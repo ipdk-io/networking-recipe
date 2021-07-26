@@ -214,7 +214,7 @@ extern "C" {
 #define L2_FWD_RX_TABLE_KEY_DST_MAC "dst_mac"
 #define L2_FWD_RX_TABLE_KEY_BRIDGE_ID "user_meta.pmeta.bridge_id"
 #define L2_FWD_RX_TABLE_KEY_SMAC_LEARNED "user_meta.pmeta.smac_learned"
-
+#define L2_FWD_SMAC_TABLE_KEY_BRIDGE_ID "user_meta.pmeta.bridge_id"
 #define L2_FWD_RX_TABLE_ACTION_L2_FWD "linux_networking_control.l2_fwd"
 #define ACTION_L2_FWD_PARAM_PORT "port"
 
@@ -433,6 +433,36 @@ extern "C" {
 #define L2_FWD_SMAC_TABLE_ACTION_SMAC_LEARN \
   "linux_networking_control.set_smac_learn"
 
+#define L2_FWD_SMAC_TABLE_ACTION_NO_ACTION \
+  "linux_networking_control.no_action"
+
+/* SRC_IP_MAC_MAP_TABLE */
+#define SRC_IP_MAC_MAP_TABLE "linux_networking_control.vm_src_ip4_mac_map_table"
+
+#define SRC_IP_MAC_MAP_TABLE_KEY_SRC_IP "hdrs.ipv4[vmeta.common.depth].src_ip"
+
+#define SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP \
+  "linux_networking_control.vm_src_ip4_mac_map_action"
+
+#define ACTION_SET_SRC_MAC_HIGH "src_mac_high"
+
+#define ACTION_SET_SRC_MAC_MID "src_mac_mid"
+
+#define ACTION_SET_SRC_MAC_LOW "src_mac_low"
+
+/* DST_IP_MAC_MAP_TABLE */
+#define DST_IP_MAC_MAP_TABLE "linux_networking_control.vm_src_ip4_mac_map_table"
+
+#define DST_IP_MAC_MAP_TABLE_KEY_DST_IP "hdrs.ipv4[vmeta.common.depth].dst_ip"
+
+#define DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP \
+  "linux_networking_control.vm_dst_ip4_mac_map_action"
+
+#define ACTION_SET_DST_MAC_HIGH "dst_mac_high"
+
+#define ACTION_SET_DST_MAC_MID "dst_mac_mid"
+
+#define ACTION_SET_DST_MAC_LOW "dst_mac_low"
 #ifdef __cplusplus
 };  // extern "C"
 #endif
