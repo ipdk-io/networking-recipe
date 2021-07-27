@@ -444,25 +444,25 @@ extern "C" {
 #define SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP \
   "linux_networking_control.vm_src_ip4_mac_map_action"
 
-#define ACTION_SET_SRC_MAC_HIGH "src_mac_high"
+#define ACTION_SET_SRC_MAC_HIGH "smac_high"
 
-#define ACTION_SET_SRC_MAC_MID "src_mac_mid"
+#define ACTION_SET_SRC_MAC_MID "smac_mid"
 
-#define ACTION_SET_SRC_MAC_LOW "src_mac_low"
+#define ACTION_SET_SRC_MAC_LOW "smac_low"
 
 /* DST_IP_MAC_MAP_TABLE */
-#define DST_IP_MAC_MAP_TABLE "linux_networking_control.vm_src_ip4_mac_map_table"
+#define DST_IP_MAC_MAP_TABLE "linux_networking_control.vm_dst_ip4_mac_map_table"
 
 #define DST_IP_MAC_MAP_TABLE_KEY_DST_IP "hdrs.ipv4[vmeta.common.depth].dst_ip"
 
 #define DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP \
   "linux_networking_control.vm_dst_ip4_mac_map_action"
 
-#define ACTION_SET_DST_MAC_HIGH "dst_mac_high"
+#define ACTION_SET_DST_MAC_HIGH "dmac_high"
 
-#define ACTION_SET_DST_MAC_MID "dst_mac_mid"
+#define ACTION_SET_DST_MAC_MID "dmac_mid"
 
-#define ACTION_SET_DST_MAC_LOW "dst_mac_low"
+#define ACTION_SET_DST_MAC_LOW "dmac_low"
 #ifdef __cplusplus
 };  // extern "C"
 #endif

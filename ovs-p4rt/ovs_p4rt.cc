@@ -2021,6 +2021,146 @@ absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
 
+void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
+                         struct ip_mac_map_info& ip_info,
+                         const ::p4::config::v1::P4Info& p4info,
+                         bool insert_entry) {
+  using namespace ovs_p4rt;
+  table_entry->set_table_id(GetTableId(p4info, SRC_IP_MAC_MAP_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(
+      GetMatchFieldId(p4info, SRC_IP_MAC_MAP_TABLE, SRC_IP_MAC_MAP_TABLE_KEY_SRC_IP));
+
+  std::string ip_addr = CanonicalizeIp(ip_info.src_ip_addr.ip.v4addr.s_addr);
+  match->mutable_exact()->set_value(ip_addr);
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(
+        GetActionId(p4info, SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP,
+                                     ACTION_SET_SRC_MAC_HIGH));
+      std::string mac_high = EncodeByteValue(2, (ip_info.src_mac_addr[4] & 0xff),
+		                             (ip_info.src_mac_addr[5] & 0xff));
+      param->set_value(mac_high);
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP,
+                                     ACTION_SET_SRC_MAC_MID));
+      std::string mac_mid = EncodeByteValue(2, (ip_info.src_mac_addr[2] & 0xff),
+                                             (ip_info.src_mac_addr[3] & 0xff));
+      param->set_value(mac_mid);
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP,
+                                     ACTION_SET_SRC_MAC_LOW));
+      std::string mac_low = EncodeByteValue(2, (ip_info.src_mac_addr[0] & 0xff),
+                                             (ip_info.src_mac_addr[1] & 0xff));
+      param->set_value(mac_low);
+    }
+  }
+
+  return;
+}
+
+void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
+                         struct ip_mac_map_info& ip_info,
+                         const ::p4::config::v1::P4Info& p4info,
+                         bool insert_entry) {
+  using namespace ovs_p4rt;
+
+  table_entry->set_table_id(GetTableId(p4info, DST_IP_MAC_MAP_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(
+      GetMatchFieldId(p4info, DST_IP_MAC_MAP_TABLE, DST_IP_MAC_MAP_TABLE_KEY_DST_IP));
+
+  std::string ip_addr = CanonicalizeIp(ip_info.dst_ip_addr.ip.v4addr.s_addr);
+  match->mutable_exact()->set_value(ip_addr);
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(
+        GetActionId(p4info, DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP,
+                                     ACTION_SET_DST_MAC_HIGH));
+      std::string mac_high = EncodeByteValue(2, (ip_info.dst_mac_addr[4] & 0xff),
+                                             (ip_info.dst_mac_addr[5] & 0xff)); 
+      param->set_value(mac_high);
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP,
+                                     ACTION_SET_DST_MAC_MID));
+      std::string mac_mid = EncodeByteValue(2, (ip_info.dst_mac_addr[2] & 0xff),
+                                             (ip_info.dst_mac_addr[3] & 0xff));
+      param->set_value(mac_mid);
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP,
+                                     ACTION_SET_DST_MAC_LOW));
+      std::string mac_low = EncodeByteValue(2, (ip_info.dst_mac_addr[0] & 0xff),
+                                             (ip_info.dst_mac_addr[1] & 0xff));
+      param->set_value(mac_low);
+    }
+  }
+
+  return;
+}
+
+absl::Status ConfigDstIpMacMapTableEntry(
+    ovs_p4rt::OvsP4rtSession* session,
+    struct ip_mac_map_info& ip_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
+  ::p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
+
+  PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info,
+                               insert_entry);
+
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+//  return absl::OkStatus();
+}
+absl::Status ConfigSrcIpMacMapTableEntry(
+    ovs_p4rt::OvsP4rtSession* session,
+    struct ip_mac_map_info& ip_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
+  ::p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
+
+  PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info,
+                               insert_entry);
+
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+//  return absl::OkStatus();
+}
+
 }  // namespace ovs_p4rt
 
 //----------------------------------------------------------------------
@@ -2413,144 +2553,7 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry) {
   return;
 }
 
-void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
-                         struct ip_mac_map_info& ip_info,
-                         const ::p4::config::v1::P4Info& p4info,
-                         bool insert_entry) {
-  using namespace ovs_p4rt;
-  table_entry->set_table_id(GetTableId(p4info, SRC_IP_MAC_MAP_TABLE));
-  auto match = table_entry->add_match();
-  match->set_field_id(
-      GetMatchFieldId(p4info, SRC_IP_MAC_MAP_TABLE, SRC_IP_MAC_MAP_TABLE_KEY_SRC_IP));
-
-  std::string ip_addr = CanonicalizeIp(ip_info.src_ip_addr.ip.v4addr.s_addr);
-  match->mutable_exact()->set_value(ip_addr);
-
-  if (insert_entry) {
-    auto table_action = table_entry->mutable_action();
-    auto action = table_action->mutable_action();
-    action->set_action_id(
-        GetActionId(p4info, SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP));
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP,
-                                     ACTION_SET_SRC_MAC_HIGH));
-      std::string mac_high = EncodeByteValue(2, (ip_info.src_mac_addr[4] & 0xff),
-		                             (ip_info.src_mac_addr[5] & 0xff));
-      param->set_value(mac_high);
-    }
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP,
-                                     ACTION_SET_SRC_MAC_MID));
-      std::string mac_mid = EncodeByteValue(2, (ip_info.src_mac_addr[2] & 0xff),
-                                             (ip_info.src_mac_addr[3] & 0xff));
-      param->set_value(mac_mid);
-    }
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP,
-                                     ACTION_SET_SRC_MAC_LOW));
-      std::string mac_low = EncodeByteValue(2, (ip_info.src_mac_addr[0] & 0xff),
-                                             (ip_info.src_mac_addr[1] & 0xff));
-      param->set_value(mac_low);
-    }
-  }
-
-  return;
-}
-
-void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
-                         struct ip_mac_map_info& ip_info,
-                         const ::p4::config::v1::P4Info& p4info,
-                         bool insert_entry) {
-  using namespace ovs_p4rt;
-
-  table_entry->set_table_id(GetTableId(p4info, SRC_IP_MAC_MAP_TABLE));
-  auto match = table_entry->add_match();
-  match->set_field_id(
-      GetMatchFieldId(p4info, DST_IP_MAC_MAP_TABLE, DST_IP_MAC_MAP_TABLE_KEY_DST_IP));
-
-  std::string ip_addr = CanonicalizeIp(ip_info.dst_ip_addr.ip.v4addr.s_addr);
-  match->mutable_exact()->set_value(ip_addr);
-
-  if (insert_entry) {
-    auto table_action = table_entry->mutable_action();
-    auto action = table_action->mutable_action();
-    action->set_action_id(
-        GetActionId(p4info, DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP));
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP,
-                                     ACTION_SET_DST_MAC_HIGH));
-      std::string mac_high = EncodeByteValue(2, (ip_info.dst_mac_addr[4] & 0xff),
-                                             (ip_info.dst_mac_addr[5] & 0xff)); 
-      param->set_value(mac_high);
-    }
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP,
-                                     ACTION_SET_DST_MAC_MID));
-      std::string mac_mid = EncodeByteValue(2, (ip_info.dst_mac_addr[2] & 0xff),
-                                             (ip_info.dst_mac_addr[3] & 0xff));
-      param->set_value(mac_mid);
-    }
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP,
-                                     ACTION_SET_DST_MAC_LOW));
-      std::string mac_low = EncodeByteValue(2, (ip_info.dst_mac_addr[0] & 0xff),
-                                             (ip_info.dst_mac_addr[1] & 0xff));
-      param->set_value(mac_low);
-    }
-  }
-
-  return;
-}
-
-absl::Status ConfigDstIpMacMapTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
-    struct ip_mac_map_info& ip_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-
-  ::p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
-
-  PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info,
-                               insert_entry);
-  return ovs_p4rt::SendWriteRequest(session, write_request);
-}
-
-absl::Status ConfigSrcIpMacMapTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
-    struct ip_mac_map_info& ip_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-
-  ::p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
-
-  PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info,
-                               insert_entry);
-  return ovs_p4rt::SendWriteRequest(session, write_request);
-}
-
-void ConfigIpMacMapTableEntry(struct ip_mac_map_info& ip_info,
+void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info,
                               bool insert_entry) {
   using namespace ovs_p4rt;
 
@@ -2585,4 +2588,3 @@ void ConfigIpMacMapTableEntry(struct ip_mac_map_info& ip_info,
 
   return;
 }
-
