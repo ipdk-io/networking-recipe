@@ -1,0 +1,10 @@
+[submodule "modules/krnlmon"]
+	path = modules/krnlmon
+	url = https://github.com/ipdk-io/krnlmon.git
+[submodule "modules/SAI"]
+	path = modules/SAI
+	url = https://github.com/opencomputeproject/SAI.git
+[submodule "ovs/ovs"]
+	path = ovs/ovs
+	url = https://github.com/ffoulkes/ipdk.ovs
+	branch = split-arch
