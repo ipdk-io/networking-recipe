@@ -26,13 +26,16 @@ set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
 
 set(SDE_INSTALL_PREFIX "/opt/sde" CACHE PATH "SDE install directory")
 
+option(WITH_OPENCONFIG  "Build with OpenConfig" OFF)
+option(WITH_STRATUM     "Build with Stratum" OFF)
+
 ############################
 # Target selection options #
 ############################
 
-option(TOFINO_TARGET "Build for Tofino target" OFF)
-option(MEV_TARGET    "Build for MEV target" OFF)
-option(DPDK_TARGET   "Build for DPDK target" OFF)
+option(TOFINO_TARGET    "Build for Tofino target" OFF)
+option(MEV_TARGET       "Build for MEV target" OFF)
+option(DPDK_TARGET      "Build for DPDK target" OFF)
 
 # Translate selected option to TARGETFLAG string.
 # - Use precedence to deal with multiple selections.

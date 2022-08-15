@@ -53,11 +53,13 @@ add_executable(tdi_pipeline_builder
     ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi/tdi_pipeline_builder.cc
 )
 
+# Suppress "warning: attribute ignored" on ABSL_MUST_USE_RESULT [[nodiscard]]
+target_compile_options(tdi_pipeline_builder PRIVATE -Wno-attributes)
+
 target_include_directories(tdi_pipeline_builder
     PRIVATE
         ${STRATUM_SOURCE_DIR}
         ${PROTO_OUT_DIR}
-#       ${OVS_INSTALL_PREFIX}/include
 )
 
 if(DPDK_TARGET)

@@ -17,7 +17,7 @@ while true ; do
 	PREFIX=$2
 	shift 2 ;;
     --dep-prefix)
-	DEPEND_INSTALL_PREFIX=$2
+	DEPEND_INSTALL=$2
 	shift 2 ;;
     --sde-prefix)
 	SDE_INSTALL=$2
@@ -50,7 +50,7 @@ cmake -S . -B build \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
     -DOVS_INSTALL_PREFIX=ovs/install \
     -DSDE_INSTALL_PREFIX=${SDE_INSTALL} \
-    -DDEPEND_INSTALL_PREFIX=${DEPEND_INSTALL_PREFIX}
+    -DDEPEND_INSTALL_PREFIX=${DEPEND_INSTALL}
 
 cmake --build build -j6
 cmake --install build

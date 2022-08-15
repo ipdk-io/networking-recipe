@@ -1,0 +1,4 @@
+rpc_proto_@LT_CURRENT@ {
+global:
+        *;
+};

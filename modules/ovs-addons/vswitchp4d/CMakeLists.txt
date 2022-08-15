@@ -46,15 +46,14 @@ target_link_libraries(ovs-vswitchd
         ${LIBVSWITCHD}
         -Wl,--no-whole-archive
     PUBLIC
-#       -Wl,--as-needed
-#       ${DPDK_LIBRARIES}
-#       -Wl,--no-as-needed
-#       stratum
         atomic
         unwind
         rt m pthread
 )
 
-#add_dependencies(ovs-vswitchd stratum)
+if(WITH_STRATUM)
+    target_link_libraries(ovs-vswitchd PUBLIC stratum)
+    add_dependencies(ovs-vswitchd stratum)
+endif()
 
 install(TARGETS ovs-vswitchd DESTINATION sbin)
