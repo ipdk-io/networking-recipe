@@ -6,5 +6,5 @@
 	url = https://github.com/opencomputeproject/SAI.git
 [submodule "ovs/ovs"]
 	path = ovs/ovs
-	url = https://github.com/ffoulkes/ipdk.ovs
+	url = https://github.com/ipdk-io/ovs
 	branch = split-arch
