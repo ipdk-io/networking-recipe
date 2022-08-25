@@ -42,7 +42,7 @@ repository, which you can clone into a default directory named "P4-OVS" with::
 
 Submodules
 ----------
-P4-OvS intergates with multiple submodules as mentioned below::
+P4-OvS integates with multiple submodules as mentioned below::
 
     $ p4runtime
     $ stratum
@@ -58,7 +58,7 @@ Install python dependent packages as mentioned in P4-OVS::
     $ pip3 install -r Documentation/requirements.txt
     $ cd p4runtime/py ; python setup.py build ; python setup.py install_lib
 
-Python utilitiy available in P4-OvS assumes to run on Python3. Need to install
+Python utility available in P4-OvS assumes to run on Python3. Need to install
 below python dependent packages via pip3::
 
     $ pip3 install ovspy
