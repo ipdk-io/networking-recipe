@@ -1,6 +1,4 @@
-# networking-recipe
-
-IPDK Networking Recipe
+# Building the IPDK Networking Recipe
 
 ## Download
 

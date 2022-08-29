@@ -14,10 +14,8 @@ cmake_minimum_required(VERSION 3.5)
 
 add_executable(gnmi_cli
     gnmi_cli.cc
-    client_parse_key_value.c
-    client_parse_key_value.h
-    client_strzcpy.c
-    client_strzcpy.h
+    gnmi_cli_utils.c
+    gnmi_cli_utils.h
 )
 
 target_link_libraries(gnmi_cli

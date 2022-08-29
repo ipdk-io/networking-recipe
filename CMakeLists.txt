@@ -6,7 +6,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(ovs-with-p4 VERSION 0.1 LANGUAGES C CXX)
+project(networking-recipe VERSION 0.1 LANGUAGES C CXX)
 
 include(CMakePrintHelpers)
 

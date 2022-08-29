@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017 Nicira, Inc.
+ * Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Nicira, Inc.
+ * Copyright (c) 2022 Intel Corporation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +15,12 @@
  * limitations under the License.
  */
 
-#include "client_parse_key_value.h"
+// Adapted from ovs_strzcpy and ovs_parse_key_value.
 
-#include <string.h>
+#include "gnmi_cli_utils.h"
+
 #include <stdbool.h>
+#include <string.h>
 
 static size_t parse_value(const char *s, const char *delimiters)
 {
@@ -118,4 +121,25 @@ bool client_parse_key_value(char **stringp, char **keyp, char **valuep)
     *keyp = key;
     *valuep = value;
     return true;
+}
+
+/* Copies 'src' to 'dst'.  Reads no more than 'size - 1' bytes from 'src'.
+ * Always null-terminates 'dst' (if 'size' is nonzero), and writes a zero byte
+ * to every otherwise unused byte in 'dst'.
+ *
+ * Except for performance, the following call:
+ *     client_strzcpy(dst, src, size);
+ * is equivalent to these two calls:
+ *     memset(dst, '\0', size);
+ *     client_strlcpy(dst, src, size);
+ *
+ * (Thus, client_strzcpy() is similar to strncpy() without some of the pitfalls.)
+ */
+void client_strzcpy(char *dst, const char *src, size_t size)
+{
+    if (size > 0) {
+        size_t len = strnlen(src, size - 1);
+        memcpy(dst, src, len);
+        memset(dst + len, '\0', size - len);
+    }
 }

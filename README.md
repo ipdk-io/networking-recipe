@@ -15,7 +15,7 @@ monolithic.
 - The Stratum initialization code (`hal.cc` and `main_bfrt.cc`) was adapted
   to create two new modules (`bf_interface.cc` and `p4_service_interface.cc`)
   that OvS could use to start the P4 Runtime and gNMI services.
-  
+
 - Extensive changes were made to other parts of the Stratum code, to
   support a P4-enabled IPDK hardware or software switch.
 
@@ -76,7 +76,7 @@ Implementation will be done incrementally.
   calls to the OvS sidecar (`ovs-p4rt`), which will communicate with
   `infrap4d` via gRPC requests.
 
-## Repositories  
+## Repositories
 
 - OvS development will take place on the `split-arch` branch of the
   `ipdk-io/ovs` repository.

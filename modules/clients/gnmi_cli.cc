@@ -1,5 +1,5 @@
 // Copyright 2019-present Open Networking Foundation
-// Copyright 2021 Intel Corporation
+// Copyright 2021-2022 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include <csignal>
@@ -11,10 +11,9 @@
 
 #include "gflags/gflags.h"
 #include "gnmi/gnmi.grpc.pb.h"
+#include "gnmi_cli_utils.h"
 #include "grpcpp/grpcpp.h"
 #include "grpcpp/security/credentials.h"
-#include "client_parse_key_value.h"
-#include "client_strzcpy.h"
 
 const char kUsage[] =
     R"USAGE(usage: gnmi-cli [--help] [Options] {get,set,cap,sub-onchange,sub-sample} parameters

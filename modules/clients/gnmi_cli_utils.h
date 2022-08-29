@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017 Nicira, Inc.
+ * Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017 Nicira, Inc.
+ * Copyright (c) 2022 Intel Corporation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +15,13 @@
  * limitations under the License.
  */
 
-#ifndef OFPUTIL_PARSE_KEY_VALUE_H
-#define OFPUTIL_PARSE_KEY_VALUE_H 1
+// Adapted from ovs_strzcpy and ovs_parse_key_value.
+
+#ifndef GNMI_CLI_UTILS_H
+#define GNMI_CLI_UTILS_H 1
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,8 +29,10 @@ extern "C" {
 
 bool client_parse_key_value(char **stringp, char **keyp, char **valuep);
 
+void client_strzcpy(char *dst, const char *src, size_t size);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* client_parse_key_value.h */
+#endif /* GNMI_CLI_UTILS_H */
