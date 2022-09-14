@@ -87,7 +87,7 @@ set(STRATUM_BF_PROTO_FILES
     stratum/hal/lib/p4/common_flow_entry.proto
     stratum/hal/lib/p4/p4_table_map.proto
     stratum/hal/lib/p4/p4_pipeline_config.proto
-    stratum/hal/lib/tdi/bf.proto
+    stratum/hal/lib/tdi/tdi.proto
 )
 
 ########################
@@ -377,8 +377,8 @@ add_library(stratum_bf_proto_o OBJECT
     ${PROTO_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.cc
     ${PROTO_OUT_DIR}/stratum/hal/lib/common/common.pb.cc
     ${PROTO_OUT_DIR}/stratum/hal/lib/common/common.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/bf.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/bf.pb.cc
+    ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.h
+    ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.cc
 )
 
 add_dependencies(stratum_bf_proto_o p4v1_proto)
