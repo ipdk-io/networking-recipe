@@ -15,6 +15,10 @@ set(OVS_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install" CACHE PATH
 set(OVS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ovs" CACHE PATH
     "OVS source directory")
 
+if(P4OVS)
+    set(P4OVS_OPTION --with-p4ovs)
+endif()
+
 ExternalProject_Add(ovs
   SOURCE_DIR
     ${OVS_SOURCE_DIR}
@@ -23,9 +27,10 @@ ExternalProject_Add(ovs
   COMMAND
     ${OVS_SOURCE_DIR}/configure
     --prefix=${OVS_INSTALL_PREFIX}
-    --with-p4ovs --disable-ssl
+    ${P4OVS_OPTION}
+    --disable-ssl
   BINARY_DIR
-    ${OVS_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
   BUILD_COMMAND
     # Using $(MAKE) causes CMake not to disable the jobserver, allowing
     # us to do parallel builds. The number of jobs defaults the -jN value

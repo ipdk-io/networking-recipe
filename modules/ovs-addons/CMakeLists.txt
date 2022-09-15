@@ -8,4 +8,7 @@ cmake_minimum_required(VERSION 3.5)
 project(ovs-addons)
 
 add_subdirectory(src)
-add_subdirectory(vswitchp4d)
+
+if(P4OVS)
+    add_subdirectory(vswitchp4d)
+endif()

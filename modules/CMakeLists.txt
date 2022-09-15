@@ -59,7 +59,7 @@ if(DPDK_TARGET)
 endif()
 
 if(WITH_STRATUM)
-  add_subdirectory(clients)
+    add_subdirectory(clients)
 endif()
 add_subdirectory(krnlmon)
 add_subdirectory(ovs-addons)

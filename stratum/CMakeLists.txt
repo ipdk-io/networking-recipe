@@ -167,16 +167,34 @@ add_dependencies(stratum_hal_lib_p4_o
 # stratum_target_o #
 ####################
 
-add_library(stratum_target_o OBJECT
+if(IPDK_TARGET)
     # IPDK files
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_chassis_manager.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_chassis_manager.h
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_hal.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_hal.h
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_node.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_node.h
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_switch.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_switch.h
+    set(STRATUM_TARGET_FILES
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_chassis_manager.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_chassis_manager.h
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_hal.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_hal.h
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_node.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_node.h
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_switch.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_switch.h
+    )
+else()
+    # TDI files
+    set(STRATUM_TARGET_FILES
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_chassis_manager.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_chassis_manager.h
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_hal.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_hal.h
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.h
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_switch.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_switch.h
+    )
+endif()
+
+add_library(stratum_target_o OBJECT
+    ${STRATUM_TARGET_FILES}
 
     # TDI files
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_action_profile_manager.cc
@@ -213,9 +231,21 @@ add_dependencies(stratum_target_o stratum_proto)
 # stratum_main_o #
 ##################
 
+if(IPDK_TARGET)
+    # IPDK files
+    set(STRATUM_MAIN_FILES
+      ${STRATUM_SOURCE_DIR}/stratum/hal/bin/ipdk/ipdk_main.cc
+      ${STRATUM_SOURCE_DIR}/stratum/hal/bin/ipdk/ipdk_main.h
+    )
+else()
+    # TDI files
+    set(STRATUM_MAIN_FILES
+        ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi/tdi_main.cc
+    )
+endif()
+
 add_library(stratum_main_o OBJECT
-    ${STRATUM_SOURCE_DIR}/stratum/hal/bin/ipdk/ipdk_main.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/bin/ipdk/ipdk_main.h
+    ${STRATUM_MAIN_FILES}
 )
 
 target_compile_definitions(stratum_main_o PRIVATE SDE_9_5_0)

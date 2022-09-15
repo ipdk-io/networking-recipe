@@ -26,16 +26,16 @@ set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
 
 set(SDE_INSTALL_PREFIX "/opt/sde" CACHE PATH "SDE install directory")
 
-option(WITH_OPENCONFIG  "Build with OpenConfig" OFF)
 option(WITH_STRATUM     "Build with Stratum" OFF)
+option(WITH_OPENCONFIG  "Build with OpenConfig" ${WITH_STRATUM})
 
 ############################
 # Target selection options #
 ############################
 
 option(TOFINO_TARGET    "Build for Tofino target" OFF)
-option(MEV_TARGET       "Build for MEV target" OFF)
 option(DPDK_TARGET      "Build for DPDK target" OFF)
+option(IPDK_TARGET      "Build Stratum for IPDK" ON)
 
 # Translate selected option to TARGETFLAG string.
 # - Use precedence to deal with multiple selections.
@@ -45,20 +45,13 @@ option(DPDK_TARGET      "Build for DPDK target" OFF)
 if(TOFINO_TARGET)
     set(TARGETFLAG TOFINO_TARGET)
     set(DPDK_TARGET OFF)
-    set(MEV_TARGET OFF)
-elseif(MEV_TARGET)
-    set(TARGETFLAG MEV_TARGET)
-    set(DPDK_TARGET OFF)
-    set(TOFINO_TARGET OFF)
-else()
+    message(NOTICE "Building TOFINO_TARGET")
+elseif(DPDK_TARGET)
     set(TARGETFLAG DPDK_TARGET)
-    set(DPDK_TARGET ON)
-    set(MEV_TARGET OFF)
     set(TOFINO_TARGET OFF)
-endif()
-
-if(DPDK_TARGET)
-    set(SOFT_TARGET ON)
+    message(NOTICE "Building DPDK_TARGET")
+else()
+    message(FATAL_ERROR "No TARGET specified")
 endif()
 
 ###########################
@@ -66,13 +59,7 @@ endif()
 ###########################
 
 add_compile_options(-D${TARGETFLAG})
-add_compile_options(-DIPDK_TARGET)
-add_compile_options(-DTDI_TARGET)
 add_compile_options(-DP4OVS_CHANGES)
-
-if(DPDK_TARGET)
-    add_compile_options(-DSOFT_TARGET)
-endif()
 
 if(DEPEND_INSTALL_PREFIX)
   include_directories(${DEPEND_INSTALL_PREFIX}/include)

@@ -2,13 +2,14 @@
 
 # Parse command-line options.
 SHORTOPTS=p:
-LONGOPTS=prefix:,sde-prefix:,dep-prefix:
+LONGOPTS=prefix:,sde-prefix:,dep-prefix:,target:,stratum,tdi-only
 
 GETOPTS=`getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 eval set -- "${GETOPTS}"
 
 # Set defaults.
 PREFIX="install"
+TARGET="DPDK"
 
 # Process command-line options.
 while true ; do
@@ -22,6 +23,15 @@ while true ; do
     --sde-prefix)
 	SDE_INSTALL=$2
 	shift 2 ;;
+    --stratum)
+	STRATUM_OPTION="-DWITH_STRATUM=ON"
+	shift ;;
+    --target)
+	TARGET=$2
+	shift 2 ;;
+    --tdi-only)
+	TDI_ONLY_OPTION="-DIPDK_TARGET=OFF"
+	shift ;;
     --)
 	shift
 	break ;;
@@ -50,7 +60,9 @@ cmake -S . -B build \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
     -DOVS_INSTALL_PREFIX=ovs/install \
     -DSDE_INSTALL_PREFIX=${SDE_INSTALL} \
-    -DDEPEND_INSTALL_PREFIX=${DEPEND_INSTALL}
+    -DDEPEND_INSTALL_PREFIX=${DEPEND_INSTALL} \
+    -D${TARGET}_TARGET=ON \
+    ${STRATUM_OPTION} ${TDI_ONLY_OPTION}
 
 cmake --build build -j6
 cmake --install build

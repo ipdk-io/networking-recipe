@@ -361,8 +361,8 @@ endif(WITH_OPENCONFIG)
 #  Build libstratum_proto #
 ###########################
 
-# stratum_bf_proto_o
-add_library(stratum_bf_proto_o OBJECT
+# stratum_proto1_o
+add_library(stratum_proto1_o OBJECT
     ${PROTO_OUT_DIR}/stratum/public/proto/p4_table_defs.pb.h
     ${PROTO_OUT_DIR}/stratum/public/proto/p4_table_defs.pb.cc
     ${PROTO_OUT_DIR}/stratum/public/proto/p4_annotation.pb.h
@@ -381,12 +381,12 @@ add_library(stratum_bf_proto_o OBJECT
     ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.cc
 )
 
-add_dependencies(stratum_bf_proto_o p4v1_proto)
+add_dependencies(stratum_proto1_o p4v1_proto)
 
-target_include_directories(stratum_bf_proto_o PRIVATE ${PROTO_OUT_DIR})
+target_include_directories(stratum_proto1_o PRIVATE ${PROTO_OUT_DIR})
 
-# stratum_p4_proto_o
-add_library(stratum_p4_proto_o OBJECT
+# stratum_proto2_o
+add_library(stratum_proto2_o OBJECT
     ${PROTO_OUT_DIR}/stratum/public/proto/error.pb.cc
     ${PROTO_OUT_DIR}/stratum/public/proto/error.pb.h
     ${PROTO_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.cc
@@ -395,18 +395,18 @@ add_library(stratum_p4_proto_o OBJECT
     ${PROTO_OUT_DIR}/stratum/hal/lib/phal/db.pb.h
 )
 
-target_link_libraries(stratum_p4_proto_o PUBLIC p4v1_proto)
-target_link_libraries(stratum_p4_proto_o PUBLIC pthread)
+target_link_libraries(stratum_proto2_o PUBLIC p4v1_proto)
+target_link_libraries(stratum_proto2_o PUBLIC pthread)
 
-add_dependencies(stratum_p4_proto_o p4v1_proto)
-add_dependencies(stratum_p4_proto_o stratum_bf_proto_o)
+add_dependencies(stratum_proto2_o p4v1_proto)
+add_dependencies(stratum_proto2_o stratum_proto1_o)
 
-target_include_directories(stratum_p4_proto_o PRIVATE ${PROTO_OUT_DIR})
+target_include_directories(stratum_proto2_o PRIVATE ${PROTO_OUT_DIR})
 
 # stratum_proto
 add_library(stratum_proto SHARED
-    $<TARGET_OBJECTS:stratum_bf_proto_o>
-    $<TARGET_OBJECTS:stratum_p4_proto_o>
+    $<TARGET_OBJECTS:stratum_proto1_o>
+    $<TARGET_OBJECTS:stratum_proto2_o>
 )
 
 configure_file(stratum_proto.sym.in
