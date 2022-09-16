@@ -7,85 +7,73 @@ IPDK Networking Recipe (P4-OVS Split Architecture)
 The initial implementation of P4-OVS was both physically and logically
 monolithic.
 
-- Two foreign components (Stratum and an RFC 3594 Kernel Monitor) were added
-  to a fork of the Open vSwitch repository.
+- Two foreign components (Stratum and the Kernel Monitor) were added to a
+  fork of the Open vSwitch repository.
 
 - OvS was modified to build these components and include them in `ovs-vswitchd`.
 
-- The Stratum initialization code (`hal.cc` and `main_bfrt.cc`) was adapted
-  to create two new modules (`bf_interface.cc` and `p4_service_interface.cc`)
-  that OvS could use to start the P4 Runtime and gNMI services.
+- Stratum initialization was adapted to allow OvS to start the P4 Runtime
+  and gNMI services.
 
-- Extensive changes were made to other parts of the Stratum code, to
-  support a P4-enabled IPDK hardware or software switch.
+- Extensive changes were made to Stratum to support P4-enabled IPDK hardware
+  and software switches.
 
 ## Split Architecture
 
-The Split Architecture is an effort to modularize P4-OVS, making it easier
-to upstream and maintain.
+The Split Architecture modularizes P4-OVS, making the code easier to maintain
+and more suitable for upstreaming.
 
-- Remove foreign components from the OvS repository, leaving only the logic
-  needed to support P4. Make the changes suitable for upstreaming to the
-  parent project.
+- Remove foreign components from the OvS repository, together with most
+  of the changes to OvS itself.
 
-- Reengineer the Stratum modifications to be non-breaking. Make the changes
-  suitable for upstreaming to the parent project.
+- Reengineer the Stratum modifications to be non-breaking and suitable for
+  upstreaming to the parent project. Make 'tdi' a distinct platform type
+  and 'ipdk' a distinct platform based on 'tdi'.
 
-- Make the Kernel Monitor a separate component. Remove OvS dependencies.
-  Refactor for modularity and to support unit testing.
+- Extract the Kernel Monitor and make it a separate component. Remove OvS
+  dependencies, and refactor for modularity and to support unit testing.
 
-- Create a component that combines Stratum, the Kernel Monitor, TDI, and the
-  P4 driver into a separate daemon (`infrap4d`).
+- Create a new component (`infrap4d`) that combines Stratum, the Kernel
+  Monitor, TDI, and a P4 target driver into a separate process (daemon).
 
-- Create a sidecar component (`ovs-p4rt`) that can be linked into
-  `ovs-vswitchd` to allow OvS to communicate with `infrap4d`.
+- Create a component (`ovs-p4rt`) that can be linked with `ovs-vswitchd`
+  to allow OvS to communicate with `infrap4d`.
 
-- Create a superproject (`networking-recipe`) to incorporate the components
+- Create a superproject (`networking-recipe`) to integrate the components
   and orchestrate the overall build.
 
-- Incorporate changes to the OvS and Stratum components that have been
-  made in P4-OVS since the initial split was done.
+- Merge changes that have been made to the OvS and Stratum components in
+  P4-OVS since the initial split was done. Bring OvS and Stratum up to date
+  by merging the latest versions of the parent projects.
 
-- Remove OvS and Stratum changes that are not applicable to the initial
-  release, to limit the amount of unused code.
+- Upstream the OvS and Stratum changes to the parent projects.
 
-- Bring the OvS and Stratum code up to date, rebasing the P4OVS changes
-  onto the heads of the original projects.
-
-- Upstream the OvS and Stratum changes to their parent projects.
-
-Implementation will be done incrementally.
+Implementation will be done incrementally through ipdk-io repositories.
 
 ## Changes from P4-OVS
 
 - The `external`, `p4runtime`, `stratum`, and `unit_test` directories will
   be removed from the `ovs` repository.
 
-- The `p4proto` directory will be stripped down and most of its contents
-  will be removed. The local Stratum files will move back into Stratum
-  itself. Some of the changes will be discarded. Platform-specific changes
-  will become part of the new `ipdk` and `tdi` platforms. `bf_interface`
-  and `p4_service_interface` will revert to the platform-specific `hal`
-  and `main` files.
+- The `p4proto` directory will be removed. The locally modified Stratum files
+  will be moved back into Stratum or discarded. Platform-specific changes will
+  become part of the new `ipdk` and `tdi` platforms.
 
-- OvS will no longer launch the Kernel Monitor or the Stratum P4 and Config
-  Monitoring services.
-
-- OvS will no longer be able to make direct calls to the Kernel Monitor,
-  the P4 switch driver, or TDI. All communication will be by means of C
-  calls to the OvS sidecar (`ovs-p4rt`), which will communicate with
-  `infrap4d` via gRPC requests.
+- OvS will no longer manage Stratum or the Kernel Monitor. It will also
+  no longer make direct calls to the Kernel Monitor, TDI, or the switch
+  driver. All communication will be by means of calls to the OvS sidecar
+  (`ovs-p4rt`), which will communicate with `infrap4d` via gRPC.
 
 ## Repositories
 
-- OvS development will take place on the `split-arch` branch of the
+- OvS development takes place on the `split-arch` branch of the
   `ipdk-io/ovs` repository.
 
-- Stratum development will take place on the `split-arch` branch of the
+- Stratum development takes place on the `split-arch` branch of the
   `ipdk-io/stratum-dev` repository.
 
-- Kernel Monitor development will take place on the `main` branch of the
+- Kernel Monitor development takes place on the `main` branch of the
   `ipdk-io/krnlmon` repository.
 
-- Superproject development will take place on the `main` branch of the
+- Superproject development takes place on the `main` branch of the
   `ipdk-io/networking-recipe` repository.
