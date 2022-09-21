@@ -1,9 +1,11 @@
-# p4ovs/clients
+# modules/clients
 #
 # Copyright 2022 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 cmake_minimum_required(VERSION 3.5)
+
+add_subdirectory(p4rt-ctl)
 
 # TODO: Eliminate dependencies on libovs, stratum, and dpdk.
 # TODO: Find out what properties can be made transitive.
