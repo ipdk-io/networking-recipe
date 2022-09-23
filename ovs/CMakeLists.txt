@@ -9,7 +9,7 @@ project(ovs LANGUAGES C)
 
 include(ExternalProject)
 
-set(OVS_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install" CACHE PATH
+set(OVS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH
     "OVS install directory")
 
 set(OVS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ovs" CACHE PATH

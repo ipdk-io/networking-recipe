@@ -18,7 +18,7 @@ set(LT_CURRENT "0" CACHE STRING "Current version number for linker symbols")
 
 set(DEPEND_INSTALL_PREFIX "" CACHE PATH "Dependencies install directory")
 
-set(OVS_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/ovs/install" CACHE PATH
+set(OVS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH
     "OVS install directory")
 
 set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
@@ -26,7 +26,11 @@ set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
 
 set(SDE_INSTALL_PREFIX "/opt/sde" CACHE PATH "SDE install directory")
 
-option(WITH_STRATUM     "Build with Stratum" OFF)
+#################
+# Build options #
+#################
+
+option(WITH_STRATUM     "Build with Stratum" ON)
 option(WITH_OPENCONFIG  "Build with OpenConfig" ${WITH_STRATUM})
 
 ############################
@@ -35,24 +39,23 @@ option(WITH_OPENCONFIG  "Build with OpenConfig" ${WITH_STRATUM})
 
 option(TOFINO_TARGET    "Build for Tofino target" OFF)
 option(DPDK_TARGET      "Build for DPDK target" OFF)
-option(IPDK_TARGET      "Build Stratum for IPDK" ON)
+option(IPDK_TARGET      "Build Stratum for IPDK" OFF)
 
 # Translate selected option to TARGETFLAG string.
 # - Use precedence to deal with multiple selections.
 # - Ensure that individual target options are consistent
 #   so we can use them to control the build.
-# - Default to DPDK_TARGET.
+# - Default to TOFINO_TARGET.
 if(TOFINO_TARGET)
     set(TARGETFLAG TOFINO_TARGET)
     set(DPDK_TARGET OFF)
-    message(NOTICE "Building TOFINO_TARGET")
 elseif(DPDK_TARGET)
     set(TARGETFLAG DPDK_TARGET)
-    set(TOFINO_TARGET OFF)
-    message(NOTICE "Building DPDK_TARGET")
 else()
-    message(FATAL_ERROR "No TARGET specified")
+    set(TARGETFLAG TOFINO_TARGET)
 endif()
+
+message(NOTICE "Building ${TARGETFLAG}")
 
 ###########################
 # Global compiler options #

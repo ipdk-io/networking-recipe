@@ -2,42 +2,40 @@
 
 # Parse command-line options.
 SHORTOPTS=p:
-LONGOPTS=prefix:,sde-prefix:,dep-prefix:,target:,stratum,tdi-only
+LONGOPTS=clean,prefix:,sde-install:,dep-install:,target:
 
 GETOPTS=`getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 eval set -- "${GETOPTS}"
 
 # Set defaults.
 PREFIX="install"
-TARGET="DPDK"
+TARGET="TOFINO"
 
 # Process command-line options.
 while true ; do
     case "$1" in
+    --clean)
+        rm -fr build install
+        shift 1;;
     -p|--prefix)
-	PREFIX=$2
-	shift 2 ;;
-    --dep-prefix)
-	DEPEND_INSTALL=$2
-	shift 2 ;;
-    --sde-prefix)
-	SDE_INSTALL=$2
-	shift 2 ;;
-    --stratum)
-	STRATUM_OPTION="-DWITH_STRATUM=ON"
-	shift ;;
+        PREFIX=$2
+        shift 2 ;;
+    --dep-install)
+        DEPEND_INSTALL=$2
+        shift 2 ;;
+    --sde-install)
+        SDE_INSTALL=$2
+        shift 2 ;;
     --target)
-	TARGET=$2
-	shift 2 ;;
-    --tdi-only)
-	TDI_ONLY_OPTION="-DIPDK_TARGET=OFF"
-	shift ;;
+        # convert to uppercase
+        TARGET=${2^^}
+        shift 2 ;;
     --)
-	shift
-	break ;;
+        shift
+        break ;;
     *)
-	echo "Internal error!"
-	exit 1 ;;
+        echo "Internal error!"
+        exit 1 ;;
     esac
 done
 
@@ -46,23 +44,20 @@ if [ -z "${SDE_INSTALL}" ]; then
     exit 1
 fi
 
-# Do a clean build of the of the recipe.
-# This preserves the private OVS build tree if there is one.
-rm -fr build install
+if [ -n "${DEPEND_INSTALL}" ]; then
+    DEPEND_INSTALL_OPTION=-DDEPEND_INSTALL_PREFIX=${DEPEND_INSTALL}
+fi
 
-# Build OVS with a private install tree.
-cmake -S ovs -B ovs/build -DOVS_INSTALL_PREFIX=ovs/install
-cmake --build ovs/build -j6 -- V=0
+# Build OVS first.
+cmake -S ovs -B build/ovs -DOVS_INSTALL_PREFIX=${PREFIX}
+cmake --build build/ovs -j6 -- V=0
 
-# Build the rest of the recipe using the private OVS install tree.
-# This allows us to do a clean build without having to remake OVS.
+# Build the rest of the recipe.
 cmake -S . -B build \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
-    -DOVS_INSTALL_PREFIX=ovs/install \
     -DSDE_INSTALL_PREFIX=${SDE_INSTALL} \
-    -DDEPEND_INSTALL_PREFIX=${DEPEND_INSTALL} \
-    -D${TARGET}_TARGET=ON \
-    ${STRATUM_OPTION} ${TDI_ONLY_OPTION}
+    ${DEPEND_INSTALL_OPTION} \
+    -D${TARGET}_TARGET=ON
 
 cmake --build build -j6
 cmake --install build

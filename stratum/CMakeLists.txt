@@ -22,10 +22,6 @@ set(STRATUM_SOURCE_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/stratum" CACHE PATH
     "Path to Stratum source directory")
 
-set(STRATUM_INSTALL_PREFIX
-    "${CMAKE_CURRENT_SOURCE_DIR}/install" CACHE PATH
-    "STRATUM install directory")
-
 set(PROTO_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
 file(MAKE_DIRECTORY ${PROTO_OUT_DIR})
@@ -299,28 +295,41 @@ if(WITH_OPENCONFIG)
 endif()
 
 if(TOFINO_TARGET)
-    find_library(TARGET_UTILS bfutils ${SDE_INSTALL_PREFIX}/lib)
-    find_library(TARGET_SYS bfsys ${SDE_INSTALL_PREFIX}/lib)
-    find_library(TARGET_DRIVER driver ${SDE_INSTALL_PREFIX}/lib)
+    find_library(TARGET_BFUTILS bfutils ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT TARGET_BFUTILS)
+        message(FATAL_ERROR "Cannot find library: bfutils")
+    endif()
 
-    if(NOT TARGET_UTILS OR NOT TARGET_SYS OR NOT TARGET_DRIVER)
-        message(FATAL_ERROR "Cannot find Tofino libraries. Did you specify SDE_INSTALL_PREFIX?")
+    find_library(TARGET_DRIVER driver ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT TARGET_DRIVER)
+        message(FATAL_ERROR "Cannot find library: driver")
     endif()
 
     target_link_libraries(stratum PUBLIC
-        ${TARGET_UTILS} ${TARGET_SYS} ${TARGET_DRIVER}
+        ${TARGET_BFUTILS} ${TARGET_DRIVER}
     )
 else()
     # SDE_9_5_0 is for Stratum.
-    target_compile_definitions(stratum PRIVATE SDE_9_5_0)
+#   target_compile_definitions(stratum PRIVATE SDE_9_5_0)
 
     find_library(TARGET_UTILS target_utils ${SDE_INSTALL_PREFIX}/lib)
-    find_library(TARGET_SWITCHD bf_switchd_lib ${SDE_INSTALL_PREFIX}/lib)
-    find_library(TARGET_SYS target_sys ${SDE_INSTALL_PREFIX}/lib)
-    find_library(TARGET_DRIVER driver ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT TARGET_UTILS)
+        message(FATAL_ERROR "Cannot find library: target_utils")
+    endif()
 
-    if(NOT TARGET_UTILS OR NOT TARGET_SWITCHD OR NOT TARGET_SYS OR NOT TARGET_DRIVER)
-        message(FATAL_ERROR "Cannot find target libraries. Did you specify SDE_INSTALL_PREFIX?")
+    find_library(TARGET_SWITCHD bf_switchd_lib ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT TARGET_SWITCHD)
+        message(FATAL_ERROR "Cannot find library: bf_switchd_lib")
+    endif()
+
+    find_library(TARGET_SYS target_sys ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT TARGET_SYS)
+        message(FATAL_ERROR "Cannot find library: target_sys")
+    endif()
+
+    find_library(TARGET_DRIVER driver ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT TARGET_DRIVER)
+        message(FATAL_ERROR "Cannot find library: driver")
     endif()
 
     target_link_libraries(stratum PUBLIC
@@ -334,4 +343,4 @@ configure_file(libstratum.pc.in
 install(TARGETS stratum LIBRARY)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libstratum.pc
-DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)

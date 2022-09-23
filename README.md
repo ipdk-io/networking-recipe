@@ -43,8 +43,10 @@ and more suitable for upstreaming.
   and orchestrate the overall build.
 
 - Merge changes that have been made to the OvS and Stratum components in
-  P4-OVS since the initial split was done. Bring OvS and Stratum up to date
-  by merging the latest versions of the parent projects.
+  P4-OVS since the initial split was done.
+
+- Bring OvS and Stratum up to date by merging the latest versions of the
+  parent projects.
 
 - Upstream the OvS and Stratum changes to the parent projects.
 
@@ -52,17 +54,17 @@ Implementation will be done incrementally through ipdk-io repositories.
 
 ## Changes from P4-OVS
 
-- The `external`, `p4runtime`, `stratum`, and `unit_test` directories will
-  be removed from the `ovs` repository.
+- Remove the `external`, `p4runtime`, `stratum`, and `unit_test` directories
+  from the `ovs` repository.
 
-- The `p4proto` directory will be removed. The locally modified Stratum files
-  will be moved back into Stratum or discarded. Platform-specific changes will
-  become part of the new `ipdk` and `tdi` platforms.
+- Remove the `p4proto` directory. Merge locally-modified Stratum files
+  back into Stratum or discard them. Make platform-specific changes part of
+  the new `ipdk` and `tdi` platforms.
 
-- OvS will no longer manage Stratum or the Kernel Monitor. It will also
-  no longer make direct calls to the Kernel Monitor, TDI, or the switch
-  driver. All communication will be by means of calls to the OvS sidecar
-  (`ovs-p4rt`), which will communicate with `infrap4d` via gRPC.
+- OvS no longer manages Stratum or the Kernel Monitor. It also no longer
+  makes direct calls to the Kernel Monitor or switch driver. All communication
+  with Stratum will be by means of calls to the OvS client API (`ovs-p4rt`),
+  which sends gRPC requests to `infrap4d`.
 
 ## Repositories
 
