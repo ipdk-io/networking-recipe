@@ -15,17 +15,15 @@ add_subdirectory(p4rt-ctl)
 ##################
 
 add_executable(gnmi_cli
-    gnmi_cli.cc
-    gnmi_cli_utils.c
-    gnmi_cli_utils.h
+    ${STRATUM_SOURCE_DIR}/stratum/tools/gnmi/gnmi_cli.cc
 )
 
 target_link_libraries(gnmi_cli
     PUBLIC
-        grpc protobuf gflags grpc++
-        atomic pthread unwind
-        absl_synchronization
+        stratum
         gnmi_proto rpc_proto
+        grpc protobuf gflags grpc++
+        pthread re2
 )
 
 if(HAVE_POSIX_AIO)
@@ -67,11 +65,11 @@ if(DPDK_TARGET)
     target_link_options(tdi_pipeline_builder PRIVATE ${DPDK_LDFLAGS_OTHER})
 endif()
 
-target_link_libraries(tdi_pipeline_builder
-    PRIVATE
-        stratum
-        protobuf gflags glog grpc++
-        absl_strings
+target_link_libraries(tdi_pipeline_builder PUBLIC stratum_proto p4v1_proto)
+target_link_libraries(tdi_pipeline_builder PUBLIC stratum)
+
+target_link_libraries(tdi_pipeline_builder PUBLIC
+    protobuf gflags glog grpc grpc++
 )
 
 add_dependencies(tdi_pipeline_builder

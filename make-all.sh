@@ -2,7 +2,7 @@
 
 # Parse command-line options.
 SHORTOPTS=p:
-LONGOPTS=clean,prefix:,sde-install:,dep-install:,target:
+LONGOPTS=clean,prefix:,sde-install:,dep-install:,develop,target:
 
 GETOPTS=`getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 eval set -- "${GETOPTS}"
@@ -10,6 +10,7 @@ eval set -- "${GETOPTS}"
 # Set defaults.
 PREFIX="install"
 TARGET="TOFINO"
+DEVELOP=0
 
 # Process command-line options.
 while true ; do
@@ -23,6 +24,9 @@ while true ; do
     --dep-install)
         DEPEND_INSTALL=$2
         shift 2 ;;
+    --develop)
+        DEVELOP=1
+        shift ;;
     --sde-install)
         SDE_INSTALL=$2
         shift 2 ;;
@@ -48,13 +52,22 @@ if [ -n "${DEPEND_INSTALL}" ]; then
     DEPEND_INSTALL_OPTION=-DDEPEND_INSTALL_PREFIX=${DEPEND_INSTALL}
 fi
 
+if [ ${DEVELOP} -ne 0 ]; then
+    OVS_BUILD=ovs/build
+    OVS_INSTALL=ovs/install
+else
+    OVS_BUILD=build/ovs
+    OVS_INSTALL=${PREFIX}
+fi
+
 # Build OVS first.
-cmake -S ovs -B build/ovs -DOVS_INSTALL_PREFIX=${PREFIX}
-cmake --build build/ovs -j6 -- V=0
+cmake -S ovs -B ${OVS_BUILD} -DCMAKE_INSTALL_PREFIX=${OVS_INSTALL}
+cmake --build ${OVS_BUILD} -j6 -- V=0
 
 # Build the rest of the recipe.
 cmake -S . -B build \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
+    -DOVS_INSTALL_PREFIX=${OVS_INSTALL} \
     -DSDE_INSTALL_PREFIX=${SDE_INSTALL} \
     ${DEPEND_INSTALL_OPTION} \
     -D${TARGET}_TARGET=ON

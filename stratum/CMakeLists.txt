@@ -257,7 +257,7 @@ add_dependencies(stratum_main_o stratum_proto)
 # libstratum #
 ##############
 
-add_library(stratum SHARED
+add_library(stratum STATIC
     $<TARGET_OBJECTS:stratum_glue_o>
     $<TARGET_OBJECTS:stratum_lib_o>
     $<TARGET_OBJECTS:stratum_hal_lib_common_o>
@@ -282,6 +282,7 @@ target_link_libraries(stratum PUBLIC
 )
 
 target_link_libraries(stratum PUBLIC glog gflags grpc protobuf grpc++)
+target_link_libraries(stratum PUBLIC pthread)
 
 target_link_libraries(stratum PUBLIC
     stratum_proto
@@ -295,23 +296,33 @@ if(WITH_OPENCONFIG)
 endif()
 
 if(TOFINO_TARGET)
-    find_library(TARGET_BFUTILS bfutils ${SDE_INSTALL_PREFIX}/lib)
-    if(NOT TARGET_BFUTILS)
-        message(FATAL_ERROR "Cannot find library: bfutils")
-    endif()
-
-    find_library(TARGET_DRIVER driver ${SDE_INSTALL_PREFIX}/lib)
-    if(NOT TARGET_DRIVER)
+    find_library(LIBDRIVER driver ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT LIBDRIVER)
         message(FATAL_ERROR "Cannot find library: driver")
     endif()
 
+    find_library(LIBTDI tdi ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT LIBTDI)
+        message(FATAL_ERROR "Cannot find library: tdi")
+    endif()
+
+    find_library(LIBTDI_JSON_PARSER tdi_json_parser ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT LIBTDI_JSON_PARSER)
+        message(FATAL_ERROR "Cannot find library: tdi_json_parser")
+    endif()
+
+    find_library(LIBTARGET_SYS target_sys ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT LIBTARGET_SYS)
+        message(FATAL_ERROR "Cannot find library: target_sys")
+    endif()
+
     target_link_libraries(stratum PUBLIC
-        ${TARGET_BFUTILS} ${TARGET_DRIVER}
+        ${LIBDRIVER}
+        ${LIBTDI}
+        ${LIBTDI_JSON_PARSER}
+        ${LIBTARGET_SYS}
     )
 else()
-    # SDE_9_5_0 is for Stratum.
-#   target_compile_definitions(stratum PRIVATE SDE_9_5_0)
-
     find_library(TARGET_UTILS target_utils ${SDE_INSTALL_PREFIX}/lib)
     if(NOT TARGET_UTILS)
         message(FATAL_ERROR "Cannot find library: target_utils")
@@ -337,10 +348,10 @@ else()
     )
 endif()
 
-configure_file(libstratum.pc.in
-               ${CMAKE_CURRENT_BINARY_DIR}/libstratum.pc @ONLY)
-
-install(TARGETS stratum LIBRARY)
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libstratum.pc
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+#configure_file(libstratum.pc.in
+#               ${CMAKE_CURRENT_BINARY_DIR}/libstratum.pc @ONLY)
+#
+#install(TARGETS stratum LIBRARY)
+#
+#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libstratum.pc
+#        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
