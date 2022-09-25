@@ -1,0 +1,4 @@
+libgnmi_proto_@LT_CURRENT@ {
+global:
+        *;
+};
