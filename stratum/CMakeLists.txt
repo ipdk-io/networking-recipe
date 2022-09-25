@@ -347,11 +347,3 @@ else()
         ${TARGET_UTILS} ${TARGET_SWITCHD} ${TARGET_SYS} ${TARGET_DRIVER}
     )
 endif()
-
-#configure_file(libstratum.pc.in
-#               ${CMAKE_CURRENT_BINARY_DIR}/libstratum.pc @ONLY)
-#
-#install(TARGETS stratum LIBRARY)
-#
-#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libstratum.pc
-#        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
