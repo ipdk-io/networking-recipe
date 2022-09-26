@@ -2,7 +2,7 @@ IPDK on tofino
 ===============
 
 # Overview
-This document describes how to build and run IPDK on Tofino.
+This document describes how to build and run IPDK on Tofino HW. Similar steps apply when run on Tofino simulation model. Please refer to Tofino specific documentation for more details.
 
 # Requirements
 - Docker (Ubuntu 20.04 base image)
