@@ -1,5 +1,5 @@
-Build Networking Recipe for tofino
-===============
+Build IPDK on tofino
+====================
 
 # Overview
 This document describes how to build and run IPDK on Tofino HW. Similar steps apply when run on Tofino simulation model. Please refer to Tofino specific documentation for more details.
@@ -60,7 +60,7 @@ cd ..
 export SDE_INSTALL=sde/install
 ```
 
-### Build infrap4d
+### Build Networking Recipe
 ```
 cd $IPDK_RECIPE
 ./make-all.sh --dep-install /usr/local/ --sde-install $SDE_INSTALL
