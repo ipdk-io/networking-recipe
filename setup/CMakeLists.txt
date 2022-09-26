@@ -11,13 +11,10 @@ include(CMakePrintHelpers)
 option(USE_SUDO       "Use sudo when installing" OFF)
 
 if(USE_SUDO)
-  set(SUDO_CMD "sudo")
+  set(SUDO_CMD "sudo" "-E")
 endif()
 
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
-
-cmake_print_variables(CMAKE_BINARY_DIR)
-return()
 
 ##########
 # ABSEIL #
