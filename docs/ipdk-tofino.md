@@ -1,4 +1,4 @@
-IPDK on tofino
+Build Networking Recipe for tofino
 ===============
 
 # Overview
@@ -23,7 +23,7 @@ The build and execution of infrap4d uses docker.
 ## Git
 
 ### Clone IPDK networking-recipe
-> git clone --recursive git@github.com:ipdk-io/networking-recipe.git infrap4d
+> git clone --recursive git@github.com:ipdk-io/networking-recipe.git ipdk.recipe
 
 ## Intel P4Studio
 Get the Intel P4Studio SDE version 9.11. The untarred directory is henceforth referred to as **sde**. If using an Intel Tofino Reference platform, please also download the BSP package.
@@ -43,14 +43,16 @@ apt-get install sudo git cmake autoconf gcc g++ libtool python3 python3-dev pyth
 
 ### Build and install infrap4d dependencies
 ```
-cd infrap4d/setup
+cd ipdk.recipe
+export IPDK_RECIPE=`pwd`
+cd $IPDK_RECIPE/setup
 cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/
 make
 ldconfig
 ```
 
 ### Build Intel P4Studio SDE
-The below steps are minimal. For a more detailed installation procedure, please refer to the Intel P4Studio SDE Installation Guide
+The below steps are minimal. For a more detailed installation procedure, please refer to the Intel P4Studio SDE Installation Guide.
 ```
 cd sde/p4studio
 ./p4studio profile apply profiles/ipdk.yaml --bsp-path **path-to-bsp**
@@ -60,17 +62,16 @@ export SDE_INSTALL=sde/install
 
 ### Build infrap4d
 ```
-cd infrap4d
-export INFRAP4D=`pwd`
+cd $IPDK_RECIPE
 ./make-all.sh --dep-install /usr/local/ --sde-install $SDE_INSTALL
 ```
 
 # Run
 ```
-cd infrap4d
-cp $SDE_INSTALL/share/bf_switchd/zlog-cfg $INFRAP4D/zlog-cfg-cur
+cd IPDK_RECIPE
+cp $SDE_INSTALL/share/bf_switchd/zlog-cfg $IPDK_RECIPE/zlog-cfg-cur
 
-LD_LIBRARY_PATH=$INFRAP4D/install/lib/:$SDE_INSTALL/lib \
+LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib \
     ./install/sbin/infrap4d \
     -chassis_config_file=./stratum/stratum/stratum/hal/config/x86-64-accton-wedge100bf-32x-r0/chassis_config.pb.txt \
     -tdi_switchd_cfg=$SDE_INSTALL/share/p4/targets/tofino/tofino_skip_p4.conf \
@@ -105,10 +106,10 @@ A conf file is also generated. This files holds the location of the above files 
 To generate the bin file for the controller.
 ```
 cd $SDE_INSTALL
-LD_LIBRARY_PATH=$INFRAP4D/install/lib/:$SDE_INSTALL/lib \
-    $INFRAP4D/install/bin/tdi_pipeline_builder \
+LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib \
+    $IPDK_RECIPE/install/bin/tdi_pipeline_builder \
     -p4c_conf_file=$SDE_INSTALL/share/p4/targets/tofino/tna_exact_match.conf \
-    -bf_pipeline_config_binary_file=$INFRAP4D/tna_exact_match.pb.bin
+    -bf_pipeline_config_binary_file=$IPDK_RECIPE/tna_exact_match.pb.bin
 ```
 
 ## Using p4rt-ctl
