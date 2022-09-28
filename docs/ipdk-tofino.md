@@ -59,6 +59,7 @@ cd sde/p4studio
 cd ..
 export SDE_INSTALL=sde/install
 ```
+> Note: To test with tofino-model, please edit profiles/ipdk.yaml file and remove the **asic: true** configuration. Additionally, a bsp-path would also not be required for tofino-model.
 
 ### Build Networking Recipe
 ```
@@ -70,6 +71,8 @@ cd $IPDK_RECIPE
 ```
 cd IPDK_RECIPE
 cp $SDE_INSTALL/share/bf_switchd/zlog-cfg $IPDK_RECIPE/zlog-cfg-cur
+mkdir -p /etc/stratum/
+mkdir -p /var/log/stratum/
 
 LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib \
     ./install/sbin/infrap4d \
@@ -77,6 +80,7 @@ LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib \
     -tdi_switchd_cfg=$SDE_INSTALL/share/p4/targets/tofino/tofino_skip_p4.conf \
     -tdi_sde_install=$SDE_INSTALL
 ```
+> Note: To test with tofino-model, please use **./stratum/stratum/stratum/hal/config/barefoot-tofino-model/chassis_config.pb.txt** as the chassis_config_file.
 
 # Set forwarding pipeline
 Following are optional steps to perform set forwarding pipeline.
@@ -100,7 +104,7 @@ The above commands will generate 4 files. The last 3 files are combined together
  - context.json
  - bf-rt.json
 
-A conf file is also generated. This files holds the location of the above files relative to SDE_INSTALL.
+A conf file is also generated. This file holds the location of the above files relative to SDE_INSTALL.
 
 ## Using tdi_pipeline_builder
 To generate the bin file for the controller.
