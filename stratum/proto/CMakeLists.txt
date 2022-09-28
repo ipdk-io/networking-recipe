@@ -218,15 +218,6 @@ target_include_directories(rpc_proto PRIVATE ${PROTO_OUT_DIR})
 
 target_link_libraries(rpc_proto PUBLIC protobuf)
 
-configure_file(rpc_proto.sym.in
-    ${CMAKE_CURRENT_BINARY_DIR}/rpc_proto.sym @ONLY
-)
-
-set_target_properties(rpc_proto PROPERTIES
-    LINK_OPTIONS -Wl,--version-script=rpc_proto.sym
-    LINK_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rpc_proto.sym
-)
-
 install(TARGETS rpc_proto LIBRARY)
 
 #######################
@@ -251,14 +242,6 @@ target_include_directories(p4v1_proto PRIVATE ${PROTO_OUT_DIR})
 
 target_link_libraries(p4v1_proto PUBLIC rpc_proto absl_synchronization)
 add_dependencies(p4v1_proto rpc_proto)
-
-configure_file(p4v1_proto.sym.in
-    ${CMAKE_CURRENT_BINARY_DIR}/p4v1_proto.sym @ONLY)
-
-set_target_properties(p4v1_proto PROPERTIES
-    LINK_OPTIONS -Wl,--version-script=p4v1_proto.sym
-    LINK_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/p4v1_proto.sym
-)
 
 install(TARGETS p4v1_proto LIBRARY)
 
@@ -286,15 +269,6 @@ target_link_libraries(gnmi_proto
         absl_strings
         absl_synchronization
         absl_time
-)
-
-configure_file(gnmi_proto.sym.in
-    ${CMAKE_CURRENT_BINARY_DIR}/gnmi_proto.sym @ONLY
-)
-
-set_target_properties(gnmi_proto PROPERTIES
-    LINK_OPTIONS -Wl,--version-script=gnmi_proto.sym
-    LINK_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gnmi_proto.sym
 )
 
 install(TARGETS gnmi_proto LIBRARY)
@@ -407,15 +381,6 @@ target_include_directories(stratum_proto2_o PRIVATE ${PROTO_OUT_DIR})
 add_library(stratum_proto SHARED
     $<TARGET_OBJECTS:stratum_proto1_o>
     $<TARGET_OBJECTS:stratum_proto2_o>
-)
-
-configure_file(stratum_proto.sym.in
-    ${CMAKE_CURRENT_BINARY_DIR}/stratum_proto.sym @ONLY
-)
-
-set_target_properties(stratum_proto PROPERTIES
-    LINK_OPTIONS -Wl,--version-script=stratum_proto.sym
-    LINK_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/stratum_proto.sym
 )
 
 install(TARGETS stratum_proto LIBRARY)

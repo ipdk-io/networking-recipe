@@ -66,16 +66,13 @@ if(DPDK_TARGET)
 endif()
 
 target_link_libraries(tdi_pipeline_builder PUBLIC stratum_proto p4v1_proto)
-target_link_libraries(tdi_pipeline_builder PUBLIC stratum)
 
 target_link_libraries(tdi_pipeline_builder PUBLIC
     protobuf gflags glog grpc grpc++
 )
 
-add_dependencies(tdi_pipeline_builder
-    stratum
-    p4v1_proto
-    stratum_proto
-)
+target_link_libraries(tdi_pipeline_builder PRIVATE stratum)
+
+add_dependencies(tdi_pipeline_builder stratum p4v1_proto stratum_proto)
 
 install(TARGETS tdi_pipeline_builder RUNTIME)

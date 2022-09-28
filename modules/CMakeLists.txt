@@ -17,10 +17,7 @@ endif()
 
 # Update pkg-config search path.
 set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
-list(APPEND CMAKE_PREFIX_PATH
-    ${OVS_INSTALL_PREFIX}
-    ${SDE_INSTALL_PREFIX}
-)
+list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_PREFIX})
 
 #if(DPDK_TARGET)
 #    pkg_check_modules(DPDK REQUIRED libdpdk)
