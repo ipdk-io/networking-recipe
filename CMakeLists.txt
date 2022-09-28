@@ -11,8 +11,6 @@ project(networking-recipe VERSION 0.1 LANGUAGES C CXX)
 include(FindPkgConfig)
 include(CMakePrintHelpers)
 
-set(LT_CURRENT "0" CACHE STRING "Current version number for linker symbols")
-
 #############################
 # Symbolic path definitions #
 #############################
@@ -74,14 +72,26 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+#####################
+# External packages #
+#####################
+
 if(DEPEND_INSTALL_PREFIX)
     list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_PREFIX})
 endif()
 list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_PREFIX})
 
+if(WITH_STRATUM)
+    find_package(absl REQUIRED)
+endif()
+
 if(DPDK_TARGET)
   pkg_check_modules(DPDK REQUIRED libdpdk)
 endif()
+
+##################
+# Subdirectories #
+##################
 
 if(WITH_STRATUM)
     add_subdirectory(stratum)
