@@ -1,4 +1,0 @@
-p4v1_proto_@LT_CURRENT@ {
-global:
-        *;
-};

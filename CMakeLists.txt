@@ -10,8 +10,6 @@ project(networking-recipe VERSION 0.1 LANGUAGES C CXX)
 
 include(CMakePrintHelpers)
 
-set(LT_CURRENT "0" CACHE STRING "Current version number for linker symbols")
-
 #############################
 # Symbolic path definitions #
 #############################
@@ -67,14 +65,30 @@ if(IPDK_TARGET)
 endif()
 
 if(DEPEND_INSTALL_PREFIX)
-  include_directories(${DEPEND_INSTALL_PREFIX}/include)
-  link_directories(${DEPEND_INSTALL_PREFIX}/lib)
+    include_directories(${DEPEND_INSTALL_PREFIX}/include)
+    link_directories(${DEPEND_INSTALL_PREFIX}/lib)
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+#####################
+# External packages #
+#####################
+
+if(DEPEND_INSTALL_PREFIX)
+    list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_PREFIX})
+endif()
+
 if(WITH_STRATUM)
-  add_subdirectory(stratum)
+    find_package(absl REQUIRED)
+endif()
+
+##################
+# Subdirectories #
+##################
+
+if(WITH_STRATUM)
+    add_subdirectory(stratum)
 endif()
 add_subdirectory(infrap4d)
 add_subdirectory(modules)
