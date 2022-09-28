@@ -62,7 +62,10 @@ message(NOTICE "Building ${TARGETFLAG}")
 ###########################
 
 add_compile_options(-D${TARGETFLAG})
-add_compile_options(-DP4OVS_CHANGES)
+
+if(IPDK_TARGET)
+    add_compile_options(-DP4OVS_CHANGES)
+endif()
 
 if(DEPEND_INSTALL_PREFIX)
   include_directories(${DEPEND_INSTALL_PREFIX}/include)
