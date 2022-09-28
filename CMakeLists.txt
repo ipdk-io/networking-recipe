@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(networking-recipe VERSION 0.1 LANGUAGES C CXX)
 
+include(FindPkgConfig)
 include(CMakePrintHelpers)
 
 #############################
@@ -78,9 +79,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(DEPEND_INSTALL_PREFIX)
     list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_PREFIX})
 endif()
+list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_PREFIX})
 
 if(WITH_STRATUM)
     find_package(absl REQUIRED)
+endif()
+
+if(DPDK_TARGET)
+  pkg_check_modules(DPDK REQUIRED libdpdk)
 endif()
 
 ##################

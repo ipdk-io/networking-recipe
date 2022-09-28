@@ -295,25 +295,25 @@ if(WITH_OPENCONFIG)
     target_link_libraries(stratum PUBLIC openconfig_proto)
 endif()
 
+find_library(LIBTDI tdi ${SDE_INSTALL_PREFIX}/lib)
+if(NOT LIBTDI)
+    message(FATAL_ERROR "Cannot find library: tdi")
+endif()
+
+find_library(LIBTDI_JSON_PARSER tdi_json_parser ${SDE_INSTALL_PREFIX}/lib)
+if(NOT LIBTDI_JSON_PARSER)
+    message(FATAL_ERROR "Cannot find library: tdi_json_parser")
+endif()
+
+find_library(LIBTARGET_SYS target_sys ${SDE_INSTALL_PREFIX}/lib)
+if(NOT LIBTARGET_SYS)
+    message(FATAL_ERROR "Cannot find library: target_sys")
+endif()
+
 if(TOFINO_TARGET)
     find_library(LIBDRIVER driver ${SDE_INSTALL_PREFIX}/lib)
     if(NOT LIBDRIVER)
         message(FATAL_ERROR "Cannot find library: driver")
-    endif()
-
-    find_library(LIBTDI tdi ${SDE_INSTALL_PREFIX}/lib)
-    if(NOT LIBTDI)
-        message(FATAL_ERROR "Cannot find library: tdi")
-    endif()
-
-    find_library(LIBTDI_JSON_PARSER tdi_json_parser ${SDE_INSTALL_PREFIX}/lib)
-    if(NOT LIBTDI_JSON_PARSER)
-        message(FATAL_ERROR "Cannot find library: tdi_json_parser")
-    endif()
-
-    find_library(LIBTARGET_SYS target_sys ${SDE_INSTALL_PREFIX}/lib)
-    if(NOT LIBTARGET_SYS)
-        message(FATAL_ERROR "Cannot find library: target_sys")
     endif()
 
     target_link_libraries(stratum PUBLIC
@@ -322,28 +322,31 @@ if(TOFINO_TARGET)
         ${LIBTDI_JSON_PARSER}
         ${LIBTARGET_SYS}
     )
-else()
-    find_library(TARGET_UTILS target_utils ${SDE_INSTALL_PREFIX}/lib)
-    if(NOT TARGET_UTILS)
-        message(FATAL_ERROR "Cannot find library: target_utils")
-    endif()
-
-    find_library(TARGET_SWITCHD bf_switchd_lib ${SDE_INSTALL_PREFIX}/lib)
-    if(NOT TARGET_SWITCHD)
-        message(FATAL_ERROR "Cannot find library: bf_switchd_lib")
-    endif()
-
-    find_library(TARGET_SYS target_sys ${SDE_INSTALL_PREFIX}/lib)
-    if(NOT TARGET_SYS)
-        message(FATAL_ERROR "Cannot find library: target_sys")
-    endif()
-
-    find_library(TARGET_DRIVER driver ${SDE_INSTALL_PREFIX}/lib)
-    if(NOT TARGET_DRIVER)
+elseif(DPDK_TARGET)
+    find_library(LIBDRIVER driver ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT LIBDRIVER)
         message(FATAL_ERROR "Cannot find library: driver")
     endif()
 
+    find_library(LIBBF_SWITCHD bf_switchd_lib ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT LIBBF_SWITCHD)
+        message(FATAL_ERROR "Cannot find library: bf_switchd_lib")
+    endif()
+
+    find_library(LIBTARGET_UTILS target_utils ${SDE_INSTALL_PREFIX}/lib)
+    if(NOT LIBTARGET_UTILS)
+        message(FATAL_ERROR "Cannot find library: target_utils")
+    endif()
+
     target_link_libraries(stratum PUBLIC
-        ${TARGET_UTILS} ${TARGET_SWITCHD} ${TARGET_SYS} ${TARGET_DRIVER}
+        ${LIBDRIVER}
+        ${LIBBF_SWITCHD}
+        ${LIBTDI}
+        ${LIBTDI_JSON_PARSER}
+        ${LIBTARGET_UTILS}
+        ${LIBTARGET_SYS}
     )
+
+    target_link_directories(stratum PUBLIC ${DPDK_LIBRARY_DIRS})
+    target_link_options(stratum PUBLIC ${DPDK_LDFLAGS_OTHER})
 endif()
