@@ -36,11 +36,10 @@ option(WITH_OPENCONFIG  "Build with OpenConfig" ${WITH_STRATUM})
 # Target selection options #
 ############################
 
-option(TOFINO_TARGET    "Build for Tofino target" OFF)
 option(DPDK_TARGET      "Build for DPDK target" OFF)
-option(IPDK_TARGET      "Build Stratum for IPDK" OFF)
+option(TOFINO_TARGET    "Build for Tofino target" OFF)
 
-# Translate selected option to TARGETFLAG string.
+# Translate target option to TARGETFLAG string.
 # - Use precedence to deal with multiple selections.
 # - Ensure that individual target options are consistent
 #   so we can use them to control the build.
@@ -61,7 +60,7 @@ message(NOTICE "Building ${TARGETFLAG}")
 ###########################
 
 add_compile_options(-D${TARGETFLAG})
-if(IPDK_TARGET)
+if(DPDK_TARGET)
     add_compile_options(-DP4OVS_CHANGES)
 endif()
 

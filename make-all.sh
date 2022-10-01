@@ -9,7 +9,7 @@ eval set -- "${GETOPTS}"
 
 # Set defaults.
 PREFIX="install"
-TARGET="TOFINO"
+TARGET_TYPE="TOFINO"
 DEVELOP=0
 
 # Process command-line options.
@@ -19,20 +19,24 @@ while true ; do
         rm -fr build install
         shift 1;;
     -p|--prefix)
+        # --prefix=<path>
         PREFIX=$2
         shift 2 ;;
     --dep-install)
+        # --dep-install=<path>
         DEPEND_INSTALL=$2
         shift 2 ;;
     --develop)
         DEVELOP=1
         shift ;;
     --sde-install)
+        # --sde-install=<path>
         SDE_INSTALL=$2
         shift 2 ;;
     --target)
+        # --target={dpdk|tofino}
         # convert to uppercase
-        TARGET=${2^^}
+        TARGET_TYPE=${2^^}
         shift 2 ;;
     --)
         shift
@@ -70,7 +74,7 @@ cmake -S . -B build \
     -DOVS_INSTALL_PREFIX=${OVS_INSTALL} \
     -DSDE_INSTALL_PREFIX=${SDE_INSTALL} \
     ${DEPEND_INSTALL_OPTION} \
-    -D${TARGET}_TARGET=ON
+    -D${TARGET_TYPE}_TARGET=ON
 
 cmake --build build -j6
 cmake --install build
