@@ -38,7 +38,7 @@ Build is done within the infrap4d docker container created above.
 ### Install basic utilities
 ```
 apt-get update
-apt-get install sudo git cmake autoconf gcc g++ libtool python3 python3-dev python3-distutils
+apt-get install sudo git cmake autoconf gcc g++ libtool python3 python3-dev python3-distutils iproute2 libssl-dev
 ```
 
 ### Build and install infrap4d dependencies
