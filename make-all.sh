@@ -64,6 +64,9 @@ else
     OVS_INSTALL=${PREFIX}
 fi
 
+# Abort on error.
+set -e
+
 # Build OVS first.
 cmake -S ovs -B ${OVS_BUILD} -DCMAKE_INSTALL_PREFIX=${OVS_INSTALL}
 cmake --build ${OVS_BUILD} -j6 -- V=0
