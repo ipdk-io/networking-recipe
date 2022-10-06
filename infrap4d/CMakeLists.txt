@@ -7,7 +7,7 @@ set(STRATUM_TDI_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi)
 if(DPDK_TARGET)
     set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/dpdk/main.cc)
 elseif(TOFINO_TARGET)
-    set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/main.cc)
+    set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/tofino/main.cc)
 endif()
 
 add_executable(infrap4d

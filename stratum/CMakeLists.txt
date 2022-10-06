@@ -168,12 +168,12 @@ set(STRATUM_TDI_LIB_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi)
 if(TOFINO_TARGET)
     # Tofino files
     set(STRATUM_TARGET_FILES
-        ${STRATUM_TDI_LIB_DIR}/tdi_chassis_manager.cc
-        ${STRATUM_TDI_LIB_DIR}/tdi_chassis_manager.h
-        ${STRATUM_TDI_LIB_DIR}/tdi_hal.cc
-        ${STRATUM_TDI_LIB_DIR}/tdi_hal.h
-        ${STRATUM_TDI_LIB_DIR}/tdi_switch.cc
-        ${STRATUM_TDI_LIB_DIR}/tdi_switch.h
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_chassis_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_chassis_manager.h
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.h
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.h
     )
 elseif(DPDK_TARGET)
     # DPDK files
@@ -232,8 +232,8 @@ set(STRATUM_TDI_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi)
 if(TOFINO_TARGET)
     # Tofino files
     set(STRATUM_MAIN_FILES
-        ${STRATUM_TDI_BIN_DIR}/tdi_main.cc
-        ${STRATUM_TDI_BIN_DIR}/tdi_main.h
+        ${STRATUM_TDI_BIN_DIR}/tofino/tofino_main.cc
+        ${STRATUM_TDI_BIN_DIR}/tofino/tofino_main.h
     )
 elseif(DPDK_TARGET)
     # DPDK files
