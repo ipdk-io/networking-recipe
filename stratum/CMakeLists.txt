@@ -163,29 +163,27 @@ add_dependencies(stratum_hal_lib_p4_o
 # stratum_target_o #
 ####################
 
-if(IPDK_TARGET)
-    # IPDK files
+set(STRATUM_TDI_LIB_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi)
+
+if(TOFINO_TARGET)
+    # Tofino files
     set(STRATUM_TARGET_FILES
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_chassis_manager.cc
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_chassis_manager.h
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_hal.cc
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_hal.h
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_node.cc
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_node.h
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_switch.cc
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/ipdk/ipdk_switch.h
+        ${STRATUM_TDI_LIB_DIR}/tdi_chassis_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/tdi_chassis_manager.h
+        ${STRATUM_TDI_LIB_DIR}/tdi_hal.cc
+        ${STRATUM_TDI_LIB_DIR}/tdi_hal.h
+        ${STRATUM_TDI_LIB_DIR}/tdi_switch.cc
+        ${STRATUM_TDI_LIB_DIR}/tdi_switch.h
     )
-else()
-    # TDI files
+elseif(DPDK_TARGET)
+    # DPDK files
     set(STRATUM_TARGET_FILES
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_chassis_manager.cc
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_chassis_manager.h
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_hal.cc
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_hal.h
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.cc
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.h
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_switch.cc
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_switch.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_chassis_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_chassis_manager.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.h
     )
 endif()
 
@@ -199,6 +197,8 @@ add_library(stratum_target_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_counter_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_packetio_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_packetio_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_pipeline_utils.cc
@@ -227,16 +227,19 @@ add_dependencies(stratum_target_o stratum_proto)
 # stratum_main_o #
 ##################
 
-if(IPDK_TARGET)
-    # IPDK files
+set(STRATUM_TDI_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi)
+
+if(TOFINO_TARGET)
+    # Tofino files
     set(STRATUM_MAIN_FILES
-      ${STRATUM_SOURCE_DIR}/stratum/hal/bin/ipdk/ipdk_main.cc
-      ${STRATUM_SOURCE_DIR}/stratum/hal/bin/ipdk/ipdk_main.h
+        ${STRATUM_TDI_BIN_DIR}/tdi_main.cc
+        ${STRATUM_TDI_BIN_DIR}/tdi_main.h
     )
-else()
-    # TDI files
+elseif(DPDK_TARGET)
+    # DPDK files
     set(STRATUM_MAIN_FILES
-        ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi/tdi_main.cc
+        ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.cc
+        ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.h
     )
 endif()
 
