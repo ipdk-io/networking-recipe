@@ -19,9 +19,13 @@ export SDE_INSTALL=<path>
 ## Build
 
 ```bash
-./make-all.sh
+./make-all.sh [--target {tofino|dpdk}] [--prefix <prefix>]
 ```
 
-The `make-all` script creates a separate install tree for OVS.
+Defaults:
+* `--target` currently defaults to `tofino`
+* `--prefix` currently defaults to `./install`
 
-This allows you to rebuild the non-OVS code without having to rebuild OVS.
+See [Building IPDK for Tofino](docs/ipdk-tofino.md) for more information.
+
+Support for the DPDK target is currently **under construction**.

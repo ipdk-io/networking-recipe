@@ -27,8 +27,8 @@ and more suitable for upstreaming.
   of the changes to OvS itself.
 
 - Reengineer the Stratum modifications to be non-breaking and suitable for
-  upstreaming to the parent project. Make 'tdi' a distinct platform type
-  and 'ipdk' a distinct platform based on 'tdi'.
+  upstreaming to the parent project. Make `tdi` a distinct platform type,
+  with `tofino` and `dpdk` variants.
 
 - Extract the Kernel Monitor and make it a separate component. Remove OvS
   dependencies, and refactor for modularity and to support unit testing.
