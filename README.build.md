@@ -28,7 +28,7 @@ export SDE_INSTALL=<path>
 | --------- | ----- | ----------- |
 | `--clean` | | Remove the main build and install trees. |
 | `--prefix` |  _path_ | Path to the directory in which build artifacts should be installed. Sets the  `CMAKE_INSTALL_PREFIX` CMake variable. Default value is `./install`. |
-| `-sde-install` | _path_ | Path to install directory for the target driver (SDE). Sets the `SDE_INSTALL_PREFIX` CMake variable. Defaults to the value of the `SDE_INSTALL` environment variable. |
+| `--sde-install` | _path_ | Path to install directory for the target driver (SDE). Sets the `SDE_INSTALL_PREFIX` CMake variable. Defaults to the value of the `SDE_INSTALL` environment variable. |
 | `--target` | _target_ | Target to build for (`dpdk` or `tofino`). Sets the `DPDK_TARGET` or `TOFINO_TARGET` CMake variable. Currently defaults to `tofino`. |
 
 Parameter names may be abbreviated to any shorter form as long as it is unique.
