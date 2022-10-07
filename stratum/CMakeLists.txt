@@ -48,7 +48,6 @@ add_compile_options(-Wno-attributes)
 ##################
 
 add_library(stratum_glue_o OBJECT
-    ${STRATUM_SOURCE_DIR}/stratum/glue/gtl/cleanup.h
     ${STRATUM_SOURCE_DIR}/stratum/glue/integral_types.h
     ${STRATUM_SOURCE_DIR}/stratum/glue/logging.cc
     ${STRATUM_SOURCE_DIR}/stratum/glue/logging.h
@@ -76,6 +75,14 @@ add_library(stratum_lib_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/lib/macros.h
     ${STRATUM_SOURCE_DIR}/stratum/lib/security/auth_policy_checker.cc
     ${STRATUM_SOURCE_DIR}/stratum/lib/security/auth_policy_checker.h
+    ${STRATUM_SOURCE_DIR}/stratum/lib/security/credentials_manager.cc
+    ${STRATUM_SOURCE_DIR}/stratum/lib/security/credentials_manager.h
+    ${STRATUM_SOURCE_DIR}/stratum/lib/security/certificate.cc
+    ${STRATUM_SOURCE_DIR}/stratum/lib/security/certificate.h
+    ${STRATUM_SOURCE_DIR}/stratum/lib/p4runtime/p4runtime_session.cc
+    ${STRATUM_SOURCE_DIR}/stratum/lib/p4runtime/p4runtime_session.h
+    ${STRATUM_SOURCE_DIR}/stratum/lib/p4runtime/sdn_controller_manager.cc
+    ${STRATUM_SOURCE_DIR}/stratum/lib/p4runtime/sdn_controller_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/lib/utils.cc
     ${STRATUM_SOURCE_DIR}/stratum/lib/utils.h
     ${STRATUM_SOURCE_DIR}/stratum/public/lib/error.cc
@@ -285,7 +292,7 @@ target_link_libraries(stratum PUBLIC
 )
 
 target_link_libraries(stratum PUBLIC glog gflags grpc protobuf grpc++)
-target_link_libraries(stratum PUBLIC pthread)
+target_link_libraries(stratum PUBLIC pthread re2 crypto)
 
 target_link_libraries(stratum PUBLIC
     stratum_proto
