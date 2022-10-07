@@ -1,5 +1,5 @@
-Build IPDK on tofino
-====================
+Building IPDK for Tofino
+========================
 
 # Overview
 This document describes how to build and run IPDK on Tofino HW. Similar steps apply when run on Tofino simulation model. Please refer to Tofino specific documentation for more details.
