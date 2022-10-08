@@ -112,10 +112,6 @@ add_library(stratum_hal_lib_common_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/utils.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/utils.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/writer_interface.h
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/yang_parse_tree.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/yang_parse_tree.h
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/yang_parse_tree_paths.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/yang_parse_tree_paths.h
 )
 
 target_include_directories(stratum_hal_lib_common_o PRIVATE
@@ -157,6 +153,38 @@ target_include_directories(stratum_hal_lib_p4_o PRIVATE ${STRATUM_INCLUDES})
 add_dependencies(stratum_hal_lib_p4_o
     stratum_proto
     p4v1_proto
+)
+
+##########################
+# stratum_hal_lib_yang_o #
+##########################
+
+add_library(stratum_hal_lib_yang_o OBJECT
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_add_subtree_interface.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_chassis.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_component.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_component.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_helpers.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_helpers.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_interface.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_interface.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_node.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_optical.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_paths.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_paths.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_singleton.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang/yang_parse_tree_system.cc
+)
+
+target_include_directories(stratum_hal_lib_yang_o PRIVATE
+    ${STRATUM_INCLUDES}
+)
+
+add_dependencies(stratum_hal_lib_yang_o
+    gnmi_proto
+    stratum_proto
 )
 
 ####################
@@ -266,6 +294,7 @@ add_library(stratum STATIC
     $<TARGET_OBJECTS:stratum_hal_lib_common_o>
     $<TARGET_OBJECTS:stratum_hal_lib_phal_o>
     $<TARGET_OBJECTS:stratum_hal_lib_p4_o>
+    $<TARGET_OBJECTS:stratum_hal_lib_yang_o>
     $<TARGET_OBJECTS:stratum_target_o>
     $<TARGET_OBJECTS:stratum_main_o>
 )
