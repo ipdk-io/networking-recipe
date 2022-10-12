@@ -172,6 +172,7 @@ if(TOFINO_TARGET)
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_chassis_manager.h
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.h
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_wrapper.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.h
     )
@@ -182,6 +183,7 @@ elseif(DPDK_TARGET)
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_chassis_manager.h
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_wrapper.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.h
     )
@@ -205,7 +207,18 @@ add_library(stratum_target_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_pipeline_utils.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_pre_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_pre_manager.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_action_profile.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_clone_session.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_counter.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_helpers.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_helpers.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_interface.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_meter.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_multicast.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_register.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_table_data.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_table_entry.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_table_key.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_wrapper.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_wrapper.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_table_manager.cc
@@ -214,7 +227,7 @@ add_library(stratum_target_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/utils.h
 )
 
-target_compile_definitions(stratum_target_o PRIVATE SDE_9_5_0)
+target_compile_definitions(stratum_target_o PRIVATE SDE_9_11_0)
 
 target_include_directories(stratum_target_o PRIVATE
     ${STRATUM_INCLUDES}
