@@ -55,6 +55,7 @@ set(STRATUM_P4_PROTO_FILES
     stratum/hal/lib/common/common.proto
     stratum/hal/lib/p4/forwarding_pipeline_configs.proto
     stratum/hal/lib/phal/db.proto
+    stratum/public/proto/p4_role_config.proto
 )
 
 set(GNMI_PROTO_FILES
@@ -353,6 +354,8 @@ add_library(stratum_proto1_o OBJECT
     ${PROTO_OUT_DIR}/stratum/hal/lib/common/common.pb.h
     ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.h
     ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.cc
+    ${PROTO_OUT_DIR}/stratum/public/proto/p4_role_config.pb.cc
+    ${PROTO_OUT_DIR}/stratum/public/proto/p4_role_config.pb.h
 )
 
 add_dependencies(stratum_proto1_o p4v1_proto)

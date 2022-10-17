@@ -1,13 +1,14 @@
-[submodule "ovs/ovs"]
-	path = ovs/ovs
-	url = https://github.com/ipdk-io/ovs
-	branch = split-arch
-[submodule "stratum/stratum"]
-	path = stratum/stratum
-	url = https://github.com/ipdk-io/stratum-dev.git
-[submodule "stratum/p4runtime"]
-	path = stratum/p4runtime
-	url = https://github.com/p4lang/p4runtime.git
 [submodule "stratum/googleapis"]
 	path = stratum/googleapis
 	url = https://github.com/googleapis/googleapis.git
+[submodule "ovs/ovs"]
+	path = ovs/ovs
+	url = https://github.com/ipdk-io/ovs.git
+	branch = ipdk-latest
+[submodule "stratum/p4runtime"]
+	path = stratum/p4runtime
+	url = https://github.com/p4lang/p4runtime.git
+[submodule "stratum/stratum"]
+	path = stratum/stratum
+	url = https://github.com/ipdk-io/stratum-dev.git
+	branch = ipdk-latest-stratum
