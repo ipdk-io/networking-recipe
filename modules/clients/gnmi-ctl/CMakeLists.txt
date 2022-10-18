@@ -34,4 +34,6 @@ add_dependencies(gnmi-ctl
     rpc_proto
 )
 
-install(TARGETS gnmi-ctl RUNTIME)
+if(DPDK_TARGET)
+    install(TARGETS gnmi-ctl RUNTIME)
+endif()

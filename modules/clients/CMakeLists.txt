@@ -5,42 +5,41 @@
 #
 cmake_minimum_required(VERSION 3.5)
 
+add_subdirectory(gnmi-ctl)
 add_subdirectory(p4rt-ctl)
 
-if(DPDK_TARGET)
-    add_subdirectory(gnmi-ctl)
-else()
-    ##################
-    # Build gnmi_cli #
-    ##################
+##################
+# Build gnmi_cli #
+##################
 
-    add_executable(gnmi_cli
-        ${STRATUM_SOURCE_DIR}/stratum/tools/gnmi/gnmi_cli.cc
-    )
+add_executable(gnmi_cli
+    ${STRATUM_SOURCE_DIR}/stratum/tools/gnmi/gnmi_cli.cc
+)
 
-    target_link_libraries(gnmi_cli
-        PUBLIC
-            stratum
-            gnmi_proto rpc_proto
-            grpc protobuf gflags grpc++
-            pthread re2
-    )
+target_link_libraries(gnmi_cli
+    PUBLIC
+        stratum
+        gnmi_proto rpc_proto
+        grpc protobuf gflags grpc++
+        pthread re2
+)
 
-    if(HAVE_POSIX_AIO)
-        target_link_libraries(gnmi_cli PUBLIC rt)
-    endif()
+if(HAVE_POSIX_AIO)
+    target_link_libraries(gnmi_cli PUBLIC rt)
+endif()
 
-    target_include_directories(gnmi_cli
-        PRIVATE
-            ${STRATUM_SOURCE_DIR}
-            ${PROTO_OUT_DIR}
-    )
+target_include_directories(gnmi_cli
+    PRIVATE
+        ${STRATUM_SOURCE_DIR}
+        ${PROTO_OUT_DIR}
+)
 
-    add_dependencies(gnmi_cli
-        gnmi_proto
-        rpc_proto
-    )
+add_dependencies(gnmi_cli
+    gnmi_proto
+    rpc_proto
+)
 
+if(NOT DPDK_TARGET)
     install(TARGETS gnmi_cli RUNTIME)
 endif()
 
@@ -60,11 +59,6 @@ target_include_directories(tdi_pipeline_builder
         ${STRATUM_SOURCE_DIR}
         ${PROTO_OUT_DIR}
 )
-
-if(DPDK_TARGET)
-    target_link_directories(tdi_pipeline_builder PRIVATE ${DPDK_LIBRARY_DIRS})
-    target_link_options(tdi_pipeline_builder PRIVATE ${DPDK_LDFLAGS_OTHER})
-endif()
 
 target_link_libraries(tdi_pipeline_builder PUBLIC stratum_proto p4v1_proto)
 
