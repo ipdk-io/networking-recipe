@@ -29,8 +29,9 @@ if(DPDK_TARGET)
     install(
         FILES
             ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_port_config.pb.txt
+            ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_skip_p4.conf
         DESTINATION
-            ${CMAKE_INSTALL_PREFIX}/share/stratum
+            ${CMAKE_INSTALL_PREFIX}/share/stratum/dpdk
     )
 elseif(TOFINO_TARGET)
   install(
