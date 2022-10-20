@@ -5,10 +5,8 @@
 #
 cmake_minimum_required(VERSION 3.5)
 
+add_subdirectory(gnmi-ctl)
 add_subdirectory(p4rt-ctl)
-
-# TODO: Eliminate dependencies on libovs, stratum, and dpdk.
-# TODO: Find out what properties can be made transitive.
 
 ##################
 # Build gnmi_cli #
@@ -41,7 +39,9 @@ add_dependencies(gnmi_cli
     rpc_proto
 )
 
-install(TARGETS gnmi_cli RUNTIME)
+if(NOT DPDK_TARGET)
+    install(TARGETS gnmi_cli RUNTIME)
+endif()
 
 ##############################
 # Build tdi_pipeline_builder #
@@ -59,11 +59,6 @@ target_include_directories(tdi_pipeline_builder
         ${STRATUM_SOURCE_DIR}
         ${PROTO_OUT_DIR}
 )
-
-if(DPDK_TARGET)
-    target_link_directories(tdi_pipeline_builder PRIVATE ${DPDK_LIBRARY_DIRS})
-    target_link_options(tdi_pipeline_builder PRIVATE ${DPDK_LDFLAGS_OTHER})
-endif()
 
 target_link_libraries(tdi_pipeline_builder PUBLIC stratum_proto p4v1_proto)
 
