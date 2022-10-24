@@ -118,7 +118,7 @@ void build_gnmi_path(std::string path_str, ::gnmi::Path* path) {
     update = req.add_update();
   }
   build_gnmi_path(path, update->mutable_path());
-  strtol (val.c_str(),&check,10);
+  strtol(val.c_str(), &check, 10);
   if (*check) {
     update->mutable_val()->set_string_val(val);
   } else {
@@ -158,60 +158,61 @@ void build_gnmi_path(std::string path_str, ::gnmi::Path* path) {
   return sub_req;
 }
 
-bool extract_interface_node(char **path, char *node_path, bool *vhost_dev) {
-  char *key =  NULL;
-  char *value =  NULL;
+bool extract_interface_node(char** path, char* node_path, bool* vhost_dev) {
+  char* key =  NULL;
+  char* value =  NULL;
   int found_node = 0;
 
-  while(client_parse_key_value(path, &key, &value)) {
-      if (strcmp(key, FLAGS_device_key.c_str()) == 0) {
-          snprintf(node_path+strlen(node_path),
-                   strlen(FLAGS_device_type_virtual_interface.c_str())+1, "%s",
-                   FLAGS_device_type_virtual_interface.c_str());
-          //Validate the device value
-          if((strcmp(value,"virtual-device") != 0) &&
-             (strcmp(value,"physical-device") != 0)) {
-              return -1;
-          }
-          if(strcmp(value,"virtual-device") == 0) {
-              std::cout << "setting vhost_dev = true.";
-              *vhost_dev = true;
-          }
-          found_node += 1;
+  while (client_parse_key_value(path, &key, &value)) {
+    if (strcmp(key, FLAGS_device_key.c_str()) == 0) {
+      snprintf(node_path + strlen(node_path),
+               strlen(FLAGS_device_type_virtual_interface.c_str()) + 1, "%s",
+               FLAGS_device_type_virtual_interface.c_str());
+      // Validate the device value
+      if ((strcmp(value, "virtual-device") != 0) &&
+          (strcmp(value, "physical-device") != 0)) {
+        return -1;
       }
-      if (strcmp(key, FLAGS_name_key.c_str()) == 0) {
-          // Hardcoded lenght of "[name=]/"
-          snprintf(node_path+strlen(node_path), strlen(value)+9,
-                   "[name=%s]/", value);
-          found_node += 1;
+      if (strcmp(value, "virtual-device") == 0) {
+        std::cout << "setting vhost_dev = true.";
+        *vhost_dev = true;
       }
-      if (found_node == 2)
-          return 0;
+      found_node += 1;
+    }
+    if (strcmp(key, FLAGS_name_key.c_str()) == 0) {
+      // Hardcoded length of "[name=]/"
+      snprintf(node_path + strlen(node_path), strlen(value) + 9,
+               "[name=%s]/", value);
+      found_node += 1;
+    }
+    if (found_node == 2)
+      return 0;
   }
   return -1;
 }
 
-void traverse_params(char **path, char *node_path, char *config_value, bool &flag) {
-  char *key =  NULL;
-  char *value =  NULL;
+void traverse_params(char** path, char* node_path, char* config_value,
+                     bool& flag) {
+  char* key =  NULL;
+  char* value =  NULL;
 
-  if(client_parse_key_value(path, &key, &value)) {
-      if ((value != NULL) && value[0] != '\0') {
-          // This should be executed for a <key=value> pair, specifically for
-          // SET operation.
-          snprintf(node_path+strlen(node_path),
-                   strlen(FLAGS_subtree_config.c_str())+strlen(key)+2,
-                   "%s/%s", FLAGS_subtree_config.c_str(), key);
-          strcpy(config_value, value);
-          return;
-      } else if (key != NULL && key[0] != '\0') {
-          // This should be executed for a <key>, specifically for
-          // GET operation.
-          snprintf(node_path+strlen(node_path),
-                   strlen(FLAGS_subtree_config.c_str())+strlen(key)+2,
-                   "%s/%s", FLAGS_subtree_config.c_str(), key);
-          return;
-      }
+  if (client_parse_key_value(path, &key, &value)) {
+    if ((value != NULL) && value[0] != '\0') {
+      // This should be executed for a <key=value> pair, specifically for
+      // SET operation.
+      snprintf(node_path + strlen(node_path),
+               strlen(FLAGS_subtree_config.c_str()) + strlen(key) + 2,
+               "%s/%s", FLAGS_subtree_config.c_str(), key);
+      strcpy(config_value, value);
+      return;
+    } else if (key != NULL && key[0] != '\0') {
+      // This should be executed for a <key>, specifically for
+      // GET operation.
+      snprintf(node_path + strlen(node_path),
+               strlen(FLAGS_subtree_config.c_str()) + strlen(key) + 2,
+               "%s/%s", FLAGS_subtree_config.c_str(), key);
+      return;
+    }
   }
   flag = false;
   return;
@@ -236,7 +237,7 @@ int Main(int argc, char** argv) {
     auto stub = ::gnmi::gNMI::NewStub(channel);
     ::grpc::ClientContext ctx;
     ::gnmi::CapabilityRequest req;
-    //PRINT_MSG(req, "REQUEST");
+    // PRINT_MSG(req, "REQUEST");
     ::gnmi::CapabilityResponse resp;
     RETURN_IF_GRPC_ERROR(stub->Capabilities(&ctx, req, &resp));
     PRINT_MSG(resp, "RESPONSE");
@@ -277,9 +278,10 @@ int Main(int argc, char** argv) {
 
       strcpy(path1, buffer);
       traverse_params(&path, path1, config_value, params);
-      //If device is 'virtual-device' and port type is 'link', consider it as 'vhost' type.
-      if(((strcmp(config_value,"link") == 0) || (strcmp(config_value,"LINK") == 0))
-          &&(vhost_device == true)) {
+      // If device is 'virtual-device' and port type is 'link', consider it a
+      // 'vhost' type.
+      if (((strcmp(config_value, "link") == 0) ||
+           (strcmp(config_value, "LINK") == 0)) && vhost_device) {
            strcpy(config_value, "vhost");
       }
       if (params) {
@@ -305,8 +307,8 @@ int Main(int argc, char** argv) {
     stream_reader_writer = stream_reader_writer_ptr.get();
     ::gnmi::SubscribeRequest req = build_gnmi_sub_onchange_req(path);
     // CHECK_RETURN_IF_FALSE(stream_reader_writer->Write(req))
+    //     << "Cannot write request.";
     stream_reader_writer->Write(req);
-     //   << "Can not write request.";
     ::gnmi::SubscribeResponse resp;
     while (stream_reader_writer->Read(&resp)) {
       PRINT_MSG(resp, "RESPONSE");
@@ -319,9 +321,9 @@ int Main(int argc, char** argv) {
     stream_reader_writer = stream_reader_writer_ptr.get();
     ::gnmi::SubscribeRequest req =
         build_gnmi_sub_sample_req(path, FLAGS_interval);
-    //CHECK_RETURN_IF_FALSE(stream_reader_writer->Write(req))
+    // CHECK_RETURN_IF_FALSE(stream_reader_writer->Write(req))
+    //     << "Cannot write request.";
     stream_reader_writer->Write(req);
-    //    << "Can not write request.";
     ::gnmi::SubscribeResponse resp;
     while (stream_reader_writer->Read(&resp)) {
       PRINT_MSG(resp, "RESPONSE");

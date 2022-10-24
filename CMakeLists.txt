@@ -30,7 +30,6 @@ set(SDE_INSTALL_PREFIX "/opt/sde" CACHE PATH "SDE install directory")
 #################
 
 option(WITH_STRATUM     "Build with Stratum" ON)
-option(WITH_OPENCONFIG  "Build with OpenConfig" ${WITH_STRATUM})
 
 ############################
 # Target selection options #
@@ -44,16 +43,23 @@ option(TOFINO_TARGET    "Build for Tofino target" OFF)
 # - Ensure that individual target options are consistent
 #   so we can use them to control the build.
 # - Default to TOFINO_TARGET.
+set(_target_action "Building")
+set(_default_target "TOFINO_TARGET")
 if(TOFINO_TARGET)
     set(TARGETFLAG TOFINO_TARGET)
     set(DPDK_TARGET OFF)
 elseif(DPDK_TARGET)
     set(TARGETFLAG DPDK_TARGET)
 else()
-    set(TARGETFLAG TOFINO_TARGET)
+    set(TARGETFLAG ${_default_target})
+    set(${_default_target} ON)
+    set(_target_action "Defaulting to")
 endif()
 
-message(NOTICE "Building ${TARGETFLAG}")
+message(NOTICE "${_target_action} ${TARGETFLAG}")
+
+unset(_default_target)
+unset(_target_action)
 
 ###########################
 # Global compiler options #

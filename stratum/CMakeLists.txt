@@ -90,13 +90,6 @@ add_dependencies(stratum_lib_o stratum_proto)
 # stratum_hal_lib_common_o #
 ############################
 
-if(WITH_OPENCONFIG)
-    set(OPENCONFIG_CONVERTER
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/openconfig_converter.cc
-        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/openconfig_converter.h
-    )
-endif()
-
 add_library(stratum_hal_lib_common_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/channel_writer_wrapper.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/config_monitoring_service.cc
@@ -105,7 +98,8 @@ add_library(stratum_hal_lib_common_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/error_buffer.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/gnmi_publisher.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/gnmi_publisher.h
-    ${OPENCONFIG_CONVERTER}
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/openconfig_converter.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/openconfig_converter.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/p4_service.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/p4_service.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/server_writer_wrapper.h
@@ -347,15 +341,12 @@ target_link_libraries(stratum PUBLIC glog gflags grpc protobuf grpc++)
 target_link_libraries(stratum PUBLIC pthread)
 
 target_link_libraries(stratum PUBLIC
+    openconfig_proto
     stratum_proto
     gnmi_proto
     rpc_proto
     p4v1_proto
 )
-
-if(WITH_OPENCONFIG)
-    target_link_libraries(stratum PUBLIC openconfig_proto)
-endif()
 
 find_library(LIBTDI tdi ${SDE_INSTALL_PREFIX}/lib)
 if(NOT LIBTDI)
