@@ -50,32 +50,15 @@ set(P4V1_PROTO_FILES
     p4/config/v1/p4types.proto
 )
 
+set(PROCMON_PROTO_FILES
+    stratum/procmon/procmon.proto
+)
+
 set(STRATUM_P4_PROTO_FILES
     stratum/public/proto/error.proto
     stratum/hal/lib/common/common.proto
     stratum/hal/lib/p4/forwarding_pipeline_configs.proto
     stratum/hal/lib/phal/db.proto
-)
-
-set(GNMI_PROTO_FILES
-    gnmi/gnmi.proto
-    gnmi/gnmi_ext.proto
-)
-
-set(YGOT_PROTO_PATH github.com/openconfig/ygot/proto)
-
-set(YGOT_PROTO_FILES
-    ${YGOT_PROTO_PATH}/yext/yext.proto
-    ${YGOT_PROTO_PATH}/ywrapper/ywrapper.proto
-)
-
-set(OPENCONFIG_PROTO_FILES
-    openconfig/enums/enums.proto
-    openconfig/openconfig.proto
-)
-
-set(STRATUM_OC_PROTO_FILES
-    stratum/public/proto/openconfig-goog-bcm.proto
 )
 
 set(STRATUM_BF_PROTO_FILES
@@ -125,7 +108,7 @@ function(generate_proto_files PROTO_FILES SRC_DIR)
         install(FILES ${_hdr} DESTINATION
                 ${CMAKE_INSTALL_PREFIX}/include/stratum/pb/${_path})
 
-        if(INSTALL-PROTO)
+        if(INSTALL_PROTO)
             # Install protobuf files in share/stratum/proto.
             install(FILES ${SRC_DIR}/${_file} DESTINATION
                     ${CMAKE_INSTALL_PREFIX}/share/stratum/proto/${_path})
@@ -189,14 +172,12 @@ generate_grpc_files("p4/v1/p4runtime.proto" "${P4RUNTIME_SOURCE_DIR}/proto")
 
 generate_proto_files("${STRATUM_P4_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
 
-generate_proto_files("${GNMI_PROTO_FILES}" "${PROTO_PARENT_DIR}")
-generate_grpc_files("gnmi/gnmi.proto" "${PROTO_PARENT_DIR}")
-
-generate_proto_files("${YGOT_PROTO_FILES}" "${PROTO_PARENT_DIR}")
-generate_proto_files("${OPENCONFIG_PROTO_FILES}" "${PROTO_PARENT_DIR}")
-generate_proto_files("${STRATUM_OC_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
-
 generate_proto_files("${STRATUM_BF_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
+
+if(WITH_PROCMON)
+    generate_proto_files("${PROCMON_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
+    generate_grpc_files("${PROCMON_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
+endif()
 
 ######################
 # Build librpc_proto #
@@ -241,93 +222,34 @@ add_dependencies(p4v1_proto rpc_proto)
 
 install(TARGETS p4v1_proto LIBRARY)
 
-#######################
-# Build libgnmi_proto #
-#######################
-
-add_library(gnmi_proto SHARED
-    ${PROTO_OUT_DIR}/gnmi/gnmi.grpc.pb.cc
-    ${PROTO_OUT_DIR}/gnmi/gnmi.grpc.pb.h
-    ${PROTO_OUT_DIR}/gnmi/gnmi.pb.cc
-    ${PROTO_OUT_DIR}/gnmi/gnmi.pb.h
-    ${PROTO_OUT_DIR}/gnmi/gnmi_ext.pb.cc
-    ${PROTO_OUT_DIR}/gnmi/gnmi_ext.pb.h
-)
-
-add_dependencies(gnmi_proto rpc_proto)
-
-target_include_directories(gnmi_proto PRIVATE ${PROTO_OUT_DIR})
-
-target_link_libraries(gnmi_proto
-    PUBLIC
-        rpc_proto
-        absl_hash
-        absl_strings
-        absl_synchronization
-        absl_time
-)
-
-install(TARGETS gnmi_proto LIBRARY)
-
 ###########################
-#  Build openconfig_proto #
+# Build libprocmon_proto  #
 ###########################
 
-# ygot_proto_o
-add_library(ygot_proto_o OBJECT
-    ${PROTO_OUT_DIR}/${YGOT_PROTO_PATH}/yext/yext.pb.cc
-    ${PROTO_OUT_DIR}/${YGOT_PROTO_PATH}/yext/yext.pb.h
-    ${PROTO_OUT_DIR}/${YGOT_PROTO_PATH}/ywrapper/ywrapper.pb.cc
-    ${PROTO_OUT_DIR}/${YGOT_PROTO_PATH}/ywrapper/ywrapper.pb.h
-)
+if(WITH_PROCMON)
+    add_library(procmon_proto SHARED
+        ${PROTO_OUT_DIR}/stratum/procmon/procmon.pb.cc
+        ${PROTO_OUT_DIR}/stratum/procmon/procmon.pb.h
+        ${PROTO_OUT_DIR}/stratum/procmon/procmon.grpc.pb.cc
+        ${PROTO_OUT_DIR}/stratum/procmon/procmon.grpc.pb.h
+    )
+    target_include_directories(procmon_proto PUBLIC ${PROTO_OUT_DIR})
+    install(TARGETS procmon_proto LIBRARY)
+endif()
 
-target_include_directories(ygot_proto_o PRIVATE ${PROTO_OUT_DIR})
+##############################
+# Build openconfig libraries #
+##############################
 
-# openconfig_enums_proto_o
-add_library(openconfig_enums_proto_o OBJECT
-    ${PROTO_OUT_DIR}/openconfig/enums/enums.pb.cc
-    ${PROTO_OUT_DIR}/openconfig/enums/enums.pb.h
-)
+add_subdirectory(gnmi)
+if(WITH_GNOI)
+    add_subdirectory(gnoi)
+endif()
+add_subdirectory(openconfig)
 
-add_dependencies(openconfig_enums_proto_o ygot_proto_o)
-
-target_include_directories(
-    openconfig_enums_proto_o PRIVATE ${PROTO_OUT_DIR})
-
-# openconfig_proto_o
-add_library(openconfig_proto_o OBJECT
-    ${PROTO_OUT_DIR}/openconfig/openconfig.pb.cc
-    ${PROTO_OUT_DIR}/openconfig/openconfig.pb.h
-)
-
-add_dependencies(openconfig_proto_o openconfig_enums_proto_o)
-
-target_include_directories(openconfig_proto_o PRIVATE ${PROTO_OUT_DIR})
-
-# openconfig_goog_bcm_proto_o
-add_library(openconfig_goog_bcm_proto_o OBJECT
-    ${PROTO_OUT_DIR}/stratum/public/proto/openconfig-goog-bcm.pb.cc
-    ${PROTO_OUT_DIR}/stratum/public/proto/openconfig-goog-bcm.pb.h
-)
-
-add_dependencies(openconfig_goog_bcm_proto_o ygot_proto_o)
-
-target_include_directories(
-    openconfig_goog_bcm_proto_o PRIVATE ${PROTO_OUT_DIR})
-
-# openconfig_proto
-add_library(openconfig_proto SHARED
-    $<TARGET_OBJECTS:ygot_proto_o>
-    $<TARGET_OBJECTS:openconfig_enums_proto_o>
-    $<TARGET_OBJECTS:openconfig_proto_o>
-    $<TARGET_OBJECTS:openconfig_goog_bcm_proto_o>
-)
-
-install(TARGETS openconfig_proto LIBRARY)
-
-###########################
-#  Build libstratum_proto #
-###########################
+##########################
+# Build libstratum_proto #
+##########################
 
 # stratum_proto1_o
 add_library(stratum_proto1_o OBJECT
@@ -378,3 +300,44 @@ add_library(stratum_proto SHARED
 )
 
 install(TARGETS stratum_proto LIBRARY)
+
+################################
+# Download gNOI Protobuf files #
+################################
+
+include(ExternalProject)
+
+# Update to correspond to the version used by Stratum.
+# The definitions can be found in stratum/stratum/bazel/deps.bzl.
+set(GNOI_COMMIT 437c62e630389aa4547b4f0521d0bca3fb2bf811)
+set(GNOI_SHA 77d8c271adc22f94a18a5261c28f209370e87a5e615801a4e7e0d09f06da531f)
+
+# Path to the stratum/proto/gnoi directory.
+set(PROTO_GNOI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/gnoi)
+
+ExternalProject_Add(fetch-gnoi
+  URL https://github.com/openconfig/gnoi/archive/${GNOI_COMMIT}.zip
+  URL_HASH SHA256=${GNOI_SHA}
+  PATCH_COMMAND
+    find . -name *.proto | xargs sed -i -e "s#github.com/openconfig/##g"
+  COMMAND
+    cp -v cert/cert.proto ${PROTO_GNOI_DIR}/cert
+  COMMAND
+    cp -v common/common.proto ${PROTO_GNOI_DIR}/common
+  COMMAND
+    cp -v diag/diag.proto ${PROTO_GNOI_DIR}/diag
+  COMMAND
+    cp -v file/file.proto ${PROTO_GNOI_DIR}/file
+  COMMAND
+    cp -v system/system.proto ${PROTO_GNOI_DIR}/system
+  COMMAND
+    cp -v types/types.proto ${PROTO_GNOI_DIR}/types
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+# The target is only built when expressly requested to do so.
+#     cmake --build build --target fetch-gnoi
+set_target_properties(fetch-gnoi PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
