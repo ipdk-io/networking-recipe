@@ -15,15 +15,15 @@ include(CMakePrintHelpers)
 # Symbolic path definitions #
 #############################
 
-set(DEPEND_INSTALL_PREFIX "" CACHE PATH "Dependencies install directory")
+set(DEPEND_INSTALL_DIR "" CACHE PATH "Dependencies install directory")
 
-set(OVS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH
+set(OVS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH
     "OVS install directory")
 
 set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
     "OVS source directory")
 
-set(SDE_INSTALL_PREFIX "/opt/sde" CACHE PATH "SDE install directory")
+set(SDE_INSTALL_DIR "/opt/sde" CACHE PATH "SDE install directory")
 
 #################
 # Build options #
@@ -70,9 +70,9 @@ if(DPDK_TARGET)
     add_compile_options(-DP4OVS_CHANGES)
 endif()
 
-if(DEPEND_INSTALL_PREFIX)
-    include_directories(${DEPEND_INSTALL_PREFIX}/include)
-    link_directories(${DEPEND_INSTALL_PREFIX}/lib)
+if(DEPEND_INSTALL_DIR)
+    include_directories(${DEPEND_INSTALL_DIR}/include)
+    link_directories(${DEPEND_INSTALL_DIR}/lib)
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -81,10 +81,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # External packages #
 #####################
 
-if(DEPEND_INSTALL_PREFIX)
-    list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_PREFIX})
+if(DEPEND_INSTALL_DIR)
+    list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
 endif()
-list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_PREFIX})
+list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
 
 if(WITH_STRATUM)
     find_package(absl REQUIRED)

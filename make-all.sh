@@ -53,7 +53,7 @@ if [ -z "${SDE_INSTALL}" ]; then
 fi
 
 if [ -n "${DEPEND_INSTALL}" ]; then
-    DEPEND_INSTALL_OPTION=-DDEPEND_INSTALL_PREFIX=${DEPEND_INSTALL}
+    DEPEND_INSTALL_OPTION=-DDEPEND_INSTALL_DIR=${DEPEND_INSTALL}
 fi
 
 if [ ${DEVELOP} -ne 0 ]; then
@@ -74,8 +74,8 @@ cmake --build ${OVS_BUILD} -j6 -- V=0
 # Build the rest of the recipe.
 cmake -S . -B build \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
-    -DOVS_INSTALL_PREFIX=${OVS_INSTALL} \
-    -DSDE_INSTALL_PREFIX=${SDE_INSTALL} \
+    -DOVS_INSTALL_DIR=${OVS_INSTALL} \
+    -DSDE_INSTALL_DIR=${SDE_INSTALL} \
     ${DEPEND_INSTALL_OPTION} \
     -D${TARGET_TYPE}_TARGET=ON
 
