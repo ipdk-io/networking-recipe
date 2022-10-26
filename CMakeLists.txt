@@ -29,6 +29,8 @@ set(SDE_INSTALL_PREFIX "/opt/sde" CACHE PATH "SDE install directory")
 # Build options #
 #################
 
+option(WITH_GNOI        "Build with gNOI enabled" OFF)
+option(WITH_PROCMON     "Build with process monitor" OFF)
 option(WITH_STRATUM     "Build with Stratum" ON)
 
 ############################

@@ -340,6 +340,23 @@ target_link_libraries(stratum PUBLIC
 target_link_libraries(stratum PUBLIC glog gflags grpc protobuf grpc++)
 target_link_libraries(stratum PUBLIC pthread)
 
+# Protobuf libraries
+
+if(WITH_GNIO)
+    target_link_libraries(stratum PUBLIC
+        gnio_cert
+        gnio_diag
+        gnio_file
+        gnio_system
+        gnio_common
+        gnio_types
+    )
+endif()
+
+if(WITH_PROCMON)
+    target_link_libraries(stratum PUBLIC procmon_proto)
+endif()
+
 target_link_libraries(stratum PUBLIC
     openconfig_proto
     stratum_proto
@@ -347,6 +364,8 @@ target_link_libraries(stratum PUBLIC
     rpc_proto
     p4v1_proto
 )
+
+# P4 driver libraries
 
 find_library(LIBTDI tdi ${SDE_INSTALL_PREFIX}/lib)
 if(NOT LIBTDI)
