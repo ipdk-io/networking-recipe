@@ -9,9 +9,6 @@ project(ovs LANGUAGES C)
 
 include(ExternalProject)
 
-set(OVS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH
-    "OVS install directory")
-
 set(OVS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ovs" CACHE PATH
     "OVS source directory")
 
@@ -26,14 +23,14 @@ ExternalProject_Add(ovs
     cd ${OVS_SOURCE_DIR} && ./boot.sh
   COMMAND
     ${OVS_SOURCE_DIR}/configure
-    --prefix=${OVS_INSTALL_PREFIX}
+    --prefix=${CMAKE_INSTALL_PREFIX}
     ${P4OVS_OPTION}
     --disable-ssl
   BINARY_DIR
     ${CMAKE_CURRENT_BINARY_DIR}
   BUILD_COMMAND
-    # Using $(MAKE) causes CMake not to disable the jobserver, allowing
-    # us to do parallel builds. The number of jobs defaults the -jN value
+    # Using $(MAKE) causes CMake not to disable the jobserver, allowing us
+    # to do parallel builds. The number of jobs defaults to the -jN value
     # specified on the CMake command line IN ADDITION TO any CMake jobs.
     # This does not apply in our case because we've made p4ovs dependent
     # on ovs, so CMake won't continue until the ovs build completes.

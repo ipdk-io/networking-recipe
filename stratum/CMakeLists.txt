@@ -110,7 +110,7 @@ add_library(stratum_hal_lib_common_o OBJECT
 
 target_include_directories(stratum_hal_lib_common_o PRIVATE
     ${STRATUM_INCLUDES}
-    ${SDE_INSTALL_PREFIX}/include
+    ${SDE_INSTALL_DIR}/include
 )
 
 add_dependencies(stratum_hal_lib_common_o
@@ -270,7 +270,7 @@ target_compile_definitions(stratum_target_o PRIVATE SDE_9_11_0)
 
 target_include_directories(stratum_target_o PRIVATE
     ${STRATUM_INCLUDES}
-    ${SDE_INSTALL_PREFIX}/include
+    ${SDE_INSTALL_DIR}/include
 )
 
 add_dependencies(stratum_target_o stratum_proto)
@@ -303,7 +303,7 @@ target_compile_definitions(stratum_main_o PRIVATE SDE_9_5_0)
 
 target_include_directories(stratum_main_o PRIVATE
     ${STRATUM_INCLUDES}
-    ${SDE_INSTALL_PREFIX}/include
+    ${SDE_INSTALL_DIR}/include
 )
 
 add_dependencies(stratum_main_o stratum_proto)
@@ -348,23 +348,23 @@ target_link_libraries(stratum PUBLIC
     p4v1_proto
 )
 
-find_library(LIBTDI tdi ${SDE_INSTALL_PREFIX}/lib)
+find_library(LIBTDI tdi ${SDE_INSTALL_DIR}/lib)
 if(NOT LIBTDI)
     message(FATAL_ERROR "Cannot find library: tdi")
 endif()
 
-find_library(LIBTDI_JSON_PARSER tdi_json_parser ${SDE_INSTALL_PREFIX}/lib)
+find_library(LIBTDI_JSON_PARSER tdi_json_parser ${SDE_INSTALL_DIR}/lib)
 if(NOT LIBTDI_JSON_PARSER)
     message(FATAL_ERROR "Cannot find library: tdi_json_parser")
 endif()
 
-find_library(LIBTARGET_SYS target_sys ${SDE_INSTALL_PREFIX}/lib)
+find_library(LIBTARGET_SYS target_sys ${SDE_INSTALL_DIR}/lib)
 if(NOT LIBTARGET_SYS)
     message(FATAL_ERROR "Cannot find library: target_sys")
 endif()
 
 if(TOFINO_TARGET)
-    find_library(LIBDRIVER driver ${SDE_INSTALL_PREFIX}/lib)
+    find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
     if(NOT LIBDRIVER)
         message(FATAL_ERROR "Cannot find library: driver")
     endif()
@@ -376,17 +376,17 @@ if(TOFINO_TARGET)
         ${LIBTARGET_SYS}
     )
 elseif(DPDK_TARGET)
-    find_library(LIBDRIVER driver ${SDE_INSTALL_PREFIX}/lib)
+    find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
     if(NOT LIBDRIVER)
         message(FATAL_ERROR "Cannot find library: driver")
     endif()
 
-    find_library(LIBBF_SWITCHD bf_switchd_lib ${SDE_INSTALL_PREFIX}/lib)
+    find_library(LIBBF_SWITCHD bf_switchd_lib ${SDE_INSTALL_DIR}/lib)
     if(NOT LIBBF_SWITCHD)
         message(FATAL_ERROR "Cannot find library: bf_switchd_lib")
     endif()
 
-    find_library(LIBTARGET_UTILS target_utils ${SDE_INSTALL_PREFIX}/lib)
+    find_library(LIBTARGET_UTILS target_utils ${SDE_INSTALL_DIR}/lib)
     if(NOT LIBTARGET_UTILS)
         message(FATAL_ERROR "Cannot find library: target_utils")
     endif()
