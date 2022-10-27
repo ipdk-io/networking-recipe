@@ -1,4 +1,5 @@
-# Builds stratum/proto/openconfig
+# Builds OpenConfig Protobuf library
+
 cmake_minimum_required(VERSION 3.5)
 
 set(YGOT_PROTO_PATH github.com/openconfig/ygot/proto)

@@ -1,4 +1,4 @@
-# Builds protobuf object libraries
+# Builds Protobuf libraries
 
 cmake_minimum_required(VERSION 3.5)
 

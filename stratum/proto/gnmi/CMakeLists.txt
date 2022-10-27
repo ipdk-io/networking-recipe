@@ -1,4 +1,5 @@
-# Builds stratum/proto/openconfig
+# Builds gNMI Protobuf library
+
 cmake_minimum_required(VERSION 3.5)
 
 set(GNMI_PROTO_FILES

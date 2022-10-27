@@ -1,4 +1,5 @@
-# Builds stratum/proto/gnoi
+# Builds gNOI Protobuf libraries
+
 cmake_minimum_required(VERSION 3.5)
 
 set(GNOI_COMMON_FILES
