@@ -7,8 +7,7 @@ an opportunity to take the DPDK code out for a test drive.
 
 ## Project Name
 
-Starting with this release, the P4-OVS Split Architecture has a new name:
-**P4 Control Plane**.
+Note that the P4-OVS Split Architecture has a new name: **P4 Control Plane**.
 
 ## What's Changed
 
