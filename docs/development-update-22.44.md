@@ -39,8 +39,8 @@ For YangParseTreePaths, we refactored `yang_parse_tree_paths.cc`
 (originally \~4100 lines, increasing to \~5600 lines in P4-OVS) into
 multiple, smaller source files, separating out sections of code that
 had been heavily modified. We then created alternate versions for DPDK.
-See `refactoring_yang_parse_tree_paths.md` in the `stratum/docs`
-directory for details.
+See [Refactoring YangParseTreePaths](../stratum/stratum/stratum/docs/refactoring_yang_parse_tree_paths.md)
+for details.
 
 This restructuring allowed us to port DPDK code from P4-OVS with minimal
 impact on the existing Tofino code.
@@ -52,7 +52,7 @@ DPDK. Features implemented by Stratum (P4Runtime and OpenConfig) should
 be on par with P4-OVS.
 
 Additional development work is required to support the kernel monitor
-and to allow OVS to communicate with *infraprd*.
+and to allow OVS to communicate with *infrap4d*.
 
 To build DPDK under CMake, you must first set the `SDE_INSTALL`
 environment variable to point to the root of the P4-DPDK install tree.
@@ -94,11 +94,11 @@ supported in the DPDK build:
 - system-priority
 
 The following leaves have been renamed, to reduce ambiguity or
-improve consistency with other leaves:
+for consistency with other leaves:
 
 - `host` is now `host-name`
 - `hotplug` is now `qemu-hotplug-mode`
-- `qemu-mac` is now `qemu-mac-address`
+- `qemu-vm-mac` is now `qemu-vm-mac-address`
 
 ### OvS Update
 
@@ -108,6 +108,8 @@ OvS has been updated from January 2022 to a more recent version.
 
 For DPDK builds, we have replaced `gnmi_cli` with `gnmi-ctl`, which is
 the new name for the modified version of gnmi_cli that was part of P4-OVS.
+
+For Tofino builds, we install the unmodified version of `gnmi_cli`.
 
 ## Known Issues
 
