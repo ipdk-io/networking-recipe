@@ -17,6 +17,7 @@ Note that the P4-OVS Split Architecture has a new name: **P4 Control Plane**.
 - Integrated DPDK support from P4-OVS
 - Disabled unsupported port attributes in DPDK
 - Updated OVS to newer release
+- Replace `gnmi_cli` with `gnmi-ctl` in DPDK build
 
 ### TDI variants
 
@@ -102,6 +103,11 @@ improve consistency with other leaves:
 ### OvS Update
 
 OvS has been updated from January 2022 to a more recent version.
+
+## gnmi-ctl
+
+For DPDK builds, we have replaced `gnmi_cli` with `gnmi-ctl`, which is
+the new name for the modified version of gnmi_cli that was part of P4-OVS.
 
 ## Known Issues
 
