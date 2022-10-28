@@ -149,4 +149,4 @@ LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib \
 
 ### Using p4rt-ctl
 
-Please refer to this [link](https://github.com/ipdk-io/networking-recipe/blob/main/docs/executables.rst#p4rt-ctl-executable)
+Please refer to this [link](https://github.com/ipdk-io/networking-recipe/blob/main/docs/p4rt-ctl.rst)
