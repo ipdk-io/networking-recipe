@@ -207,8 +207,8 @@ if(TOFINO_TARGET)
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_chassis_manager.h
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.h
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_target.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_utils.cc
-        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_wrapper.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.h
     )
@@ -219,8 +219,8 @@ elseif(DPDK_TARGET)
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_chassis_manager.h
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_target.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_utils.cc
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_wrapper.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.h
     )
