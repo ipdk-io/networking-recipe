@@ -1,4 +1,4 @@
-# Build file for ovs-clients.
+# Build file for clients.
 #
 # Copyright 2022 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
