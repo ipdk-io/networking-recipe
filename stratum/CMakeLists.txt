@@ -146,7 +146,7 @@ target_include_directories(stratum_hal_lib_p4_o PRIVATE ${STRATUM_INCLUDES})
 
 add_dependencies(stratum_hal_lib_p4_o
     stratum_proto
-    p4v1_proto
+    p4runtime_proto
 )
 
 ##########################
@@ -344,8 +344,8 @@ target_link_libraries(stratum PUBLIC
     openconfig_proto
     stratum_proto
     gnmi_proto
-    rpc_proto
-    p4v1_proto
+    grpc_proto
+    p4runtime_proto
 )
 
 find_library(LIBTDI tdi ${SDE_INSTALL_DIR}/lib)

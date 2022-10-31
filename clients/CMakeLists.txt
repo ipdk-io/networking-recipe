@@ -19,7 +19,7 @@ add_executable(gnmi_cli
 target_link_libraries(gnmi_cli
     PUBLIC
         stratum
-        gnmi_proto rpc_proto
+        gnmi_proto grpc_proto
         grpc protobuf gflags grpc++
         pthread re2
 )
@@ -36,7 +36,7 @@ target_include_directories(gnmi_cli
 
 add_dependencies(gnmi_cli
     gnmi_proto
-    rpc_proto
+    grpc_proto
 )
 
 if(NOT DPDK_TARGET)
@@ -60,7 +60,7 @@ target_include_directories(tdi_pipeline_builder
         ${PROTO_OUT_DIR}
 )
 
-target_link_libraries(tdi_pipeline_builder PUBLIC stratum_proto p4v1_proto)
+target_link_libraries(tdi_pipeline_builder PUBLIC stratum_proto p4runtime_proto)
 
 target_link_libraries(tdi_pipeline_builder PUBLIC
     protobuf gflags glog grpc grpc++
@@ -68,6 +68,6 @@ target_link_libraries(tdi_pipeline_builder PUBLIC
 
 target_link_libraries(tdi_pipeline_builder PRIVATE stratum)
 
-add_dependencies(tdi_pipeline_builder stratum p4v1_proto stratum_proto)
+add_dependencies(tdi_pipeline_builder stratum p4runtime_proto stratum_proto)
 
 install(TARGETS tdi_pipeline_builder RUNTIME)
