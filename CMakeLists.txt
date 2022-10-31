@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
 project(networking-recipe VERSION 0.1 LANGUAGES C CXX)
 
@@ -93,6 +93,40 @@ endif()
 if(DPDK_TARGET)
   pkg_check_modules(DPDK REQUIRED libdpdk)
 endif()
+
+#######################
+# Runpath definitions #
+#######################
+
+# Library using own libraries and dependencies
+set(LIB_ORIGIN_AND_DEPS "$ORIGIN")
+if(DEPEND_INSTALL_DIR)
+    list(APPEND LIB_ORIGIN_AND_DEPS "${DEPEND_INSTALL_DIR}/lib")
+endif()
+list(JOIN LIB_ORIGIN_AND_DEPS ":" LIB_ORIGIN_AND_DEPS)
+
+# Executable using own libraries and dependencies
+# Assumes the executable is in bin or sbin
+set(EXEC_ORIGIN_AND_DEPS "$ORIGIN/../lib")
+if(DEPEND_INSTALL_DIR)
+    list(APPEND EXEC_ORIGIN_AND_DEPS "${DEPEND_INSTALL_DIR}/lib")
+endif()
+list(JOIN EXEC_ORIGIN_AND_DEPS ":" EXEC_ORIGIN_AND_DEPS)
+
+# Library using own libraries, SDE, and dependencies
+set(LIB_ORIGIN_SDE_AND_DEPS "$ORIGIN" "${SDE_INSTALL_DIR}/lib")
+if(DEPEND_INSTALL_DIR)
+    list(APPEND LIB_ORIGIN_SDE_AND_DEPS "${DEPEND_INSTALL_DIR}/lib")
+endif()
+list(JOIN LIB_ORIGIN_SDE_AND_DEPS ":" LIB_ORIGIN_SDE_AND_DEPS)
+
+# Executable using own libraries, SDE, and dependencies
+# Assumes the executable is in bin or sbin
+set(EXEC_ORIGIN_SDE_AND_DEPS "$ORIGIN/../lib" "${SDE_INSTALL_DIR}/lib")
+if(DEPEND_INSTALL_DIR)
+    list(APPEND EXEC_ORIGIN_SDE_AND_DEPS "${DEPEND_INSTALL_DIR}/lib")
+endif()
+list(JOIN EXEC_ORIGIN_SDE_AND_DEPS ":" EXEC_ORIGIN_SDE_AND_DEPS)
 
 ##################
 # Subdirectories #

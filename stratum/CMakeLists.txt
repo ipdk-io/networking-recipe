@@ -324,23 +324,6 @@ add_library(stratum STATIC
 )
 
 target_link_libraries(stratum PUBLIC
-    absl_strings absl_synchronization absl_graphcycles_internal
-    absl_stacktrace absl_symbolize absl_malloc_internal
-    absl_debugging_internal absl_demangle_internal absl_time
-    absl_strings_internal absl_throw_delegate
-    absl_base absl_spinlock_wait absl_int128 absl_raw_logging_internal
-    absl_log_severity absl_civil_time absl_civil_time absl_time_zone
-    absl_status absl_cord absl_cord_internal absl_cordz_info
-    absl_cordz_handle absl_cordz_sample_token absl_cordz_functions
-    absl_exponential_biased absl_str_format_internal absl_hash
-    absl_raw_hash_set absl_city absl_bad_optional_access
-    absl_bad_variant_access absl_low_level_hash
-)
-
-target_link_libraries(stratum PUBLIC glog gflags grpc protobuf grpc++)
-target_link_libraries(stratum PUBLIC pthread)
-
-target_link_libraries(stratum PUBLIC
     openconfig_proto
     stratum_proto
     gnmi_proto
@@ -348,58 +331,110 @@ target_link_libraries(stratum PUBLIC
     p4v1_proto
 )
 
+target_link_libraries(stratum PUBLIC glog gflags grpc protobuf grpc++)
+
+target_link_libraries(stratum PUBLIC
+    absl::strings absl::synchronization absl::graphcycles_internal
+    absl::stacktrace absl::symbolize absl::malloc_internal
+    absl::debugging_internal absl::demangle_internal absl::time
+    absl::strings_internal absl::throw_delegate
+    absl::base absl::spinlock_wait absl::int128 absl::raw_logging_internal
+    absl::log_severity absl::civil_time absl::civil_time absl::time_zone
+    absl::status absl::cord absl::cord_internal absl::cordz_info
+    absl::cordz_handle absl::cordz_sample_token absl::cordz_functions
+    absl::exponential_biased absl::str_format_internal absl::hash
+    absl::raw_hash_set absl::city absl::bad_optional_access
+    absl::bad_variant_access absl::low_level_hash
+)
+
+target_link_libraries(stratum PUBLIC pthread)
+
+# tdi
 find_library(LIBTDI tdi ${SDE_INSTALL_DIR}/lib)
 if(NOT LIBTDI)
     message(FATAL_ERROR "Cannot find library: tdi")
 endif()
 
+add_library(tdi SHARED IMPORTED)
+set_property(TARGET tdi PROPERTY IMPORTED_LOCATION ${LIBTDI})
+
+# tdi_json_parser
 find_library(LIBTDI_JSON_PARSER tdi_json_parser ${SDE_INSTALL_DIR}/lib)
 if(NOT LIBTDI_JSON_PARSER)
     message(FATAL_ERROR "Cannot find library: tdi_json_parser")
 endif()
 
+add_library(tdi_json_parser SHARED IMPORTED)
+set_property(TARGET tdi_json_parser
+             PROPERTY IMPORTED_LOCATION ${LIBTDI_JSON_PARSER})
+
+# target_sys
 find_library(LIBTARGET_SYS target_sys ${SDE_INSTALL_DIR}/lib)
 if(NOT LIBTARGET_SYS)
     message(FATAL_ERROR "Cannot find library: target_sys")
 endif()
 
+add_library(target_sys SHARED IMPORTED)
+set_property(TARGET target_sys PROPERTY IMPORTED_LOCATION ${LIBTARGET_SYS})
+
 if(TOFINO_TARGET)
+    # Tofino driver
     find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
     if(NOT LIBDRIVER)
         message(FATAL_ERROR "Cannot find library: driver")
     endif()
+
+    add_library(driver SHARED IMPORTED)
+    set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
 
     target_link_libraries(stratum PUBLIC
-        ${LIBDRIVER}
-        ${LIBTDI}
-        ${LIBTDI_JSON_PARSER}
-        ${LIBTARGET_SYS}
+        driver
+        tdi
+        tdi_json_parser
+        target_sys
     )
 elseif(DPDK_TARGET)
+    # DPDK driver
     find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
     if(NOT LIBDRIVER)
         message(FATAL_ERROR "Cannot find library: driver")
     endif()
 
+    add_library(driver SHARED IMPORTED)
+    set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
+
+    # bf_switchd_lib
     find_library(LIBBF_SWITCHD bf_switchd_lib ${SDE_INSTALL_DIR}/lib)
     if(NOT LIBBF_SWITCHD)
         message(FATAL_ERROR "Cannot find library: bf_switchd_lib")
     endif()
 
+    add_library(bf_switchd_lib SHARED IMPORTED)
+    set_property(TARGET bf_switchd_lib
+                 PROPERTY IMPORTED_LOCATION ${LIBBF_SWITCHD})
+
+    # target_utils
     find_library(LIBTARGET_UTILS target_utils ${SDE_INSTALL_DIR}/lib)
     if(NOT LIBTARGET_UTILS)
         message(FATAL_ERROR "Cannot find library: target_utils")
     endif()
 
+    add_library(target_utils SHARED IMPORTED)
+    set_property(TARGET target_utils
+                 PROPERTY IMPORTED_LOCATION ${LIBTARGET_UTILS})
+
     target_link_libraries(stratum PUBLIC
-        ${LIBDRIVER}
-        ${LIBBF_SWITCHD}
-        ${LIBTDI}
-        ${LIBTDI_JSON_PARSER}
-        ${LIBTARGET_UTILS}
-        ${LIBTARGET_SYS}
+        driver
+        bf_switchd_lib
+        tdi
+        tdi_json_parser
+        target_utils
+        target_sys
     )
 
-    target_link_directories(stratum PUBLIC ${DPDK_LIBRARY_DIRS})
-    target_link_options(stratum PUBLIC ${DPDK_LDFLAGS_OTHER})
+    target_link_directories(stratum PUBLIC
+        ${SDE_INSTALL}/lib
+        ${DPDK_LIBRARY_DIRS})
+
+    target_link_options(stratum PUBLIC ${DPDK_LD_FLAGS} ${DPDK_LDFLAGS_OTHER})
 endif()

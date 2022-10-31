@@ -212,7 +212,12 @@ add_library(rpc_proto SHARED
 
 target_include_directories(rpc_proto PRIVATE ${PROTO_OUT_DIR})
 
-target_link_libraries(rpc_proto PUBLIC protobuf)
+target_link_libraries(rpc_proto PUBLIC protobuf z pthread)
+
+set_target_properties(rpc_proto PROPERTIES
+    INSTALL_RPATH ${LIB_ORIGIN_AND_DEPS}
+    INSTALL_RPATH_USE_LINK_PATH FALSE
+)
 
 install(TARGETS rpc_proto LIBRARY)
 
@@ -236,8 +241,12 @@ add_library(p4v1_proto SHARED
 
 target_include_directories(p4v1_proto PRIVATE ${PROTO_OUT_DIR})
 
-target_link_libraries(p4v1_proto PUBLIC rpc_proto absl_synchronization)
-add_dependencies(p4v1_proto rpc_proto)
+target_link_libraries(p4v1_proto PUBLIC rpc_proto)
+
+set_target_properties(p4v1_proto PROPERTIES
+    INSTALL_RPATH ${LIB_ORIGIN_AND_DEPS}
+    INSTALL_RPATH_USE_LINK_PATH FALSE
+)
 
 install(TARGETS p4v1_proto LIBRARY)
 
@@ -261,10 +270,15 @@ target_include_directories(gnmi_proto PRIVATE ${PROTO_OUT_DIR})
 target_link_libraries(gnmi_proto
     PUBLIC
         rpc_proto
-        absl_hash
-        absl_strings
-        absl_synchronization
-        absl_time
+        absl::hash
+        absl::strings
+        absl::synchronization
+        absl::time
+)
+
+set_target_properties(gnmi_proto PROPERTIES
+    INSTALL_RPATH ${LIB_ORIGIN_AND_DEPS}
+    INSTALL_RPATH_USE_LINK_PATH FALSE
 )
 
 install(TARGETS gnmi_proto LIBRARY)
@@ -323,6 +337,11 @@ add_library(openconfig_proto SHARED
     $<TARGET_OBJECTS:openconfig_goog_bcm_proto_o>
 )
 
+set_target_properties(openconfig_proto PROPERTIES
+    INSTALL_RPATH ""
+    INSTALL_RPATH_USE_LINK_PATH FALSE
+)
+
 install(TARGETS openconfig_proto LIBRARY)
 
 ###########################
@@ -375,6 +394,11 @@ target_include_directories(stratum_proto2_o PRIVATE ${PROTO_OUT_DIR})
 add_library(stratum_proto SHARED
     $<TARGET_OBJECTS:stratum_proto1_o>
     $<TARGET_OBJECTS:stratum_proto2_o>
+)
+
+set_target_properties(stratum_proto PROPERTIES
+    INSTALL_RPATH ""
+    INSTALL_RPATH_USE_LINK_PATH FALSE
 )
 
 install(TARGETS stratum_proto LIBRARY)

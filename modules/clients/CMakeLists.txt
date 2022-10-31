@@ -19,9 +19,16 @@ add_executable(gnmi_cli
 target_link_libraries(gnmi_cli
     PUBLIC
         stratum
+        stratum_proto
+        p4v1_proto
         gnmi_proto rpc_proto
-        grpc protobuf gflags grpc++
+        grpc protobuf gflags glog grpc++
         pthread re2
+)
+
+set_target_properties(gnmi_cli PROPERTIES
+    INSTALL_RPATH ${EXEC_ORIGIN_SDE_AND_DEPS}
+    INSTALL_RPATH_USE_LINK_PATH FALSE
 )
 
 if(HAVE_POSIX_AIO)
@@ -60,13 +67,18 @@ target_include_directories(tdi_pipeline_builder
         ${PROTO_OUT_DIR}
 )
 
-target_link_libraries(tdi_pipeline_builder PUBLIC stratum_proto p4v1_proto)
+target_link_libraries(tdi_pipeline_builder PRIVATE stratum)
 
 target_link_libraries(tdi_pipeline_builder PUBLIC
+    stratum_proto
+    p4v1_proto
     protobuf gflags glog grpc grpc++
 )
 
-target_link_libraries(tdi_pipeline_builder PRIVATE stratum)
+set_target_properties(tdi_pipeline_builder PROPERTIES
+    INSTALL_RPATH ${EXEC_ORIGIN_SDE_AND_DEPS}
+    INSTALL_RPATH_USE_LINK_PATH FALSE
+)
 
 add_dependencies(tdi_pipeline_builder stratum p4v1_proto stratum_proto)
 

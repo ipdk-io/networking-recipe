@@ -23,6 +23,11 @@ target_link_libraries(gnmi-ctl
         pthread re2
 )
 
+set_target_properties(gnmi-ctl PROPERTIES
+    INSTALL_RPATH ${EXEC_ORIGIN_AND_DEPS}
+    INSTALL_RPATH_USE_LINK_PATH FALSE
+)
+
 target_include_directories(gnmi-ctl
     PRIVATE
         ${STRATUM_SOURCE_DIR}
