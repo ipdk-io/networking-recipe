@@ -100,6 +100,6 @@ endif()
 
 if(WITH_STRATUM)
     add_subdirectory(stratum)
+    add_subdirectory(clients)
 endif()
 add_subdirectory(infrap4d)
-add_subdirectory(modules)

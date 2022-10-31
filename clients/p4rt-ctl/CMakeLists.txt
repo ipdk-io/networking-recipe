@@ -1,9 +1,17 @@
-# Build file for ovs-clients.
+# Build file for p4rt-ctl.
 #
 # Copyright 2022 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 cmake_minimum_required(VERSION 3.5)
+
+# Define PYTHON3 variable.
+find_program(PYTHON3 python3)
+if(NOT PYTHON3)
+    include(FindPython)
+    find_package(Python COMPONENTS Interpreter)
+    set(PYTHON3 ${Python_EXECUTABLE})
+endif()
 
 set(P4RT_CTL_OUT ${CMAKE_CURRENT_BINARY_DIR}/p4rt-ctl)
 
