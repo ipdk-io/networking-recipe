@@ -2,7 +2,7 @@
 
 # Parse command-line options.
 SHORTOPTS=p:
-LONGOPTS=clean,prefix:,sde-install:,dep-install:,develop,target:
+LONGOPTS=clean,prefix:,sde-install:,dep-install:,develop,target:,ovs,no-ovs
 
 GETOPTS=`getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 eval set -- "${GETOPTS}"
@@ -17,7 +17,7 @@ while true ; do
     case "$1" in
     --clean)
         rm -fr build install
-        shift 1;;
+        exit 0 ;;
     -p|--prefix)
         # --prefix=<path>
         PREFIX=$2
@@ -28,6 +28,12 @@ while true ; do
         shift 2 ;;
     --develop)
         DEVELOP=1
+        shift ;;
+    --ovs)
+        BUILD_WITH_OVS=true
+        shift ;;
+    --no-ovs)
+        BUILD_WITH_OVS=false
         shift ;;
     --sde-install)
         # --sde-install=<path>
@@ -67,15 +73,22 @@ fi
 # Abort on error.
 set -e
 
-# Build OVS first.
-cmake -S ovs -B ${OVS_BUILD} -DCMAKE_INSTALL_PREFIX=${OVS_INSTALL}
-cmake --build ${OVS_BUILD} -j6 -- V=0
+if [ -z "${BUILD_WITH_OVS}" -o "${BUILD_WITH_OVS}" = "true" ]; then
+    # Build OVS first.
+    echo "Building OVS"
+    cmake -S ovs -B ${OVS_BUILD} -DCMAKE_INSTALL_PREFIX=${OVS_INSTALL}
+    cmake --build ${OVS_BUILD} -j6 -- V=0
+    OVS_INSTALL_OPTION=-DOVS_INSTALL_DIR=${OVS_INSTALL}
+else
+    echo "Skipping OVS build"
+    OVS_INSTALL_OPTION=
+fi
 
 # Build the rest of the recipe.
 cmake -S . -B build \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
-    -DOVS_INSTALL_DIR=${OVS_INSTALL} \
     -DSDE_INSTALL_DIR=${SDE_INSTALL} \
+    ${OVS_INSTALL_OPTION} \
     ${DEPEND_INSTALL_OPTION} \
     -D${TARGET_TYPE}_TARGET=ON
 
