@@ -26,19 +26,19 @@ target_link_libraries(infrap4d PRIVATE
 if(DPDK_TARGET)
     # Executable using own libraries, SDE libraries, DPDK libraries,
     # and dependency libraries
-    set(INFRAP4D_RPATH "$ORIGIN/../lib" "${SDE_INSTALL_DIR}/lib"
+    set(_infrap4d_rpath "$ORIGIN/../lib" "${SDE_INSTALL_DIR}/lib"
         "${DPDK_LIBRARY_DIRS}")
     if(DEPEND_INSTALL_DIR)
-        list(APPEND INFRAP4D_RPATH "${DEPEND_INSTALL_DIR}/lib")
+        list(APPEND _infrap4d_rpath "${DEPEND_INSTALL_DIR}/lib")
     endif()
-    list(JOIN INFRAP4D_RPATH ":" INFRAP4D_RPATH)
+    list(JOIN _infrap4d_rpath ":" _infrap4d_rpath)
 else()
     # Executable using own libraries, SDE, and dependencies
-    set(INFRAP4D_RPATH ${EXEC_ORIGIN_SDE_AND_DEPS})
+    set(_infrap4d_rpath ${EXEC_ORIGIN_SDE_AND_DEPS})
   endif()
 
 set_target_properties(infrap4d PROPERTIES
-    INSTALL_RPATH ${INFRAP4D_RPATH}
+    INSTALL_RPATH ${_infrap4d_rpath}
     INSTALL_RPATH_USE_LINK_PATH FALSE
 )
 
