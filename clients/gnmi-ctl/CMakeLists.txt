@@ -1,4 +1,4 @@
-# modules/clients/gnmi-ctl
+# Build file for gnmi-ctl.
 #
 # Copyright 2022 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0

@@ -1,4 +1,4 @@
-# Build file for clients.
+# Build file for p4rt-ctl.
 #
 # Copyright 2022 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
