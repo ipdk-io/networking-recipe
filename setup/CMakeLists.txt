@@ -8,10 +8,12 @@ project(dependencies VERSION 1 LANGUAGES C CXX)
 include(ExternalProject)
 include(CMakePrintHelpers)
 
-option(USE_SUDO       "Use sudo when installing" OFF)
+option(ON_DEMAND    "Build targets on demand" OFF)
+option(USE_SUDO     "Use sudo when installing" OFF)
 
 if(USE_SUDO)
   set(SUDO_CMD "sudo" "-E")
+  set(LDCONFIG_CMD COMMAND sudo ldconfig)
 endif()
 
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
@@ -35,12 +37,16 @@ ExternalProject_Add(abseil-cpp
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
+    -DCMAKE_INSTALL_RPATH=$ORIGIN
     -DBUILD_SHARED_LIBS=on
     -DBUILD_TESTING=off
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
     ${LDCONFIG_CMD}
 )
+if(ON_DEMAND)
+  set_target_properties(abseil-cpp PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
 
 ############
 # PROTOBUF #
@@ -64,7 +70,11 @@ ExternalProject_Add(protobuf
     -Dprotobuf_BUILD_TESTS=off
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
 )
+if(ON_DEMAND)
+  set_target_properties(protobuf PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
 
 ########
 # GRPC #
@@ -84,9 +94,9 @@ ExternalProject_Add(grpc
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
     -DBUILD_SHARED_LIBS=on
-    -DgRPC_SSL_PROVIDER=package
     -DgRPC_ABSL_PROVIDER=package
     -DgRPC_PROTOBUF_PROVIDER=package
+    -DgRPC_SSL_PROVIDER=package
     -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=off
     -DgRPC_BUILD_GRPC_NODE_PLUGIN=off
     -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=off
@@ -96,10 +106,14 @@ ExternalProject_Add(grpc
     -DgRPC_INSTALL=on
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
   DEPENDS
     abseil-cpp
     protobuf
 )
+if(ON_DEMAND)
+  set_target_properties(grpc PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
 
 ########
 # CCTZ #
@@ -120,7 +134,11 @@ ExternalProject_Add(cctz
     -DBUILD_TESTING=off
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
 )
+if(ON_DEMAND)
+  set_target_properties(cctz PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
 
 ##########
 # GFLAGS #
@@ -140,7 +158,11 @@ ExternalProject_Add(gflags
     -DBUILD_SHARED_LIBS=on
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
 )
+if(ON_DEMAND)
+  set_target_properties(gflags PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
 
 ########
 # GLOG #
@@ -161,9 +183,13 @@ ExternalProject_Add(glog
     -DWITH_GTEST=OFF
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
   DEPENDS
     gflags
 )
+if(ON_DEMAND)
+  set_target_properties(glog PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
 
 #############
 # GMOCK_GBL #
@@ -178,6 +204,9 @@ ExternalProject_Add(gmock-gbl
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 )
+if(ON_DEMAND)
+  set_target_properties(gmock-gbl PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
 
 #########
 # GTEST #
@@ -197,7 +226,11 @@ ExternalProject_Add(gtest
     -DBUILD_SHARED_LIBS=on
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
 )
+if(ON_DEMAND)
+  set_target_properties(gtest PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
 
 ########
 # JSON #
@@ -217,4 +250,8 @@ ExternalProject_Add(json
     -DJSON_BuildTests=off
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
 )
+if(ON_DEMAND)
+  set_target_properties(json PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
