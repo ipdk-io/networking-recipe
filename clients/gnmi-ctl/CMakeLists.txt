@@ -18,7 +18,7 @@ add_executable(gnmi-ctl
 target_link_libraries(gnmi-ctl
     PUBLIC
         stratum
-        gnmi_proto rpc_proto
+        gnmi_proto grpc_proto
         grpc protobuf gflags grpc++
         pthread re2
 )
@@ -31,7 +31,7 @@ target_include_directories(gnmi-ctl
 
 add_dependencies(gnmi-ctl
     gnmi_proto
-    rpc_proto
+    grpc_proto
 )
 
 if(DPDK_TARGET)

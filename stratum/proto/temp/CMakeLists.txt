@@ -219,24 +219,43 @@ install(TARGETS grpc_proto LIBRARY)
 # Build libp4runtime_proto #
 ############################
 
+add_library(p4types_proto_o OBJECT
+    ${PROTO_OUT_DIR}/p4/config/v1/p4types.pb.cc
+    ${PROTO_OUT_DIR}/p4/config/v1/p4types.pb.h
+)
+target_include_directories(p4types_proto_o PRIVATE ${PROTO_OUT_DIR})
 
-# External target
-add_library(p4runtime_proto SHARED
+add_library(p4data_proto_o OBJECT
+    ${PROTO_OUT_DIR}/p4/v1/p4data.pb.cc
+    ${PROTO_OUT_DIR}/p4/v1/p4data.pb.h
+)
+target_include_directories(p4data_proto_o PRIVATE ${PROTO_OUT_DIR})
+
+add_library(p4info_proto_o OBJECT
+    ${PROTO_OUT_DIR}/p4/config/v1/p4info.pb.cc
+    ${PROTO_OUT_DIR}/p4/config/v1/p4info.pb.h
+)
+target_include_directories(p4info_proto_o PRIVATE ${PROTO_OUT_DIR})
+add_dependencies(p4info_proto_o p4types_proto_o)
+
+add_library(p4runtime_proto_o OBJECT
     ${PROTO_OUT_DIR}/p4/v1/p4runtime.pb.cc
     ${PROTO_OUT_DIR}/p4/v1/p4runtime.pb.h
     ${PROTO_OUT_DIR}/p4/v1/p4runtime.grpc.pb.cc
     ${PROTO_OUT_DIR}/p4/v1/p4runtime.grpc.pb.h
-    ${PROTO_OUT_DIR}/p4/v1/p4data.pb.cc
-    ${PROTO_OUT_DIR}/p4/v1/p4data.pb.h
-    ${PROTO_OUT_DIR}/p4/config/v1/p4types.pb.cc
-    ${PROTO_OUT_DIR}/p4/config/v1/p4types.pb.h
-    ${PROTO_OUT_DIR}/p4/config/v1/p4info.pb.cc
-    ${PROTO_OUT_DIR}/p4/config/v1/p4info.pb.h
 )
+target_include_directories(p4runtime_proto_o PRIVATE ${PROTO_OUT_DIR})
+add_dependencies(p4runtime_proto_o grpc_proto p4data_proto_o p4info_proto_o)
 
+# External target
+add_library(p4runtime_proto SHARED
+	$<TARGET_OBJECTS:p4runtime_proto_o>
+	$<TARGET_OBJECTS:p4types_proto_o>
+	$<TARGET_OBJECTS:p4data_proto_o>
+	$<TARGET_OBJECTS:p4info_proto_o>
+)
 target_include_directories(p4runtime_proto PRIVATE ${PROTO_OUT_DIR})
-
-target_link_libraries(p4runtime_proto PUBLIC grpc_proto absl_synchronization)
+target_link_libraries(p4runtime_proto PUBLIC grpc_proto absl::synchronization)
 add_dependencies(p4runtime_proto grpc_proto)
 
 install(TARGETS p4runtime_proto LIBRARY)
@@ -261,10 +280,10 @@ target_include_directories(gnmi_proto PRIVATE ${PROTO_OUT_DIR})
 target_link_libraries(gnmi_proto
     PUBLIC
         grpc_proto
-        absl_hash
-        absl_strings
-        absl_synchronization
-        absl_time
+        absl::hash
+        absl::strings
+        absl::synchronization
+        absl::time
 )
 
 install(TARGETS gnmi_proto LIBRARY)
