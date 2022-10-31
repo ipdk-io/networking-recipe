@@ -82,7 +82,6 @@ if [ -z "${BUILD_WITH_OVS}" -o "${BUILD_WITH_OVS}" = "true" ]; then
 else
     echo "Skipping OVS build"
     OVS_INSTALL_OPTION=
-
 fi
 
 # Build the rest of the recipe.
