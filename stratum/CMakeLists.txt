@@ -219,6 +219,8 @@ elseif(DPDK_TARGET)
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_chassis_manager.h
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_port_config.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_port_config.h
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_target.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_utils.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.cc
