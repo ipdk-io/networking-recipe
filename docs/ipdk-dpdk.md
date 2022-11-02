@@ -32,7 +32,7 @@ cmake --build build [-j<njobs>]
 #### Set environment variables
  - export DEPEND_INSTALL=`absolute path for installing dependencies`
  - export SDE_INSTALL=`absolute path for p4 sde install built in previous step`
- - export LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib:$SDE_INSTALL/lib64:$DEPEND_INSTALL_PATH/lib:$DEPEND_INSTALL_PATH/lib64:$LD_LIBRARY_PATH
+ - export LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib:$SDE_INSTALL/lib64:$DEPEND_INSTALL/lib:$DEPEND_INSTALL/lib64:$LD_LIBRARY_PATH
  
 #### Compile the recipe
 
@@ -54,6 +54,13 @@ sudo mkdir -p /var/log/stratum/
 sudo mkdir -p /usr/share/stratum/dpdk
 sudo cp ./install/share/stratum/dpdk/dpdk_port_config.pb.txt /usr/share/stratum/dpdk/
 sudo cp ./install/share/stratum/dpdk/ dpdk_skip_p4.conf /usr/share/stratum/dpdk/
+```
+
+#### Set hugepages required for DPDK
+
+Run hugepages script, found in `scripts` directory
+```bash
+sudo ./scripts/set_hugepages.sh
 ```
 
 #### Run the infrap4d daemon
