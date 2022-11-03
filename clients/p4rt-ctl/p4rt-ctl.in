@@ -24,7 +24,6 @@ import sys
 import grpc
 import logging
 import math
-#import ovspy.client
 import queue
 import random
 import re
@@ -40,9 +39,6 @@ from google.rpc import status_pb2, code_pb2
 from p4.v1 import p4runtime_pb2
 from p4.v1 import p4runtime_pb2_grpc
 from p4.config.v1 import p4info_pb2
-
-# context = Context()
-#ovs = None
 
 USAGE = "p4rt-ctl: P4Runtime switch management utility\n" \
         "usage: p4rt-ctl [OPTIONS] COMMAND [ARG...]\n" \
@@ -586,30 +582,11 @@ class P4RuntimeClient:
         return self.stub.Read(req)
 
 
-#def resolve_device_id_by_bridge_name(bridge_name):
-#    global ovs
-#    ovs = ovspy.client.OvsClient(5000)
-#
-#    if ovs.find_bridge(bridge_name) is None:
-#        raise Exception("bridge '{}' doesn't exist".format(bridge_name))
-
-#    for br in ovs.get_bridge_raw():
-#        if br['name'] == bridge_name:
-#            other_configs = br['other_config'][1][0]
-#            for i, cfg in enumerate(other_configs):
-#                if cfg == 'device_id':
-#                    return int(other_configs[i+1])
-    # This function should not reach this line
-#    raise Exception("bridge '{}' does not have "
-#                    "'device_id' configured".format(bridge_name))
-
 def with_client(f):
     @wraps(f)
     def handle(*args, **kwargs):
         client = None
         try:
-            # client = P4RuntimeClient(device_id=
-            #           resolve_device_id_by_bridge_name(args[0]))
             client = P4RuntimeClient(device_id=1)
             f(client, *args, **kwargs)
         except Exception as e:
@@ -618,102 +595,6 @@ def with_client(f):
             if client:
                 client.tear_down()
     return handle
-
-
-#interface_query = {
-#    "method": "transact",
-#    "params": [
-#        "Open_vSwitch",
-#        {
-#            "op": "select",
-#            "table": "Interface",
-#            "where": [],
-#        }
-#    ],
-#    "id": random.randint(0, 10000)
-#}
-
-
-#def ovs_get_interfaces():
-#    result = ovs._send(interface_query)
-#    return result["result"][0]["rows"]
-
-
-#def ovs_get_interface(id):
-#    for intf in ovs_get_interfaces():
-#        if intf['_uuid'][1] == id:
-#            return intf
-
-
-#def ovs_get_interfaces_by_bridge_name(bridge):
-#    interfaces = []
-#    br = ovs.find_bridge(bridge)
-
-#    if not br:
-#        return interfaces
-
-#    for p in br.get_ports():
-#        port = p.get_raw()
-#        interfaces_ids = []
-#        if port["interfaces"][0] == 'set':
-#            for i in port["interfaces"][1]:
-#                interfaces_ids.append(i[1])
-#        elif port["interfaces"][0] == 'uuid':
-#            interfaces_ids.append(port["interfaces"][1])
-
-#        for id in interfaces_ids:
-#            intf = ovs_get_interface(id)
-#            interfaces.append(intf)
-
-#    return interfaces
-
-
-#@with_client
-#def p4ctl_show(client, bridge):
-#    p4info = client.get_p4info()
-#    if not p4info:
-#        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
-#
-#    helper = P4InfoHelper(p4info)
-
-#    bridge_line = "P4Runtime switch {} information:\n".format(bridge)
-#    device_id_line = "device_id: {}\n".format(client.device_id)
-#    n_tables_line = "n_tables: {}\n".format(len(p4info.tables))
-#    tables_line = "tables:"
-#    for tbl in p4info.tables:
-#        match = [mf.name for mf in tbl.match_fields]
-#        actions = [helper.get_name('actions', a.id) for a in tbl.action_refs]
-#        tables_line += " {}(match=[{}], actions=[{}])".format(
-#                        tbl.preamble.name, ', '.join(match),
-#                        ', '.join(actions))
-#    tables_line += "\n"
-#
-#    ports = []
-#    for intf in ovs_get_interfaces_by_bridge_name(bridge):
-#        mac = intf['mac_in_use']
-#        link_state = intf['link_state'].upper()
-#        speed = int(int(intf['link_speed']) / 1000)
-#        rx_packets = intf['statistics'][1][1][1]
-#        rx_bytes = intf['statistics'][1][8][1]
-#        tx_packets = intf['statistics'][1][12][1]
-#        tx_bytes = intf['statistics'][1][9][1]
-#        port_str = "  {}({}):\n\tstate: {}\n\taddr:{}\n\tspeed: " \
-#            "{}\n\tstats: {}".format(
-#                intf['ofport'] if intf['name'] != bridge else "LOCAL",
-#                intf['name'],
-#                mac,
-#                link_state,
-#                "{} Mbps".format(str(speed)),
-#                "rx_packets={}, rx_bytes={}, tx_packets={}, tx_bytes={}".
-#                format(rx_packets, rx_bytes, tx_packets, tx_bytes))
-#        ports.append(port_str)
-#
-#    print(''.join([bridge_line,
-#                   device_id_line,
-#                   n_tables_line,
-#                   tables_line,
-#                   '\n'.join(ports)]))
-#
 
 @with_client
 def p4ctl_set_pipe(client, bridge, device_config, p4info):
@@ -936,7 +817,6 @@ def p4ctl_dump_entries(client, bridge, tbl_name=None):
 
 
 all_commands = {
-    "show": (p4ctl_show, 1),
     "set-pipe": (p4ctl_set_pipe, 3),
     "get-pipe": (p4ctl_get_pipe, 1),
     "add-entry": (p4ctl_add_entry, 3),
