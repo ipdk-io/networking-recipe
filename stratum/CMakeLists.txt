@@ -326,17 +326,17 @@ add_library(stratum STATIC
 )
 
 target_link_libraries(stratum PUBLIC
-    absl_strings absl_synchronization absl_graphcycles_internal
-    absl_stacktrace absl_symbolize absl_malloc_internal
-    absl_debugging_internal absl_demangle_internal absl_time
-    absl_strings_internal absl_throw_delegate
-    absl_base absl_spinlock_wait absl_int128 absl_raw_logging_internal
-    absl_log_severity absl_civil_time absl_civil_time absl_time_zone
-    absl_status absl_cord absl_cord_internal absl_cordz_info
-    absl_cordz_handle absl_cordz_sample_token absl_cordz_functions
-    absl_exponential_biased absl_str_format_internal absl_hash
-    absl_raw_hash_set absl_city absl_bad_optional_access
-    absl_bad_variant_access absl_low_level_hash
+    absl::strings absl::synchronization absl::graphcycles_internal
+    absl::stacktrace absl::symbolize absl::malloc_internal
+    absl::debugging_internal absl::demangle_internal absl::time
+    absl::strings_internal absl::throw_delegate
+    absl::base absl::spinlock_wait absl::int128 absl::raw_logging_internal
+    absl::log_severity absl::civil_time absl::civil_time absl::time_zone
+    absl::status absl::cord absl::cord_internal absl::cordz_info
+    absl::cordz_handle absl::cordz_sample_token absl::cordz_functions
+    absl::exponential_biased absl::str_format_internal absl::hash
+    absl::raw_hash_set absl::city absl::bad_optional_access
+    absl::bad_variant_access absl::low_level_hash
 )
 
 target_link_libraries(stratum PUBLIC glog gflags grpc protobuf grpc++)

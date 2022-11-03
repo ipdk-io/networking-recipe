@@ -236,7 +236,7 @@ add_library(p4runtime_proto SHARED
 
 target_include_directories(p4runtime_proto PRIVATE ${PROTO_OUT_DIR})
 
-target_link_libraries(p4runtime_proto PUBLIC grpc_proto absl_synchronization)
+target_link_libraries(p4runtime_proto PUBLIC grpc_proto absl::synchronization)
 add_dependencies(p4runtime_proto grpc_proto)
 
 install(TARGETS p4runtime_proto LIBRARY)
@@ -261,10 +261,10 @@ target_include_directories(gnmi_proto PRIVATE ${PROTO_OUT_DIR})
 target_link_libraries(gnmi_proto
     PUBLIC
         grpc_proto
-        absl_hash
-        absl_strings
-        absl_synchronization
-        absl_time
+        absl::hash
+        absl::strings
+        absl::synchronization
+        absl::time
 )
 
 install(TARGETS gnmi_proto LIBRARY)
