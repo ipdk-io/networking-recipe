@@ -332,11 +332,9 @@ target_link_libraries(stratum PUBLIC
     absl::strings_internal absl::throw_delegate
     absl::base absl::spinlock_wait absl::int128 absl::raw_logging_internal
     absl::log_severity absl::civil_time absl::civil_time absl::time_zone
-    absl::status absl::cord absl::cord_internal absl::cordz_info
-    absl::cordz_handle absl::cordz_sample_token absl::cordz_functions
-    absl::exponential_biased absl::str_format_internal absl::hash
-    absl::raw_hash_set absl::city absl::bad_optional_access
-    absl::bad_variant_access absl::low_level_hash
+    absl::status absl::cord absl::exponential_biased absl::str_format_internal
+    absl::hash absl::raw_hash_set absl::city absl::bad_optional_access
+    absl::bad_variant_access
 )
 
 target_link_libraries(stratum PUBLIC glog gflags grpc protobuf grpc++)
