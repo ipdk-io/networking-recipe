@@ -1,0 +1,186 @@
+{
+  "switch": "br0",
+  "p4file": "linux_networking",
+  "bridge": "br-int",
+  "port": [
+    {
+      "id": "1",
+      "device": "virtual-device",
+      "name": "net_vhost0",
+      "host": "host0",
+      "device-type": "VIRTIO_NET",
+      "queues": "1",
+      "socket-path": "/tmp/vhost-user-0",
+      "port-type": "LINK",
+      "single-cmd": "TRUE",
+      "interface": "ens3",
+      "packet-dir": "host",
+      "ip": "99.0.0.1/24",
+      "mac_local": "00:e8:ca:11:aa:01",
+      "vlan": "1"
+    },
+    {
+      "id": "2",
+      "device": "virtual-device",
+      "name": "TAP4",
+      "port-type": "TAP",
+      "pipeline-name": "pipe",
+      "mempool-name": "MEMPOOL0",
+      "mtu": "1500",
+      "single-cmd": "TRUE",
+      "packet-dir": "host",
+      "mac": "00:00:01:00:00:03"
+    },
+    {
+      "id": "3",
+      "device": "physical-device",
+      "name": "PORT0",
+      "port-type": "LINK",
+      "control-port": "TAP1",
+      "mtu": "1500",
+      "packet-dir": "network",
+      "single-cmd": "TRUE"
+    },
+    {
+      "id": "4",
+      "device": "physical-device",
+      "name": "PORT1",
+      "port-type": "LINK",
+      "control-port": "TAP2",
+      "mtu": "1500",
+      "packet-dir": "network",
+      "single-cmd": "TRUE"
+    },
+    {
+      "id": "5",
+      "device": "virtual-device",
+      "name": "TAP0",
+      "port-type": "TAP",
+      "pipeline-name": "pipe",
+      "mempool-name": "MEMPOOL0",
+      "mtu": "1500",
+      "single-cmd": "TRUE",
+      "packet-dir": "host",
+      "mac": "00:00:01:00:00:01"
+    },
+    {
+      "id": "6",
+      "device": "virtual-device",
+      "name": "TAP3",
+      "port-type": "TAP",
+      "pipeline-name": "pipe",
+      "mempool-name": "MEMPOOL0",
+      "mtu": "1500",
+      "single-cmd": "TRUE",
+      "packet-dir": "host",
+      "mac": "00:00:01:00:00:02"
+    }
+  ],
+  "table": [
+    {
+      "description": "lnt_tx_control_pkts_table",
+      "switch": "br0",
+      "name": "linux_networking_control.handle_tx_control_pkts_table",
+      "type": "entry",
+      "match_action": [
+        "istd.input_port=0,action=linux_networking_control.push_vlan_fwd(6,1)"
+      ]
+    },
+    {
+      "description": "lnt_tx_control_vlan_pkts_table",
+      "switch": "br0",
+      "name": "linux_networking_control.handle_tx_control_vlan_pkts_table",
+      "type": "entry",
+      "match_action": [
+        "istd.input_port=6,local_metadata.vlan_id=1,action=linux_networking_control.pop_vlan_fwd(0)"
+      ]
+    },
+    {
+      "description": "lnt_control_physical_port_rx_table",
+      "switch": "br0",
+      "name": "linux_networking_control.handle_rx_control_pkts_table",
+      "type": "entry",
+      "match_action": [
+        "istd.input_port=2,action=linux_networking_control.set_control_dest(3)",
+        "istd.input_port=4,action=linux_networking_control.set_control_dest(5)"
+      ]
+    },
+    {
+      "description": "lnt_control_physical_tx_table",
+      "switch": "br0",
+      "name": "linux_networking_control.handle_tx_control_pkts_table",
+      "type": "entry",
+      "match_action": [
+        "istd.input_port=3,action=linux_networking_control.set_control_dest(2)",
+        "istd.input_port=5,action=linux_networking_control.set_control_dest(4)"
+      ]
+    }
+  ],
+  "vm": [
+    {
+      "id": "1",
+      "vm_name": "Vm1",
+      "port": "net_vhost0",
+      "hotplug": {
+        "qemu-socket-ip": "127.0.0.1",
+        "qemu-socket-port": "6650",
+        "qemu-vm-mac": "00:e8:ca:11:aa:01",
+        "qemu-vm-netdev-id": "netdev0",
+        "qemu-vm-chardev-id": "char1",
+        "native-socket-path": "/tmp/vhost-user-0",
+        "qemu-vm-device-id": "dev0",
+        "serial-telnet-port": "6550"
+      },
+      "remote_ip": [
+        "99.0.0.3"
+      ],
+      "mac_remote": "00:e8:ca:11:cc:01"
+    }
+  ],
+  "net_namespace": [
+    {
+      "id": "1",
+      "name": "VM0",
+      "veth_if": "veth_vm0",
+      "ip": "99.0.0.3/24",
+      "peer_name": "veth_host_vm0"
+    }
+  ],
+  "vxlan": {
+    "tep_intf": "TEP0",
+    "tep_ip": [
+      "40.1.1.1/24",
+      "40.1.1.2/24"
+    ],
+    "dst_port": [
+      "4789"
+    ],
+    "vxlan_name": [
+      "vxlan1"
+    ]
+  },
+  "ecmp": {
+    "local_ports": [
+      "TAP1",
+      "TAP2"
+    ],
+    "local_ports_ip": [
+      "50.1.1.1/24",
+      "60.1.1.1/24"
+    ],
+    "remote_ports_ip": [
+      "50.1.1.2/24",
+      "60.1.1.2/24"
+    ]
+  },
+    "traffic":
+  {
+      "send_port": [2,4],
+      "in_pkt_header": {
+        "ip_dst_1": "99.0.0.3"
+      },
+      "number_pkts": [10],
+      "count_buffer": [6]
+  }
+
+}

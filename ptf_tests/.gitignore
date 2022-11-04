@@ -1,0 +1,9 @@
+*.pyc
+common/__pycache__
+common/lib/__pycache__
+common/utils/__pycache__
+tests/__pycache__
+common/*.pyc
+common/lib/*.pyc
+common/utils/.pyc
+tests/*.pyc

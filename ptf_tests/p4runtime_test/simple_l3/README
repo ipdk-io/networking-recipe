@@ -1,0 +1,108 @@
+===============================================================================
+Setting Up The Repos and Test Environment Setup:
+===============================================================================
+
+1) clone and build P4SDE repo on host/server machine 
+    mkdir p4-sde
+    cd p4-sde
+    git clone  https://github.com/intel-innersource/networking.ethernet.acceleration.vswitch.p4-sde.p4-driver.git -b main --recursive p4_sde-nat-p4-driver
+    mkdir install
+
+    ** Below steps are important, need to be executed on all terminals **
+    export SDE=$PWD
+    export SDE_INSTALL=$SDE/install
+    export PKG_CONFIG_PATH=${SDE_INSTALL}/lib/x86_64-linux-gnu/pkgconfig
+    export LD_LIBRARY_PATH=$SDE_INSTALL/lib
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SDE_INSTALL/lib/x86_64-linux-gnu
+    echo $SDE
+    echo $SDE_INSTALL
+    echo $PKG_CONFIG_PATH
+    echo $LD_LIBRARY_PATH
+    ***********************
+
+    cd $SDE/p4_sde-nat-p4-driver
+    git checkout main
+    python3 tools/setup/install_dep.py
+    ./autogen.sh
+    ./configure --prefix=$SDE_INSTALL
+    make -j 8
+    make -j 8 install
+
+2) clone and build P4OVS repo on host/server machine 
+    git clone  https://github.com/intel-innersource/networking.ethernet.acceleration.vswitch.p4-ovs.ipdk-p4ovs.git P4-OVS
+    cd P4-OVS
+    git submodule update --init --recursive
+    pip3 install ovspy
+    pip3 install -r Documentation/requirements.txt
+    pip3 install Cython
+    cd p4runtime/py ; python setup.py build ; python setup.py install_lib
+    < remove existing packeges from the machine >
+    ./install_dep_packages.sh /root/
+    ./build-p4ovs.sh $SDE_INSTALL
+
+3) clone and build ptf repo from  https://github.com/p4lang/ptf.git 
+        git clone https://github.com/p4lang/ptf.git ptf
+        cd ptf
+        pip install -r requirements-dev.txt
+        pip3 install pypcap
+        sudo apt-get install tcpdump
+        pip install ptf
+        sudo python setup.py install
+
+4) other dependencies:
+        install python 3.6
+        copy p4testutils under $SDE_INSTALL/lib/python3.8/site-packages/  <this step is optional> 
+        pip install crc16
+
+5) clone and build p4runtime_shell
+        git clone https://github.com/p4lang/p4runtime-shell.git 
+        pip3 install p4runtime==1.3.0
+        pip3 install ipaddr==2.2.0
+        pip3 install grpcio==1.35.0
+        pip3 install protobuf==3.14.0
+        pip3 install p4runtime-shell
+
+===============================================================================
+Running simple l3 scenario (using TAP ports):
+===============================================================================
+start p4rt service on a host machine. create 2 TAP ports using gnmi cli. 
+assign ip address to TAP ports.
+now run the ptf test that sets the pipeline with this 
+configuration (simple_l3.pb.bin), configure these ports with 
+rules and sends the traffic.
+
+Steps to be followed :
+=======================
+1) run OVS and p4rt service on host machine
+  source p4ovs_env_setup.sh <SDE_INSTALL_PATH>
+  ./run_ovs.sh
+
+2) create gnmi ports on the host itself
+  alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"'
+  sudo gnmi-cli set "device:virtual-device,name:TAP0,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP"
+  sudo gnmi-cli set "device:virtual-device,name:TAP1,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP"
+  sudo gnmi-cli set "device:virtual-device,name:TAP2,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP"
+  sudo gnmi-cli set "device:virtual-device,name:TAP3,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP"
+  ip addr add 1.1.1.1/24 dev TAP0
+  ip addr add 1.1.1.2/24 dev TAP1
+  ip addr add 1.1.1.3/24 dev TAP3
+  ip addr add 1.1.1.4/24 dev TAP4
+  ip link set TAP0 up
+  ip link set TAP1 up
+  ip link set TAP2 up
+  ip link set TAP3 up
+
+NOTE: we have to 4 TAP ports here for the simple_l3 example. because the port map file (port_info.json) has map of 4 TAP ports mapped to device id 0.
+the port_info.json is required because its a dummy port map file that tells the PTF dataplane.py to do port_add() during initialization.PTF's port_add() call, doesnot really add ports to the DPDK pipeline. currently PORT_INFO path is $TESTDIR/port_info.json. but user can provide customized port_info.json file path as well, with option -f while running the test.
+
+3) assign ip address to other 2 TAP ports
+  ip addr add dev <interface_name> <ip_address>/24
+
+4) run the test using following command
+  goto ptf_tests/p4runtime_test directory under P4OVS repo
+  generate compiler artifacts for the p4 program using p4c compiler
+  ./run_p4_tests.sh -p <p4 program name> -t <path/to/the/test/directory/> --no-veth -s <test case name> --p4info <path/to/p4info/txt/file> --p4bin <path/to/bin/file> --ip <host/server machine IP>
+
+  (example) ./run_p4_tests.sh -p simple_l3 -t ./simple_l3/ --no-veth -s simple_l3 --p4info ./cfgs/simple_l3/p4Info.txt --p4bin ./cfgs/simple_l3/simple_l3.pb.bin
+
+simplel3.py test sets the forwarding pipeline with simple_l3.pb.bin and configures TAP ports with rules and then sends the traffic. 

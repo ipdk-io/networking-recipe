@@ -1,0 +1,135 @@
+{
+  "switch": "br0",
+  "p4file": "pna_tcp_connection_tracking",
+  "port": [
+  {
+  "id": "1",
+  "device": "virtual-device",
+  "name": "net_vhost0",
+  "host" : "host1",
+  "socket-path":"/tmp/vhost-user-0",
+  "queues":"1",
+  "device-type":"VIRTIO_NET",
+  "port-type": "LINK",
+  "single_cmd": "TRUE",
+  "interface": "ens3",
+  "ip_address": "10.10.10.10/24",
+  "mac_local": "00:e8:ca:11:aa:01",
+  "ip_route": "20.20.20.0/24",
+  "ip_add_route": "10.10.10.10"
+  
+  },
+  {
+
+  "id": "2",
+  "device": "virtual-device",
+  "name": "net_vhost1",
+  "host" : "host1",
+  "socket-path":"/tmp/vhost-user-1",
+  "queues":"1",
+  "device-type":"VIRTIO_NET",
+  "port-type": "LINK",
+  "single_cmd": "TRUE",
+  "interface": "ens3",
+  "ip_address": "20.20.20.10/24",
+  "mac_local": "00:e8:ca:11:bb:01",
+  "ip_route": "10.10.10.0/24",
+  "ip_add_route": "20.20.20.10"
+
+  },
+  {
+  "id": "3",
+  "device": "virtual-device",
+  "name": "net_vhost2",
+  "host" : "host1",
+  "socket-path":"/tmp/vhost-user-2",
+  "queues":"1",
+  "device-type":"VIRTIO_NET",
+  "port-type": "LINK",
+  "single_cmd": "TRUE",
+  "interface": "ens3",
+  "ip_address": "30.30.30.10/24",
+  "mac_local": "00:e8:ca:11:cc:01",
+  "ip_route": "40.40.40.0/24",
+  "ip_add_route": "30.30.30.10"
+
+  },
+  {
+
+  "id": "4",
+  "device": "virtual-device",
+  "name": "net_vhost3",
+  "host" : "host1",
+  "socket-path":"/tmp/vhost-user-3",
+  "queues":"1",
+  "device-type":"VIRTIO_NET",
+  "port-type": "LINK",
+  "single_cmd": "TRUE",
+  "interface": "ens3",
+  "ip_address": "40.40.40.10/24",
+  "mac_local": "00:e8:ca:11:dd:01",
+  "ip_route": "30.30.30.0/24",
+  "ip_add_route": "40.40.40.10"
+
+  }
+
+  ],
+
+  "vm": [
+  {
+  "id": "1",
+  "remote_ip": "20.20.20.10",
+  "mac_remote": "00:e8:ca:11:bb:01"
+  },
+  {
+  "id": "2",
+  "remote_ip": "10.10.10.10",
+  "mac_remote": "00:e8:ca:11:aa:01"
+  },
+  {
+  "id": "3",
+  "remote_ip": "40.40.40.10",
+  "mac_remote": "00:e8:ca:11:dd:01"
+  },
+  {
+  "id": "4",
+  "remote_ip": "30.30.30.10",
+  "mac_remote": "00:e8:ca:11:cc:01"
+  }
+  
+  ],
+
+
+  "table": [ 
+  {
+  "description": "table_for_ct_options",
+  "switch": "br0",
+  "name": "MainControlImpl.set_ct_options",
+  "type": "entry",
+  "match_action": [
+  "hdr.tcp.flags=0x02/0x02,priority=53,action=MainControlImpl.tcp_syn_packet",
+  "hdr.tcp.flags=0x01/0x01,priority=54,action=MainControlImpl.tcp_fin_or_rst_packet",
+  "hdr.tcp.flags=0x04/0x04,priority=55,action=MainControlImpl.tcp_fin_or_rst_packet"
+  ]
+  },
+  {
+  "description": "table_for_ct_ip_frwd",
+  "switch": "br0",
+  "name": "MainControlImpl.ip_fwd_table",
+  "type": "entry",
+  "match_action": [
+  "hdr.ipv4.srcAddr=10.10.10.10,hdr.ipv4.dstAddr=20.20.20.10,action=MainControlImpl.send(1)",
+  "hdr.ipv4.srcAddr=20.20.20.10,hdr.ipv4.dstAddr=10.10.10.10,action=MainControlImpl.send(0)",
+  "hdr.ipv4.srcAddr=40.40.40.10,hdr.ipv4.dstAddr=30.30.30.10,action=MainControlImpl.send(2)",
+  "hdr.ipv4.srcAddr=30.30.30.10,hdr.ipv4.dstAddr=40.40.40.10,action=MainControlImpl.send(3)"
+  ]
+  } 
+  ],
+
+  "netperf": {
+  "testname": "TCP_STREAM",
+  "testlen": 10,
+  "cmd_option": "-- -m 1"
+  }
+
+}     

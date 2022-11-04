@@ -1,0 +1,55 @@
+{
+    "switch": "br0",
+    "p4file": "l3_exact_match",
+    "num": "5",
+    "port": [
+        { 
+            "id": "1",
+            "device": "physical-device",
+            "name": "PORT0",
+            "port-type": "LINK",
+            "pipeline-name": "pipe",
+            "packet-dir": "network",
+            "ip_address": "1.1.1.2/24",
+            "interface": "ens3",
+      "mac": "00:e8:ca:11:aa:01",
+            "single_cmd": "TRUE"
+       },        
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "net_vhost0",
+            "host" : "host1",
+            "socket-path":"/tmp/vhost-user-0",
+            "queues":"1",
+            "device-type":"VIRTIO_NET",
+            "port-type": "LINK",
+            "single-cmd": "TRUE",
+            "interface": "ens3",
+            "ip_address": "1.1.1.1/24",
+            "mac_local": "00:e8:ca:11:aa:01",
+            "remote_ip": "1.1.1.2"
+       }
+    ],
+    "table": [ 
+        {
+            "description": "l3_exact_match_with_vhost",
+            "switch": "br0",
+     "name": "ingress.ipv4_host_dst",
+            "type": "entry",
+            "match_action": [
+                    "headers.ipv4.dst_addr=1.1.1.1,action=ingress.send(0)",
+                    "headers.ipv4.dst_addr=1.1.1.2,action=ingress.send(1)"
+            ]
+   }
+     ],
+
+    "vm":[ 
+     {
+         "id": "1",
+         "remote_ip": "1.1.1.1",
+         "mac_remote": "00:e8:ca:11:bb:01"
+    
+       }
+    ]
+   }

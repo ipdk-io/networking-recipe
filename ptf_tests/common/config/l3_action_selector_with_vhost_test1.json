@@ -1,0 +1,100 @@
+{
+    "switch": "br0",
+    "p4file": "l3_action_selector",
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name":"net_vhost0",
+            "device-type":"VIRTIO_NET",
+            "queues":"1",
+            "host": "host1",
+            "socket-path":"/tmp/vhost-user-0",
+            "port-type": "LINK",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE",
+            "ip": "1.1.1.1/24",
+            "mac": "00:00:01:00:00:0a",
+            "single-cmd": "TRUE",
+            "interface": "ens3"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name":"net_vhost1",
+            "device-type":"VIRTIO_NET",
+            "queues":"1",
+            "host": "host2",
+            "socket-path":"/tmp/vhost-user-1",
+            "port-type": "LINK",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE",
+            "ip": "2.2.2.2/24",
+            "mac": "00:00:01:00:00:0b",
+            "single-cmd": "TRUE",
+            "interface": "ens3"
+        }
+    ],
+    "table": [ 
+        {
+            "description": "table_action_selector_test_1",
+            "switch": "br0",
+            "name": "ingress.as_sl3",
+     "member_details": [
+      "action=ingress.send(0),member_id=1",
+      "action=ingress.send(1),member_id=2"
+     ],
+     "group_details": [
+      "group_id=1,reference_members=(1),max_size=128",
+      "group_id=2,reference_members=(2),max_size=128"
+     ]
+ },
+        {
+            "description": "ipv4_table",
+            "switch": "br0",
+            "name": "ingress.ipv4_host",
+            "match_action": [
+                    "headers.ipv4.dst_addr=1.1.1.1,group_id=1",
+                    "headers.ipv4.dst_addr=2.2.2.2,group_id=2",
+                    "headers.ipv4.dst_addr=224.0.0.1,group_id=2",
+                    "headers.ipv4.dst_addr=255.255.255.255,group_id=2"
+     ]
+ } 
+     ],
+    "traffic": 
+     {
+             "type": "tcp",
+             "send_port": [1, 0, 0],
+             "receive_port": [0, 1, 1],
+             "in_pkt_header": {
+       "ip_src": ["2.2.2.2"],
+       "ip_dst": ["1.1.1.1", "224.0.0.1", "255.255.255.255"]
+      },
+            "out_pkt_header": [],
+            "number_pkts": [10],
+            "pcap_file_name": ["log_as1.pcap","log_as2.pcap","log_as3.pcap"]
+            },
+"vm":[
+        {
+            "id": "1",
+            "dst_gw": "1.1.1.1",
+            "remote_ip": "2.2.2.2",
+            "mac_remote": "00:e8:ca:11:bb:01",
+            "name": "VM0"
+        },
+        {
+            "id": "2",
+            "dst_nw": "1.1.1.0/24",
+            "dst_gw": "2.2.2.2",
+            "remote_ip": "1.1.1.1",
+            "mac_remote": "00:e8:ca:11:aa:01",
+            "name": "VM1"
+               
+        }
+]
+               
+ }     

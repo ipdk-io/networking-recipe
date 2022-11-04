@@ -1,0 +1,85 @@
+{
+  "switch": "br0",
+  "p4file": "pna_tcp_connection_tracking",
+  "port": [
+  {
+  "id": "1",
+  "device": "physical-device",
+  "name": "PORT0",
+  "port-type": "LINK",
+  "pipeline-name": "pipe",
+  "packet-dir": "network",
+  "single_cmd": "TRUE"
+  },
+  {
+  "id": "2",
+  "device": "virtual-device",
+  "name": "TAP0",
+  "port-type": "TAP",
+  "pipeline-name": "pipe",
+  "mempool-name": "MEMPOOL0",
+  "mtu": "1500",
+  "single_cmd": "TRUE"
+  },
+  {
+  "id": "3",
+  "device": "virtual-device",
+  "name": "TAP1",
+  "port-type": "TAP",
+  "pipeline-name": "pipe",
+  "mempool-name": "MEMPOOL0",
+  "mtu": "1500",
+  "single_cmd": "TRUE"
+  },
+  {
+  "id": "4",
+  "device": "virtual-device",
+  "name": "TAP2",
+  "port-type": "TAP",
+  "pipeline-name": "pipe",
+  "mempool-name": "MEMPOOL0",
+  "mtu": "1500",
+  "single_cmd": "TRUE"
+  }
+  ],
+  "table": [ 
+  {
+  "description": "table_for_ct_options",
+  "switch": "br0",
+  "name": "MainControlImpl.set_ct_options",
+  "type": "entry",
+  "match_action": [
+  "hdr.tcp.flags=0x02/0x02,priority=53,action=MainControlImpl.tcp_syn_packet",
+  "hdr.tcp.flags=0x01/0x01,priority=54,action=MainControlImpl.tcp_fin_or_rst_packet",
+  "hdr.tcp.flags=0x04/0x04,priority=55,action=MainControlImpl.tcp_fin_or_rst_packet"
+  ]
+  },
+  {
+  "description": "table_for_ct_ip_frwd",
+  "switch": "br0",
+  "name": "MainControlImpl.ip_fwd_table",
+  "type": "entry",
+  "match_action": [
+  "hdr.ipv4.srcAddr=10.10.10.10,hdr.ipv4.dstAddr=20.20.20.10,action=MainControlImpl.send(1)",
+  "hdr.ipv4.srcAddr=20.20.20.10,hdr.ipv4.dstAddr=10.10.10.10,action=MainControlImpl.send(0)",
+  "hdr.ipv4.srcAddr=30.30.30.10,hdr.ipv4.dstAddr=40.40.40.10,action=MainControlImpl.send(3)",
+  "hdr.ipv4.srcAddr=40.40.40.10,hdr.ipv4.dstAddr=30.30.30.10,action=MainControlImpl.send(2)"
+  ]
+  } 
+  ],
+
+  "traffic": 
+  {
+  "type": "tcp",
+  "send_port": [0, 1, 2, 3],
+  "receive_port": [1, 0, 3, 2],
+  "in_pkt_header": {
+  "eth_mac": ["00:00:01:00:00:01","00:00:02:00:00:01","00:00:03:00:00:01","00:00:04:00:00:01"],
+  "ip_address" : ["10.10.10.10","20.20.20.10","30.30.30.10","40.40.40.10"],
+  "tcp_port" : [10001, 20001, 30001, 40001],
+  "flags" : ["SA", "A", "F", "FA", "R"]
+  
+  },
+  "out_pkt_header": []
+  }
+  }     

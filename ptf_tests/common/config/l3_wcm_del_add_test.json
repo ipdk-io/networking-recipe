@@ -1,0 +1,75 @@
+{
+    "switch": "br0",
+    "p4file": "simple_l2l3_wcm",
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "2000",
+            "single-cmd": "TRUE",
+            "ip": "1.1.1.1/24",
+            "mac": "00:00:01:00:00:01"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE",
+            "ip": "2.2.2.2/24",
+            "mac": "00:00:01:00:00:02"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP3",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [ 
+        {
+            "description": "table_for_wcm_action",
+            "switch": "br0",
+            "name": "ingress.ipv4_wcm",
+            "type": "entry",
+            "match_action": [
+                    "hdr.ipv4.dst_addr=192.168.15.0/255.255.255.0,priority=101,action=drop",
+                    "hdr.ipv4.dst_addr=192.168.0.0/255.255.0.0,priority=100,action=ingress.send(1)",
+                    "hdr.ipv4.dst_addr=192.168.16.0/255.255.255.0,priority=200,action=ingress.send(2)"
+            ]
+        }
+     ],
+
+    "traffic": 
+  {
+          "type": "tcp",
+          "send_port": [1,2],
+          "receive_port": [0,1,2],
+          "in_pkt_header": {
+    "ip_dst": ["192.168.15.100", "192.168.2.100", "192.168.16.100"],
+    "ip_src_1": "192.168.1.100"
+   },
+         "out_pkt_header": []
+         }
+ }     

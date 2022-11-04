@@ -1,0 +1,91 @@
+{
+    "switch": "br0",
+    "p4file": "l3_exact_match",
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE",
+            "mac": "00:00:01:00:00:01"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE",
+            "mac": "00:00:01:00:00:02"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP3",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [
+        {
+            "description": "Unsupport tabel, ports, match field and actions",
+            "switch": "br0",
+            "name": "pipe.ipv4_host",
+            "type": "entry",
+            "match_action": [
+                "hdr.ipv4.dst_addr=1.1.1.1,action=send(X)",
+                "headers.ipv4.dst_addr=1.1.1.2,action=ingress.drop(1)",
+                "hdr.ipv4.l2_addr=1.1.1.1,action=send(0)",
+                "hdr.ipv4.dst_addr=1.1.1.1,action=mirror(0)"
+            ]
+        },
+        {
+            "description": "Support table_for_dst_ip",
+            "switch": "br0",
+            "name": "ingress.ipv4_host_dst",
+            "type": "entry",
+            "match_action": [
+                "headers.ipv4.dst_addr=1.1.1.2,action=ingress.send(0)",
+                "headers.ipv4.dst_addr=2.2.2.3,action=ingress.send(1)"
+            ]
+        }
+    ],
+    "traffic": {
+        "type": "tcp",
+        "pkt_num": 50,
+        "send_port": [
+            1,
+            2
+        ],
+        "receive_port": [
+            0,
+            1
+        ],
+        "ip_dst": [
+            "1.1.1.2",
+            "2.2.2.3"
+        ],
+        "ip_src": [
+            "192.168.1.10"
+        ]
+    }
+}

@@ -1,0 +1,56 @@
+{
+    "switch": "br0",
+    "p4file": "l3_exact_match",
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "500",
+            "mac": "00:00:01:00:00:01"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "mac": "00:00:01:00:00:02"
+        }
+    ],
+    "table": [ 
+        {
+            "description": "table_for_dst_ip",
+            "switch": "br0",
+     "name": "ingress.ipv4_host_dst",
+            "type": "entry",
+            "match_action": [
+                    "headers.ipv4.dst_addr=2.2.2.3,action=ingress.send(0)",
+                    "headers.ipv4.dst_addr=1.1.1.2,action=ingress.send(1)"
+            ]
+   }
+  
+     ],
+
+    "traffic": 
+  {
+          "type": "tcp",
+          "send_port": [0, 1],
+          "receive_port": [0, 1],
+          "in_pkt_header": {
+    "pktsize_1": "1400",
+    "pktsize_2": "300",
+    "src_mac": "00:00:00:00:03:15",
+    "dst_mac": "9e:ba:ce:98:d9:e9",
+    "ip_dst_1": "1.1.1.2",
+    "ip_dst_2": "2.2.2.3",
+    "ip_src": "192.168.1.10"
+   },
+         "out_pkt_header": []
+         }
+ }     

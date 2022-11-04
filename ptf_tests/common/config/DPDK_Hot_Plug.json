@@ -1,0 +1,33 @@
+{
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "net_vhost0",
+            "host" : "host1",
+            "socket-path":"/tmp/vhost-user-0",
+            "queues":"1",
+            "device-type":"VIRTIO_NET",
+            "port-type": "LINK",
+            "single-cmd": "TRUE",
+            "ip": "1.1.1.1/24"
+        }
+    ],
+    "vm":[
+        {
+            "vm_name" : "Vm1",
+            "port" : "net_vhost0",
+            "hotplug" : {
+                "qemu-socket-ip":"127.0.0.1",
+                "qemu-socket-port":"6650",
+                "qemu-vm-mac":"00:e8:ca:11:aa:01",
+                "qemu-vm-netdev-id":"netdev0",
+                "qemu-vm-chardev-id":"char1",
+                "native-socket-path":"/tmp/vhost-user-0",
+                "qemu-vm-device-id":"dev0",
+                "serial-telnet-port" : "6550"
+    
+               }
+        }
+    ]
+}

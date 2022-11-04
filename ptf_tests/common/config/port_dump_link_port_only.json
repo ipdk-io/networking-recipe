@@ -1,0 +1,23 @@
+{
+    "switch": "br0",
+    "p4file": "l3_exact_match",
+    "port": [
+        {
+            "id": "1",
+            "device": "physical-device",
+            "name": "PORT0",
+            "port-type": "LINK",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [
+        {
+            "description": "",
+            "switch": "",
+            "name": "",
+            "type": "",
+            "match_action": []
+        }
+    ]
+}

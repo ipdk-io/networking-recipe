@@ -1,0 +1,25 @@
+{
+    "switch": "br0",
+    "p4file": "l3_exact_match",
+    "port": [
+        {
+            "id": "1",
+            "device": "physical-device",
+            "name":"PORT0",
+            "port-type": "LINK",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "control-port": "TAP0",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [ 
+        {
+            "description": "config_control_port_with_link",
+            "switch": "br0",
+            "name": "ingress.ipv4_host_dst",
+            "match_action": ["headers.ipv4.dst_addr=1.1.1.2,action=ingress.send(1)"]
+       } 
+    ]
+ }     

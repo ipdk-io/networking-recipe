@@ -1,0 +1,185 @@
+{
+    "switch": "br0",
+    "p4file": "l3_exact_match",
+    "port": [
+        {
+            "id": "1",
+            "device": "physical-device",
+            "name":"PORT0",
+            "port-type": "LINK",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type": "TAP",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "5",
+            "device": "virtual-device",
+            "name": "TAP3",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "6",
+            "device": "virtual-device",
+            "name": "TAP4",
+            "port-type": "TAP",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "7",
+            "device": "virtual-device",
+            "name": "TAP5",
+            "port-type": "TAP",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "8",
+            "device": "virtual-device",
+            "name": "TAP6",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "9",
+            "device": "virtual-device",
+            "name": "TAP7",
+            "port-type": "TAP",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "10",
+            "device": "virtual-device",
+            "name":"net_vhost0",
+            "device-type":"VIRTIO_NET",
+            "queues":"1",
+            "host": "host1",
+            "socket-path":"/tmp/vhost-user-0",
+            "port-type": "LINK",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "11",
+            "device": "virtual-device",
+            "name":"net_vhost1",
+            "device-type":"VIRTIO_NET",
+            "queues":"1",
+            "host": "host2",
+            "socket-path":"/tmp/vhost-user-1",
+            "port-type": "LINK",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "12",
+            "device": "virtual-device",
+            "name":"net_vhost2",
+            "device-type":"VIRTIO_NET",
+            "queues":"1",
+            "host": "host3",
+            "socket-path":"/tmp/vhost-user-2",
+            "port-type": "LINK",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "13",
+            "device": "virtual-device",
+            "name":"net_vhost3",
+            "device-type":"VIRTIO_NET",
+            "queues":"1",
+            "host": "host4",
+            "socket-path":"/tmp/vhost-user-3",
+            "port-type": "LINK",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "14",
+            "device": "virtual-device",
+            "name":"net_vhost4",
+            "device-type":"VIRTIO_NET",
+            "queues":"1",
+            "host": "host5",
+            "socket-path":"/tmp/vhost-user-4",
+            "port-type": "LINK",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "15",
+            "device": "virtual-device",
+            "name":"net_vhost5",
+            "device-type":"VIRTIO_NET",
+            "queues":"1",
+            "host": "host6",
+            "socket-path":"/tmp/vhost-user-5",
+            "port-type": "LINK",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "16",
+            "device": "virtual-device",
+            "name":"net_vhost6",
+            "device-type":"VIRTIO_NET",
+            "queues":"1",
+            "host": "host7",
+            "socket-path":"/tmp/vhost-user-6",
+            "port-type": "LINK",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [ 
+        {
+            "description": "",
+            "switch": "",
+            "name": "",
+            "type": "",
+            "match_action": []
+       } 
+    ]
+ }     

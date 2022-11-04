@@ -1,0 +1,91 @@
+{
+    "switch": "br0",
+    "p4file": "l3_exact_match",
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "2000",
+            "single-cmd": "TRUE",
+            "ip": "1.1.1.1/24",
+            "mac": "00:00:01:00:00:01"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE",
+            "ip": "2.2.2.2/24",
+            "mac": "00:00:01:00:00:02"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP3",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [ 
+        {
+            "description": "table_for_dst_ip",
+            "switch": "br0",
+     "name": "ingress.ipv4_host_dst",
+            "type": "entry",
+            "match_action": [
+                    "headers.ipv4.dst_addr=1.1.1.1,action=ingress.send(0)",
+                    "headers.ipv4.dst_addr=1.1.1.2,action=ingress.drop(1)"
+            ]
+   },
+        {
+            "description": "table_for_src_ip",
+            "switch": "br0",
+            "name": "ingress.ipv4_host_src",
+            "type": "entry",
+            "match_action": [
+                    "headers.ipv4.src_addr=1.1.1.1,action=ingress.send(0)",
+                    "headers.ipv4.src_addr=1.1.1.2,action=ingress.drop(1)"
+            ]
+ } 
+     ],
+
+    "traffic": 
+  {
+          "type": "tcp",
+          "send_port": [1, 0],
+          "receive_port": [0, 1],
+          "in_pkt_header": {
+    "ip_dst_1": "1.1.1.1",
+    "ip_dst_2": "1.1.1.2",
+    "ip_src_1": "1.1.1.1",
+                  "ip_src_2": "1.1.1.2"
+   },
+         "out_pkt_header": [],
+         "number_pkts": [500,3],
+         "payload_size": [1000],
+         "pkts_counter": ["in-unicast-pkts","out-unicast-pkts"],
+         "octets_counter": ["in-octets", "out-octets"],
+         "count_buffer": [10]
+         }
+ }     

@@ -1,0 +1,181 @@
+{
+  "switch": "br0",
+  "p4file": "linux_networking",
+  "bridge": "br-int",
+  "port": [
+    {
+      "id": "1",
+      "device": "virtual-device",
+      "name": "net_vhost0",
+      "host": "host0",
+      "device-type": "VIRTIO_NET",
+      "queues": "1",
+      "socket-path": "/tmp/vhost-user-0",
+      "port-type": "LINK",
+      "single-cmd": "TRUE",
+      "interface": "ens3",
+      "ip_address": "90.0.0.1/24",
+      "mac_local": "00:e8:ca:11:aa:01",
+      "vlan": "1"
+    },
+    {
+      "id": "2",
+      "device": "virtual-device",
+      "name": "net_vhost1",
+      "host": "host1",
+      "device-type": "VIRTIO_NET",
+      "queues": "1",
+      "socket-path": "/tmp/vhost-user-1",
+      "port-type": "LINK",
+      "single-cmd": "TRUE",
+      "interface": "ens3",
+      "ip_address": "90.0.0.2/24",
+      "mac_local": "00:e8:ca:11:bb:01",
+      "vlan": "2"
+    },
+    {
+      "id": "3",
+      "device": "virtual-device",
+      "name": "net_vhost2",
+      "host": "host2",
+      "device-type": "VIRTIO_NET",
+      "queues": "1",
+      "socket-path": "/tmp/vhost-user-2",
+      "port-type": "LINK",
+      "single-cmd": "TRUE",
+      "interface": "ens3",
+      "ip_address": "90.0.0.3/24",
+      "mac_local": "00:e8:ca:11:aa:03",
+      "vlan": "3"
+    },
+    {
+      "id": "4",
+      "device": "virtual-device",
+      "name": "net_vhost3",
+      "host": "host3",
+      "device-type": "VIRTIO_NET",
+      "queues": "1",
+      "socket-path": "/tmp/vhost-user-3",
+      "port-type": "LINK",
+      "single-cmd": "TRUE",
+      "interface": "ens3",
+      "ip_address": "90.0.0.4/24",
+      "mac_local": "00:e8:ca:11:bb:04",
+      "vlan": "4"
+    },
+    {
+      "id": "5",
+      "device": "virtual-device",
+      "name": "TAP0",
+      "port-type": "TAP",
+      "pipeline-name": "pipe",
+      "mempool-name": "MEMPOOL0",
+      "mtu": "1500",
+      "single-cmd": "TRUE",
+      "mac": "00:00:01:00:00:01"
+    },
+    {
+      "id": "6",
+      "device": "virtual-device",
+      "name": "TAP1",
+      "port-type": "TAP",
+      "pipeline-name": "pipe",
+      "mempool-name": "MEMPOOL0",
+      "mtu": "1500",
+      "single-cmd": "TRUE",
+      "mac": "00:00:01:00:00:02"
+    },
+    {
+      "id": "7",
+      "device": "virtual-device",
+      "name": "TAP2",
+      "port-type": "TAP",
+      "pipeline-name": "pipe",
+      "mempool-name": "MEMPOOL0",
+      "mtu": "2000",
+      "single-cmd": "TRUE",
+      "mac": "00:00:01:00:00:03"
+    },
+    {
+      "id": "8",
+      "device": "virtual-device",
+      "name": "TAP3",
+      "port-type": "TAP",
+      "pipeline-name": "pipe",
+      "mempool-name": "MEMPOOL0",
+      "mtu": "1500",
+      "single-cmd": "TRUE",
+      "mac": "00:00:01:00:00:04"
+    }
+  ],
+  "table": [
+    {
+      "description": "lnt_tx_control_pkts_table",
+      "switch": "br0",
+      "name": "linux_networking_control.handle_tx_control_pkts_table",
+      "type": "entry",
+      "match_action": [
+        "istd.input_port=0,action=linux_networking_control.push_vlan_fwd(4,1)",
+        "istd.input_port=1,action=linux_networking_control.push_vlan_fwd(4,2)",
+        "istd.input_port=2,action=linux_networking_control.push_vlan_fwd(4,3)",
+        "istd.input_port=3,action=linux_networking_control.push_vlan_fwd(4,4)"
+      ]
+    },
+    {
+      "description": "lnt_tx_control_vlan_pkts_table",
+      "switch": "br0",
+      "name": "linux_networking_control.handle_tx_control_vlan_pkts_table",
+      "type": "entry",
+      "match_action": [
+        "istd.input_port=4,local_metadata.vlan_id=1,action=linux_networking_control.pop_vlan_fwd(0)",
+        "istd.input_port=4,local_metadata.vlan_id=2,action=linux_networking_control.pop_vlan_fwd(1)",
+        "istd.input_port=4,local_metadata.vlan_id=3,action=linux_networking_control.pop_vlan_fwd(2)",
+        "istd.input_port=4,local_metadata.vlan_id=4,action=linux_networking_control.pop_vlan_fwd(3)"
+      ]
+    }
+  ],
+  "vm": [
+    {
+      "id": "1",
+      "remote_ip": [
+        "90.0.0.2",
+        "90.0.0.3",
+        "90.0.0.4"
+      ],
+      "mac_remote": "00:e8:ca:11:bb:01"
+    },
+    {
+      "id": "2",
+      "dst_nw": "1.1.1.0/24",
+      "dst_gw": "2.2.2.2",
+      "remote_ip": [
+        "90.0.0.1",
+        "90.0.0.3",
+        "90.0.0.4"
+      ],
+      "mac_remote": "00:e8:ca:11:aa:01"
+    },
+    {
+      "id": "3",
+      "dst_nw": "2.2.2.0/24",
+      "dst_gw": "1.1.1.1",
+      "remote_ip": [
+        "90.0.0.1",
+        "90.0.0.2",
+        "90.0.0.4"
+      ],
+      "mac_remote": "00:e8:ca:11:bb:03"
+    },
+    {
+      "id": "4",
+      "dst_nw": "1.1.1.0/24",
+      "dst_gw": "2.2.2.2",
+      "remote_ip": [
+        "90.0.0.1",
+        "90.0.0.2",
+        "90.0.0.3"
+      ],
+      "mac_remote": "00:e8:ca:11:aa:04"
+    }
+  ]
+}

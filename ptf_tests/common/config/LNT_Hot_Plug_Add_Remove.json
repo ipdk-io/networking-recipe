@@ -1,0 +1,107 @@
+{
+    "switch": "br0",
+    "p4file": "linux_networking",
+    "bridge": "br-int",
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "net_vhost0",
+            "host" : "host1",
+            "socket-path":"/tmp/vhost-user-0",
+            "queues":"1",
+            "device-type":"VIRTIO_NET",
+            "port-type": "LINK",
+            "single-cmd": "TRUE",
+            "ip": "1.1.1.1/24",
+            "vlan": "1"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "net_vhost1",
+            "host" : "host1",
+            "socket-path":"/tmp/vhost-user-1",
+            "queues":"1",
+            "device-type":"VIRTIO_NET",
+            "port-type": "LINK",
+            "single-cmd": "TRUE",
+            "ip": "1.1.1.2/24",
+            "vlan": "2"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "2000",
+            "single_cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single_cmd": "TRUE"
+        }
+
+    ],
+    "vm":[
+        {
+            "vm_name" : "Vm1",
+            "port" : "net_vhost0",
+            "hotplug" : {
+                "qemu-socket-ip":"127.0.0.1",
+                "qemu-socket-port":"6650",
+                "qemu-vm-mac":"00:e8:ca:11:aa:01",
+                "qemu-vm-netdev-id":"netdev0",
+                "qemu-vm-chardev-id":"char1",
+                "native-socket-path":"/tmp/vhost-user-0",
+                "qemu-vm-device-id":"dev0",
+                "serial-telnet-port" : "6550"
+            }
+        },
+        {
+                    "vm_name" : "Vm2",
+                    "port" : "net_vhost1",
+                    "hotplug" : {
+                            "qemu-socket-ip":"127.0.0.1",
+                            "qemu-socket-port":"6651",
+                            "qemu-vm-mac":"00:e8:ca:11:aa:02",
+                            "qemu-vm-netdev-id":"netdev1",
+                            "qemu-vm-chardev-id":"char2",
+                            "native-socket-path":"/tmp/vhost-user-1",
+                            "qemu-vm-device-id":"dev1",
+                            "serial-telnet-port" : "6551"
+            }
+            }
+   ],
+   "table": [
+          {
+              "description": "table_to_push_vlan",
+              "switch": "br0",
+              "name": "linux_networking_control.handle_tx_control_pkts_table",
+              "type": "entry",
+              "match_action": [
+                    "istd.input_port=0,action=linux_networking_control.push_vlan_fwd(2,1)",
+                    "istd.input_port=1,action=linux_networking_control.push_vlan_fwd(2,2)"
+            ]
+          },
+          {
+              "description": "table_to_pop_vlan",
+              "switch": "br0",
+              "name": "linux_networking_control.handle_tx_control_vlan_pkts_table",
+              "type": "entry",
+              "match_action": [
+                    "istd.input_port=2,local_metadata.vlan_id=1,action=linux_networking_control.pop_vlan_fwd(0)",
+                    "istd.input_port=2,local_metadata.vlan_id=2,action=linux_networking_control.pop_vlan_fwd(1)"
+            ]
+          }
+     ]
+
+ }

@@ -1,0 +1,73 @@
+{
+  "switch": "br0",
+  "p4file": "l3em_indirect_counter_psa",
+  "p4arctype":"psa",
+  "port": [
+    {
+      "id": "1",
+      "device": "virtual-device",
+      "name": "net_vhost0",
+      "host": "host1",
+      "socket-path": "/tmp/vhost-user-0",
+      "queues": "1",
+      "device-type": "VIRTIO_NET",
+      "port-type": "LINK",
+      "single-cmd": "TRUE",
+      "interface": "ens3",
+      "ip_address": "1.1.1.1/24",
+      "mac_local": "00:e8:ca:11:aa:01"
+    },
+    {
+      "id": "2",
+      "device": "virtual-device",
+      "name": "net_vhost1",
+      "host": "host2",
+      "socket-path": "/tmp/vhost-user-1",
+      "queues": "1",
+      "device-type": "VIRTIO_NET",
+      "port-type": "LINK",
+      "single-cmd": "TRUE",
+      "interface": "ens3",
+      "ip_address": "2.2.2.2/24",
+      "mac_local": "00:e8:ca:11:bb:01"
+    }
+  ],
+  "table": [
+    {
+      "description": "ingress.ipv4_host",
+      "switch": "br0",
+      "name": "ingress.ipv4_host",
+      "type": "entry",
+      "match_action": [
+        "hdr.ipv4.dst_addr=1.1.1.1,action=ingress.send(0)",
+        "hdr.ipv4.dst_addr=2.2.2.2,action=ingress.send(1)"
+      ]
+    }
+  ],
+  "vm": [
+    {
+      "id": "1",
+      "dst_nw": "2.2.2.0/24",
+      "dst_gw": "1.1.1.1",
+      "remote_ip": "2.2.2.2",
+      "mac_remote": "00:e8:ca:11:bb:01"
+    },
+    {
+      "id": "2",
+      "dst_nw": "1.1.1.0/24",
+      "dst_gw": "2.2.2.2",
+      "remote_ip": "1.1.1.1",
+      "mac_remote": "00:e8:ca:11:aa:01"
+    }
+  ],
+  "counter": {
+    "index": [
+      1
+    ],
+    "num_ping": [
+      4,
+      1
+    ],
+    "default_byte": 64
+  }
+}

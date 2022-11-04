@@ -1,0 +1,51 @@
+{
+    "switch": "br0",
+    "p4file": "l3_exact_match",
+    "dump_bridge":"br1",
+    "p4_device_id": 1,
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "net_vhost0",
+            "host" : "host1",
+            "socket-path":"/tmp/vhost-user-0",
+            "queues":"1",
+            "device-type":"VIRTIO_NET",
+            "control-port":"TAP0",
+            "port-type": "LINK",
+            "single-cmd": "TRUE",
+            "interface": "ens3",
+            "ip_address": "1.1.1.1/24",
+            "mac_local": "00:e8:ca:11:aa:01"
+        }
+    ],
+    "table": [ 
+        {
+            "description": "control_port_counter_with_vhost",
+            "switch": "br0",
+            "name": "ingress.ipv4_host_dst",
+            "type": "entry",
+            "match_action": [
+                    "headers.ipv4.dst_addr=1.1.1.2,action=ingress.send(1)",
+                    "headers.ipv4.dst_addr=1.1.1.10,action=ingress.send(0)"
+            ]
+       }
+    ],
+    "vm":[ 
+    {
+        "dst_nw": "2.2.2.0/24",
+        "dst_gw": "1.1.1.1",
+        "remote_ip": "1.1.1.2",
+        "mac_remote": "00:e8:ca:11:bb:01"
+    }
+    ],
+    "traffic":
+    {
+        "ip_dst":["1.1.1.2","1.1.1.10"],
+        "number_pkts":[5],
+        "count_buffer": [3],
+        "packet_size":[84,42],
+        "counter":["pkts","bytes"]
+    }
+}

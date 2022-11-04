@@ -1,0 +1,166 @@
+{
+    "max_port_count": "16",
+    "socket_path_dir": "/tmp/",
+    "port": [
+        {
+            "id": "0",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host1",
+            "name": "net_vhost0",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-0",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host2",
+            "name": "net_vhost1",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-1",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host3",
+            "name": "net_vhost2",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-2",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host4",
+            "name": "net_vhost3",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-3",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host5",
+            "name": "net_vhost4",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-4",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "5",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host6",
+            "name": "net_vhost5",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-5",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "6",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host7",
+            "name": "net_vhost6",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-6",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "7",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host8",
+            "name": "net_vhost7",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-7",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "8",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host9",
+            "name": "net_vhost8",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-8",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "9",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host10",
+            "name": "net_vhost9",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-9",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "10",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host11",
+            "name": "net_vhost10",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-10",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "11",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host12",
+            "name": "net_vhost11",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-11",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "12",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host13",
+            "name": "net_vhost12",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-12",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "13",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host12",
+            "name": "net_vhost13",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-13",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "14",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host15",
+            "name": "net_vhost14",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-14",
+            "port-type" : "LINK"
+        },
+        {
+            "id": "15",
+            "device": "virtual-device",
+            "device-type": "VIRTIO_NET",
+            "host": "host16",
+            "name": "net_vhost15",
+            "queues": "1",
+            "socket-path": "/tmp/vhost-user-15",
+            "port-type" : "LINK"
+        }
+   ]
+}
