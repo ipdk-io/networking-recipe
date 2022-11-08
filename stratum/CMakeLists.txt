@@ -26,12 +26,6 @@ set(PROTO_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
 file(MAKE_DIRECTORY ${PROTO_OUT_DIR})
 
-set(STRATUM_INCLUDES
-    ${STRATUM_SOURCE_DIR}
-    # Protobuf C++ header files.
-    ${PROTO_OUT_DIR}
-)
-
 #####################
 # Compile Protobufs #
 #####################

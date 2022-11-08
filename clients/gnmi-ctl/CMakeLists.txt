@@ -17,7 +17,7 @@ add_executable(gnmi-ctl
 
 target_link_libraries(gnmi-ctl
     PUBLIC
-        stratum_hal_lib_tdi
+        stratum_tdi
         gnmi_proto grpc_proto
         grpc protobuf gflags grpc++
         pthread re2
