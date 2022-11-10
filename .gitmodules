@@ -11,3 +11,6 @@
 [submodule "stratum/googleapis"]
 	path = stratum/googleapis
 	url = https://github.com/googleapis/googleapis.git
+[submodule "ptf-tests"]
+	path = ptf-tests
+	url = https://github.com/ipdk-io/ptf-tests.git
