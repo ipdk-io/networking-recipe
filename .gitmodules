@@ -14,3 +14,10 @@
 [submodule "ptf-tests"]
 	path = ptf-tests
 	url = https://github.com/ipdk-io/ptf-tests.git
+[submodule "krnlmon/krnlmon"]
+	path = krnlmon/krnlmon
+	url = https://github.com/ipdk-io/krnlmon.git
+	branch = main
+[submodule "krnlmon/SAI"]
+	path = krnlmon/SAI
+	url = https://github.com/opencomputeproject/SAI.git
