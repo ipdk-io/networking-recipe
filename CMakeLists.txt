@@ -102,4 +102,9 @@ if(WITH_STRATUM)
     add_subdirectory(stratum)
     add_subdirectory(clients)
 endif()
+
+if(DPDK_TARGET)
+add_subdirectory(krnlmon)
+endif()
+
 add_subdirectory(infrap4d)
