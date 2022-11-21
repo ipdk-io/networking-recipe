@@ -22,8 +22,8 @@
 1. [Overview](#overview)
 2. [Topology](#topology)
 3. [Create P4 artifacts](#create_p4_artifacts)
-3. [Limitations](#limitations)
-4. [Steps to create topology](#steps)
+4. [Limitations](#limitations)
+5. [Steps to create topology](#steps)
 
 ## Overview <a name="overview"></a>
 This README describes a step by step procedure to run Linux networking scenario
@@ -37,9 +37,9 @@ This README describes a step by step procedure to run Linux networking scenario
 * Notes about topology:
   * VHOST ports, TAP ports, Physical LINK ports are created by GNMI CLI and LINK port is binded to the DPDK target
   * VLAN 1, VLAN 2, .... VLAN N created using Linux commands and are on top a TAP port. These VLAN ports should be equal to number of VM's that are spawned.
-  * br-int, VxLAN0 ports are created using ovs-vsctl command provided by P4-OVS and all the VLAN ports are attached to br-int using ovs-vsctl command.
+  * br-int, VxLAN0 ports are created using ovs-vsctl command provided by the networking recipe and all the VLAN ports are attached to br-int using ovs-vsctl command.
 
-System under test will have above topology running P4-OVS. Link Partner can have either P4-OVS or legacy OVS or kernel VxLAN. Note the limitations below before setting up the topology.
+System under test will have above topology running the networking recipe. Link Partner can have either the networking recipe or legacy OVS or kernel VxLAN. Note the limitations below before setting up the topology.
 
 ## Create P4 artifacts <a name="create_p4_artifacts"></a>
 - Install p4c compiler from p4lang/p4c(<https://github.com/p4lang/p4c>) repository and follow the readme for procedure
@@ -47,7 +47,7 @@ System under test will have above topology running P4-OVS. Link Partner can have
   eg. export OUTPUT_DIR=/root/ovs/p4proto/p4src/linux_networking/
 - Generate the artifacts using p4c-dpdk installed in previous step using command below:
 ```
-  p4c-dpdk --arch pna --target dpdk --p4runtime-files $OUTPUT_DIR/p4Info.txt --bf-rt-schema $OUTPUT_DIR/bf-rt.json --context $OUTPUT_DIR/context.json -o $OUTPUT_DIR/linux_networking.spec linux_networking.p4
+  p4c-dpdk --arch pna --target dpdk --p4runtime-files $OUTPUT_DIR/p4Info.txt --bf-rt-schema $OUTPUT_DIR/bf-rt.json --context $OUTPUT_DIR/context.json -o $OUTPUT_DIR/linux_networking.spec $OUTPUT_DIR/linux_networking.p4
 ```
 - Modify sample lnw.conf file available in ovs/p4proto/p4src/linux_networking/ to specify absolute path of the artifacts (json and spec files)
 - Generate binary execuatble using tdi-pipeline builder command below:
@@ -56,9 +56,8 @@ tdi_pipeline_builder --p4c_conf_file=lnw.conf --bf_pipeline_config_binary_file=l
 ```
 
 ## Limitations <a name="limitations"></a>
-Current SAI enablement for P4-OVS has following limitations:
+Current SAI enablement for the networking recipe has following limitations:
 - Always all VHOST user ports need to be configured first and only then TAP ports/physical ports
-- VM's Spawned on top of VHOST user ports should be UP and running, interfaces with in VM should be brought up before loading the "forwarding pipeline" (limitation by target)
 - TAP port created for the corresponding link port should be created using "gnmi-ctl control port creation got the link port"
 eg: gnmi-ctl set "device:physical-device,name:PORT0,pipeline-name:pipe,mempool-name:MEMPOOL0,control-port:TAP1,mtu:1500,pci-bdf:0000:18:00.0,packet-dir=network,port-type:link"
 - All VLAN interfaces created on top of TAP ports, should always be in lowercase format "vlan+vlan_id"
@@ -69,6 +68,7 @@ Ex: vlan1, vlan2, vlan3 …. vlan4094
 - We are not supporting any ofproto rules which would not allow for FDB learning on OVS.
 
 ## Steps to create the topology <a name="steps"></a>
+ *Note*: gnmi-ctl and p4rt-ctl utility used in below steps can be found under $IPDK_RECIPE/install/bin and should be run with `sudo`
 #### 1. Bind the physical port (Port 0 and Port 1) to user-space IO driver:
 * Load uio and vfio-pci driver
 ```
@@ -82,10 +82,9 @@ Ex: vlan1, vlan2, vlan3 …. vlan4094
 ```
  *Note*: pci_bdf can be obtained using lspci command. Check if device is binded correctly using ./dpdk-devbind.py -s (Refer to the section "Network devices using DPDK-compatible driver")
 
-#### 2. Export the environment variables and start running the OVS
+#### 2. Export the environment variables LD_LIBRARY_PATH, IPDK_RECIPE and SDE_INSTALL and start running the infrap4d
 ```
-    source p4ovs_env_setup.sh $SDE_INSTALL <$DEPS_INSTALL>
-    ./run_ovs.sh <$DEPS_INSTALL>
+    sudo $IPDK_RECIPE/install/bin/infrap4d
 ```
 #### 3. Create two VHOST user ports:
 ```
@@ -127,39 +126,51 @@ Note:
     ip link set dev TAP3 up
   ```
 
-#### 8. Set the pipeline and add br-int to OVS
+#### 8. Set the pipeline
 ```
     p4rt-ctl set-pipe br0 lnw.pb.bin p4Info.txt
-    ovs-vsctl add-br br-int
-    ip link set dev br-int up
+```
+#### 9. Start and run ovs-vswitchd server and ovsdb-server
+```
+mkdir -p $IPDK_RECIPE/install/var/run/openvswitch
+rm -rf $IPDK_RECIPE/install/etc/openvswitch/conf.db
+
+sudo $IPDK_RECIPE/install/bin/ovsdb-tool create $IPDK_RECIPE/install/etc/openvswitch/conf.db $IPDK_RECIPE/install/share/openvswitch/vswitch.ovsschema
+
+export RUN_OVS=$IPDK_RECIPE/install
+
+sudo $IPDK_RECIPE/install/sbin/ovsdb-server \
+	        --remote=punix:$RUN_OVS/var/run/openvswitch/db.sock \
+	        --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
+                --pidfile --detach
+sudo $IPDK_RECIPE/install/sbin/ovs-vswitchd --detach --no-chdir unix:$RUN_OVS/var/run/openvswitch/db.sock --mlockall --log-file=/tmp/ovs-vswitchd.log
+
+sudo $IPDK_RECIPE/install/bin/ovs-vsctl --db unix:$RUN_OVS/var/run/openvswitch/db.sock show
+
+sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-br br-int
+ifconfig br-int up
 ```
 
 #### 9. Configure VXLAN port
-  - 9.1 Option1: When one of the TAP port is used for tunnel termination.
+   Using one of the TAP ports for tunnel termination.
 ```
-    ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=40.1.1.2 options:dst_port=4789
+    sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=40.1.1.2 options:dst_port=4789
+```
 Note:
     - VXLAN destination port should always be standard port. i.e., 4789. (limitation by p4 parser)
-```
-  - 9.2 Option2: When a dummy port is used for tunnel termination. Here remote IP is on a different network, route to reach peer need to be statically configure (refer section 13.1) or learn via FRR (refer section 13.2).
-```
-    ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=30.1.1.1 options:dst_port=4789
-Note:
-    - VXLAN destination port should always be standard port. i.e., 4789. (limitation by p4 parser)
-```
 
 #### 10. Configure VLAN ports on TAP0 and add them to br-int
 ```
     ip link add link TAP0 name vlan1 type vlan id 1
     ip link add link TAP0 name vlan2 type vlan id 2
-    ovs-vsctl add-port br-int vlan1
-    ovs-vsctl add-port br-int vlan2
+    sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vlan1
+    sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vlan2
     ip link set dev vlan1 up
     ip link set dev vlan2 up
-
+```
 Note:
      - All VLAN interfaces should be created on top of TAP ports, and should always be in lowercase format "vlan+vlan_id. (Eg: vlan1, vlan2, vlan3 …. vlan4094)
-```
+
 
 #### 11. Configure rules to push and pop VLAN from vhost 0 and 1 ports to TAP0 port (vhost-user and vlan port mapping)
 ```
@@ -203,7 +214,6 @@ Note: Port number used in p4rt-ctl commands are target datapath indexes(unique i
   ```
     p4rt-ctl add-entry br0 linux_networking_control.handle_rx_control_pkts_table "istd.input_port=2,action=linux_networking_control.set_control_dest(3)"
   ```
-
   - **Rule for: Any rx control packet from phy port1(TDP 4) should be sent it to it corresponding control port TAP2(TDP 5)**
   ```
     p4rt-ctl add-entry br0 linux_networking_control.handle_rx_control_pkts_table "istd.input_port=4,action=linux_networking_control.set_control_dest(5)"
@@ -221,4 +231,3 @@ Note: Port number used in p4rt-ctl commands are target datapath indexes(unique i
   - Ping between VM's on the same host
   - Underlay ping
   - Overlay ping: Ping between VM's on different hosts
-
