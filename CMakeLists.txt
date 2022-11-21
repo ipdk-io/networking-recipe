@@ -116,4 +116,6 @@ if(WITH_STRATUM)
 endif()
 
 add_subdirectory(infrap4d)
-add_subdirectory(ovs-p4rt)
+if(DPDK_TARGET)
+    add_subdirectory(ovs-p4rt)
+endif()
