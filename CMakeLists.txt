@@ -25,6 +25,10 @@ set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
 
 set(SDE_INSTALL_DIR "/opt/sde" CACHE PATH "SDE install directory")
 
+set(PROTO_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
+    "Path to generated Protobuf files")
+file(MAKE_DIRECTORY ${PROTO_OUT_DIR})
+
 #################
 # Build options #
 #################
@@ -112,3 +116,4 @@ if(WITH_STRATUM)
 endif()
 
 add_subdirectory(infrap4d)
+add_subdirectory(ovs-p4rt)
