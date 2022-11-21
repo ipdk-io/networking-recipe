@@ -41,10 +41,8 @@ Added the following commands:
 - add-action-profile-group
 - delete-action-profile-group
 - get-action-profile-member
-- get-counter
-- reset-counter
 
-The utility should no be on par with P4-OVS.
+The utility should now be on par with P4-OVS except counter support.
 
 ### Kernel Monitor
 
