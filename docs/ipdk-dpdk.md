@@ -54,6 +54,7 @@ sudo mkdir -p /var/log/stratum/
 sudo mkdir -p /usr/share/stratum/dpdk
 sudo cp ./install/share/stratum/dpdk/dpdk_port_config.pb.txt /usr/share/stratum/dpdk/
 sudo cp ./install/share/stratum/dpdk/ dpdk_skip_p4.conf /usr/share/stratum/dpdk/
+sudo cp $SDE_INSTALL/share/target_sys/zlog-cfg /usr/share/target_sys/
 ```
 
 #### Set hugepages required for DPDK
