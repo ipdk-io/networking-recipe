@@ -12,6 +12,8 @@ include(ExternalProject)
 set(OVS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ovs" CACHE PATH
     "OVS source directory")
 
+option(P4OVS "Build OVS with P4Runtime support" OFF)
+
 if(P4OVS)
     set(P4OVS_OPTION --with-p4ovs)
 endif()

@@ -103,7 +103,8 @@ endif()
 ##################
 
 if(DPDK_TARGET)
-    set(WITH_KRNLMON OFF)
+    set(WITH_KRNLMON ON)
+    set(WITH_OVSP4RT ON)
 endif()
 
 if(WITH_KRNLMON)
@@ -116,6 +117,6 @@ if(WITH_STRATUM)
 endif()
 
 add_subdirectory(infrap4d)
-if(WITH_KRNLMON)
+if(WITH_OVSP4RT)
     add_subdirectory(ovs-p4rt)
 endif()

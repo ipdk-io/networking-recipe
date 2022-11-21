@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // TODO: ovs-p4rt logging
 #include "ovs_p4rt_session.h"
-#include <string>
-#include <grpcpp/grpcpp.h>
 #include <arpa/inet.h>
 #include "absl/flags/flag.h"
-#include "p4/v1/p4runtime.grpc.pb.h"
 #include "openvswitch/ovs-p4rt.h"
 #include "p4_name_mapping.h"
 
