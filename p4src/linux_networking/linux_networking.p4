@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef LINUX_NETWORKING_P4_
 #define LINUX_NETWORKING_P4_
 
@@ -67,8 +67,8 @@ control linux_networking_control(inout headers_t hdr,
         inout pna_main_output_metadata_t ostd)
 {
     Hash<bit<16>>(PNA_HashAlgorithm_t.TARGET_DEFAULT) src_port_hash_fn;
-    // ECMP
-    ActionSelector(PNA_HashAlgorithm_t.TARGET_DEFAULT, 128, 10) as_ecmp;
+    Hash<bit<16>>(PNA_HashAlgorithm_t.TARGET_DEFAULT) ecmp_hash_fn;
+    bool ecmp_group_id_valid = false;
     InternetChecksum() ck;
 
     ActionRef_t vendormeta_mod_action_ref = 0;
@@ -438,24 +438,39 @@ control linux_networking_control(inout headers_t hdr,
         local_metadata.nexthop_id = nexthop_id;
     }
 
+    // SAI API: create_next_hop_group && create_neighbor_entry
+    table ecmp_hash_table {
+        key = {
+            local_metadata.hash : exact;
+            local_metadata.host_info_tx_extended_flex_0 :exact;
+        }
+        actions = {
+            set_nexthop_id;
+            @defaultonly NoAction;
+        }
+
+        const default_action = NoAction;
+        size = 65536;
+    }
+
+    action ecmp_hash_action(bit<16> ecmp_group_id) {
+        ecmp_group_id_valid = true;
+        local_metadata.host_info_tx_extended_flex_0 = ecmp_group_id;
+    }
+
     // SAI API: create_next_hop && create_route_entry
     table ipv4_table {
         key = {
             local_metadata.ipv4_dst_match : lpm;
-            hdr.outer_ipv4.src_addr:selector;
-            hdr.outer_ipv4.dst_addr:selector;
-            hdr.outer_ipv4.protocol:selector;
-            hdr.outer_udp.src_port:selector;
-            hdr.outer_udp.dst_port:selector;
         }
 
         actions = {
             set_nexthop_id;
+            ecmp_hash_action; /* not used in RX direction */
             @defaultonly drop;
         }
 
-        //const default_action = drop();
-        pna_implementation = as_ecmp;
+        const default_action = drop();
         size = 65536;
     }
 
@@ -585,6 +600,18 @@ control linux_networking_control(inout headers_t hdr,
                             hdr.outer_ethernet.dst_addr});
 
                         ipv4_table.apply();
+
+                        if ((local_metadata.is_tunnel == 1) && (ecmp_group_id_valid)) {
+                            // Underlay 5 Tuple used for ECMP loadbalancing
+                            local_metadata.hash = ecmp_hash_fn.get_hash({
+                                hdr.outer_ipv4.src_addr,
+                                hdr.outer_ipv4.dst_addr,
+                                hdr.outer_ipv4.protocol,
+                                hdr.outer_udp.src_port,
+                                hdr.outer_udp.dst_port});
+
+                            ecmp_hash_table.apply();
+                        }
                         vxlan_encap_mod_table.apply();
 
                         nexthop_table.apply();
