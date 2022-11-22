@@ -34,6 +34,7 @@ file(MAKE_DIRECTORY ${PROTO_OUT_DIR})
 #################
 
 option(WITH_STRATUM     "Build with Stratum" ON)
+option(WITH_OVSP4RT     "Build with OVS P4Runtime client" OFF)
 
 ############################
 # Target selection options #

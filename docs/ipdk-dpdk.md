@@ -14,6 +14,13 @@ git clone --recursive git@github.com:p4lang/p4-dpdk-target.git p4sde
 
 For build instructions, refer [P4 SDE Readme](https://github.com/p4lang/p4-dpdk-target/blob/main/README.md#building-and-installing)
 
+### Install basic utilities
+
+```bash
+For Fedora distro: yum install libatomic libnl3-devel
+For Ubuntu distro: apt install libatomic1 libnl-route-3-dev
+```
+
 ### Build and install infrap4d dependencies
 
 ```bash
@@ -53,7 +60,7 @@ sudo mkdir -p /etc/stratum/
 sudo mkdir -p /var/log/stratum/
 sudo mkdir -p /usr/share/stratum/dpdk
 sudo cp ./install/share/stratum/dpdk/dpdk_port_config.pb.txt /usr/share/stratum/dpdk/
-sudo cp ./install/share/stratum/dpdk/ dpdk_skip_p4.conf /usr/share/stratum/dpdk/
+sudo cp ./install/share/stratum/dpdk/dpdk_skip_p4.conf /usr/share/stratum/dpdk/
 sudo cp $SDE_INSTALL/share/target_sys/zlog-cfg /usr/share/target_sys/
 ```
 

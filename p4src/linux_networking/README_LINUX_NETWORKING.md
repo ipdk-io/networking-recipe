@@ -131,6 +131,7 @@ Note:
     p4rt-ctl set-pipe br0 lnw.pb.bin p4Info.txt
 ```
 #### 9. Start and run ovs-vswitchd server and ovsdb-server
+Kill any existing ovs process if running.
 ```
 mkdir -p $IPDK_RECIPE/install/var/run/openvswitch
 rm -rf $IPDK_RECIPE/install/etc/openvswitch/conf.db
