@@ -84,6 +84,7 @@ Ex: vlan1, vlan2, vlan3 …. vlan4094
 
 #### 2. Export the environment variables LD_LIBRARY_PATH, IPDK_RECIPE and SDE_INSTALL and start running the infrap4d
 ```
+    alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"
     sudo $IPDK_RECIPE/install/bin/infrap4d
 ```
 #### 3. Create two VHOST user ports:

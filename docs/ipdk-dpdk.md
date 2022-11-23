@@ -82,7 +82,7 @@ sudo ./install/sbin/infrap4d
 
 Open a new terminal for setting the pipeline and trying the sample P4 program. Set all the environment variables and export all environment variables to sudo user
 ```bash
-   alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"'
+   alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
 #### Create 2 TAP ports
