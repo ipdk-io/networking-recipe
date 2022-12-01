@@ -38,7 +38,7 @@ git clone --recursive git@github.com:ipdk-io/networking-recipe.git ipdk.recipe
 
 ### Intel P4Studio
 
-Get Intel P4Studio SDE version 9.11. The untarred directory is henceforth referred to as **sde**. If using an Intel Tofino Reference platform, please also download the BSP package.
+Get Intel P4Studio SDE. The untarred directory is henceforth referred to as **sde**. If using an Intel Tofino Reference platform, please also download the BSP package.
 
 ```bash
 tar xvf bf-sde-9.11.0-cpr.tgz
@@ -81,13 +81,13 @@ cd ..
 export SDE_INSTALL=sde/install
 ```
 
-> Note: To test with tofino-model, please edit profiles/ipdk.yaml file and remove the **asic: true** configuration. Additionally, a bsp-path would also not be required for tofino-model.
+> Note: To test with tofino-model, please edit profiles/ipdk.yaml file and change the **asic** configuration from true -> false. Additionally, a bsp-path would also not be required for tofino-model.
 
 ### Build Networking Recipe
 
 ```bash
 cd $IPDK_RECIPE
-./make-all.sh --dep-install /usr/local/ --sde-install $SDE_INSTALL
+./make-all.sh --dep-install /usr/local/ --sde-install $SDE_INSTALL --target=tofino
 ```
 
 ## Run
@@ -119,16 +119,15 @@ The tna_exact_match P4 example is used to describe these steps. The same steps w
 
 ```bash
 cd sde/build
-cmake .. -DP4FLAGS="--p4runtime-files p4info.txt --p4runtime-force-std-externs"
 make tna_exact_match
 make install
 ```
 
-The additional **P4FLAGS** option is required to generate a p4info.txt file required for P4Runtime. The 2nd option (p4runtime-force-std-externs) will disable including any TNA specific externs within the generated p4info file.
-
 The above commands will generate 4 files. The last 3 files are combined together by the TDI pipeline builder to generate a single bin file to be pushed from the controller.
 
-- p4info.txt
+These files can be found in install/share/tofinopd/tna_exact_match/ directory.
+
+- tna_exact_match.p4info.pb.txt
 - tofino.bin
 - context.json
 - bf-rt.json
@@ -146,7 +145,3 @@ LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib \
     -p4c_conf_file=$SDE_INSTALL/share/p4/targets/tofino/tna_exact_match.conf \
     -bf_pipeline_config_binary_file=$IPDK_RECIPE/tna_exact_match.pb.bin
 ```
-
-### Using p4rt-ctl
-
-Please refer to this [link](https://github.com/ipdk-io/networking-recipe/blob/main/docs/p4rt-ctl.rst)
