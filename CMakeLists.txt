@@ -48,7 +48,7 @@ option(TOFINO_TARGET    "Build for Tofino target" OFF)
 #   so we can use them to control the build.
 # - Default to TOFINO_TARGET.
 set(_target_action "Building")
-set(_default_target "TOFINO_TARGET")
+set(_default_target "DPDK_TARGET")
 if(TOFINO_TARGET)
     set(TARGETFLAG TOFINO_TARGET)
     set(DPDK_TARGET OFF)

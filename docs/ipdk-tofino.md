@@ -87,7 +87,7 @@ export SDE_INSTALL=sde/install
 
 ```bash
 cd $IPDK_RECIPE
-./make-all.sh --dep-install /usr/local/ --sde-install $SDE_INSTALL
+./make-all.sh --dep-install /usr/local/ --sde-install $SDE_INSTALL --target=tofino
 ```
 
 ## Run
