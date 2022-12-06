@@ -115,6 +115,21 @@ For Tofino builds, we install the unmodified version of `gnmi_cli`.
 
 - The Teardown test cases in `dpdk_hal_test` are currently failing.
 
+- When tunnel is enabled, it is expected to have total size of the tunnel
+  packet less than or equal to 1514 Bytes. To match this size, user need to
+  adjust overlay network interface MTU size not more than 1450 Bytes.
+  Underlay fragmentation is not support, so we need to make sure packet is
+  with in the MTU size of the underlay port.
+
+- For any udp/tcp packets from overlay network, if checksum issues are
+  noticed on interfaces which are of type VIRTIO-NET, it is recommended to
+  disable checksum using below command.
+  $ ethtool --offload <netdev-name> rx off tx off
+
+- pna_tcp_connection_tracking demonstrates the PNA add_on_miss feature and
+  flow aging for auto learn flows. It supports partial implementation of TCP
+  state machine.
+
 ## Coming Attractions
 
 - Update Stratum to a more recent version
