@@ -9,7 +9,7 @@ eval set -- "${GETOPTS}"
 
 # Set defaults.
 PREFIX="install"
-TARGET_TYPE="TOFINO"
+TARGET_TYPE="DPDK"
 DEVELOP=0
 
 # Process command-line options.

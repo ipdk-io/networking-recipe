@@ -9,7 +9,7 @@ This document describes how to build and run IPDK networking recipe on DPDK targ
 ### Build P4 SDE for DPDK
 
 ```bash
-git clone --recursive git@github.com:p4lang/p4-dpdk-target.git p4sde
+git clone --recursive https://github.com/p4lang/p4-dpdk-target.git p4sde
 ```
 
 For build instructions, refer [P4 SDE Readme](https://github.com/p4lang/p4-dpdk-target/blob/main/README.md#building-and-installing)
@@ -24,7 +24,7 @@ For Ubuntu distro: apt install libatomic1 libnl-route-3-dev
 ### Build and install infrap4d dependencies
 
 ```bash
-git clone --recursive git@github.com:ipdk-io/networking-recipe.git ipdk.recipe
+git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
 cd ipdk.recipe
 export IPDK_RECIPE=`pwd`
 cd $IPDK_RECIPE/setup
@@ -39,7 +39,6 @@ cmake --build build [-j<njobs>]
 #### Set environment variables
  - export DEPEND_INSTALL=`absolute path for installing dependencies`
  - export SDE_INSTALL=`absolute path for p4 sde install built in previous step`
- - export LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib:$SDE_INSTALL/lib64:$DEPEND_INSTALL/lib:$DEPEND_INSTALL/lib64:$LD_LIBRARY_PATH
  
 #### Compile the recipe
 
@@ -52,16 +51,10 @@ cd $IPDK_RECIPE
 
 ### Run Networking recipe
 
-#### Copy the config files to /usr/share/stratum/dpdk required by infrap4d
+####  Set up the environment required by infrap4d
 
 ```bash
-cd $IPDK_RECIPE
-sudo mkdir -p /etc/stratum/
-sudo mkdir -p /var/log/stratum/
-sudo mkdir -p /usr/share/stratum/dpdk
-sudo cp ./install/share/stratum/dpdk/dpdk_port_config.pb.txt /usr/share/stratum/dpdk/
-sudo cp ./install/share/stratum/dpdk/dpdk_skip_p4.conf /usr/share/stratum/dpdk/
-sudo cp $SDE_INSTALL/share/target_sys/zlog-cfg /usr/share/target_sys/
+source ./scripts/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
 ```
 
 #### Set hugepages required for DPDK
@@ -69,6 +62,11 @@ sudo cp $SDE_INSTALL/share/target_sys/zlog-cfg /usr/share/target_sys/
 Run hugepages script, found in `scripts` directory
 ```bash
 sudo ./scripts/set_hugepages.sh
+```
+
+#### Export all environment variables to sudo user
+```bash
+alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
 #### Run the infrap4d daemon
@@ -79,19 +77,19 @@ sudo ./install/sbin/infrap4d
 ```
 
 ### Run a sample program
-
-Open a new terminal for setting the pipeline and trying the sample P4 program. Set all the environment variables and export all environment variables to sudo user
+Open a new terminal for setting the pipeline and trying the sample P4 program. Setup the environment and export all environment variables to sudo user
 ```bash
-   alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
+source ./scripts/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
 #### Create 2 TAP ports
 
 ```bash
-   sudo ./install/bin/gnmi-ctl set "device:virtual-device,name:TAP0,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP"
-   sudo ./install/bin/gnmi-ctl set "device:virtual-device,name:TAP1,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP"
-   ifconfig TAP0 up
-   ifconfig TAP1 up
+sudo ./install/bin/gnmi-ctl set "device:virtual-device,name:TAP0,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP"
+sudo ./install/bin/gnmi-ctl set "device:virtual-device,name:TAP1,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP"
+ifconfig TAP0 up
+ifconfig TAP1 up
 ```
 
  *Note*: See [gnmi-ctl Readme](https://github.com/ipdk-io/networking-recipe/blob/main/docs/dpdk/gnmi-ctl.rst) for more information on gnmi-ctl utility
@@ -100,34 +98,34 @@ Open a new terminal for setting the pipeline and trying the sample P4 program. S
 
 - Clone the ipdk repo for scripts to build p4c and sample p4 program
 ```bash
-   git clone https://github.com/ipdk-io/ipdk.git --recursive ipdk-io
+git clone https://github.com/ipdk-io/ipdk.git --recursive ipdk-io
 ```
 
 - Install p4c compiler from [p4c](https://github.com/p4lang/p4c) repository and follow the readme for procedure. Alternatively, refer the [p4c script](https://github.com/ipdk-io/ipdk/blob/main/build/networking/scripts/build_p4c.sh)
 
 - Set the environment variable OUTPUT_DIR to the location where artifacts should be generated and where p4 files are available
 ```bash
-  export OUTPUT_DIR=/root/ipdk-io/build/networking/examples/simple_l3
+export OUTPUT_DIR=/root/ipdk-io/build/networking/examples/simple_l3
 ```
 
 - Generate the artifacts using p4c compiler installed in previous step using command below:
 ```bash
-  mkdir $OUTPUT_DIR/pipe
-  p4c --arch psa --target dpdk --p4runtime-files $OUTPUT_DIR/p4Info.txt --bf-rt-schema $OUTPUT_DIR/bf-rt.json --context $OUTPUT_DIR/context.json $OUTPUT_DIR/simple_l3.p4
+mkdir $OUTPUT_DIR/pipe
+p4c-dpdk --arch pna --target dpdk --p4runtime-files $OUTPUT_DIR/p4Info.txt --bf-rt-schema $OUTPUT_DIR/bf-rt.json --context $OUTPUT_DIR/pipe/context.json -o $OUTPUT_DIR/pipe/simple_l3.spec $OUTPUT_DIR/simple_l3.p4
 ```
-  *Note*: The above commands will generate 3 files (p4Info.txt, bf-rt.json and context.json).
+*Note*: The above commands will generate 3 files (p4Info.txt, bf-rt.json and context.json).
 
 - Modify simple_l3.conf file to provide correct paths for bfrt-config, context and config
 
 - TDI pipeline builder combines the artifacts generated by p4c compiler to generate a single bin file to be pushed from the controller. Generate binary execuatble using tdi-pipeline builder command below:
 ```bash
-   ./install/bin/tdi_pipeline_builder --p4c_conf_file=$OUTPUT_DIR/simple_l3.conf --bf_pipeline_config_binary_file=$OUTPUT_DIR/simple_l3.pb.bin
+./install/bin/tdi_pipeline_builder --p4c_conf_file=$OUTPUT_DIR/simple_l3.conf --bf_pipeline_config_binary_file=$OUTPUT_DIR/simple_l3.pb.bin
 ```
 
 #### Set forwarding pipeline
 
 ```bash
-   sudo ./install/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3.pb.bin $OUTPUT_DIR/p4Info.txt
+sudo ./install/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3.pb.bin $OUTPUT_DIR/p4Info.txt
 ```
 
 #### Configure forwarding rules
