@@ -1,10 +1,3 @@
-[submodule "ovs/ovs"]
-	path = ovs/ovs
-	url = https://github.com/ipdk-io/ovs
-	branch = split-arch
-[submodule "stratum/stratum"]
-	path = stratum/stratum
-	url = https://github.com/ipdk-io/stratum-dev.git
 [submodule "stratum/p4runtime"]
 	path = stratum/p4runtime
 	url = https://github.com/p4lang/p4runtime.git
@@ -14,10 +7,18 @@
 [submodule "ptf-tests"]
 	path = ptf-tests
 	url = https://github.com/ipdk-io/ptf-tests.git
-[submodule "krnlmon/krnlmon"]
-	path = krnlmon/krnlmon
-	url = https://github.com/ipdk-io/krnlmon.git
-	branch = main
 [submodule "krnlmon/SAI"]
 	path = krnlmon/SAI
 	url = https://github.com/opencomputeproject/SAI.git
+[submodule "stratum/stratum"]
+	path = stratum/stratum
+	url = https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.stratum-dev/
+	branch = split-arch
+[submodule "krnlmon/krnlmon"]
+	path = krnlmon/krnlmon
+	url = https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.krnlmon
+	branch = main
+[submodule "ovs/ovs"]
+	path = ovs/ovs
+	url = https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.p4ovs
+	branch = ipdk-latest
