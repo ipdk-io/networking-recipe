@@ -76,7 +76,7 @@ set -e
 if [ -z "${BUILD_WITH_OVS}" -o "${BUILD_WITH_OVS}" = "true" ]; then
     # Build OVS first.
     echo "Building OVS"
-    cmake -S ovs -B ${OVS_BUILD} -DCMAKE_INSTALL_PREFIX=${OVS_INSTALL}
+    cmake -S ovs -B ${OVS_BUILD} -DCMAKE_INSTALL_PREFIX=${OVS_INSTALL} -DP4OVS=ON
     cmake --build ${OVS_BUILD} -j6 -- V=0
     OVS_INSTALL_OPTION=-DOVS_INSTALL_DIR=${OVS_INSTALL}
 else

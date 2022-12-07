@@ -44,12 +44,12 @@ System under test will have above topology running the networking recipe. Link P
 ## Create P4 artifacts <a name="create_p4_artifacts"></a>
 - Install p4c compiler from p4lang/p4c(<https://github.com/p4lang/p4c>) repository and follow the readme for procedure
 - Set the environment variable OUTPUT_DIR to the location where artifacts should be generated and where p4 files are available
-  eg. export OUTPUT_DIR=/root/ovs/p4proto/p4src/linux_networking/
+  eg. export OUTPUT_DIR=$IPDK_RECIPE/p4src/linux_networking/
 - Generate the artifacts using p4c-dpdk installed in previous step using command below:
 ```
   p4c-dpdk --arch pna --target dpdk --p4runtime-files $OUTPUT_DIR/p4Info.txt --bf-rt-schema $OUTPUT_DIR/bf-rt.json --context $OUTPUT_DIR/context.json -o $OUTPUT_DIR/linux_networking.spec $OUTPUT_DIR/linux_networking.p4
 ```
-- Modify sample lnw.conf file available in ovs/p4proto/p4src/linux_networking/ to specify absolute path of the artifacts (json and spec files)
+- Modify sample lnw.conf file available in $IPDK_RECIPE/p4src/linux_networking/ to specify absolute path of the artifacts (json and spec files)
 - Generate binary execuatble using tdi-pipeline builder command below:
 ```
 tdi_pipeline_builder --p4c_conf_file=lnw.conf --bf_pipeline_config_binary_file=lnw.pb.bin
@@ -84,6 +84,7 @@ Ex: vlan1, vlan2, vlan3 …. vlan4094
 
 #### 2. Export the environment variables LD_LIBRARY_PATH, IPDK_RECIPE and SDE_INSTALL and start running the infrap4d
 ```
+    alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"
     sudo $IPDK_RECIPE/install/bin/infrap4d
 ```
 #### 3. Create two VHOST user ports:
@@ -131,6 +132,7 @@ Note:
     p4rt-ctl set-pipe br0 lnw.pb.bin p4Info.txt
 ```
 #### 9. Start and run ovs-vswitchd server and ovsdb-server
+Kill any existing ovs process if running.
 ```
 mkdir -p $IPDK_RECIPE/install/var/run/openvswitch
 rm -rf $IPDK_RECIPE/install/etc/openvswitch/conf.db

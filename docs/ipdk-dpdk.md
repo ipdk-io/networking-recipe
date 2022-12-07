@@ -14,6 +14,13 @@ git clone --recursive https://github.com/p4lang/p4-dpdk-target.git p4sde
 
 For build instructions, refer [P4 SDE Readme](https://github.com/p4lang/p4-dpdk-target/blob/main/README.md#building-and-installing)
 
+### Install basic utilities
+
+```bash
+For Fedora distro: yum install libatomic libnl3-devel
+For Ubuntu distro: apt install libatomic1 libnl-route-3-dev
+```
+
 ### Build and install infrap4d dependencies
 
 ```bash
