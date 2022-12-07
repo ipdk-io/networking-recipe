@@ -13,9 +13,9 @@ set(PROTO_INCLUDES
     ${PROTO_OUT_DIR}
 )
 
-######################
+###################
 # Use OVS package #
-######################
+###################
 #
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -110,3 +110,41 @@ target_link_libraries(ovs-vswitchd PUBLIC
 )
 
 install(TARGETS ovs-vswitchd DESTINATION sbin)
+
+######################
+# ovs-testcontroller #
+######################
+
+add_executable(ovs-testcontroller
+    $<TARGET_OBJECTS:ovs_sidecar_o>
+)
+
+target_link_libraries(ovs-testcontroller
+    PRIVATE
+        -Wl,--whole-archive
+        ${OFPROTO_LINK_LIBRARIES}
+        ${LIBOVS_LINK_LIBRARIES}
+        ${SFLOW_LINK_LIBRARIES}    
+        ${LIBVSWITCHD}
+        -Wl,--no-whole-archive
+    PUBLIC
+        atomic
+	rt
+	unwind
+)
+
+target_link_libraries(ovs-testcontroller PUBLIC
+    absl::strings
+    absl::statusor
+    absl::flags_private_handle_accessor
+    absl::flags
+)
+
+target_link_libraries(ovs-testcontroller PUBLIC stratum)
+
+target_link_libraries(ovs-testcontroller PUBLIC
+    stratum_proto
+    p4runtime_proto
+)
+
+install(TARGETS ovs-testcontroller DESTINATION bin)
