@@ -39,7 +39,9 @@ cmake --build build [-j<njobs>]
 #### Set environment variables
  - export DEPEND_INSTALL=`absolute path for installing dependencies`
  - export SDE_INSTALL=`absolute path for p4 sde install built in previous step`
- 
+```bash
+source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL 
+```
 #### Compile the recipe
 
 ```bash
@@ -53,15 +55,18 @@ cd $IPDK_RECIPE
 
 ####  Set up the environment required by infrap4d
 
+*Note*: `sudo` option is required when running copy_config_files.sh since we are creating directories and copying
+config file at system level
 ```bash
-source ./scripts/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+sudo ./scripts/dpdk/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
 ```
 
 #### Set hugepages required for DPDK
 
 Run hugepages script, found in `scripts` directory
 ```bash
-sudo ./scripts/set_hugepages.sh
+sudo ./scripts/dpdk/set_hugepages.sh
 ```
 
 #### Export all environment variables to sudo user
@@ -80,6 +85,7 @@ sudo ./install/sbin/infrap4d
 Open a new terminal for setting the pipeline and trying the sample P4 program. Setup the environment and export all environment variables to sudo user
 ```bash
 source ./scripts/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+./scripts/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
