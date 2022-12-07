@@ -1,10 +1,11 @@
 [submodule "ovs/ovs"]
 	path = ovs/ovs
 	url = https://github.com/ipdk-io/ovs
-	branch = split-arch
+	branch = ipdk-latest
 [submodule "stratum/stratum"]
 	path = stratum/stratum
 	url = https://github.com/ipdk-io/stratum-dev.git
+	branch = split-arch
 [submodule "stratum/p4runtime"]
 	path = stratum/p4runtime
 	url = https://github.com/p4lang/p4runtime.git

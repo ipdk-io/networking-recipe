@@ -1,10 +1,15 @@
+# build directories
 /build
+/install
+
+# download directories
 /abseil-cpp
-/protobuf
-/grpc
 /cctz
 /gflags
 /glog
 /gmock-gbl
+/grpc
 /gtest
 /json
+/protobuf
+/zlib
