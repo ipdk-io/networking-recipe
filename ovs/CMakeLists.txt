@@ -18,6 +18,12 @@ if(P4OVS)
     set(P4OVS_OPTION --with-p4ovs)
 endif()
 
+if(NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug"))
+    set(NDEBUG_OPTION --enable-ndebug)
+endif()
+
+set(SSL_OPTION --disable-ssl)
+
 ExternalProject_Add(ovs
   SOURCE_DIR
     ${OVS_SOURCE_DIR}
@@ -27,7 +33,8 @@ ExternalProject_Add(ovs
     ${OVS_SOURCE_DIR}/configure
     --prefix=${CMAKE_INSTALL_PREFIX}
     ${P4OVS_OPTION}
-    --disable-ssl
+    ${NDEBUG_OPTION}
+    ${SSL_OPTION}
   BINARY_DIR
     ${CMAKE_CURRENT_BINARY_DIR}
   BUILD_COMMAND

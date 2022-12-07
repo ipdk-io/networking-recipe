@@ -11,6 +11,9 @@ project(networking-recipe VERSION 0.1 LANGUAGES C CXX)
 include(FindPkgConfig)
 include(CMakePrintHelpers)
 
+# Default: Release with Debug Info
+set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+
 #############################
 # Symbolic path definitions #
 #############################
@@ -87,9 +90,9 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-######################
-# Finder search path #
-######################
+#####################
+# CMAKE_PREFIX_PATH #
+#####################
 
 # CMAKE_PREFIX_PATH specifies the directories to be searched by
 # find_file(), find_library(), find_path(), and find_program().
