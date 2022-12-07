@@ -29,13 +29,6 @@ set(PROTO_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
 file(MAKE_DIRECTORY ${PROTO_OUT_DIR})
 
-#################
-# Build options #
-#################
-
-option(WITH_STRATUM     "Build with Stratum" ON)
-option(WITH_OVSP4RT     "Build with OVS P4Runtime client" OFF)
-
 ############################
 # Target selection options #
 ############################
@@ -66,14 +59,26 @@ message(NOTICE "${_target_action} ${TARGETFLAG}")
 unset(_default_target)
 unset(_target_action)
 
+###################
+# Feature toggles #
+###################
+
+if(DPDK_TARGET)
+    set(WITH_KRNLMON ON)
+    set(WITH_OVSP4RT ON)
+elseif(TOFINO_TARGET)
+    set(WITH_KRNLMON OFF)
+    set(WITH_OVSP4RT OFF)
+endif()
+
+cmake_print_variables(WITH_KRNLMON)
+cmake_print_variables(WITH_OVSP4RT)
+
 ###########################
 # Global compiler options #
 ###########################
 
 add_compile_options(-D${TARGETFLAG})
-if(DPDK_TARGET)
-    add_compile_options(-DP4OVS_CHANGES)
-endif()
 
 if(DEPEND_INSTALL_DIR)
     include_directories(${DEPEND_INSTALL_DIR}/include)
@@ -82,42 +87,48 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+######################
+# Finder search path #
+######################
+
+# CMAKE_PREFIX_PATH specifies the directories to be searched by
+# find_file(), find_library(), find_path(), and find_program().
+
+if(NOT DEPEND_INSTALL_DIR STREQUAL "")
+    list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
+endif()
+
+list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
+
+if(NOT OVS_INSTALL_DIR STREQUAL "")
+    list(APPEND CMAKE_PREFIX_PATH ${OVS_INSTALL_DIR})
+endif()
+
+list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
+cmake_print_variables(CMAKE_PREFIX_PATH)
+
 #####################
 # External packages #
 #####################
 
-if(DEPEND_INSTALL_DIR)
-    list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
-endif()
-list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
-
-if(WITH_STRATUM)
-    find_package(absl REQUIRED)
-endif()
+find_package(absl REQUIRED)
 
 if(DPDK_TARGET)
-  pkg_check_modules(DPDK REQUIRED libdpdk)
+    pkg_check_modules(DPDK REQUIRED libdpdk)
 endif()
 
 ##################
 # Subdirectories #
 ##################
 
-if(DPDK_TARGET)
-    set(WITH_KRNLMON ON)
-    set(WITH_OVSP4RT ON)
-endif()
-
 if(WITH_KRNLMON)
     add_subdirectory(krnlmon)
 endif()
 
-if(WITH_STRATUM)
-    add_subdirectory(stratum)
-    add_subdirectory(clients)
-endif()
-
+add_subdirectory(stratum)
 add_subdirectory(infrap4d)
+add_subdirectory(clients)
+
 if(WITH_OVSP4RT)
     add_subdirectory(ovs-p4rt)
 endif()
