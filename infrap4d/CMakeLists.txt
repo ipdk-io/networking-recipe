@@ -15,6 +15,10 @@ add_executable(infrap4d
     ${INFRAP4D_MAIN}
 )
 
+set_target_properties(infrap4d
+    PROPERTIES INSTALL_RPATH $ORIGIN/../lib
+)
+
 target_include_directories(infrap4d PRIVATE ${STRATUM_SOURCE_DIR})
 
 target_link_libraries(infrap4d PRIVATE
