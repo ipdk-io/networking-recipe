@@ -30,7 +30,7 @@ export SDE_INSTALL=$2
 export DEPEND_INSTALL=$3
 
 #Get the OS and Version details
-. $IPDK_RECIPE/scripts/os_ver_details.sh
+. $IPDK_RECIPE/scripts/dpdk/os_ver_details.sh
 get_os_ver_details
 echo "OS and Version details..."
 echo "$OS : $VER"
@@ -64,13 +64,4 @@ echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 echo "PATH: $PATH"
 echo ""
 
-
-#... Create required directories and copy the config files ...#
-cd $IPDK_RECIPE
-sudo mkdir -p /etc/stratum/
-sudo mkdir -p /var/log/stratum/
-sudo mkdir -p /usr/share/stratum/dpdk
-sudo cp ./install/share/stratum/dpdk/dpdk_port_config.pb.txt /usr/share/stratum/dpdk/
-sudo cp ./install/share/stratum/dpdk/dpdk_skip_p4.conf /usr/share/stratum/dpdk/
-sudo cp $SDE_INSTALL/share/target_sys/zlog-cfg /usr/share/target_sys/
 set +e
