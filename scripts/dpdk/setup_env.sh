@@ -54,12 +54,13 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64
 #Update Dependent libraries
 export LD_LIBRARY_PATH=$DEPEND_INSTALL/lib:$DEPEND_INSTALL/lib64:$LD_LIBRARY_PATH
 export PATH=$DEPEND_INSTALL/bin:$DEPEND_INSTALL/sbin:$PATH
-export LIBRARY_PATH=$DEPEND_INSTALL/lib:$LIBRARY_PATH
+export LIBRARY_PATH=$DEPEND_INSTALL/lib:$DEPEND_INSTALL/lib64:$LIBRARY_PATH
 
 echo ""
 echo ""
 echo "Updated Environment Variables ..."
 echo "SDE_INSTALL: $SDE_INSTALL"
+echo "LIBRARY_PATH: $LIBRARY_PATH"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 echo "PATH: $PATH"
 echo ""
