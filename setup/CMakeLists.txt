@@ -8,8 +8,11 @@ project(dependencies VERSION 1 LANGUAGES C CXX)
 include(ExternalProject)
 include(CMakePrintHelpers)
 
-if(${CMAKE_VERSION} VERSION_EQUAL 3.24 OR ${CMAKE_VERSION} VERSION_EQUAL 3.25)
-  message(FATAL_ERROR "Protobuf build is broken in CMake version ${CMAKE_VERSION}")
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24)
+  message(STATUS "CMake version is ${CMAKE_VERSION}")
+  message(STATUS "Protobuf build is broken in CMake 3.24.x and 3.25.x")
+  message(STATUS "Versions 3.16 through 3.22 are recommended")
+  message(FATAL_ERROR)
 endif()
 
 option(ON_DEMAND    "Build targets on demand" OFF)
