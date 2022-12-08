@@ -8,6 +8,13 @@ project(dependencies VERSION 1 LANGUAGES C CXX)
 include(ExternalProject)
 include(CMakePrintHelpers)
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24)
+  message(STATUS "CMake version is ${CMAKE_VERSION}")
+  message(STATUS "Protobuf build is broken in CMake 3.24.x and 3.25.x")
+  message(STATUS "Versions 3.16 through 3.22 are recommended")
+  message(FATAL_ERROR "Invalid CMake version")
+endif()
+
 option(ON_DEMAND    "Build targets on demand" OFF)
 option(USE_SUDO     "Use sudo when installing" OFF)
 
@@ -48,29 +55,55 @@ if(ON_DEMAND)
   set_target_properties(abseil-cpp PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
+########
+# ZLIB #
+########
+
+set(ZLIB_GIT_TAG 04f42ceca40f73e2978b50e93806c2a18c1281fc) # v1.2.13
+
+ExternalProject_Add(zlib
+  GIT_REPOSITORY  https://github.com/madler/zlib
+  GIT_TAG         ${ZLIB_GIT_FLAG}
+  GIT_PROGRESS    ON
+
+  SOURCE_DIR
+    ${CMAKE_SOURCE_DIR}/zlib
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+  INSTALL_COMMAND
+    ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
+)
+if(ON_DEMAND)
+  set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
+
 ############
 # PROTOBUF #
 ############
 
-set(PROTOBUF_GIT_TAG v3.18.1)
+set(PROTOBUF_GIT_TAG 0dab03ba7bc438d7ba3eac2b2c1eb39ed520f928) # v3.18.1
 
 ExternalProject_Add(protobuf
   GIT_REPOSITORY  https://github.com/google/protobuf.git
   GIT_TAG         ${PROTOBUF_GIT_TAG}
-  GIT_SHALLOW     ON    # depth=1
   GIT_PROGRESS    ON
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/protobuf
   CMAKE_ARGS
-    -S ${CMAKE_SOURCE_DIR}/protobuf/cmake
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
+    -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
     -DBUILD_SHARED_LIBS=on
     -Dprotobuf_BUILD_TESTS=off
+  SOURCE_SUBDIR
+    cmake
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
     ${LDCONFIG_CMD}
+  DEPENDS
+    zlib
 )
 if(ON_DEMAND)
   set_target_properties(protobuf PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -88,13 +121,22 @@ ExternalProject_Add(grpc
   GIT_SHALLOW     ON    # depth=1
   GIT_PROGRESS    ON
 
+  PATCH_COMMAND
+    patch -i ${CMAKE_SOURCE_DIR}/grpc.patch -p1
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/grpc
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_INSTALL_RPATH=$ORIGIN
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
+    -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
     -DBUILD_SHARED_LIBS=on
+    -DgRPC_ABSL_PROVIDER=package
+    -DgRPC_PROTOBUF_PROVIDER=package
+	# gRPC builds BoringSSL, which is incompatible with libpython.
+	# We use whatever version of OpenSSL is installed instead.
     -DgRPC_SSL_PROVIDER=package
+    -DgRPC_ZLIB_PROVIDER=package
     -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=off
     -DgRPC_BUILD_GRPC_NODE_PLUGIN=off
     -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=off
@@ -108,6 +150,7 @@ ExternalProject_Add(grpc
   DEPENDS
     abseil-cpp
     protobuf
+    zlib
 )
 if(ON_DEMAND)
   set_target_properties(grpc PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -177,6 +220,7 @@ ExternalProject_Add(glog
     ${CMAKE_SOURCE_DIR}/glog
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_INSTALL_RPATH=$ORIGIN
     -Dgflags_DIR:PATH=${CMAKE_INSTALL_PREFIX}/lib/cmake/gflags
     -DWITH_GTEST=OFF
   INSTALL_COMMAND
@@ -221,6 +265,7 @@ ExternalProject_Add(gtest
     ${CMAKE_SOURCE_DIR}/gtest
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_INSTALL_RPATH=$ORIGIN
     -DBUILD_SHARED_LIBS=on
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
