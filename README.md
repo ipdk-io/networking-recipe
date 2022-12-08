@@ -76,7 +76,7 @@ P4-OVS, making the code easier to maintain and more suitable for upstreaming.
 
 Implementation is being done incrementally through ipdk-io repositories.
 
-- OvS development takes place on the `split-arch` branch of the
+- OvS development currently takes place on the `ipdk-latest` branch of the
   `ipdk-io/ovs` repository.
 
 - Stratum development takes place on the `split-arch` branch of the
@@ -85,7 +85,7 @@ Implementation is being done incrementally through ipdk-io repositories.
 - Kernel Monitor development takes place on the `main` branch of the
   `ipdk-io/krnlmon` repository.
 
-- End-to-end test development takes place in the `ipdk.io/ptf-tests`
+- End-to-end test development takes place in the `ipdk-io/ptf-tests`
   repository.
 
 - Superproject development takes place on the `main` branch of the
