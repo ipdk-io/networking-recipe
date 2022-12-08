@@ -7,7 +7,7 @@
 #include "openvswitch/ovs-p4rt.h"
 #include "p4_name_mapping.h"
 
-ABSL_FLAG(std::string, grpc_addr, "127.0.0.1:9339",
+ABSL_FLAG(std::string, grpc_addr, "127.0.0.1:9559",
           "P4Runtime server address.");
 ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
 
