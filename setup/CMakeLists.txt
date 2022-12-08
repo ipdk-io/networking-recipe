@@ -12,7 +12,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24)
   message(STATUS "CMake version is ${CMAKE_VERSION}")
   message(STATUS "Protobuf build is broken in CMake 3.24.x and 3.25.x")
   message(STATUS "Versions 3.16 through 3.22 are recommended")
-  message(FATAL_ERROR)
+  message(FATAL_ERROR "Invalid CMake version")
 endif()
 
 option(ON_DEMAND    "Build targets on demand" OFF)
