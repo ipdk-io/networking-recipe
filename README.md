@@ -44,13 +44,13 @@ P4-OVS, making the code easier to maintain and more suitable for upstreaming.
 
 - Updated OvS to a more recent version.
 
-### In Progress
-
-- Integrate the Kernel Monitor into `infrap4d`. Merge changes that were
+- Integrated the Kernel Monitor into `infrap4d`. Merged changes that were
   made in P4-OVS after the original split was done.
 
-- Create a component (`ovs-p4rt`) that can be linked with `ovs-vswitchd`
+- Created a component (`ovs-p4rt`) that can be linked with `ovs-vswitchd`
   to allow OvS to communicate with `infrap4d`.
+
+### Not Yet Done
 
 - Update to the current version of Stratum.
 
@@ -84,6 +84,9 @@ Implementation is being done incrementally through ipdk-io repositories.
 
 - Kernel Monitor development takes place on the `main` branch of the
   `ipdk-io/krnlmon` repository.
+
+- End-to-end test development takes place in the `ipdk.io/ptf-tests`
+  repository.
 
 - Superproject development takes place on the `main` branch of the
   `ipdk-io/networking-recipe` repository.
