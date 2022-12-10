@@ -275,8 +275,6 @@ target_include_directories(stratum_target_o PRIVATE
 
 if(WITH_KRNLMON)
     target_compile_definitions(stratum_target_o PRIVATE KRNLMON_SUPPORT)
-    target_include_directories(stratum_target_o PRIVATE ${KRNLMON_SOURCE_DIR})
-    add_dependencies(stratum_target_o krnlmon)
 endif()
 
 add_dependencies(stratum_target_o stratum_proto)
@@ -434,10 +432,6 @@ elseif(DPDK_TARGET)
         target_utils
         target_sys
     )
-
-    if(WITH_KRNLMON)
-        target_link_libraries(stratum PUBLIC krnlmon)
-    endif()
 
     target_link_directories(stratum PUBLIC
         ${SDE_INSTALL}/lib

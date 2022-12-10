@@ -5,15 +5,15 @@ project(infrap4d VERSION 0.1.0 LANGUAGES C CXX)
 set(STRATUM_TDI_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi)
 set(STRATUM_BFRT_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/barefoot)
 
-if(DPDK_TARGET)
+if(WITH_KRNLMON)
+    add_executable(infrap4d infrap4d_main.cc)
+elseif(DPDK_TARGET)
     set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/dpdk/main.cc)
+    add_executable(infrap4d ${INFRAP4D_MAIN})
 elseif(TOFINO_TARGET)
     set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/tofino/main.cc)
+    add_executable(infrap4d ${INFRAP4D_MAIN})
 endif()
-
-add_executable(infrap4d
-    ${INFRAP4D_MAIN}
-)
 
 set_target_properties(infrap4d
     PROPERTIES INSTALL_RPATH $ORIGIN/../lib
@@ -21,11 +21,20 @@ set_target_properties(infrap4d
 
 target_include_directories(infrap4d PRIVATE ${STRATUM_SOURCE_DIR})
 
+if(WITH_KRNLMON)
+    target_include_directories(infrap4d PRIVATE ${KRNLMON_SOURCE_DIR})
+    target_compile_definitions(infrap4d PRIVATE KRNLMON_SUPPORT)
+endif()
+
 target_link_libraries(infrap4d PRIVATE
     -Wl,--whole-archive
     stratum
     -Wl,--no-whole-archive
 )
+
+if(WITH_KRNLMON)
+    target_link_libraries(infrap4d PRIVATE krnlmon pthread)
+endif()
 
 install(TARGETS infrap4d DESTINATION sbin)
 
