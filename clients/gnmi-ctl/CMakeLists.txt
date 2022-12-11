@@ -15,6 +15,8 @@ add_executable(gnmi-ctl
     gnmi_ctl_utils.h
 )
 
+set_install_rpath(gnmi-ctl $ORIGIN/../lib ${DEP_ELEMENT})
+
 target_link_libraries(gnmi-ctl
     PUBLIC
         stratum

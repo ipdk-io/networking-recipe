@@ -204,6 +204,8 @@ add_library(grpc_proto SHARED
     ${PROTO_OUT_DIR}/google/rpc/code.pb.h
 )
 
+set_install_rpath(grpc_proto ${DEP_ELEMENT})
+
 target_include_directories(grpc_proto PRIVATE ${PROTO_OUT_DIR})
 target_link_libraries(grpc_proto PUBLIC protobuf)
 
@@ -228,6 +230,8 @@ add_library(p4runtime_proto SHARED
     ${PROTO_OUT_DIR}/p4/config/v1/p4info.pb.h
 )
 
+set_install_rpath(p4runtime_proto $ORIGIN ${DEP_ELEMENT})
+
 target_include_directories(p4runtime_proto PRIVATE ${PROTO_OUT_DIR})
 
 target_link_libraries(p4runtime_proto PUBLIC grpc_proto absl::synchronization)
@@ -247,6 +251,8 @@ add_library(gnmi_proto SHARED
     ${PROTO_OUT_DIR}/gnmi/gnmi_ext.pb.cc
     ${PROTO_OUT_DIR}/gnmi/gnmi_ext.pb.h
 )
+
+set_install_rpath(gnmi_proto ${DEP_ELEMENT})
 
 add_dependencies(gnmi_proto grpc_proto)
 
@@ -343,6 +349,8 @@ add_library(stratum_proto1_o OBJECT
     ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.cc
 )
 
+# Ensure that the header files on which we depend have been generated
+# before we start building the current library.
 add_dependencies(stratum_proto1_o p4runtime_proto)
 
 target_include_directories(stratum_proto1_o PRIVATE ${PROTO_OUT_DIR})
@@ -357,9 +365,8 @@ add_library(stratum_proto2_o OBJECT
     ${PROTO_OUT_DIR}/stratum/hal/lib/phal/db.pb.h
 )
 
-target_link_libraries(stratum_proto2_o PUBLIC p4runtime_proto)
-target_link_libraries(stratum_proto2_o PUBLIC pthread)
-
+# Ensure that the header files on which we depend have been generated
+# before we start building the current library.
 add_dependencies(stratum_proto2_o p4runtime_proto)
 add_dependencies(stratum_proto2_o stratum_proto1_o)
 

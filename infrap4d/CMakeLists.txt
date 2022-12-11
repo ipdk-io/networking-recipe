@@ -15,9 +15,7 @@ elseif(TOFINO_TARGET)
     add_executable(infrap4d ${INFRAP4D_MAIN})
 endif()
 
-set_target_properties(infrap4d
-    PROPERTIES INSTALL_RPATH $ORIGIN/../lib
-)
+set_install_rpath(infrap4d $ORIGIN/../lib ${SDE_ELEMENT} ${DEP_ELEMENT})
 
 target_include_directories(infrap4d PRIVATE ${STRATUM_SOURCE_DIR})
 

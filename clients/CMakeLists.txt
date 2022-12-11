@@ -16,6 +16,8 @@ add_executable(gnmi_cli
     ${STRATUM_SOURCE_DIR}/stratum/tools/gnmi/gnmi_cli.cc
 )
 
+set_install_rpath(gnmi_cli $ORIGIN/../lib ${DEP_ELEMENT})
+
 target_link_libraries(gnmi_cli
     PUBLIC
         stratum
@@ -53,6 +55,8 @@ add_executable(tdi_pipeline_builder
 
 # Suppress "warning: attribute ignored" on ABSL_MUST_USE_RESULT [[nodiscard]]
 target_compile_options(tdi_pipeline_builder PRIVATE -Wno-attributes)
+
+set_install_rpath(tdi_pipeline_builder $ORIGIN/../lib ${DEP_ELEMENT})
 
 target_include_directories(tdi_pipeline_builder
     PRIVATE

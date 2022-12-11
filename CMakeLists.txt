@@ -14,6 +14,8 @@ include(CMakePrintHelpers)
 # Default: Release with Debug Info
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
+option(SET_RPATH "Set RPATH in libraries and executables" OFF)
+
 #############################
 # Symbolic path definitions #
 #############################
@@ -83,7 +85,7 @@ cmake_print_variables(WITH_OVSP4RT)
 
 add_compile_options(-D${TARGETFLAG})
 
-if(DEPEND_INSTALL_DIR)
+if(NOT DEPEND_INSTALL_DIR STREQUAL "")
     include_directories(${DEPEND_INSTALL_DIR}/include)
     link_directories(${DEPEND_INSTALL_DIR}/lib)
 endif()
@@ -119,6 +121,55 @@ find_package(absl REQUIRED)
 if(DPDK_TARGET)
     pkg_check_modules(DPDK REQUIRED libdpdk)
 endif()
+
+##################
+# RPATH elements #
+##################
+
+# TODO:
+# If the SDE or DEPEND install tree is combined with the
+# RECIPE install tree (which we might want to do for a runtime
+# system), we can omit the SDE or DEPEND element in favor of
+# the ORIGIN element.
+#
+# The ORIGIN element is equivalent to ${CMAKE_PREFIX_PATH}/lib.
+#
+# The elements will need to expanded to include /lib64 paths where
+# appropriate.
+#
+# We shouldn't need an element for ${SDE_INSTALL_DIR}/lib/x86_64-linux-gnu.
+# It's only used for DPDK libraries, which are transitive dependencies of
+# the SDE libraries (specifically dpdk_infra.so). In the unlikely event
+# that we do need to include the DPDK library directory in the RPATH, we
+# can use DPDK_LIBRARY_DIRS, which is defined by pkg_check_modules(DPDK).
+
+set(SDE_ELEMENT ${SDE_INSTALL_DIR}/lib)
+
+if(NOT DEPEND_INSTALL_DIR STREQUAL "")
+    set(DEP_ELEMENT ${DEPEND_INSTALL_DIR}/lib)
+endif()
+
+###################
+# RPATH functions #
+###################
+
+# Constructs an RPATH (RUNPATH) value from a list of component paths.
+function(define_rpath VAR)
+    set(_rpath ${ARGN})
+    list(REMOVE_DUPLICATES _rpath)
+    list(JOIN _rpath ":" _rpath)
+    set(${VAR} ${_rpath} PARENT_SCOPE)
+endfunction()
+
+# Constructs an RPATH (RUNPATH) value and sets the INSTALL_RPATH property
+# of the specified target.
+function(set_install_rpath TARGET)
+    if(SET_RPATH)
+        define_rpath(_rpath ${ARGN})
+        set_target_properties(${TARGET} PROPERTIES INSTALL_RPATH ${_rpath})
+        # message(STATUS "${TARGET}::RPATH=\"${_rpath}\"")
+    endif()
+endfunction()
 
 ##################
 # Subdirectories #
