@@ -19,6 +19,8 @@ endif()
 
 set_install_rpath(infrap4d $ORIGIN/../lib ${SDE_ELEMENT} ${DEP_ELEMENT})
 
+target_sources(infrap4d PRIVATE $<TARGET_OBJECTS:daemon_o>)
+
 target_include_directories(infrap4d PRIVATE ${STRATUM_SOURCE_DIR})
 
 if(WITH_KRNLMON)
