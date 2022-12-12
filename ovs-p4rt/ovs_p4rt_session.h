@@ -86,7 +86,7 @@ std::unique_ptr<p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
 
 // Functions that operate on a OvsP4rtSession.
 
-absl::StatusOr<p4::v1::ReadResponse> SendReadRequest(
+absl::Status SendReadRequest(
     OvsP4rtSession* session, const p4::v1::ReadRequest& read_request);
 
 absl::Status SendWriteRequest(OvsP4rtSession* session,
