@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 
 project(infrap4d VERSION 0.1.0 LANGUAGES C CXX)
 
+add_subdirectory(daemon)
+
 set(STRATUM_TDI_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi)
 set(STRATUM_BFRT_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/barefoot)
 
@@ -14,6 +16,8 @@ elseif(TOFINO_TARGET)
     set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/tofino/main.cc)
     add_executable(infrap4d ${INFRAP4D_MAIN})
 endif()
+
+target_sources(infrap4d PRIVATE $<TARGET_OBJECTS:daemon_o>)
 
 set_target_properties(infrap4d
     PROPERTIES INSTALL_RPATH $ORIGIN/../lib
