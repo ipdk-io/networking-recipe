@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 
 project(infrap4d VERSION 0.1.0 LANGUAGES C CXX)
 
+add_subdirectory(daemon)
+
 set(STRATUM_TDI_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi)
 set(STRATUM_BFRT_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/barefoot)
 

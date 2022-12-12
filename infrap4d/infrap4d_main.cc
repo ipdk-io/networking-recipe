@@ -7,7 +7,14 @@
 #include "stratum/hal/bin/tdi/tofino/tofino_main.h"
 #endif
 
+extern "C"  {
+#include "daemon/daemon.h"
+}
+
 #include "krnlmon_main.h"
+#include "gflags/gflags.h"
+
+DEFINE_bool(detach, true, "Run infrap4d in attached mode");
 
 pthread_cond_t rpc_start_cond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t rpc_start_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -21,6 +28,12 @@ int main(int argc, char* argv[]) {
 #if defined(TOFINO_TARGET)
   return stratum::hal::tdi::TofinoMain(argc, argv).error_code();
 #elif defined(DPDK_TARGET)
+  gflags::ParseCommandLineFlags(&argc, &argv, false);
+  if (FLAGS_detach) {
+      daemonize_start(false);
+      daemonize_complete();
+  }
+
   krnlmon_init();
 
   krnlmon_shutdown();
@@ -30,5 +43,7 @@ int main(int argc, char* argv[]) {
      //TODO: Figure out logging for infrap4d
      return status.error_code();
    }
+
+  return 0;
 #endif
 }

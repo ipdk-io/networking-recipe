@@ -92,6 +92,10 @@ alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SD
 cd $IPDK_RECIPE
 sudo ./install/sbin/infrap4d
 ```
+ *Note*: By default, infrap4d runs in detached mode. If user wants to run infrap4d in attached mode, use --nodetach option.
+All infrap4d logs are by default logged under /var/log/stratum.
+All P4SDE logs are logged in p4_driver.log under $IPDK_RECIPE.
+All OVS logs are logged under /tmp/ovs-vswitchd.log.
 
 ### Run a sample program
 
