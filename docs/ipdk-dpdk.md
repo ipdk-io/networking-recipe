@@ -19,6 +19,7 @@ For build instructions, refer to [P4 SDE Readme](https://github.com/p4lang/p4-dp
 ```bash
 For Fedora distro: yum install libatomic libnl3-devel
 For Ubuntu distro: apt install libatomic1 libnl-route-3-dev
+pip3 install -r requirements.txt
 ```
 
 ### Build and install infrap4d dependencies

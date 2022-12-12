@@ -17,10 +17,13 @@ endif()
 
 option(ON_DEMAND    "Build targets on demand" OFF)
 option(USE_SUDO     "Use sudo when installing" OFF)
+option(USE_LDCONFIG "Use ldconfig when installing" ON)
 
 if(USE_SUDO)
   set(SUDO_CMD "sudo" "-E")
-  set(LDCONFIG_CMD COMMAND sudo ldconfig)
+  if(USE_LDCONFIG)
+      set(LDCONFIG_CMD COMMAND sudo ldconfig)
+  endif()
 endif()
 
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
@@ -133,8 +136,8 @@ ExternalProject_Add(grpc
     -DBUILD_SHARED_LIBS=on
     -DgRPC_ABSL_PROVIDER=package
     -DgRPC_PROTOBUF_PROVIDER=package
-	# gRPC builds BoringSSL, which is incompatible with libpython.
-	# We use whatever version of OpenSSL is installed instead.
+    # gRPC builds BoringSSL, which is incompatible with libpython.
+    # We use whatever version of OpenSSL is installed instead.
     -DgRPC_SSL_PROVIDER=package
     -DgRPC_ZLIB_PROVIDER=package
     -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=off
