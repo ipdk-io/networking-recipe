@@ -166,6 +166,10 @@ elseif(DPDK_TARGET)
     ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_parse_tree_interface.cc
     ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_parse_tree_interface.h
   )
+elseif(ES2000_TARGET)
+  set(STRATUM_TARGET_YANG_FILES
+    ${STRATUM_YANG_LIB_DIR}/yang_add_subtree_interface.cc
+  )
 endif()
 
 add_library(stratum_hal_lib_yang_o OBJECT
@@ -225,6 +229,18 @@ elseif(DPDK_TARGET)
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_utils.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.h
+    )
+elseif(ES2000_TARGET)
+    # ES2000 files
+    set(STRATUM_TARGET_FILES
+        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_chassis_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_chassis_manager.h
+        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_hal.cc
+        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_hal.h
+        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_sde_target.cc
+        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_sde_utils.cc
+        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_switch.cc
+        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_switch.h
     )
 endif()
 
@@ -298,6 +314,12 @@ elseif(DPDK_TARGET)
     set(STRATUM_MAIN_FILES
         ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.cc
         ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.h
+    )
+elseif(ES2000_TARGET)
+    # ES2000 files
+    set(STRATUM_MAIN_FILES
+        ${STRATUM_TDI_BIN_DIR}/es2000/es2k_main.cc
+        ${STRATUM_TDI_BIN_DIR}/es2000/es2k_main.h
     )
 endif()
 
@@ -444,4 +466,104 @@ elseif(DPDK_TARGET)
         ${DPDK_LIBRARY_DIRS})
 
     target_link_options(stratum PUBLIC ${DPDK_LD_FLAGS} ${DPDK_LDFLAGS_OTHER})
+elseif(ES2000_TARGET)
+    # ES2000 driver
+    find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
+    if(NOT LIBDRIVER)
+        message(FATAL_ERROR "Cannot find library: driver")
+    endif()
+
+    add_library(driver SHARED IMPORTED)
+    set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
+
+    # bf_switchd_lib
+    find_library(LIBBF_SWITCHD bf_switchd_lib ${SDE_INSTALL_DIR}/lib)
+    if(NOT LIBBF_SWITCHD)
+        message(FATAL_ERROR "Cannot find library: bf_switchd_lib")
+    endif()
+
+    add_library(bf_switchd_lib SHARED IMPORTED)
+    set_property(TARGET bf_switchd_lib
+                 PROPERTY IMPORTED_LOCATION ${LIBBF_SWITCHD})
+
+    # target_utils
+    find_library(LIBTARGET_UTILS target_utils ${SDE_INSTALL_DIR}/lib)
+    if(NOT LIBTARGET_UTILS)
+        message(FATAL_ERROR "Cannot find library: target_utils")
+    endif()
+
+    add_library(target_utils SHARED IMPORTED)
+    set_property(TARGET target_utils
+                 PROPERTY IMPORTED_LOCATION ${LIBTARGET_UTILS})
+
+    #TODO: Link to acccp for cross build
+    # xeoncp
+    find_library(LIBXEONCP xeoncp ${SDE_INSTALL_DIR}/lib)
+    if(NOT LIBXEONCP)
+        message(FATAL_ERROR "Cannot find library: xeoncp")
+    endif()
+
+    add_library(xeoncp SHARED IMPORTED)
+    set_property(TARGET xeoncp
+	    PROPERTY IMPORTED_LOCATION ${LIBXEONCP})
+
+    # vfio
+    find_library(LIBVFIO vfio ${SDE_INSTALL_DIR}/lib)
+    if(NOT LIBVFIO)
+        message(FATAL_ERROR "Cannot find library: vfio")
+    endif()
+
+    add_library(vfio SHARED IMPORTED)
+    set_property(TARGET vfio
+	    PROPERTY IMPORTED_LOCATION ${LIBVFIO})
+
+    #cpf
+    find_library(LIBCPF cpf ${SDE_INSTALL_DIR}/lib)
+    if(NOT LIBCPF)
+        message(FATAL_ERROR "Cannot find library: cpf")
+    endif()
+
+    add_library(cpf SHARED IMPORTED)
+    set_property(TARGET cpf
+	    PROPERTY IMPORTED_LOCATION ${LIBCPF})
+
+    #cpf_pmd_infra
+    find_library(LIBCPF_PMD_INFRA cpf_pmd_infra ${SDE_INSTALL_DIR}/lib)
+    if(NOT LIBCPF_PMD_INFRA)
+        message(FATAL_ERROR "Cannot find library: cpf_pmd_infra")
+    endif()
+
+    add_library(cpf_pmd_infra SHARED IMPORTED)
+    set_property(TARGET cpf_pmd_infra
+	    PROPERTY IMPORTED_LOCATION ${LIBCPF_PMD_INFRA})
+
+    #rte_net_idpf
+    find_library(LIBRTE_NET_IDPF rte_net_idpf ${SDE_INSTALL_DIR}/lib64)
+    if(NOT LIBRTE_NET_IDPF)
+        message(FATAL_ERROR "Cannot find library: rte_net_idpf")
+    endif()
+
+    add_library(rte_net_idpf SHARED IMPORTED)
+    set_property(TARGET rte_net_idpf
+            PROPERTY IMPORTED_LOCATION ${LIBRTE_NET_IDPF})    
+
+    target_link_libraries(stratum PUBLIC
+        driver
+        bf_switchd_lib
+        tdi
+        tdi_json_parser
+        target_utils
+        target_sys
+	xeoncp
+	vfio
+	cpf
+	cpf_pmd_infra
+	rte_net_idpf
+    )
+
+    target_link_directories(stratum PUBLIC
+        ${SDE_INSTALL}/lib
+        ${DPDK_LIBRARY_DIRS})
+
+    target_link_options(stratum PUBLIC ${ES2000_LD_FLAGS} ${ES2000_LDFLAGS_OTHER})
 endif()
