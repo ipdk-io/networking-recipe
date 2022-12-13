@@ -56,7 +56,7 @@ static volatile sig_atomic_t infrap4d_stored_sig_nr = SIG_ATOMIC_MAX;
  * this function.  New hooks registered after calling this function will take
  * effect normally. */
 void
-fatal_signal_fork(void)
+daemon_fatal_signal_fork(void)
 {
     size_t i;
 

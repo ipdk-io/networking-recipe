@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef FATAL_SIGNAL_H
-#define FATAL_SIGNAL_H 1
+#ifndef DAEMON_FATAL_SIGNAL_H
+#define DAEMON_FATAL_SIGNAL_H 1
 
 #include <stdbool.h>
 
 /* Basic interface. */
-void fatal_signal_fork(void);
+void daemon_fatal_signal_fork(void);
 
 #endif /* fatal-signal.h */

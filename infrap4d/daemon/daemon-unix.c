@@ -46,7 +46,7 @@ int infrap4d_daemonize_fd = -1;
 static pid_t fork_and_clean_up(void);
 static void daemonize_post_detach(void);
 
-int
+static int
 read_fully(int fd, void *p_, size_t size, size_t *bytes_read)
 {
     char *p = p_;
@@ -67,7 +67,7 @@ read_fully(int fd, void *p_, size_t size, size_t *bytes_read)
     return 0;
 }
 
-int
+static int
 write_fully(int fd, const void *p_, size_t size, size_t *bytes_written)
 {
     const char *p = p_;
@@ -103,7 +103,7 @@ fork_and_clean_up(void)
     }
     else if (pid > 0) {
         /* Running in parent process. */
-        fatal_signal_fork();
+        daemon_fatal_signal_fork();
     }
     return pid;
 }
@@ -153,7 +153,7 @@ fork_and_wait_for_startup(int *fdp, pid_t *child_pid)
                      * to our parent process as a courtesy. */
                     exit(WEXITSTATUS(status));
                 } else {
-		    ret = -1;
+                    ret = -1;
                 }
             } else {
                 abort();
@@ -202,7 +202,7 @@ daemonize_start(bool access_datapath)
         if (pid > 0) {
             /* Running in parent process. */
             exit(0);
-        } else {    
+        } else {
             /* Running in daemon or monitor process. */
             setsid();
         }
@@ -241,6 +241,6 @@ static void
 daemonize_post_detach(void)
 {
     if (infrap4d_detach) {
-        close_standard_fds();
+        daemon_close_standard_fds();
     }
 }

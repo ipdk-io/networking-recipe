@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef DAEMON_H
-#define DAEMON_H 1
+#ifndef INFRAP4D_DAEMON_H
+#define INFRAP4D_DAEMON_H 1
 
 #include <limits.h>
 #include <stdbool.h>
 #include <sys/types.h>
 
-void set_detach(void);
-pid_t read_pidfile(const char *name);
-
-bool get_detach(void);
 void daemon_save_fd(int fd);
 void daemonize_start(bool access_datapath);
 void daemonize_complete(void);
-void close_standard_fds(void);
+void daemon_close_standard_fds(void);
 
 #endif /* daemon.h */

@@ -64,7 +64,7 @@ get_null_fd(void)
  * leave open by calling daemon_save_fd()).  If we're started from e.g. an SSH
  * session, then this keeps us from holding that session open artificially. */
 void
-close_standard_fds(void)
+daemon_close_standard_fds(void)
 {
     int null_fd = get_null_fd();
     if (null_fd >= 0) {
