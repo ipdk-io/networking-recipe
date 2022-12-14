@@ -95,7 +95,7 @@ target_link_libraries(ovs-vswitchd
         rt m pthread
 )
 
-set_install_rpath(ovs-vswitchd $ORIGIN/../lib ${DEP_ELEMENT})
+set_install_rpath(ovs-vswitchd ${EXEC_ELEMENT} ${DEP_ELEMENT})
 
 target_link_libraries(ovs-vswitchd PUBLIC
     absl::strings
@@ -122,7 +122,7 @@ add_executable(ovs-testcontroller
     $<TARGET_OBJECTS:ovs_sidecar_o>
 )
 
-set_install_rpath(ovs-testcontroller $ORIGIN/../lib ${DEP_ELEMENT})
+set_install_rpath(ovs-testcontroller ${EXEC_ELEMENT} ${DEP_ELEMENT})
 
 target_link_libraries(ovs-testcontroller
     PRIVATE

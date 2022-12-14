@@ -8,8 +8,9 @@ cmake_minimum_required(VERSION 3.5)
 
 project(networking-recipe VERSION 0.1 LANGUAGES C CXX)
 
-include(FindPkgConfig)
 include(CMakePrintHelpers)
+include(FindPkgConfig)
+include(GNUInstallDirs)
 
 # Default: Release with Debug Info
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
@@ -20,7 +21,8 @@ option(SET_RPATH "Set RPATH in libraries and executables" OFF)
 # Symbolic path definitions #
 #############################
 
-set(DEPEND_INSTALL_DIR "" CACHE PATH "Dependencies install directory")
+set(DEPEND_INSTALL_DIR "$ENV{DEPEND_INSTALL}" CACHE PATH
+    "Dependencies install directory")
 
 set(OVS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH
     "OVS install directory")
@@ -28,7 +30,8 @@ set(OVS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH
 set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
     "OVS source directory")
 
-set(SDE_INSTALL_DIR "/opt/sde" CACHE PATH "SDE install directory")
+set(SDE_INSTALL_DIR "$ENV{SDE_INSTALL}" CACHE PATH
+    "SDE install directory")
 
 set(PROTO_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
@@ -98,6 +101,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # CMAKE_PREFIX_PATH specifies the directories to be searched by
 # find_file(), find_library(), find_path(), and find_program().
+# We only specify the install directory. The individual commands
+# each have their own lists of subdirectories to search.
 
 if(NOT DEPEND_INSTALL_DIR STREQUAL "")
     list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
@@ -132,7 +137,8 @@ endif()
 # system), we can omit the SDE or DEPEND element in favor of
 # the ORIGIN element.
 #
-# The ORIGIN element is equivalent to ${CMAKE_PREFIX_PATH}/lib.
+# The ORIGIN element is equivalent to ${CMAKE_PREFIX_PATH}/lib or
+# ${CMAKE_PREFIX_PATH}/lib64.
 #
 # The elements will need to expanded to include /lib64 paths where
 # appropriate.
@@ -143,11 +149,30 @@ endif()
 # that we do need to include the DPDK library directory in the RPATH, we
 # can use DPDK_LIBRARY_DIRS, which is defined by pkg_check_modules(DPDK).
 
-set(SDE_ELEMENT ${SDE_INSTALL_DIR}/lib)
+if(EXISTS ${SDE_INSTALL_DIR}/lib)
+    list(APPEND SDE_ELEMENT ${SDE_INSTALL_DIR}/lib)
+endif()
+if(EXISTS ${SDE_INSTALL_DIR}/lib64)
+    list(APPEND SDE_ELEMENT ${SDE_INSTALL_DIR}/lib64)
+endif()
 
 if(NOT DEPEND_INSTALL_DIR STREQUAL "")
-    set(DEP_ELEMENT ${DEPEND_INSTALL_DIR}/lib)
+    if(EXISTS ${DEPEND_INSTALL_DIR}/lib)
+        list(APPEND DEP_ELEMENT ${DEPEND_INSTALL_DIR}/lib)
+    endif()
+    if(EXISTS ${DEPEND_INSTALL_DIR}/lib64)
+        list(APPEND DEP_ELEMENT ${DEPEND_INSTALL_DIR}/lib64)
+    endif()
 endif()
+
+set(_libdir ${CMAKE_INSTALL_LIBDIR})
+if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib OR _libdir STREQUAL "lib")
+    list(APPEND EXEC_ELEMENT $ORIGIN/../lib)
+endif()
+if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib64 OR _libdir STREQUAL "lib64")
+    list(APPEND EXEC_ELEMENT $ORIGIN/../lib64)
+endif()
+unset(_libdir)
 
 ###################
 # RPATH functions #
