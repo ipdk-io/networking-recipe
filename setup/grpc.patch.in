@@ -7,7 +7,7 @@ index 824886600..5ba8f9384 100644
  )
  
 +set_target_properties(grpc_cpp_plugin
-+  PROPERTIES INSTALL_RPATH $ORIGIN/../lib
++  PROPERTIES INSTALL_RPATH $ORIGIN/../@CMAKE_INSTALL_LIBDIR@
 +)
 +
  target_include_directories(grpc_cpp_plugin
@@ -18,7 +18,7 @@ index 824886600..5ba8f9384 100644
  )
  
 +set_target_properties(grpc_python_plugin
-+  PROPERTIES INSTALL_RPATH $ORIGIN/../lib
++  PROPERTIES INSTALL_RPATH $ORIGIN/../@CMAKE_INSTALL_LIBDIR@
 +)
 +
  target_include_directories(grpc_python_plugin

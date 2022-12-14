@@ -1,3 +1,6 @@
+# generated files
+grpc.patch
+
 # build directories
 /build
 /install
