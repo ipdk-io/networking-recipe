@@ -7,6 +7,7 @@ project(dependencies VERSION 1 LANGUAGES C CXX)
 
 include(ExternalProject)
 include(CMakePrintHelpers)
+include(GNUInstallDirs)
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24)
   message(STATUS "CMake version is ${CMAKE_VERSION}")
@@ -116,15 +117,17 @@ endif()
 # GRPC #
 ########
 
-set(GRPC_GIT_TAG v1.42.0)
+configure_file(grpc.patch.in ${CMAKE_SOURCE_DIR}/grpc.patch @ONLY)
+
+set(GRPC_GIT_TAG 11f00485aa5ad422cfe2d9d90589158f46954101) # v1.42.0
 
 ExternalProject_Add(grpc
   GIT_REPOSITORY  https://github.com/google/grpc.git
   GIT_TAG         ${GRPC_GIT_TAG}
-  GIT_SHALLOW     ON    # depth=1
   GIT_PROGRESS    ON
 
   PATCH_COMMAND
+    # Set RUNPATH in gRPC executables.
     patch -i ${CMAKE_SOURCE_DIR}/grpc.patch -p1
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/grpc
