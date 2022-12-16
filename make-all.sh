@@ -2,7 +2,7 @@
 
 # Parse command-line options.
 SHORTOPTS=p:
-LONGOPTS=clean,prefix:,sde-install:,debug,dep-install:,develop,target:,ovs,no-ovs
+LONGOPTS=clean,prefix:,sde-install:,debug,dep-install:,develop,target:,ovs,no-ovs,rpath
 
 GETOPTS=`getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 eval set -- "${GETOPTS}"
@@ -38,6 +38,12 @@ while true ; do
         shift ;;
     --no-ovs)
         BUILD_WITH_OVS=false
+        shift ;;
+    --no-rpath)
+        RPATH_OPTION=-DSET_RPATH=off
+        shift ;;
+    --rpath)
+        RPATH_OPTION=-DSET_RPATH=true
         shift ;;
     --sde-install)
         # --sde-install=<path>
@@ -98,6 +104,7 @@ cmake -S . -B build \
     -DSDE_INSTALL_DIR=${SDE_INSTALL} \
     ${OVS_INSTALL_OPTION} \
     ${DEPEND_INSTALL_OPTION} \
+    ${RPATH_OPTION} \
     -D${TARGET_TYPE}_TARGET=ON
 
 cmake --build build -j6
