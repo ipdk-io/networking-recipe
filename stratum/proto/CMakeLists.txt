@@ -11,17 +11,11 @@ endif()
 # Get path to GRPC C++ plugin #
 ###############################
 
-execute_process(
-    COMMAND which grpc_cpp_plugin
-    OUTPUT_VARIABLE GRPC_CPP_PLUGIN
-    RESULT_VARIABLE GRPC_CPP_PLUGIN_ERROR
-)
+find_package(gRPC REQUIRED)
 
-if(GRPC_CPP_PLUGIN_ERROR)
-    message(FATAL_ERROR "Error: Could not find grpc_cpp_plugin")
-else()
-    string(STRIP "${GRPC_CPP_PLUGIN}" GRPC_CPP_PLUGIN)
-endif()
+get_property(GRPC_CPP_PLUGIN
+    TARGET gRPC::grpc_cpp_plugin
+    PROPERTY IMPORTED_LOCATION_NOCONFIG)
 
 ##########################
 # Compile protobuf files #
