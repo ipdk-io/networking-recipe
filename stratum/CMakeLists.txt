@@ -166,7 +166,7 @@ elseif(DPDK_TARGET)
     ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_parse_tree_interface.cc
     ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_parse_tree_interface.h
   )
-elseif(ES2000_TARGET)
+elseif(ES2K_TARGET)
   set(STRATUM_TARGET_YANG_FILES
     ${STRATUM_YANG_LIB_DIR}/yang_add_subtree_interface.cc
   )
@@ -230,17 +230,17 @@ elseif(DPDK_TARGET)
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.cc
         ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.h
     )
-elseif(ES2000_TARGET)
-    # ES2000 files
+elseif(ES2K_TARGET)
+    # ES2K files
     set(STRATUM_TARGET_FILES
-        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_chassis_manager.cc
-        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_chassis_manager.h
-        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_hal.cc
-        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_hal.h
-        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_sde_target.cc
-        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_sde_utils.cc
-        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_switch.cc
-        ${STRATUM_TDI_LIB_DIR}/es2000/es2k_switch.h
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_chassis_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_chassis_manager.h
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_hal.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_hal.h
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_sde_target.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_sde_utils.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_switch.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_switch.h
     )
 endif()
 
@@ -315,11 +315,11 @@ elseif(DPDK_TARGET)
         ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.cc
         ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.h
     )
-elseif(ES2000_TARGET)
-    # ES2000 files
+elseif(ES2K_TARGET)
+    # ES2K files
     set(STRATUM_MAIN_FILES
-        ${STRATUM_TDI_BIN_DIR}/es2000/es2k_main.cc
-        ${STRATUM_TDI_BIN_DIR}/es2000/es2k_main.h
+        ${STRATUM_TDI_BIN_DIR}/es2k/es2k_main.cc
+        ${STRATUM_TDI_BIN_DIR}/es2k/es2k_main.h
     )
 endif()
 
@@ -466,7 +466,7 @@ elseif(DPDK_TARGET)
         ${DPDK_LIBRARY_DIRS})
 
     target_link_options(stratum PUBLIC ${DPDK_LD_FLAGS} ${DPDK_LDFLAGS_OTHER})
-elseif(ES2000_TARGET)
+elseif(ES2K_TARGET)
     # ES2000 driver
     find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
     if(NOT LIBDRIVER)
@@ -565,5 +565,5 @@ elseif(ES2000_TARGET)
         ${SDE_INSTALL}/lib
         ${DPDK_LIBRARY_DIRS})
 
-    target_link_options(stratum PUBLIC ${ES2000_LD_FLAGS} ${ES2000_LDFLAGS_OTHER})
+    target_link_options(stratum PUBLIC ${ES2K_LD_FLAGS} ${ES2K_LDFLAGS_OTHER})
 endif()

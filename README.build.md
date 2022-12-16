@@ -19,7 +19,7 @@ export SDE_INSTALL=<path>
 ## Build
 
 ```bash
-./make-all.sh --target tofino
+./make-all.sh --target=<target>
 ```
 
 ## General options
@@ -48,6 +48,7 @@ These options are primarily of interest to developers working on the recipe.
 | ------ | ----------- |
 | dpdk   | _Under construction._ |
 | tofino | See [Building IPDK for Tofino](docs/ipdk-tofino.md) for more information. |
+| es2k   | See [Building IPDK for ES2K](docs/ipdk-es2k.md) for more information. |
 
 ## Note
 
