@@ -9,8 +9,8 @@ if(DPDK_TARGET)
     set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/dpdk/main.cc)
 elseif(TOFINO_TARGET)
     set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/tofino/main.cc)
-elseif(ES2000_TARGET)
-    set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/es2000/main.cc)
+elseif(ES2K_TARGET)
+    set(INFRAP4D_MAIN ${STRATUM_TDI_BIN_DIR}/es2k/main.cc)
 endif()
 
 add_executable(infrap4d
@@ -43,12 +43,12 @@ elseif(TOFINO_TARGET)
       DESTINATION
           ${CMAKE_INSTALL_PREFIX}/share/stratum
   )
-elseif(ES2000_TARGET)
+elseif(ES2K_TARGET)
     install(
         FILES
-	    ${STRATUM_TDI_BIN_DIR}/es2000/es2000_port_config.pb.txt
-            ${STRATUM_TDI_BIN_DIR}/es2000/es2000_skip_p4.conf
+	    ${STRATUM_TDI_BIN_DIR}/es2k/es2k_port_config.pb.txt
+            ${STRATUM_TDI_BIN_DIR}/es2k/es2k_skip_p4.conf
         DESTINATION
-            ${CMAKE_INSTALL_PREFIX}/share/stratum/es2000
+            ${CMAKE_INSTALL_PREFIX}/share/stratum/es2k
     )
 endif()

@@ -103,6 +103,7 @@ ExternalProject_Add(grpc
     -DgRPC_BUILD_GRPC_PHP_PLUGIN=off
     -DgRPC_BUILD_GRPC_RUBY_PLUGIN=off
     -DgRPC_BUILD_TESTS=off
+    -Dabsl_DIR=${CMAKE_INSTALL_PREFIX}/lib64/cmake/absl
     -DgRPC_INSTALL=on
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install

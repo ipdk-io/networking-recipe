@@ -40,7 +40,7 @@ while true ; do
         SDE_INSTALL=$2
         shift 2 ;;
     --target)
-        # --target={dpdk|tofino|es2000}
+        # --target={dpdk|tofino|es2k}
         # convert to uppercase
         TARGET_TYPE=${2^^}
         shift 2 ;;

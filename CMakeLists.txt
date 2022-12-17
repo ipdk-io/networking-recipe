@@ -41,7 +41,7 @@ option(WITH_STRATUM     "Build with Stratum" ON)
 
 option(DPDK_TARGET      "Build for DPDK target" OFF)
 option(TOFINO_TARGET    "Build for Tofino target" OFF)
-option(ES2000_TARGET "Build for Tofino target" OFF)
+option(ES2K_TARGET      "Build for ES2000 target" OFF)
 
 # Translate target option to TARGETFLAG string.
 # - Use precedence to deal with multiple selections.
@@ -55,8 +55,8 @@ if(TOFINO_TARGET)
     set(DPDK_TARGET OFF)
 elseif(DPDK_TARGET)
     set(TARGETFLAG DPDK_TARGET)
-elseif(ES2000_TARGET)
-    set(TARGETFLAG ES2000_TARGET)
+elseif(ES2K_TARGET)
+    set(TARGETFLAG ES2K_TARGET)
 else()
     set(TARGETFLAG ${_default_target})
     set(${_default_target} ON)
