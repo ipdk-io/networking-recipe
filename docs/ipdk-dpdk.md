@@ -1,4 +1,4 @@
-# Building IPDK networking recipe for DPDK target
+# IPDK Networking Recipe for DPDK
 
 ## Overview
 
@@ -60,7 +60,7 @@ option to make-all.sh. The following examples assume default `install`
 directory for the executables. If not, user will need to specify the
 appropriate path instead of ./install.
 
-### Run Networking recipe
+### Run Networking Recipe
 
 #### Set up the environment required by infrap4d
 
@@ -92,10 +92,13 @@ alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SD
 cd $IPDK_RECIPE
 sudo ./install/sbin/infrap4d
 ```
- *Note*: By default, infrap4d runs in detached mode. If user wants to run infrap4d in attached mode, use --nodetach option.
-All infrap4d logs are by default logged under /var/log/stratum.
-All P4SDE logs are logged in p4_driver.log under $IPDK_RECIPE.
-All OVS logs are logged under /tmp/ovs-vswitchd.log.
+
+ By default, infrap4d runs in detached mode. If you want to run
+ infrap4d in attached mode, use the `--nodetach` option.
+
+- All infrap4d logs are by default logged under /var/log/stratum.
+- All P4SDE logs are logged in p4_driver.log under $IPDK_RECIPE.
+- All OVS logs are logged under /tmp/ovs-vswitchd.log.
 
 ### Run a sample program
 
