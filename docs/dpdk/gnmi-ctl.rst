@@ -266,3 +266,22 @@ Limitations/Note
     not supported once the port is added to DPDK target backend.
 
     6) Runtime validation of ``value`` for each key in ``gnmi-cli`` is not supported.
+
+    7) P4 DPDK backend supports both PSA and PNA architectures. Based on the architecture
+    used in the P4 program, P4 compiler emits the pipeline name differently.
+    If P4 program is defined for
+    ``PNA architecture`` P4 compiler emits the PIPELINE name as "pipe" irrespective of the name defined in the P4 program.
+    ``PSA architecture`` P4 compiler uses and emits the PIPELINE name defined by the user in the program.
+                         Currently it supports only ingress pipelines.
+
+    This pipeline name is referred in below three places and consumed by infrap4d to program the target.
+    ``p4_pipeline_name`` in /usr/share/stratum/dpdk/dpdk_skip_p4.conf file.
+    ``p4_pipeline_name`` in conf file used in tdi_pipeline_builder to generate pb.bin.
+    ``pipeline-name`` parameter in gnmi-ctl, while configuring the PORT
+          Ex: gnmi-ctl set "device:virtual-device,name:TAP1,pipeline-name:pipe,mtu:1500,port-type:TAP"
+
+    Infrap4d assumes pipeline name is defaulted to "pipe". If the P4 program is defined for PSA architecture
+    and uses a pipeline name other than "pipe", we need to manually change the 'pipeline name' at all the above
+    three places to the ingress pipeline name mentioned in the p4 file.
+
+    Hence to avoid this handcrafting, we recommend using the ingress pipeline name as "pipe" for all the PSA programs.
