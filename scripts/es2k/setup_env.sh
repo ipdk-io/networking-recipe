@@ -45,14 +45,14 @@ else
 fi
 
 # Update IPDK RECIPE libraries
-export LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib:$IPDK_RECIPE/install/lib64:$LD_LIBRARY_PATH
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64
 
 # Update Dependent libraries
 export LD_LIBRARY_PATH=$DEPEND_INSTALL/lib:$DEPEND_INSTALL/lib64:$LD_LIBRARY_PATH
-export PATH=$DEPEND_INSTALL/bin:$DEPEND_INSTALL/sbin:$PATH
+export PATH=$DEPEND_INSTALL/bin:$DEPEND_INSTALL/sbin:$IPDK_RECIPE/install/sbin:$IPDK_RECIPE/install/bin:$PATH
 export LIBRARY_PATH=$DEPEND_INSTALL/lib:$DEPEND_INSTALL/lib64:$LIBRARY_PATH
 
 echo ""
