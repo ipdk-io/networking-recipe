@@ -2,14 +2,15 @@
 
 # Parse command-line options.
 SHORTOPTS=p:
-LONGOPTS=clean,prefix:,sde-install:,dep-install:,develop,target:,ovs,no-ovs
+LONGOPTS=clean,prefix:,sde-install:,debug,dep-install:,develop,target:,ovs,no-ovs,rpath
 
 GETOPTS=`getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 eval set -- "${GETOPTS}"
 
 # Set defaults.
+BUILD_TYPE="RelWithDebInfo"
 PREFIX="install"
-TARGET_TYPE="TOFINO"
+TARGET_TYPE="DPDK"
 DEVELOP=0
 
 # Process command-line options.
@@ -22,6 +23,9 @@ while true ; do
         # --prefix=<path>
         PREFIX=$2
         shift 2 ;;
+    --debug)
+        BUILD_TYPE="Debug"
+        shift ;;
     --dep-install)
         # --dep-install=<path>
         DEPEND_INSTALL=$2
@@ -34,6 +38,12 @@ while true ; do
         shift ;;
     --no-ovs)
         BUILD_WITH_OVS=false
+        shift ;;
+    --no-rpath)
+        RPATH_OPTION=-DSET_RPATH=off
+        shift ;;
+    --rpath)
+        RPATH_OPTION=-DSET_RPATH=true
         shift ;;
     --sde-install)
         # --sde-install=<path>
@@ -76,7 +86,10 @@ set -e
 if [ -z "${BUILD_WITH_OVS}" -o "${BUILD_WITH_OVS}" = "true" ]; then
     # Build OVS first.
     echo "Building OVS"
-    cmake -S ovs -B ${OVS_BUILD} -DCMAKE_INSTALL_PREFIX=${OVS_INSTALL}
+    cmake -S ovs -B ${OVS_BUILD} \
+        -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+        -DCMAKE_INSTALL_PREFIX=${OVS_INSTALL} \
+        -DP4OVS=ON
     cmake --build ${OVS_BUILD} -j6 -- V=0
     OVS_INSTALL_OPTION=-DOVS_INSTALL_DIR=${OVS_INSTALL}
 else
@@ -86,10 +99,12 @@ fi
 
 # Build the rest of the recipe.
 cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
     -DSDE_INSTALL_DIR=${SDE_INSTALL} \
     ${OVS_INSTALL_OPTION} \
     ${DEPEND_INSTALL_OPTION} \
+    ${RPATH_OPTION} \
     -D${TARGET_TYPE}_TARGET=ON
 
 cmake --build build -j6

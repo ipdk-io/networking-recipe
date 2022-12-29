@@ -268,12 +268,14 @@ add_library(stratum_target_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/utils.h
 )
 
-target_compile_definitions(stratum_target_o PRIVATE SDE_9_11_0)
-
 target_include_directories(stratum_target_o PRIVATE
     ${STRATUM_INCLUDES}
     ${SDE_INSTALL_DIR}/include
 )
+
+if(WITH_KRNLMON)
+    target_compile_definitions(stratum_target_o PRIVATE KRNLMON_SUPPORT)
+endif()
 
 add_dependencies(stratum_target_o stratum_proto)
 
@@ -300,8 +302,6 @@ endif()
 add_library(stratum_main_o OBJECT
     ${STRATUM_MAIN_FILES}
 )
-
-target_compile_definitions(stratum_main_o PRIVATE SDE_9_5_0)
 
 target_include_directories(stratum_main_o PRIVATE
     ${STRATUM_INCLUDES}

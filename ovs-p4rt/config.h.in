@@ -1,0 +1,16 @@
+// Copyright 2022 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
+
+#ifndef P4OVS_CONFIG_H
+#define P4OVS_CONFIG_H
+
+/* Whether C compiler supports AVX512. */
+#cmakedefine HAVE_AVX512F ${HAVE_AVX512F}
+
+/* Whether binutils is free of known issues with AVX512. */
+#cmakedefine HAVE_LD_AVX512_GOOD ${HAVE_LD_AVX512_GOOD}
+
+/* Whether we have the 'aio_write' function. */
+#cmakedefine HAVE_POSIX_AIO ${HAVE_POSIX_AIO}
+
+#endif
