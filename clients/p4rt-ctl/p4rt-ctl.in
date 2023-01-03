@@ -1042,7 +1042,7 @@ def _format_entry(p4info_helper, table_entry):
     tbl_name = p4info_helper.get_name('tables', table_entry.table_id)
     output_buffer = "  "
     output_buffer += "table={}".format(tbl_name)
-    if table_entry.priority is not None:
+    if table_entry.priority is not None and table_entry.priority != 0:
         output_buffer += " priority={}".format(table_entry.priority)
 
     first = True
@@ -1060,15 +1060,28 @@ def _format_entry(p4info_helper, table_entry):
         else:
             output_buffer += ",{}={}".format(match_field_name, mf_val)
 
-    output_buffer += ' actions='
-    action_name = p4info_helper.get_name('actions',
+    if table_entry.action.action.action_id is not None and table_entry.action.action.action_id != 0:
+        output_buffer += ' actions='
+        action_name = p4info_helper.get_name('actions',
                                          table_entry.action.action.action_id)
-    action_params = p4info_helper.get_action_params(action_name)
-    params_str = ""
-    for idx, param in enumerate(table_entry.action.action.params):
-        params_str += "{}={}".format(action_params[idx].name,
+        action_params = p4info_helper.get_action_params(action_name)
+        params_str = ""
+        for idx, param in enumerate(table_entry.action.action.params):
+            params_str += "{}={}".format(action_params[idx].name,
                                      decodeToHex(param.value))
-    output_buffer += '{}({})'.format(action_name, params_str)
+        output_buffer += '{}({})'.format(action_name, params_str)
+
+    if table_entry.action.action_profile_member_id is not None and table_entry.action.action_profile_member_id != 0:
+       action_name = ' member_id'
+       params_str =  table_entry.action.action_profile_member_id
+       output_buffer += '{}({})'.format(action_name, params_str)
+
+    if table_entry.action.action_profile_group_id is not None and table_entry.action.action_profile_group_id != 0:
+       action_name = ' group_id'
+       params_str =  table_entry.action.action_profile_group_id
+       output_buffer += '{}({})'.format(action_name, params_str)
+
+    # Need to add support for action_profile_action_set, currently not supported.
 
     return output_buffer
 
