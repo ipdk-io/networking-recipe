@@ -107,9 +107,9 @@ source ./scripts/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
-#### Create IPDF netdev's
+#### Create IPDF netdevs
 
-After installing ATE Kernel on HOST machine, install below drivers to get netdev's binded to the ES2000 target.
+After installing ATE Kernel on HOST machine, install the following drivers to bind the network devices (netdevs) to the ES2000 target.
 ```
 modprobe idpf
 modprobe auxiliary
@@ -119,7 +119,7 @@ modprobe iavf
 
 #### Create P4 artifacts
 
-- P4 programs are available in P4 SDE repository.
+- P4 programs are available in the P4 SDE repository.
 
 - Install p4c compiler from
   [p4c](https://github.com/intel-innersource/networking.ipu.software.p4-compiler.p4c.git) repository
@@ -171,7 +171,9 @@ touch tofino.bin
 sudo ./install/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3_l4_pna.pb.bin $OUTPUT_DIR/simple_l3_l4_pna.p4info.txt
 ```
 
-#### Configure forwarding rule to receive traffic on VSI-1 (base offset 16 + VSI ID 1) when key matches.
+#### Configure forwarding rule to receive traffic
+
+Add a forwarding rule to receive traffic on VSI-1 (base offset 16 + VSI ID 1) when the key matches.
 
 ```bash
 sudo  ./install/bin/p4rt-ctl add-entry br0 MainControlImpl.l3_l4_match_rx \
@@ -182,9 +184,9 @@ sudo  ./install/bin/p4rt-ctl add-entry br0 MainControlImpl.l3_l4_match_rx \
 
  *Note*: See [p4rt-ctl Readme](https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.networking-recipe/blob/main/docs/p4rt-ctl.rst) for more information on p4rt-ctl utility.
 
-#### Test traffic between link partner to ES2000
+#### Test traffic from link partner to ES2000
 
-Send packet from physical port of linkpartner to ES2000 using scapy and listen on netdev corresponding to VSI-1 using `tcpdump`.
+Send packet from physical port of link partner to ES2000 using any traffic generator application and listen on netdev corresponding to VSI-1 using `tcpdump`.
 
 ```text
 sendp(Ether(dst="6e:80:97:ae:1e:4e", src="00:00:00:09:03:14")/IP(src="192.168.1.10", dst="192.168.1.20")/UDP(sport=1000, dport=2000)/Raw(load="0"*50), iface='ens78f0')
