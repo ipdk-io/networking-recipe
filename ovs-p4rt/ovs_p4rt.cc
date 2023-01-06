@@ -206,6 +206,32 @@ absl::Status ConfigFdbRxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
 }
 
+absl::Status CheckIfTxFdbEntryExists(ovs_p4rt_cpp::OvsP4rtSession* session,
+                                    const struct mac_learning_info learn_info,
+                                    const ::p4::config::v1::P4Info p4info) {
+  ::p4::v1::ReadRequest read_req;
+  ::p4::v1::ReadResponse read_resp;
+
+  read_req.set_device_id(session->DeviceId());
+  ::p4::v1::TableEntry* table_entry = read_req.add_entities()->mutable_table_entry();
+  PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, false);
+
+  return ovs_p4rt_cpp::SendReadRequest(session, read_req);
+}
+
+absl::Status CheckIfRxFdbEntryExists(ovs_p4rt_cpp::OvsP4rtSession* session,
+                                    const struct mac_learning_info learn_info,
+                                    const ::p4::config::v1::P4Info p4info) {
+  ::p4::v1::ReadRequest read_req;
+  ::p4::v1::ReadResponse read_resp;
+
+  read_req.set_device_id(session->DeviceId());
+  ::p4::v1::TableEntry* table_entry = read_req.add_entities()->mutable_table_entry();
+  PrepareFdbRxVlanTableEntry(table_entry, learn_info, p4info, false);
+
+  return ovs_p4rt_cpp::SendReadRequest(session, read_req);
+}
+
 absl::Status ConfigFdbTunnelTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                        const struct mac_learning_info learn_info,
                                        const ::p4::config::v1::P4Info p4info,
@@ -246,12 +272,18 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry)
         status = ConfigFdbTunnelTableEntry(session.get(), learn_info,
                                            p4info, insert_entry);
     } else if (learn_info.is_vlan) {
-        status = ConfigFdbTxVlanTableEntry(session.get(), learn_info,
-                                           p4info, insert_entry);
-        if(!status.ok())
-            return;
-        status = ConfigFdbRxVlanTableEntry(session.get(), learn_info,
-                                           p4info, insert_entry);
+       status = CheckIfTxFdbEntryExists(session.get(), learn_info,
+                                           p4info);
+       if (!status.ok()) {
+            status = ConfigFdbTxVlanTableEntry(session.get(), learn_info,
+                                               p4info, insert_entry);
+       }
+        status = CheckIfRxFdbEntryExists(session.get(), learn_info,
+                                           p4info);
+        if (!status.ok()) {
+            status = ConfigFdbRxVlanTableEntry(session.get(), learn_info,
+                                               p4info, insert_entry);
+        }
     }
     if (!status.ok())
         return;

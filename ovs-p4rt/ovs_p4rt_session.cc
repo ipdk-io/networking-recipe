@@ -106,7 +106,7 @@ absl::Status GetForwardingPipelineConfig(OvsP4rtSession* session,
   return absl::OkStatus();
 }
 
-absl::StatusOr<ReadResponse> SendReadRequest(OvsP4rtSession* session,
+absl::Status SendReadRequest(OvsP4rtSession* session,
                                              const ReadRequest& read_request) {
   grpc::ClientContext context;
   auto reader = session->Stub().Read(&context, read_request);
@@ -118,11 +118,8 @@ absl::StatusOr<ReadResponse> SendReadRequest(OvsP4rtSession* session,
   }
 
   grpc::Status reader_status = reader->Finish();
-  if (!reader_status.ok()) {
-    return GrpcStatusToAbslStatus(reader_status);
-  }
 
-  return std::move(response);
+  return GrpcStatusToAbslStatus(reader_status);
 }
 
 absl::Status SendWriteRequest(OvsP4rtSession* session,
