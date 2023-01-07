@@ -1072,11 +1072,13 @@ def _format_entry(p4info_helper, table_entry):
         output_buffer += '{}({})'.format(action_name, params_str)
 
     if table_entry.action.action_profile_member_id is not None and table_entry.action.action_profile_member_id != 0:
+       output_buffer += ' actions='
        action_name = ' member_id'
        params_str =  table_entry.action.action_profile_member_id
        output_buffer += '{}({})'.format(action_name, params_str)
 
     if table_entry.action.action_profile_group_id is not None and table_entry.action.action_profile_group_id != 0:
+       output_buffer += ' actions='
        action_name = ' group_id'
        params_str =  table_entry.action.action_profile_group_id
        output_buffer += '{}({})'.format(action_name, params_str)
