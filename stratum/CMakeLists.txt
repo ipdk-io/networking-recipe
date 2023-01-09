@@ -76,6 +76,8 @@ add_library(stratum_lib_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/lib/macros.h
     ${STRATUM_SOURCE_DIR}/stratum/lib/security/auth_policy_checker.cc
     ${STRATUM_SOURCE_DIR}/stratum/lib/security/auth_policy_checker.h
+    ${STRATUM_SOURCE_DIR}/stratum/lib/security/credentials_manager.cc
+    ${STRATUM_SOURCE_DIR}/stratum/lib/security/credentials_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/lib/utils.cc
     ${STRATUM_SOURCE_DIR}/stratum/lib/utils.h
     ${STRATUM_SOURCE_DIR}/stratum/public/lib/error.cc
