@@ -46,6 +46,7 @@ fi
 
 # Update IPDK RECIPE libraries
 export LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib:$IPDK_RECIPE/install/lib64:$LD_LIBRARY_PATH
+export PATH=$IPDK_RECIPE/install/bin:$IPDK_RECIPE/install/sbin:$PATH
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64

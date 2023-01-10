@@ -33,7 +33,7 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
 # ABSEIL #
 ##########
 
-set(ABSEIL_GIT_TAG ec0d76f1d012cc1a4b3b08dfafcfc5237f5ba2c9)
+set(ABSEIL_GIT_TAG 273292d1cfc0a94a65082ee350509af1d113344d) #20220623.0
 
 # Recommended for CMake 3.8 and up
 set(ABSL_CXX_PROPAGATE_CXX_STD ON)
@@ -86,7 +86,7 @@ endif()
 # PROTOBUF #
 ############
 
-set(PROTOBUF_GIT_TAG 0dab03ba7bc438d7ba3eac2b2c1eb39ed520f928) # v3.18.1
+set(PROTOBUF_GIT_TAG fe271ab76f2ad2b2b28c10443865d2af21e27e0e) # v3.20.3
 
 ExternalProject_Add(protobuf
   GIT_REPOSITORY  https://github.com/google/protobuf.git
@@ -119,7 +119,7 @@ endif()
 
 configure_file(grpc.patch.in ${CMAKE_SOURCE_DIR}/grpc.patch @ONLY)
 
-set(GRPC_GIT_TAG 11f00485aa5ad422cfe2d9d90589158f46954101) # v1.42.0
+set(GRPC_GIT_TAG 90ccf24d22b6fc909a1021ebd89fd8c838467d26) # v1.50.0
 
 ExternalProject_Add(grpc
   GIT_REPOSITORY  https://github.com/google/grpc.git
@@ -215,7 +215,7 @@ endif()
 # GLOG #
 ########
 
-set(GLOG_GIT_TAG 503e3dec8d1fe071376befc62119a837c26612a3)
+set(GLOG_GIT_TAG a8e0007e96ff96145022c488e367da10f835c75d) #v0.6.0-rc1
 
 ExternalProject_Add(glog
   GIT_REPOSITORY  https://github.com/google/glog.git
