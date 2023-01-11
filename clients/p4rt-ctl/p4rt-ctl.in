@@ -27,6 +27,7 @@ import sys
 import grpc
 import logging
 import math
+import os
 import queue
 import random
 import re
@@ -539,12 +540,39 @@ class P4RuntimeClient:
                  election_id=(1, 0)):
         self.device_id = device_id
         self.election_id = election_id
-        try:
+
+        root_ca_file_path = '/usr/share/stratum/certs/ca.crt'
+        client_key_file_path = '/usr/share/stratum/certs/client.key'
+        client_crt_file_path = '/usr/share/stratum/certs/client.crt'
+
+        rootca_exists = os.path.isfile(root_ca_file_path)
+        clientkey_exists = os.path.isfile(client_key_file_path)
+        clientcrt_exists = os.path.isfile(client_crt_file_path)
+
+        if rootca_exists and clientkey_exists and clientcrt_exists:
+            try:
+                with open(root_ca_file_path, 'rb') as rootca:
+                    with open(client_key_file_path, 'rb') as clientkey:
+                        with open(client_crt_file_path, 'rb') as clientcrt:
+                            creds = grpc.ssl_channel_credentials(rootca.read(), clientkey.read(), clientcrt.read())
+                
+                if creds is not None:
+                    self.channel = grpc.secure_channel(grpc_addr, creds)
+                else:
+                    self.print_warning_message("Credentials error accessing certificate/key files", grpc_addr)
+                    self.channel = grpc.insecure_channel(grpc_addr)
+            except Exception as e:
+                raise e
+        else:
+            self.print_warning_message("Unable to locate TLS certificates", grpc_addr)
             self.channel = grpc.insecure_channel(grpc_addr)
-        except Exception as e:
-            raise e
+
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
         self.set_up_stream()
+
+    def print_warning_message(self, custom_text, grpc_insecure):
+        print("*** Warning: " + custom_text + " ***")
+        print("Attempting P4RT communication over insecure channel on port " + grpc_insecure + "...")
 
     def set_up_stream(self):
         self.stream_out_q = queue.Queue()
