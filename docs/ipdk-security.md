@@ -15,9 +15,19 @@ P4CP is launched only with gRPC ports open secured via TLS certificates. The por
 * 9339 - an IANA-registered port for gNMI and gNOI
 * 9559 - an IANA-registered port for P4RT
 
-### Generating TLS Certificates
+### Generating TLS Certificates & installing with script
 
-These ports are secured using TLS certificates. A Stratum script and reference configuration files are available to assist in generating the certificates. The reference file uses OpenSSL to generate the keys & certificates. However, users may choose other tools.
+A script is available to generate and install the certificates in order to establish gRPC secure-mode communication. This setup script uses a pre-configured options and uses OpenSSL to generate the certificate and key files. 
+
+To run the script, which generates certificate and key files and installs to default location:
+
+```bash
+$IPDK_RECIPE/scripts/security/setup_certs_tls_mode.sh
+```
+
+### Generating TLS Certificates & installing manually
+
+The gRPC ports are secured using TLS certificates. A Stratum script and reference configuration files are available to assist in generating the certificates. The reference file uses OpenSSL to generate the keys & certificates. However, users may choose other tools.
 
 The reference file uses a simple PKI where a self-signed RootCA is generated and the same RootCA is used to generate server key & cert and client key & cert. This results in a 1-depth level certificate chain, which will suffice for testing and confirmation, but production systems are encouraged to generate multiple depth levels in order to conform to higher security standards.
 
@@ -42,7 +52,7 @@ COMMON_NAME=localhost ./generate-certs.sh
 * Copy the generated ca.crt, client.crt and client.key to the gRPC client machine
 
 
-### Certificate installation
+#### Certificate installation
 
 InfraP4D will check for certificate in the following default location:
 
