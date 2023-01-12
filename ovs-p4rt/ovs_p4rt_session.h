@@ -1,12 +1,14 @@
 // Copyright 2020 Google LLC
 // Copyright 2021-present Open Networking Foundation
-// Copyright (c) 2022 Intel Corporation
+// Copyright (c) 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #ifndef OVSP4RT_SESSION_H_
 #define OVSP4RT_SESSION_H_
 
 #include <memory>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <grpcpp/grpcpp.h>
 
@@ -28,6 +30,21 @@ inline absl::uint128 TimeBasedElectionId() {
   return absl::MakeUint128(absl::ToUnixSeconds(absl::Now()), 0);
 }
 
+static void readFile(const std::string& filename, std::string& data)
+ {
+         std::ifstream file (filename.c_str ());
+
+         if (file.is_open ())
+         {
+                 std::stringstream ss;
+                 ss << file.rdbuf ();
+                 file.close ();
+                 data = ss.str ();
+         }
+
+         return;
+ }
+
 class OvsP4rtSession {
  public:
   // Create the session with given P4runtime stub and device id
@@ -39,7 +56,6 @@ class OvsP4rtSession {
   // and device id
   static absl::StatusOr<std::unique_ptr<OvsP4rtSession>> Create(
       const std::string& address,
-      const std::shared_ptr<grpc::ChannelCredentials>& credentials,
       uint32_t device_id, absl::uint128 election_id = TimeBasedElectionId());
 
   // Disable copy semantics.
@@ -55,6 +71,8 @@ class OvsP4rtSession {
   p4::v1::Uint128 ElectionId() const { return election_id_; }
 
   p4::v1::P4Runtime::Stub& Stub() { return *stub_; }
+
+  static std::shared_ptr<::grpc::ChannelCredentials> getChannelCredentials();
 
  private:
   OvsP4rtSession(uint32_t device_id,

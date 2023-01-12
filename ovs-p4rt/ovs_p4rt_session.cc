@@ -1,6 +1,6 @@
 // Copyright 2020 Google LLC
 // Copyright 2021-present Open Networking Foundation
-// Copyright (c) 2022 Intel Corporation
+// Copyright (c) 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include <string>
@@ -84,10 +84,31 @@ absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
 // destructed.
 absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
     const std::string& address,
-    const std::shared_ptr<grpc::ChannelCredentials>& credentials,
     uint32_t device_id, absl::uint128 election_id) {
-  return Create(CreateP4RuntimeStub(address, credentials), device_id,
+  return Create(CreateP4RuntimeStub(address, getChannelCredentials()), device_id,
                 election_id);
+}
+
+std::shared_ptr<::grpc::ChannelCredentials> OvsP4rtSession::getChannelCredentials() {
+  std::string cert, key, ca;
+
+  // TODO(5abeel): Hardcoding default certificate file locations for now.
+  readFile ("/usr/share/stratum/certs/ca.crt", ca);
+  readFile ("/usr/share/stratum/certs/client.key", key);
+  readFile ("/usr/share/stratum/certs/client.crt", cert);
+  
+  grpc::SslCredentialsOptions opts =
+            {
+              ca
+              ,key
+              ,cert
+            };
+  std::shared_ptr<::grpc::ChannelCredentials> channel_credentials =
+    grpc::SslCredentials(grpc::SslCredentialsOptions(opts));
+#if 0
+  channel_credentials = grpc::InsecureChannelCredentials();
+#endif
+  return channel_credentials;
 }
 
 absl::Status GetForwardingPipelineConfig(OvsP4rtSession* session,
