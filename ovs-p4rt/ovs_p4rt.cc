@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Intel Corporation
+// Copyright (c) 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 // TODO: ovs-p4rt logging
 #include "ovs_p4rt_session.h"
@@ -227,7 +227,7 @@ absl::Status ConfigFdbTunnelTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
 void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry) {
     // Start a new client session.
     auto status_or_session = ovs_p4rt_cpp::OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), ::grpc::InsecureChannelCredentials(),
+      absl::GetFlag(FLAGS_grpc_addr),
       absl::GetFlag(FLAGS_device_id));
     if (!status_or_session.ok()) {
         return;
@@ -383,7 +383,7 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info,
                             bool insert_entry) {
     // Start a new client session.
     auto status_or_session = ovs_p4rt_cpp::OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), ::grpc::InsecureChannelCredentials(),
+      absl::GetFlag(FLAGS_grpc_addr),
       absl::GetFlag(FLAGS_device_id));
     if (!status_or_session.ok()) {
        return;
