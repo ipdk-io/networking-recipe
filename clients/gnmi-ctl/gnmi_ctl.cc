@@ -1,5 +1,5 @@
 // Copyright 2019-present Open Networking Foundation
-// Copyright 2021-2022 Intel Corporation
+// Copyright 2021-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include <csignal>
@@ -9,11 +9,23 @@
 #include <string>
 #include <vector>
 
+#include "absl/cleanup/cleanup.h"
 #include "gflags/gflags.h"
-#include "gnmi/gnmi.grpc.pb.h"
 #include "gnmi_ctl_utils.h"
+#include "gnmi/gnmi.grpc.pb.h"
 #include "grpcpp/grpcpp.h"
 #include "grpcpp/security/credentials.h"
+#include "grpcpp/security/tls_credentials_options.h"
+#include "re2/re2.h"
+#include "stratum/glue/init_google.h"
+#include "stratum/glue/status/status.h"
+#include "stratum/glue/status/status_macros.h"
+#include "stratum/lib/constants.h"
+#include "stratum/lib/macros.h"
+#include "stratum/lib/security/credentials_manager.h"
+#include "stratum/lib/utils.h"
+
+#define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
 const char kUsage[] =
     R"USAGE(usage: gnmi-ctl [Options] {get,set,cap,sub-onchange,sub-sample} parameters
@@ -32,6 +44,14 @@ example:
    gnmi-ctl get "device:<type>,name=<name>,key"
 )USAGE";
 
+// Pipe file descriptors used to transfer signals from the handler to the cancel
+// function.
+int pipe_read_fd_ = -1;
+int pipe_write_fd_ = -1;
+
+// Pointer to the client context to cancel the blocking calls.
+grpc::ClientContext* ctx_ = nullptr;
+
 #define GNMI_PREDICT_ERROR(x) (__builtin_expect(false || (x), false))
 
 #define PRINT_MSG(msg, prompt)                   \
@@ -40,21 +60,51 @@ example:
     std::cout << msg.DebugString() << std::endl; \
   } while (0)
 
-#define RETURN_IF_GRPC_ERROR(expr)                                             \
-  do {                                                                         \
-    const ::grpc::Status _grpc_status = (expr);                                \
-    if (GNMI_PREDICT_ERROR(!_grpc_status.ok())) {                              \
-      std::cout << "Return grpc errno ("<< _grpc_status.error_code() <<        \
-                   "), Reason: "<<_grpc_status.error_message() << std::endl;   \
-      return 0;                                                                \
-    }                                                                          \
+#define RETURN_IF_GRPC_ERROR(expr)                                           \
+  do {                                                                       \
+    const ::grpc::Status _grpc_status = (expr);                              \
+    if (ABSL_PREDICT_FALSE(!_grpc_status.ok() &&                             \
+                           _grpc_status.error_code() != grpc::CANCELLED)) {  \
+      ::util::Status _status(                                                \
+          static_cast<::util::error::Code>(_grpc_status.error_code()),       \
+          _grpc_status.error_message());                                     \
+      LOG(ERROR) << "Return Error: " << #expr << " failed with " << _status; \
+      return _status;                                                        \
+    }                                                                        \
   } while (0)
+
+void HandleSignal(int signal) {
+  static_assert(sizeof(signal) <= PIPE_BUF,
+                "PIPE_BUF is smaller than the number of bytes that can be "
+                "written atomically to a pipe.");
+  // We must restore any changes made to errno at the end of the handler:
+  // https://www.gnu.org/software/libc/manual/html_node/POSIX-Safety-Concepts.html
+  int saved_errno = errno;
+  // No reasonable error handling possible.
+  write(pipe_write_fd_, &signal, sizeof(signal));
+  errno = saved_errno;
+}
+
+void* ContextCancelThreadFunc(void*) {
+  int signal_value;
+  int ret = read(pipe_read_fd_, &signal_value, sizeof(signal_value));
+  if (ret == 0) {  // Pipe has been closed.
+    return nullptr;
+  } else if (ret != sizeof(signal_value)) {
+    LOG(ERROR) << "Error reading complete signal from pipe: " << ret << ": "
+               << strerror(errno);
+    return nullptr;
+  }
+  if (ctx_) ctx_->TryCancel();
+  LOG(INFO) << "Client context cancelled.";
+  return nullptr;
+}
 
 #define MAX_STR_LENGTH 128
 
 // FIXME: For now it is connecting to localhost and later it has to be fixed
 // to support any host, by providing a CLI option to the user.
-DEFINE_string(grpc_addr, "127.0.0.1:9339", "gNMI server address");
+DEFINE_string(grpc_addr, "localhost:9339", "gNMI server address");
 
 DEFINE_uint64(interval, 5000, "Subscribe poll interval in ms");
 DEFINE_bool(replace, false, "Use replace instead of update");
@@ -69,6 +119,8 @@ DEFINE_string(name_key, "name", "The gNMI cli name key");
 DEFINE_string(subtree_config, "config", "The gNMI path subtree of type config");
 
 namespace gnmi {
+
+using namespace stratum;
 
 void add_path_elem(std::string elem_name, std::string elem_kv,
                    ::gnmi::PathElem* elem) {
@@ -221,32 +273,72 @@ void traverse_params(char** path, char* node_path, char* config_value,
 ::grpc::ClientReaderWriterInterface<
     ::gnmi::SubscribeRequest, ::gnmi::SubscribeResponse>* stream_reader_writer;
 
-int Main(int argc, char** argv) {
+::util::Status Main(int argc, char** argv) {
+
+  // Default certificate file location for TLS-mode
+  FLAGS_ca_cert_file = DEFAULT_CERTS_DIR "ca.crt";
+  FLAGS_server_key_file = DEFAULT_CERTS_DIR "stratum.key";
+  FLAGS_server_cert_file = DEFAULT_CERTS_DIR "stratum.crt";
+  FLAGS_client_key_file = DEFAULT_CERTS_DIR "client.key";
+  FLAGS_client_cert_file = DEFAULT_CERTS_DIR "client.crt";
+
+  // Parse command line flags
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+
+  ::gflags::SetUsageMessage(kUsage);
+  InitGoogle(argv[0], &argc, &argv, true);
+  stratum::InitStratumLogging();
+  
   bool vhost_device = false;
   if (argc < 2) {
     std::cout << kUsage << std::endl;
-    return 0;
+    return MAKE_ERROR(ERR_INVALID_PARAM) << "Invalid number of arguments.";
   }
-  ::grpc::Status status;
-  std::shared_ptr<::grpc::ChannelCredentials> channel_credentials =
-      ::grpc::InsecureChannelCredentials();
-  auto channel = ::grpc::CreateChannel(FLAGS_grpc_addr, channel_credentials);
+
+  ::grpc::ClientContext ctx;
+  ctx_ = &ctx;
+  // Create the pipe to transfer signals.
+  {
+    RETURN_IF_ERROR(
+        CreatePipeForSignalHandling(&pipe_read_fd_, &pipe_write_fd_));
+  }
+  CHECK_RETURN_IF_FALSE(std::signal(SIGINT, HandleSignal) != SIG_ERR);
+  pthread_t context_cancel_tid;
+  CHECK_RETURN_IF_FALSE(pthread_create(&context_cancel_tid, nullptr,
+                           ContextCancelThreadFunc, nullptr) == 0);
+  auto cleaner = absl::MakeCleanup([&context_cancel_tid, &ctx] {
+    int signal = SIGINT;
+    write(pipe_write_fd_, &signal, sizeof(signal));
+    if (pthread_join(context_cancel_tid, nullptr) != 0) {
+      LOG(ERROR) << "Failed to join the context cancel thread.";
+    }
+    close(pipe_write_fd_);
+    close(pipe_read_fd_);
+    // We call this to synchronize the internal client context state.
+    ctx.TryCancel();
+  });
+
+  ASSIGN_OR_RETURN(auto credentials_manager,
+                   CredentialsManager::CreateInstance(true));
+  auto channel = ::grpc::CreateChannel(
+      FLAGS_grpc_addr,
+      credentials_manager->GenerateExternalFacingClientCredentials());
   std::string cmd = std::string(argv[1]);
 
   if (cmd == "cap") {
     auto stub = ::gnmi::gNMI::NewStub(channel);
     ::grpc::ClientContext ctx;
     ::gnmi::CapabilityRequest req;
-    // PRINT_MSG(req, "REQUEST");
+    PRINT_MSG(req, "REQUEST");
     ::gnmi::CapabilityResponse resp;
     RETURN_IF_GRPC_ERROR(stub->Capabilities(&ctx, req, &resp));
     PRINT_MSG(resp, "RESPONSE");
-    return 0;
+    return ::util::OkStatus();
   }
 
   if (argc < 3) {
     std::cout << "Missing path for " << cmd << " request\n";
-    return 0;
+    return ::util::OkStatus();
   }
 
   char *path = argv[2];
@@ -256,7 +348,7 @@ int Main(int argc, char** argv) {
   client_strzcpy(buffer, FLAGS_root_node.c_str(), MAX_STR_LENGTH);
   if (extract_interface_node(&path, buffer, &vhost_device)) {
     std::cout << "Invalid device and name information\n";
-    return 0;
+    return ::util::OkStatus();
   }
 
   if (cmd == "get") {
@@ -330,23 +422,14 @@ int Main(int argc, char** argv) {
     }
     RETURN_IF_GRPC_ERROR(stream_reader_writer->Finish());
   } else {
-    std::cout << "Unknown command: " << cmd << std::endl;
+    return MAKE_ERROR(ERR_INVALID_PARAM) << "Unknown command: " << cmd;
   }
 
-  return 0;
-}
-
-void HandleSignal(int signal) {
-  (void)signal;
-  // Terminate the stream
-  if (stream_reader_writer != nullptr) {
-    stream_reader_writer->WritesDone();
-  }
+  return ::util::OkStatus();
 }
 
 }  // namespace gnmi
 
 int main(int argc, char** argv) {
-  ::gflags::SetUsageMessage(kUsage);
-  return gnmi::Main(argc, argv);
+  return gnmi::Main(argc, argv).error_code();
 }
