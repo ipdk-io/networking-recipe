@@ -1,0 +1,58 @@
+name: "Lint Dockerfiles"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  # if workflow for PR or push is already running stop it, and start new one
+  group: lint_dockerfiles-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+jobs:
+
+  lint_dockerfiles:
+    timeout-minutes: 100
+    runs-on: ghcr.io/hadolint/hadolint
+    steps:
+      - name: 'Checkout Networking Recipe'
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          path: ipdk.recipe
+
+      - name: Create test Dockerfile
+        run: |
+          echo "FROM ubuntu:22.10" > Dockerfile_test
+          echo "USER root" >> Dockerfile_test
+          echo "RUN apt update && apt upgrade -y" >> Dockerfile_test
+
+      - name: 'Run hadolint'
+        uses: hadolint/hadolint-action@v2.1.0
+        with:
+          dockerfile:  Dockerfile_test
+
+      -name: 'Print hadolint results'
+       uses: actions/github-script@v6
+       if: github.event_name == 'pull_request'
+       with:
+         script: |
+           const output = `
+           #### Hadolint: \`${{ steps.hadolint.outcome }}\`
+           \`\`\`
+           ${process.env.HADOLINT_RESULTS}
+           \`\`\`
+           `;
+
+           github.rest.issues.createComment({
+             issue_number: context.issue.number,
+             owner: context.repo.owner,
+             repo: context.repo.repo,
+             body: output
+           }) 
