@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - kkongusa-hadolint
   pull_request:
     branches:
       - main
+      - kkongusa-hadolint
 
 concurrency:
   # if workflow for PR or push is already running stop it, and start new one
@@ -19,7 +21,7 @@ jobs:
 
   lint_dockerfiles:
     timeout-minutes: 100
-    runs-on: ghcr.io/hadolint/hadolint
+    runs-on: ubuntu-22.04
     steps:
       - name: 'Checkout Networking Recipe'
         uses: actions/checkout@v3
