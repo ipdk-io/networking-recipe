@@ -25,6 +25,10 @@
 #include "stratum/lib/security/credentials_manager.h"
 #include "stratum/lib/utils.h"
 
+DEFINE_bool(grpc_use_insecure_mode, false,
+              "grpc communication channel in insecure mode");
+DECLARE_bool(grpc_use_insecure_mode);
+
 #define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
 const char kUsage[] =
@@ -318,11 +322,19 @@ void traverse_params(char** path, char* node_path, char* config_value,
     ctx.TryCancel();
   });
 
-  ASSIGN_OR_RETURN(auto credentials_manager,
-                   CredentialsManager::CreateInstance(true));
-  auto channel = ::grpc::CreateChannel(
-      FLAGS_grpc_addr,
-      credentials_manager->GenerateExternalFacingClientCredentials());
+  std::shared_ptr<::grpc::Channel> channel;
+  if (FLAGS_grpc_use_insecure_mode) {
+    ::grpc::Status status;
+    std::shared_ptr<::grpc::ChannelCredentials> channel_credentials =
+      ::grpc::InsecureChannelCredentials();
+    channel = ::grpc::CreateChannel(FLAGS_grpc_addr, channel_credentials);
+  } else {
+    ASSIGN_OR_RETURN(auto credentials_manager,
+                    CredentialsManager::CreateInstance(true));
+    channel = ::grpc::CreateChannel(
+        FLAGS_grpc_addr,
+        credentials_manager->GenerateExternalFacingClientCredentials());
+  }
   std::string cmd = std::string(argv[1]);
 
   if (cmd == "cap") {
