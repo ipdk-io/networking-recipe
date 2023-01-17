@@ -110,6 +110,11 @@ add_library(stratum_hal_lib_common_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/writer_interface.h
 )
 
+set_source_files_properties(
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/config_monitoring_service.cc
+    PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-declarations"
+)
+
 target_include_directories(stratum_hal_lib_common_o PRIVATE
     ${STRATUM_INCLUDES}
     ${SDE_INSTALL_DIR}/include
