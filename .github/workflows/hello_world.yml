@@ -1,0 +1,26 @@
+name: "Hello World"
+
+on:
+  push:
+    branches:
+      - main
+      - kkongusa-hadolint
+  pull_request:
+    branches:
+      - main
+      - kkongusa-hadolint
+
+
+permissions: read-all
+
+jobs:
+
+  lint_dockerfiles:
+    timeout-minutes: 100
+    runs-on: ubuntu-22.04
+    steps:
+      - name: 'Checkout Networking Recipe'
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          path: ipdk.recipe
