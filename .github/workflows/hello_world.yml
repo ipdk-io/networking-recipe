@@ -24,3 +24,14 @@ jobs:
         with:
           submodules: 'recursive'
           path: ipdk.recipe
+
+      - name: 'Create test Dockerfile'
+        run: |
+          echo "FROM ubuntu:22.10" > Dockerfile_test
+          echo "USER root" >> Dockerfile_test
+          echo "RUN apt update && apt upgrade -y" >> Dockerfile_test
+
+      - name: 'Run hadolint'
+        uses: hadolint/hadolint-action@v2.1.0
+        with:
+          dockerfile:  Dockerfile_test
