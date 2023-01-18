@@ -117,6 +117,7 @@ target_include_directories(stratum_hal_lib_common_o PRIVATE
 
 add_dependencies(stratum_hal_lib_common_o
     gnmi_proto
+    openconfig_proto
     stratum_proto
 )
 
@@ -310,7 +311,7 @@ target_include_directories(stratum_main_o PRIVATE
     ${SDE_INSTALL_DIR}/include
 )
 
-add_dependencies(stratum_main_o stratum_proto)
+add_dependencies(stratum_main_o stratum_proto gnmi_proto)
 
 ##############
 # libstratum #
