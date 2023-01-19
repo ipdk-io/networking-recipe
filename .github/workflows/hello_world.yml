@@ -34,4 +34,4 @@ jobs:
       - name: 'Run hadolint'
         uses: hadolint/hadolint-action@v2.1.0
         with:
-          dockerfile:  Dockerfile_test
+          recursive: True
