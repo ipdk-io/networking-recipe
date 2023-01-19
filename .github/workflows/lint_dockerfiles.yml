@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - main
+      - kkongusa-hadolint
   pull_request:
     branches:
       - main
-
+      - kkongusa-hadolint
 
 permissions: read-all
 
