@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 // TODO: ovs-p4rt logging
 #include "ovs_p4rt_session.h"
+#include "ovs_p4rt_tls_credentials.h"
 #include <arpa/inet.h>
 #include "absl/flags/flag.h"
 #include "openvswitch/ovs-p4rt.h"
 #include "p4_name_mapping.h"
+
+using namespace ovs_p4rt_cpp;
 
 ABSL_FLAG(std::string, grpc_addr, "127.0.0.1:9559",
           "P4Runtime server address.");
@@ -228,6 +231,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry)
     // Start a new client session.
     auto status_or_session = ovs_p4rt_cpp::OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr),
+      GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
     if (!status_or_session.ok()) {
         return;
@@ -384,6 +388,7 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info,
     // Start a new client session.
     auto status_or_session = ovs_p4rt_cpp::OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr),
+      GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
     if (!status_or_session.ok()) {
        return;
