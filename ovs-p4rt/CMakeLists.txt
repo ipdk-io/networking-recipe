@@ -58,6 +58,8 @@ add_library(ovs_sidecar_o OBJECT
     ovs_p4rt.cc
     ovs_p4rt_session.cc
     ovs_p4rt_session.h
+    ovs_p4rt_tls_credentials.cc
+    ovs_p4rt_tls_credentials.h
     p4_name_mapping.h
 )
 
