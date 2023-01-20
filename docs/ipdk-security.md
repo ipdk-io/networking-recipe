@@ -6,7 +6,7 @@ This document captures all the details related to gRPC ports and secure/insecure
 
 ## gRPC ports
 
-IPDK uses a secure-by-default model. The gRPC server will secure ports by default. A user may choose to open insecure ports if needed, but this will be a conscious decision taken by the user at run time.
+The IPDK Networking-Recipe uses a secure-by-default model. The gRPC server will secure ports by default. A user may choose to open insecure ports if needed, but this will be a conscious decision taken by the user at run time.
 
 ### Secure-by-default (TLS-mode)
 
@@ -70,7 +70,7 @@ For example:
 $IPDK_RECIPE/install/sbin/infrap4d  -ca_cert_file=/tmp/certs/ca.crt  -server_cert_file=/tmp/certs/stratum.crt  -server_key_file=/tmp/certs/stratum.key
 ```
 
-### Client certificate Verification
+### Client certificate verification
 InfraP4D requires connecting gRPC clients to send a valid certificate that can be verified. A flag is available to the users to tune the level of security required. The available values are:
 ```
 NO_REQUEST_CLIENT_CERT
