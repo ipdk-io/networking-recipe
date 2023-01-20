@@ -75,7 +75,7 @@ $IPDK_RECIPE/install/sbin/infrap4d  -ca_cert_file=/tmp/certs/ca.crt  -server_cer
 
 ### Opening Ports in Insecure Mode
 
-Ports can be opened in insecure mode by user if needed. This is controlled by a flag that needs to be enabled during runtime. Change the grpc_open_insecure_ports value to true to open insecure ports.
+Ports can be opened in insecure mode by user if needed. This is controlled by a flag that needs to be enabled during runtime. Change the grpc_open_insecure_ports value to true to open insecure ports. Also, make sure `certs` directory is removed from default location or user desired location as mentioned above.
 
 To launch InfraP4D with insecure ports 9339 and 9559 open:
 
