@@ -2,11 +2,11 @@
 
 ## Overview
 
-This document captures all the details related to gRPC ports and secure/insecure modes and certificate management.
+This document provides information related to gRPC ports and secure/insecure modes and certificate management.
 
 ## gRPC ports
 
-The IPDK Networking-Recipe uses a secure-by-default model. The gRPC server will secure ports by default. A user may choose to open insecure ports if needed, but this will be a conscious decision taken by the user at run time.
+The IPDK Networking Recipe uses a secure-by-default model. The gRPC server will secure ports by default. A user may choose to open insecure ports if needed, but this will be a conscious decision taken by the user at run time.
 
 ### Secure-by-default (TLS-mode)
 
@@ -58,7 +58,8 @@ InfraP4D will check for certificate in the following default location:
 > /usr/share/stratum/certs/
 
 If alternate location is desired, the location will need to be specified during runtime with the following flags
-```
+
+```text
 -ca_cert_file=[CA certificate file]
 -server_cert_file=[Server certificate file]
 -server_key_file=[Server private key file]
@@ -71,8 +72,10 @@ $IPDK_RECIPE/install/sbin/infrap4d  -ca_cert_file=/tmp/certs/ca.crt  -server_cer
 ```
 
 ### Client certificate verification
+
 InfraP4D requires connecting gRPC clients to send a valid certificate that can be verified. A flag is available to the users to tune the level of security required. The available values are:
-```
+
+```text
 NO_REQUEST_CLIENT_CERT
 REQUEST_CLIENT_CERT_NO_VERIFY
 REQUEST_CLIENT_CERT_AND_VERIFY
@@ -96,9 +99,11 @@ $IPDK_RECIPE/install/sbin/infrap4d  -grpc_open_insecure_mode=true
 Under default conditions, the gRPC clients will require the TLS certificates to establish communication with p4ovs/infrap4d server. The clients will need to use the same ca.crt file and the client.key and client.crt files signed by the ca.crt (can copy the generated files from the server if client is not on the same system as server).
 
 ### P4RT client
+
 The p4rt-ctl (P4RT client) will default to communicate over secure mode (port 9559). If certificates are not available or if there are certificate read errors, it will try the insecure port as a fallback mechanism. This may fail if insecure ports are not open on the server.
 
 ### gNMI client
+
 The gnmi-ctl (gNMI client) requests should be directed to port 9339.
 If the user desires to run the gnmi-ctl in insecure mode, a flag is available. Note that the insecure mode may fail if insecure ports are not open on the server.
 
