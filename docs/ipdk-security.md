@@ -64,6 +64,7 @@ If alternate location is desired, the location will need to be specified during 
 -server_cert_file=[Server certificate file]
 -server_key_file=[Server private key file]
 ```
+
 For example:
 
 ```bash
@@ -82,6 +83,7 @@ REQUEST_CLIENT_CERT_AND_VERIFY
 REQUIRE_CLIENT_CERT_NO_VERIFY
 REQUIRE_CLIENT_CERT_AND_VERIFY (default)
 ```
+
 More info on these values can be found on [this gRPC library documentation page](https://grpc.github.io/grpc/cpp/grpc__security__constants_8h.html#a29ffe63a8bb3b4945ecab42d82758f09).
 
 ### Running in insecure mode
