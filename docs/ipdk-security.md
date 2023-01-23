@@ -27,11 +27,11 @@ $IPDK_RECIPE/scripts/security/setup_certs_tls_mode.sh
 
 ### Generating TLS certificates & installing manually
 
-The gRPC ports are secured using TLS certificates. A Stratum script and reference configuration files are available to assist in generating the certificates. The reference file uses OpenSSL to generate the keys & certificates. However, users may choose other tools.
+The gRPC ports are secured using TLS certificates. A script and reference configuration files are available to assist in generating the keys & certificates using OpenSSL. However, users may choose other tools.
 
-The reference file uses a simple PKI where a self-signed RootCA is generated and the same RootCA is used to generate server key & cert and client key & cert. This results in a 1-depth level certificate chain, which will suffice for testing and confirmation, but production systems are encouraged to generate multiple depth levels in order to conform to higher security standards.
+The reference file uses a simple PKI where a self-signed Certificate Authority (CA) is generated and the same CA is used to generate server key & cert and client key & cert. This results in a 1-depth level certificate chain, which will suffice for validation and confirmation, but may not provide sufficient security for production systems. It is highly recommended that customers use well-known CAs, and generate certificates at multiple depth levels in order to conform to higher security standards.
 
-The Stratum reference files are available here: https://github.com/stratum/stratum/tree/main/tools/tls
+The reference files are available here: https://github.com/stratum/stratum/tree/main/tools/tls
 
 All certificates are in PEM format.
 
