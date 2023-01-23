@@ -110,8 +110,8 @@ Open a new terminal to set the pipeline and try the sample P4 program.
 Set up the environment and export all environment variables to sudo user.
 
 ```bash
-source ./scripts/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
-./scripts/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
+source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+./scripts/dpdk/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
