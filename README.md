@@ -84,8 +84,6 @@ To download the source code for the Networking Recipe:
 
 ```bash
 git clone --recursive https://github.com/ipdk-io/networking-recipe
-cd networking-recipe
-git submodule update init
 ```
 
 ## Targets
