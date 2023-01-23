@@ -88,9 +88,10 @@ alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SD
 
 #### Run the infrap4d daemon
 
-By default infrap4d runs in secure mode and expects `certs` available in
-specific directory. To run infrap4d with in-secure mode or steps to generate TLS
-certificats, refer to [this](https://github.com/ipdk-io/networking-recipe/blob/main/docs/ipdk-security.md) document.
+By default infrap4d runs in secure mode and expects certificates available in
+specific directory. To run infrap4d with insecure mode or steps to generate TLS
+certificates, refer to [this](https://github.com/ipdk-io/networking-recipe/blob/main/docs/ipdk-security.md) document.
+
 ```bash
 cd $IPDK_RECIPE
 sudo ./install/sbin/infrap4d
