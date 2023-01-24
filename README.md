@@ -75,7 +75,7 @@ network devices.
    Server in infrap4d via gRPC, to program the P4 pipeline and insert/delete
    P4 table entries.
 
-3. `gnmi_cli`: A gRPC-based C++ network management interface client to handle
+3. `gnmi-ctl`: A gRPC-based C++ network management interface client to handle
    port configurations and program fixed functions in the P4 pipeline.
 
 ## Download
@@ -84,8 +84,6 @@ To download the source code for the Networking Recipe:
 
 ```bash
 git clone --recursive https://github.com/ipdk-io/networking-recipe
-cd networking-recipe
-git submodule update init
 ```
 
 ## Targets
