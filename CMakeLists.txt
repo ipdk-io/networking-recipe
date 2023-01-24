@@ -6,14 +6,20 @@
 
 cmake_minimum_required(VERSION 3.5)
 
+option(KLOCWORK "Configure for Klocwork scan" OFF)
+
+# CMAKE_BUILD_TYPE must be set before the first project() command.
+if(KLOCWORK)
+  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Type of build to perform")
+else()
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
+endif()
+
 project(networking-recipe VERSION 0.1 LANGUAGES C CXX)
 
 include(CMakePrintHelpers)
 include(FindPkgConfig)
 include(GNUInstallDirs)
-
-# Default: Release with Debug Info
-set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 option(SET_RPATH "Set RPATH in libraries and executables" OFF)
 
