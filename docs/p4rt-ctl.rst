@@ -303,13 +303,24 @@ services that are available for a p4runtime client.
     ``COUNTER_FLOW``: Refers to the counter ID (generated ID by p4c, refer to bfrt.json file)
     and the counter table index. Format "counter_id=<number>,index=<number>"
 
+16. Get flow dump entries ::
+
+    $ p4rt-ctl dump-entries SWITCH [TABLE]
+    $ Example: p4rt-ctl dump-entries br0
+
+  .. note::
+
+    ``SWITCH``: Refers to the bridge name, which maps to device name
+    internally.
+    ``TABLE``: Refers to table entry from the p4 file.
+
 Known Issues
 -------------
 
     1) SWITCH parameter specified in ``p4rt-ctl`` commands are not really
     utilized in current releases. It accepts any kind of value
 
-    2) counter_id=0 in ``p4rt-ctl get-counters`` for indirect counters
+    2) counter_id=0 in ``p4rt-ctl get-counter`` for indirect counters
     is not supported in current release. Flow counters index=unset or index=0
     does not give cumulative byte count.
 
