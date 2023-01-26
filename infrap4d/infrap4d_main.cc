@@ -1,49 +1,53 @@
-// Copyright 2022 Intel Corporation
+// Copyright 2022-2023 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #if defined(DPDK_TARGET)
 #include "stratum/hal/bin/tdi/dpdk/dpdk_main.h"
-#elif defined (TOFINO_TARGET)
-#include "stratum/hal/bin/tdi/tofino/tofino_main.h"
+#else
+  #error "TDI target type not defined!"
 #endif
 
 extern "C"  {
 #include "daemon/daemon.h"
 }
 
-#include "krnlmon_main.h"
+#include "absl/synchronization/notification.h"
 #include "gflags/gflags.h"
+#include "krnlmon_main.h"
+#include "stratum/glue/status/status.h"
 
 DEFINE_bool(detach, true, "Run infrap4d in attached mode");
 
-pthread_cond_t rpc_start_cond = PTHREAD_COND_INITIALIZER;
-pthread_mutex_t rpc_start_lock = PTHREAD_MUTEX_INITIALIZER;
-int rpc_start_cookie = 0;
-
-pthread_cond_t rpc_stop_cond = PTHREAD_COND_INITIALIZER;
-pthread_mutex_t rpc_stop_lock = PTHREAD_MUTEX_INITIALIZER;
-int rpc_stop_cookie = 0;
+// Invokes the main function for the TDI target.
+static inline ::util::Status target_main(
+    int argc, char** argv, absl::Notification * ready_sync,
+    absl::Notification* done_sync) {
+#if defined(DPDK_TARGET)
+  return stratum::hal::tdi::DpdkMain(argc, argv, ready_sync, done_sync);
+#else
+  #error "TDI target type not defined!"
+#endif
+}
 
 int main(int argc, char* argv[]) {
-#if defined(TOFINO_TARGET)
-  return stratum::hal::tdi::TofinoMain(argc, argv).error_code();
-#elif defined(DPDK_TARGET)
   gflags::ParseCommandLineFlags(&argc, &argv, false);
+
   if (FLAGS_detach) {
       daemonize_start(false);
       daemonize_complete();
   }
 
-  krnlmon_init();
+  absl::Notification ready_sync;
+  absl::Notification done_sync;
 
-  krnlmon_shutdown();
+  krnlmon_create_main_thread(&ready_sync);
+  krnlmon_create_shutdown_thread(&done_sync);
 
-  auto status = stratum::hal::tdi::DpdkMain(argc, argv);
+  auto status = target_main(argc, argv, &ready_sync, &done_sync);
   if (!status.ok()) {
      //TODO: Figure out logging for infrap4d
      return status.error_code();
    }
 
   return 0;
-#endif
 }
