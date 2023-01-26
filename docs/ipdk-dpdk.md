@@ -17,8 +17,8 @@ For build instructions, refer to [P4 SDE Readme](https://github.com/p4lang/p4-dp
 ### Install basic utilities
 
 ```bash
-For Fedora distro: yum install libatomic libnl3-devel
-For Ubuntu distro: apt install libatomic1 libnl-route-3-dev
+For Fedora distro: yum install libatomic libnl3-devel openssl
+For Ubuntu distro: apt install libatomic1 libnl-route-3-dev openssl
 pip3 install -r requirements.txt
 ```
 
