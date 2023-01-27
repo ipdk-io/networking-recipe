@@ -29,11 +29,8 @@ static inline ::util::Status target_main(absl::Notification* ready_sync,
 }
 
 int main(int argc, char* argv[]) {
-  // Set target-specific defaults
-  stratum::hal::tdi::InitCommandLineFlags();
-
   // Parse infrap4d command line
-  gflags::ParseCommandLineFlags(&argc, &argv, false);
+  stratum::hal::tdi::ParseCommandLine(argc, argv, true);
 
   if (FLAGS_detach) {
       daemonize_start(false);
