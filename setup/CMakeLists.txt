@@ -1,13 +1,22 @@
-# Copyright (c) 2022 Intel Corporation
+# Downloads and builds dependencies
+#
+# Copyright 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
+#
 
 cmake_minimum_required(VERSION 3.15)
+
+# CMAKE_BUILD_TYPE must be set before the first project() command.
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build to perform")
 
 project(dependencies VERSION 1 LANGUAGES C CXX)
 
 include(ExternalProject)
 include(CMakePrintHelpers)
 include(GNUInstallDirs)
+
+# Define git repository tags and urls.
+include(deps.cmake)
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24)
   message(STATUS "CMake version is ${CMAKE_VERSION}")
@@ -27,25 +36,29 @@ if(USE_SUDO)
   endif()
 endif()
 
+# CMAKE_PREFIX_PATH specifies the directories to be searched by
+# find_file(), find_library(), find_path(), and find_program().
+#
+# We add our own install prefix to this list so the libraries we build
+# will take precedence over versions installed elsewhere on the system.
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
 
 ##########
 # ABSEIL #
 ##########
 
-set(ABSEIL_GIT_TAG 273292d1cfc0a94a65082ee350509af1d113344d) #20220623.0
-
 # Recommended for CMake 3.8 and up
 set(ABSL_CXX_PROPAGATE_CXX_STD ON)
 
 ExternalProject_Add(abseil-cpp
-  GIT_REPOSITORY  https://github.com/abseil/abseil-cpp.git
+  GIT_REPOSITORY  ${ABSEIL_GIT_URL}
   GIT_TAG         ${ABSEIL_GIT_TAG}
   GIT_PROGRESS    ON
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/abseil-cpp
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
     -DCMAKE_INSTALL_RPATH=$ORIGIN
@@ -63,16 +76,15 @@ endif()
 # ZLIB #
 ########
 
-set(ZLIB_GIT_TAG 04f42ceca40f73e2978b50e93806c2a18c1281fc) # v1.2.13
-
 ExternalProject_Add(zlib
-  GIT_REPOSITORY  https://github.com/madler/zlib
+  GIT_REPOSITORY  ${ZLIB_GIT_URL}
   GIT_TAG         ${ZLIB_GIT_FLAG}
   GIT_PROGRESS    ON
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/zlib
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
@@ -86,16 +98,15 @@ endif()
 # PROTOBUF #
 ############
 
-set(PROTOBUF_GIT_TAG fe271ab76f2ad2b2b28c10443865d2af21e27e0e) # v3.20.3
-
 ExternalProject_Add(protobuf
-  GIT_REPOSITORY  https://github.com/google/protobuf.git
+  GIT_REPOSITORY  ${PROTOBUF_GIT_URL}
   GIT_TAG         ${PROTOBUF_GIT_TAG}
   GIT_PROGRESS    ON
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/protobuf
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
     -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
@@ -119,10 +130,8 @@ endif()
 
 configure_file(grpc.patch.in ${CMAKE_SOURCE_DIR}/grpc.patch @ONLY)
 
-set(GRPC_GIT_TAG 90ccf24d22b6fc909a1021ebd89fd8c838467d26) # v1.50.0
-
 ExternalProject_Add(grpc
-  GIT_REPOSITORY  https://github.com/google/grpc.git
+  GIT_REPOSITORY  ${GRPC_GIT_URL}
   GIT_TAG         ${GRPC_GIT_TAG}
   GIT_PROGRESS    ON
 
@@ -132,6 +141,7 @@ ExternalProject_Add(grpc
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/grpc
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_INSTALL_RPATH=$ORIGIN
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
@@ -166,16 +176,15 @@ endif()
 # CCTZ #
 ########
 
-set(CCTTZ_GIT_TAG 02918d62329ef440935862719829d061a5f4beba)
-
 ExternalProject_Add(cctz
-  GIT_REPOSITORY  https://github.com/google/cctz.git
+  GIT_REPOSITORY  ${CCTZ_GIT_URL}
   GIT_TAG         ${CCTZ_GIT_TAG}
   GIT_PROGRESS    ON
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/cctz
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
     -DBUILD_TESTING=off
@@ -191,16 +200,15 @@ endif()
 # GFLAGS #
 ##########
 
-set(GFLAGS_GIT_TAG 827c769e5fc98e0f2a34c47cef953cc6328abced)
-
 ExternalProject_Add(gflags
-  GIT_REPOSITORY  https://github.com/gflags/gflags.git
+  GIT_REPOSITORY  ${GFLAGS_GIT_URL}
   GIT_TAG         ${GFLAGS_GIT_TAG}
   GIT_PROGRESS    ON
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/gflags
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DBUILD_SHARED_LIBS=on
   INSTALL_COMMAND
@@ -215,16 +223,15 @@ endif()
 # GLOG #
 ########
 
-set(GLOG_GIT_TAG a8e0007e96ff96145022c488e367da10f835c75d) #v0.6.0-rc1
-
 ExternalProject_Add(glog
-  GIT_REPOSITORY  https://github.com/google/glog.git
+  GIT_REPOSITORY  ${GLOG_GIT_URL}
   GIT_TAG         ${GLOG_GIT_TAG}
   GIT_PROGRESS    ON
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/glog
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_INSTALL_RPATH=$ORIGIN
     -Dgflags_DIR:PATH=${CMAKE_INSTALL_PREFIX}/lib/cmake/gflags
@@ -250,6 +257,7 @@ ExternalProject_Add(gmock-gbl
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/gmock-gbl
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 )
 if(ON_DEMAND)
@@ -260,16 +268,15 @@ endif()
 # GTEST #
 #########
 
-set(GTEST_GIT_TAG release-1.11.0)
-
 ExternalProject_Add(gtest
-  GIT_REPOSITORY  https://github.com/google/googletest.git
+  GIT_REPOSITORY  ${GTEST_GIT_URL}
   GIT_TAG         ${GTEST_GIT_TAG}
   GIT_PROGRESS    ON
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/gtest
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_INSTALL_RPATH=$ORIGIN
     -DBUILD_SHARED_LIBS=on
@@ -285,16 +292,15 @@ endif()
 # JSON #
 ########
 
-set(JSON_GIT_TAG 760304635dc74a5bf77903ad92446a6febb85acf)
-
 ExternalProject_Add(json
-  GIT_REPOSITORY  https://github.com/nlohmann/json.git
-  GIT_TAG         ${JSON_GIT_FLAG}
+  GIT_REPOSITORY  ${JSON_GIT_URL}
+  GIT_TAG         ${JSON_GIT_TAG}
   GIT_PROGRESS    ON
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/json
   CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DJSON_BuildTests=off
   INSTALL_COMMAND
