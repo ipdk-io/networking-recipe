@@ -1,7 +1,8 @@
 # CMake build file for Stratum code.
 #
-# Copyright 2022 Intel Corporation
+# Copyright 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
+#
 
 cmake_minimum_required(VERSION 3.5)
 project(stratum)
@@ -280,10 +281,6 @@ target_include_directories(stratum_target_o PRIVATE
     ${STRATUM_INCLUDES}
     ${SDE_INSTALL_DIR}/include
 )
-
-if(WITH_KRNLMON)
-    target_compile_definitions(stratum_target_o PRIVATE KRNLMON_SUPPORT)
-endif()
 
 add_dependencies(stratum_target_o stratum_proto)
 

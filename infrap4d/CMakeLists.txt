@@ -1,3 +1,9 @@
+# Builds infrap4d daemon
+#
+# Copyright 2022-2023 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+#
+
 cmake_minimum_required(VERSION 3.12)
 
 project(infrap4d VERSION 0.1.0 LANGUAGES C CXX)
@@ -21,7 +27,6 @@ target_include_directories(infrap4d PRIVATE ${STRATUM_SOURCE_DIR})
 
 if(WITH_KRNLMON)
     target_include_directories(infrap4d PRIVATE ${KRNLMON_SOURCE_DIR})
-    target_compile_definitions(infrap4d PRIVATE KRNLMON_SUPPORT)
 endif()
 
 target_link_libraries(infrap4d PRIVATE
