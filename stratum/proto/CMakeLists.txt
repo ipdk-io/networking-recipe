@@ -26,7 +26,7 @@ set(PROTO_PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # List of directories to be searched for Protobuf inputs.
 string(JOIN ":" PROTO_IMPORT_PATH
     ${PROTO_PARENT_DIR}
-    ${GOOGLE_SOURCE_DIR}
+    ${GOOGLEAPIS_SOURCE_DIR}
     ${P4RUNTIME_SOURCE_DIR}/proto
     ${STRATUM_SOURCE_DIR}
     /usr/local/include
@@ -92,8 +92,8 @@ function(generate_proto_files PROTO_FILES SRC_DIR)
         get_filename_component(_path ${_file} DIRECTORY)
         get_filename_component(_name ${_file} NAME_WE)
 
-        set(_src ${PROTO_OUT_DIR}/${_path}/${_name}.pb.cc)
-        set(_hdr ${PROTO_OUT_DIR}/${_path}/${_name}.pb.h)
+        set(_src ${PB_OUT_DIR}/${_path}/${_name}.pb.cc)
+        set(_hdr ${PB_OUT_DIR}/${_path}/${_name}.pb.h)
 
         set_source_files_properties(${_src} ${_hdr} PROPERTIES GENERATED TRUE)
 
@@ -103,7 +103,7 @@ function(generate_proto_files PROTO_FILES SRC_DIR)
             COMMAND
                 ${PROTOBUF_PROTOC_EXECUTABLE}
                 --proto_path=${PROTO_IMPORT_PATH}
-                --cpp_out=${PROTO_OUT_DIR}
+                --cpp_out=${PB_OUT_DIR}
                 -I${STRATUM_SOURCE_DIR}
                 ${_file}
             WORKING_DIRECTORY
@@ -137,8 +137,8 @@ function(generate_grpc_files PROTO_FILES SRC_DIR)
         get_filename_component(_path ${_file} DIRECTORY)
         get_filename_component(_name ${_file} NAME_WE)
 
-        set(_src ${PROTO_OUT_DIR}/${_path}/${_name}.grpc.pb.cc)
-        set(_hdr ${PROTO_OUT_DIR}/${_path}/${_name}.grpc.pb.h)
+        set(_src ${PB_OUT_DIR}/${_path}/${_name}.grpc.pb.cc)
+        set(_hdr ${PB_OUT_DIR}/${_path}/${_name}.grpc.pb.h)
 
         set_source_files_properties(${_src} ${_hdr} PROPERTIES GENERATED TRUE)
 
@@ -148,7 +148,7 @@ function(generate_grpc_files PROTO_FILES SRC_DIR)
             COMMAND
                 ${PROTOBUF_PROTOC_EXECUTABLE}
                 --proto_path=${PROTO_IMPORT_PATH}
-                --grpc_out=${PROTO_OUT_DIR}
+                --grpc_out=${PB_OUT_DIR}
                 --plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN}
                 -I${STRATUM_SOURCE_DIR}
                 ${_file}
@@ -176,7 +176,7 @@ endfunction(generate_grpc_files)
 # Generate c++ protobuf files #
 ###############################
 
-generate_proto_files("${RPC_PROTO_FILES}" "${GOOGLE_SOURCE_DIR}")
+generate_proto_files("${RPC_PROTO_FILES}" "${GOOGLEAPIS_SOURCE_DIR}")
 
 generate_proto_files("${P4V1_PROTO_FILES}" "${P4RUNTIME_SOURCE_DIR}/proto")
 generate_grpc_files("p4/v1/p4runtime.proto" "${P4RUNTIME_SOURCE_DIR}/proto")
@@ -198,15 +198,15 @@ generate_proto_files("${STRATUM_BF_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
 
 # Internal target
 add_library(grpc_proto SHARED
-    ${PROTO_OUT_DIR}/google/rpc/status.pb.cc
-    ${PROTO_OUT_DIR}/google/rpc/status.pb.h
-    ${PROTO_OUT_DIR}/google/rpc/code.pb.cc
-    ${PROTO_OUT_DIR}/google/rpc/code.pb.h
+    ${PB_OUT_DIR}/google/rpc/status.pb.cc
+    ${PB_OUT_DIR}/google/rpc/status.pb.h
+    ${PB_OUT_DIR}/google/rpc/code.pb.cc
+    ${PB_OUT_DIR}/google/rpc/code.pb.h
 )
 
 set_install_rpath(grpc_proto ${DEP_ELEMENT})
 
-target_include_directories(grpc_proto PRIVATE ${PROTO_OUT_DIR})
+target_include_directories(grpc_proto PRIVATE ${PB_OUT_DIR})
 target_link_libraries(grpc_proto PUBLIC protobuf)
 
 install(TARGETS grpc_proto LIBRARY)
@@ -218,21 +218,21 @@ install(TARGETS grpc_proto LIBRARY)
 
 # External target
 add_library(p4runtime_proto SHARED
-    ${PROTO_OUT_DIR}/p4/v1/p4runtime.pb.cc
-    ${PROTO_OUT_DIR}/p4/v1/p4runtime.pb.h
-    ${PROTO_OUT_DIR}/p4/v1/p4runtime.grpc.pb.cc
-    ${PROTO_OUT_DIR}/p4/v1/p4runtime.grpc.pb.h
-    ${PROTO_OUT_DIR}/p4/v1/p4data.pb.cc
-    ${PROTO_OUT_DIR}/p4/v1/p4data.pb.h
-    ${PROTO_OUT_DIR}/p4/config/v1/p4types.pb.cc
-    ${PROTO_OUT_DIR}/p4/config/v1/p4types.pb.h
-    ${PROTO_OUT_DIR}/p4/config/v1/p4info.pb.cc
-    ${PROTO_OUT_DIR}/p4/config/v1/p4info.pb.h
+    ${PB_OUT_DIR}/p4/v1/p4runtime.pb.cc
+    ${PB_OUT_DIR}/p4/v1/p4runtime.pb.h
+    ${PB_OUT_DIR}/p4/v1/p4runtime.grpc.pb.cc
+    ${PB_OUT_DIR}/p4/v1/p4runtime.grpc.pb.h
+    ${PB_OUT_DIR}/p4/v1/p4data.pb.cc
+    ${PB_OUT_DIR}/p4/v1/p4data.pb.h
+    ${PB_OUT_DIR}/p4/config/v1/p4types.pb.cc
+    ${PB_OUT_DIR}/p4/config/v1/p4types.pb.h
+    ${PB_OUT_DIR}/p4/config/v1/p4info.pb.cc
+    ${PB_OUT_DIR}/p4/config/v1/p4info.pb.h
 )
 
 set_install_rpath(p4runtime_proto $ORIGIN ${DEP_ELEMENT})
 
-target_include_directories(p4runtime_proto PRIVATE ${PROTO_OUT_DIR})
+target_include_directories(p4runtime_proto PRIVATE ${PB_OUT_DIR})
 
 target_link_libraries(p4runtime_proto PUBLIC grpc_proto absl::synchronization)
 add_dependencies(p4runtime_proto grpc_proto)
@@ -244,19 +244,19 @@ install(TARGETS p4runtime_proto LIBRARY)
 #######################
 
 add_library(gnmi_proto SHARED
-    ${PROTO_OUT_DIR}/gnmi/gnmi.grpc.pb.cc
-    ${PROTO_OUT_DIR}/gnmi/gnmi.grpc.pb.h
-    ${PROTO_OUT_DIR}/gnmi/gnmi.pb.cc
-    ${PROTO_OUT_DIR}/gnmi/gnmi.pb.h
-    ${PROTO_OUT_DIR}/gnmi/gnmi_ext.pb.cc
-    ${PROTO_OUT_DIR}/gnmi/gnmi_ext.pb.h
+    ${PB_OUT_DIR}/gnmi/gnmi.grpc.pb.cc
+    ${PB_OUT_DIR}/gnmi/gnmi.grpc.pb.h
+    ${PB_OUT_DIR}/gnmi/gnmi.pb.cc
+    ${PB_OUT_DIR}/gnmi/gnmi.pb.h
+    ${PB_OUT_DIR}/gnmi/gnmi_ext.pb.cc
+    ${PB_OUT_DIR}/gnmi/gnmi_ext.pb.h
 )
 
 set_install_rpath(gnmi_proto ${DEP_ELEMENT})
 
 add_dependencies(gnmi_proto grpc_proto)
 
-target_include_directories(gnmi_proto PRIVATE ${PROTO_OUT_DIR})
+target_include_directories(gnmi_proto PRIVATE ${PB_OUT_DIR})
 
 target_link_libraries(gnmi_proto
     PUBLIC
@@ -275,45 +275,45 @@ install(TARGETS gnmi_proto LIBRARY)
 
 # ywrapper_proto_o
 add_library(ywrapper_proto_o OBJECT
-    ${PROTO_OUT_DIR}/${YGOT_PROTO_PATH}/yext/yext.pb.cc
-    ${PROTO_OUT_DIR}/${YGOT_PROTO_PATH}/yext/yext.pb.h
-    ${PROTO_OUT_DIR}/${YGOT_PROTO_PATH}/ywrapper/ywrapper.pb.cc
-    ${PROTO_OUT_DIR}/${YGOT_PROTO_PATH}/ywrapper/ywrapper.pb.h
+    ${PB_OUT_DIR}/${YGOT_PROTO_PATH}/yext/yext.pb.cc
+    ${PB_OUT_DIR}/${YGOT_PROTO_PATH}/yext/yext.pb.h
+    ${PB_OUT_DIR}/${YGOT_PROTO_PATH}/ywrapper/ywrapper.pb.cc
+    ${PB_OUT_DIR}/${YGOT_PROTO_PATH}/ywrapper/ywrapper.pb.h
 )
 
-target_include_directories(ywrapper_proto_o PRIVATE ${PROTO_OUT_DIR})
+target_include_directories(ywrapper_proto_o PRIVATE ${PB_OUT_DIR})
 
 # openconfig_enums_proto_o
 add_library(openconfig_enums_proto_o OBJECT
-    ${PROTO_OUT_DIR}/openconfig/enums/enums.pb.cc
-    ${PROTO_OUT_DIR}/openconfig/enums/enums.pb.h
+    ${PB_OUT_DIR}/openconfig/enums/enums.pb.cc
+    ${PB_OUT_DIR}/openconfig/enums/enums.pb.h
 )
 
 add_dependencies(openconfig_enums_proto_o ywrapper_proto_o)
 
 target_include_directories(
-    openconfig_enums_proto_o PRIVATE ${PROTO_OUT_DIR})
+    openconfig_enums_proto_o PRIVATE ${PB_OUT_DIR})
 
 # openconfig_proto_o
 add_library(openconfig_proto_o OBJECT
-    ${PROTO_OUT_DIR}/openconfig/openconfig.pb.cc
-    ${PROTO_OUT_DIR}/openconfig/openconfig.pb.h
+    ${PB_OUT_DIR}/openconfig/openconfig.pb.cc
+    ${PB_OUT_DIR}/openconfig/openconfig.pb.h
 )
 
 add_dependencies(openconfig_proto_o openconfig_enums_proto_o)
 
-target_include_directories(openconfig_proto_o PRIVATE ${PROTO_OUT_DIR})
+target_include_directories(openconfig_proto_o PRIVATE ${PB_OUT_DIR})
 
 # openconfig_goog_bcm_proto_o
 add_library(openconfig_goog_bcm_proto_o OBJECT
-    ${PROTO_OUT_DIR}/stratum/public/proto/openconfig-goog-bcm.pb.cc
-    ${PROTO_OUT_DIR}/stratum/public/proto/openconfig-goog-bcm.pb.h
+    ${PB_OUT_DIR}/stratum/public/proto/openconfig-goog-bcm.pb.cc
+    ${PB_OUT_DIR}/stratum/public/proto/openconfig-goog-bcm.pb.h
 )
 
 add_dependencies(openconfig_goog_bcm_proto_o ywrapper_proto_o)
 
 target_include_directories(
-    openconfig_goog_bcm_proto_o PRIVATE ${PROTO_OUT_DIR})
+    openconfig_goog_bcm_proto_o PRIVATE ${PB_OUT_DIR})
 
 # openconfig_proto
 add_library(openconfig_proto SHARED
@@ -331,38 +331,38 @@ install(TARGETS openconfig_proto LIBRARY)
 
 # stratum_proto1_o
 add_library(stratum_proto1_o OBJECT
-    ${PROTO_OUT_DIR}/stratum/public/proto/p4_table_defs.pb.h
-    ${PROTO_OUT_DIR}/stratum/public/proto/p4_table_defs.pb.cc
-    ${PROTO_OUT_DIR}/stratum/public/proto/p4_annotation.pb.h
-    ${PROTO_OUT_DIR}/stratum/public/proto/p4_annotation.pb.cc
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/p4_control.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/p4_control.pb.cc
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.cc
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.cc
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.cc
-    ${PROTO_OUT_DIR}/stratum/hal/lib/common/common.pb.cc
-    ${PROTO_OUT_DIR}/stratum/hal/lib/common/common.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.cc
+    ${PB_OUT_DIR}/stratum/public/proto/p4_table_defs.pb.h
+    ${PB_OUT_DIR}/stratum/public/proto/p4_table_defs.pb.cc
+    ${PB_OUT_DIR}/stratum/public/proto/p4_annotation.pb.h
+    ${PB_OUT_DIR}/stratum/public/proto/p4_annotation.pb.cc
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_control.pb.h
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_control.pb.cc
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.h
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.cc
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.h
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.cc
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.h
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.cc
+    ${PB_OUT_DIR}/stratum/hal/lib/common/common.pb.cc
+    ${PB_OUT_DIR}/stratum/hal/lib/common/common.pb.h
+    ${PB_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.h
+    ${PB_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.cc
 )
 
 # Ensure that the header files on which we depend have been generated
 # before we start building the current library.
 add_dependencies(stratum_proto1_o p4runtime_proto)
 
-target_include_directories(stratum_proto1_o PRIVATE ${PROTO_OUT_DIR})
+target_include_directories(stratum_proto1_o PRIVATE ${PB_OUT_DIR})
 
 # stratum_proto2_o
 add_library(stratum_proto2_o OBJECT
-    ${PROTO_OUT_DIR}/stratum/public/proto/error.pb.cc
-    ${PROTO_OUT_DIR}/stratum/public/proto/error.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.cc
-    ${PROTO_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.h
-    ${PROTO_OUT_DIR}/stratum/hal/lib/phal/db.pb.cc
-    ${PROTO_OUT_DIR}/stratum/hal/lib/phal/db.pb.h
+    ${PB_OUT_DIR}/stratum/public/proto/error.pb.cc
+    ${PB_OUT_DIR}/stratum/public/proto/error.pb.h
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.cc
+    ${PB_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.h
+    ${PB_OUT_DIR}/stratum/hal/lib/phal/db.pb.cc
+    ${PB_OUT_DIR}/stratum/hal/lib/phal/db.pb.h
 )
 
 # Ensure that the header files on which we depend have been generated
@@ -370,7 +370,7 @@ add_library(stratum_proto2_o OBJECT
 add_dependencies(stratum_proto2_o p4runtime_proto)
 add_dependencies(stratum_proto2_o stratum_proto1_o)
 
-target_include_directories(stratum_proto2_o PRIVATE ${PROTO_OUT_DIR})
+target_include_directories(stratum_proto2_o PRIVATE ${PB_OUT_DIR})
 
 # stratum_proto
 add_library(stratum_proto SHARED

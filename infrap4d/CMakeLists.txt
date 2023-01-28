@@ -26,7 +26,7 @@ endif()
 
 target_link_libraries(infrap4d PRIVATE
     -Wl,--whole-archive
-    stratum
+    stratum_static
     -Wl,--no-whole-archive
 )
 

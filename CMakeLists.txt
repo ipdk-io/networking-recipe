@@ -15,7 +15,7 @@ else()
   set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
 endif()
 
-project(networking-recipe VERSION 0.1 LANGUAGES C CXX)
+project(networking-recipe VERSION 23.01 LANGUAGES C CXX)
 
 include(CMakePrintHelpers)
 include(FindPkgConfig)
@@ -39,9 +39,9 @@ set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
 set(SDE_INSTALL_DIR "$ENV{SDE_INSTALL}" CACHE PATH
     "SDE install directory")
 
-set(PROTO_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
+set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
-file(MAKE_DIRECTORY ${PROTO_OUT_DIR})
+file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
 ############################
 # Target selection options #

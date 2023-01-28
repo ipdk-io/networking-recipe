@@ -9,7 +9,7 @@ include(CheckLibraryExists)
 
 set(PROTO_INCLUDES
     # Protobuf C++ header files.
-    ${PROTO_OUT_DIR}
+    ${PB_OUT_DIR}
 )
 
 ###################
@@ -106,8 +106,8 @@ target_link_libraries(ovs-vswitchd PUBLIC
     absl::flags
 )
 
-target_link_libraries(ovs-vswitchd PUBLIC stratum)
-add_dependencies(ovs-vswitchd stratum)
+target_link_libraries(ovs-vswitchd PUBLIC stratum_static)
+#add_dependencies(ovs-vswitchd stratum_static)
 
 target_link_libraries(ovs-vswitchd PUBLIC
     stratum_proto
@@ -148,7 +148,7 @@ target_link_libraries(ovs-testcontroller PUBLIC
     absl::flags
 )
 
-target_link_libraries(ovs-testcontroller PUBLIC stratum)
+target_link_libraries(ovs-testcontroller PUBLIC stratum_static)
 
 target_link_libraries(ovs-testcontroller PUBLIC
     stratum_proto
