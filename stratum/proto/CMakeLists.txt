@@ -1,6 +1,8 @@
 # Builds protobuf object libraries
-
-cmake_minimum_required(VERSION 3.5)
+#
+# Copyright 2022-2023 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+#
 
 find_package(Protobuf REQUIRED)
 
@@ -34,56 +36,6 @@ string(JOIN ":" PROTO_IMPORT_PATH
     ${P4RUNTIME_SOURCE_DIR}/proto
     ${STRATUM_SOURCE_DIR}
     /usr/local/include
-)
-
-set(RPC_PROTO_FILES
-    google/rpc/status.proto
-    google/rpc/code.proto
-)
-
-set(P4V1_PROTO_FILES
-    p4/v1/p4data.proto
-    p4/v1/p4runtime.proto
-    p4/config/v1/p4info.proto
-    p4/config/v1/p4types.proto
-)
-
-set(STRATUM_P4_PROTO_FILES
-    stratum/public/proto/error.proto
-    stratum/hal/lib/common/common.proto
-    stratum/hal/lib/p4/forwarding_pipeline_configs.proto
-    stratum/hal/lib/phal/db.proto
-)
-
-set(GNMI_PROTO_FILES
-    gnmi/gnmi.proto
-    gnmi/gnmi_ext.proto
-)
-
-set(YGOT_PROTO_PATH github.com/openconfig/ygot/proto)
-
-set(YGOT_PROTO_FILES
-    ${YGOT_PROTO_PATH}/yext/yext.proto
-    ${YGOT_PROTO_PATH}/ywrapper/ywrapper.proto
-)
-
-set(OPENCONFIG_PROTO_FILES
-    openconfig/enums/enums.proto
-    openconfig/openconfig.proto
-)
-
-set(STRATUM_OC_PROTO_FILES
-    stratum/public/proto/openconfig-goog-bcm.proto
-)
-
-set(STRATUM_BF_PROTO_FILES
-    stratum/public/proto/p4_table_defs.proto
-    stratum/public/proto/p4_annotation.proto
-    stratum/hal/lib/p4/p4_control.proto
-    stratum/hal/lib/p4/common_flow_entry.proto
-    stratum/hal/lib/p4/p4_table_map.proto
-    stratum/hal/lib/p4/p4_pipeline_config.proto
-    stratum/hal/lib/tdi/tdi.proto
 )
 
 ########################
@@ -176,29 +128,16 @@ function(generate_grpc_files PROTO_FILES SRC_DIR)
     endforeach()
 endfunction(generate_grpc_files)
 
-###############################
-# Generate c++ protobuf files #
-###############################
-
-generate_proto_files("${RPC_PROTO_FILES}" "${GOOGLEAPIS_SOURCE_DIR}")
-
-generate_proto_files("${P4V1_PROTO_FILES}" "${P4RUNTIME_SOURCE_DIR}/proto")
-generate_grpc_files("p4/v1/p4runtime.proto" "${P4RUNTIME_SOURCE_DIR}/proto")
-
-generate_proto_files("${STRATUM_P4_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
-
-generate_proto_files("${GNMI_PROTO_FILES}" "${PROTO_PARENT_DIR}")
-generate_grpc_files("gnmi/gnmi.proto" "${PROTO_PARENT_DIR}")
-
-generate_proto_files("${YGOT_PROTO_FILES}" "${PROTO_PARENT_DIR}")
-generate_proto_files("${OPENCONFIG_PROTO_FILES}" "${PROTO_PARENT_DIR}")
-generate_proto_files("${STRATUM_OC_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
-
-generate_proto_files("${STRATUM_BF_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
-
 #######################
 # Build libgrpc_proto #
 #######################
+
+set(GRPC_PROTO_FILES
+    google/rpc/status.proto
+    google/rpc/code.proto
+)
+
+generate_proto_files("${GRPC_PROTO_FILES}" "${GOOGLEAPIS_SOURCE_DIR}")
 
 # Internal target
 add_library(grpc_proto SHARED
@@ -208,10 +147,11 @@ add_library(grpc_proto SHARED
     ${PB_OUT_DIR}/google/rpc/code.pb.h
 )
 
-set_install_rpath(grpc_proto ${DEP_ELEMENT})
-
 target_include_directories(grpc_proto PRIVATE ${PB_OUT_DIR})
+
 target_link_libraries(grpc_proto PUBLIC protobuf)
+
+set_install_rpath(grpc_proto ${DEP_ELEMENT})
 
 install(TARGETS grpc_proto LIBRARY)
 
@@ -219,6 +159,15 @@ install(TARGETS grpc_proto LIBRARY)
 # Build libp4runtime_proto #
 ############################
 
+set(P4RT_PROTO_FILES
+    p4/v1/p4data.proto
+    p4/v1/p4runtime.proto
+    p4/config/v1/p4info.proto
+    p4/config/v1/p4types.proto
+)
+
+generate_proto_files("${P4RT_PROTO_FILES}" "${P4RUNTIME_SOURCE_DIR}/proto")
+generate_grpc_files("p4/v1/p4runtime.proto" "${P4RUNTIME_SOURCE_DIR}/proto")
 
 # External target
 add_library(p4runtime_proto SHARED
@@ -234,104 +183,50 @@ add_library(p4runtime_proto SHARED
     ${PB_OUT_DIR}/p4/config/v1/p4info.pb.h
 )
 
-set_install_rpath(p4runtime_proto $ORIGIN ${DEP_ELEMENT})
+#add_dependencies(p4runtime_proto grpc_proto)
 
 target_include_directories(p4runtime_proto PRIVATE ${PB_OUT_DIR})
 
-target_link_libraries(p4runtime_proto PUBLIC grpc_proto absl::synchronization)
-add_dependencies(p4runtime_proto grpc_proto)
+target_link_libraries(p4runtime_proto
+    PUBLIC
+        grpc_proto
+        absl::synchronization               
+)
+
+set_install_rpath(p4runtime_proto $ORIGIN ${DEP_ELEMENT})
 
 install(TARGETS p4runtime_proto LIBRARY)
 
-#######################
-# Build libgnmi_proto #
-#######################
+##############################
+# Build openconfig libraries #
+##############################
 
-add_library(gnmi_proto SHARED
-    ${PB_OUT_DIR}/gnmi/gnmi.grpc.pb.cc
-    ${PB_OUT_DIR}/gnmi/gnmi.grpc.pb.h
-    ${PB_OUT_DIR}/gnmi/gnmi.pb.cc
-    ${PB_OUT_DIR}/gnmi/gnmi.pb.h
-    ${PB_OUT_DIR}/gnmi/gnmi_ext.pb.cc
-    ${PB_OUT_DIR}/gnmi/gnmi_ext.pb.h
+add_subdirectory(gnmi)
+add_subdirectory(openconfig)
+
+##########################
+# Build libstratum_proto #
+##########################
+
+set(STRATUM_P4_PROTO_FILES
+    stratum/public/proto/error.proto
+    stratum/hal/lib/common/common.proto
+    stratum/hal/lib/p4/forwarding_pipeline_configs.proto
+    stratum/hal/lib/phal/db.proto
 )
 
-set_install_rpath(gnmi_proto ${DEP_ELEMENT})
-
-add_dependencies(gnmi_proto grpc_proto)
-
-target_include_directories(gnmi_proto PRIVATE ${PB_OUT_DIR})
-
-target_link_libraries(gnmi_proto
-    PUBLIC
-        grpc_proto
-        absl::hash
-        absl::strings
-        absl::synchronization
-        absl::time
+set(STRATUM_BF_PROTO_FILES
+    stratum/public/proto/p4_table_defs.proto
+    stratum/public/proto/p4_annotation.proto
+    stratum/hal/lib/p4/p4_control.proto
+    stratum/hal/lib/p4/common_flow_entry.proto
+    stratum/hal/lib/p4/p4_table_map.proto
+    stratum/hal/lib/p4/p4_pipeline_config.proto
+    stratum/hal/lib/tdi/tdi.proto
 )
 
-install(TARGETS gnmi_proto LIBRARY)
-
-###########################
-#  Build openconfig_proto #
-###########################
-
-# ywrapper_proto_o
-add_library(ywrapper_proto_o OBJECT
-    ${PB_OUT_DIR}/${YGOT_PROTO_PATH}/yext/yext.pb.cc
-    ${PB_OUT_DIR}/${YGOT_PROTO_PATH}/yext/yext.pb.h
-    ${PB_OUT_DIR}/${YGOT_PROTO_PATH}/ywrapper/ywrapper.pb.cc
-    ${PB_OUT_DIR}/${YGOT_PROTO_PATH}/ywrapper/ywrapper.pb.h
-)
-
-target_include_directories(ywrapper_proto_o PRIVATE ${PB_OUT_DIR})
-
-# openconfig_enums_proto_o
-add_library(openconfig_enums_proto_o OBJECT
-    ${PB_OUT_DIR}/openconfig/enums/enums.pb.cc
-    ${PB_OUT_DIR}/openconfig/enums/enums.pb.h
-)
-
-add_dependencies(openconfig_enums_proto_o ywrapper_proto_o)
-
-target_include_directories(
-    openconfig_enums_proto_o PRIVATE ${PB_OUT_DIR})
-
-# openconfig_proto_o
-add_library(openconfig_proto_o OBJECT
-    ${PB_OUT_DIR}/openconfig/openconfig.pb.cc
-    ${PB_OUT_DIR}/openconfig/openconfig.pb.h
-)
-
-add_dependencies(openconfig_proto_o openconfig_enums_proto_o)
-
-target_include_directories(openconfig_proto_o PRIVATE ${PB_OUT_DIR})
-
-# openconfig_goog_bcm_proto_o
-add_library(openconfig_goog_bcm_proto_o OBJECT
-    ${PB_OUT_DIR}/stratum/public/proto/openconfig-goog-bcm.pb.cc
-    ${PB_OUT_DIR}/stratum/public/proto/openconfig-goog-bcm.pb.h
-)
-
-add_dependencies(openconfig_goog_bcm_proto_o ywrapper_proto_o)
-
-target_include_directories(
-    openconfig_goog_bcm_proto_o PRIVATE ${PB_OUT_DIR})
-
-# openconfig_proto
-add_library(openconfig_proto SHARED
-    $<TARGET_OBJECTS:ywrapper_proto_o>
-    $<TARGET_OBJECTS:openconfig_enums_proto_o>
-    $<TARGET_OBJECTS:openconfig_proto_o>
-    $<TARGET_OBJECTS:openconfig_goog_bcm_proto_o>
-)
-
-install(TARGETS openconfig_proto LIBRARY)
-
-###########################
-#  Build libstratum_proto #
-###########################
+generate_proto_files("${STRATUM_P4_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
+generate_proto_files("${STRATUM_BF_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
 
 # stratum_proto1_o
 add_library(stratum_proto1_o OBJECT
