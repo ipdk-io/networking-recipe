@@ -3,9 +3,6 @@
 cmake_minimum_required(VERSION 3.5)
 
 find_package(Protobuf REQUIRED)
-if(NOT Protobuf_FOUND)
-    message(SEND_ERROR "Error: Protobuf package not found")
-endif()
 
 ###############################
 # Get path to GRPC C++ plugin #
@@ -13,9 +10,16 @@ endif()
 
 find_package(gRPC REQUIRED)
 
-get_property(GRPC_CPP_PLUGIN
-    TARGET gRPC::grpc_cpp_plugin
-    PROPERTY IMPORTED_LOCATION_NOCONFIG)
+if(TARGET(gRPC::grpc_cpp_plugin))
+    get_property(GRPC_CPP_PLUGIN
+        TARGET gRPC::grpc_cpp_plugin
+        PROPERTY IMPORTED_LOCATION_NOCONFIG)
+else()
+    message(STATUS "gRPC::grpc_cpp_plugin is not a target")
+    find_program(GRPC_CPP_PLUGIN "grpc_cpp_plugin" REQUIRED)
+endif()
+
+cmake_print_variables(GRPC_CPP_PLUGIN)
 
 ##########################
 # Compile protobuf files #
