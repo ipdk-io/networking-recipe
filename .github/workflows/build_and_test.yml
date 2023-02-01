@@ -1,0 +1,99 @@
+name: "Networking Recipe CI Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  # if workflow for PR or push is already running stop it, and start new one
+  group: build_and_test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+jobs:
+
+  build_and_test:
+    timeout-minutes: 100
+    runs-on: ubuntu-20.04
+    steps:
+      - name: 'Checkout p4-dpdk repo'
+        uses: actions/checkout@v3
+        with:
+          repository: p4lang/p4-dpdk-target
+          submodules: 'recursive'
+          path: p4sde
+
+      - name: 'Install dependencies'
+        working-directory: ./p4sde/tools/setup
+        run: |
+              sudo apt update -y
+              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev libatomic1 libnl-route-3-dev -y
+              pip3 install distro
+              python3 install_dep.py
+              cmake --version
+              sudo apt-get purge cmake
+              sudo rm -rf /usr/local/bin/cmake || true
+              sudo rm -rf ~/.local/bin/cmake || true
+              # removing cmake 3.25 and reinstalling 3.20, as build is failing with cmake 3.25
+              wget https://cmake.org/files/v3.20/cmake-3.20.2-linux-x86_64.sh -O ${GITHUB_WORKSPACE}/cmake-3.20.2-linux-x86_64.sh
+              chmod a+x ${GITHUB_WORKSPACE}/cmake-3.20.2-linux-x86_64.sh
+              sudo mkdir -p /opt/rh/cmake
+              cd ${GITHUB_WORKSPACE} && sudo sh cmake-3.20.2-linux-x86_64.sh --prefix=/opt/rh/cmake --skip-license
+              sudo ln -s /opt/rh/cmake/bin/cmake /usr/local/bin/cmake
+              cmake --version
+
+      - name: 'Checkout Networking Recipe'
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          path: ipdk.recipe
+
+      - name: 'Compile P4 dpdk target'
+        run: |
+             export SDE=${GITHUB_WORKSPACE}
+             mkdir install deps
+             export SDE_INSTALL=${GITHUB_WORKSPACE}/install
+             cd ${GITHUB_WORKSPACE}/p4sde
+             ./autogen.sh
+             ./configure --prefix=$SDE_INSTALL
+             make -j6
+             make install
+
+      - name: 'Build,Configure and Execute infrap4d dependencies'
+        run: |
+             cmake --version
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe
+             export IPDK_RECIPE=`pwd`
+             cd $IPDK_RECIPE/setup
+             cmake -B build -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/deps
+             cmake --build build -j6
+
+      - name: 'Execute dpdk target build'
+        run: |
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe
+             export IPDK_RECIPE=${GITHUB_WORKSPACE}/ipdk.recipe
+             export SDE_INSTALL=${GITHUB_WORKSPACE}/install
+             export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
+             source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+             ./make-all.sh --target=dpdk
+
+  py_bandit_test:
+     timeout-minutes: 10
+     runs-on: ubuntu-20.04
+     steps:
+       - name: 'checkout Networking Recipe'
+         uses: actions/checkout@v3
+         with:
+           path: ipdk.recipe
+
+       - name: 'Run Bandit Test'
+         uses: tj-actions/bandit@v5.1
+         with:
+           targets: |  # or a single string "."
+            ./ipdk.recipe/clients/p4rt-ctl/p4rt-ctl.in
+           options: "-v"

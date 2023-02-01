@@ -44,12 +44,12 @@ System under test will have above topology running the networking recipe. Link P
 ## Create P4 artifacts <a name="create_p4_artifacts"></a>
 - Install p4c compiler from p4lang/p4c(<https://github.com/p4lang/p4c>) repository and follow the readme for procedure
 - Set the environment variable OUTPUT_DIR to the location where artifacts should be generated and where p4 files are available
-  eg. export OUTPUT_DIR=/root/ovs/p4proto/p4src/linux_networking/
+  eg. export OUTPUT_DIR=$IPDK_RECIPE/p4src/linux_networking/
 - Generate the artifacts using p4c-dpdk installed in previous step using command below:
 ```
   p4c-dpdk --arch pna --target dpdk --p4runtime-files $OUTPUT_DIR/p4Info.txt --bf-rt-schema $OUTPUT_DIR/bf-rt.json --context $OUTPUT_DIR/context.json -o $OUTPUT_DIR/linux_networking.spec $OUTPUT_DIR/linux_networking.p4
 ```
-- Modify sample lnw.conf file available in ovs/p4proto/p4src/linux_networking/ to specify absolute path of the artifacts (json and spec files)
+- Modify sample lnw.conf file available in $IPDK_RECIPE/p4src/linux_networking/ to specify absolute path of the artifacts (json and spec files)
 - Generate binary execuatble using tdi-pipeline builder command below:
 ```
 tdi_pipeline_builder --p4c_conf_file=lnw.conf --bf_pipeline_config_binary_file=lnw.pb.bin
@@ -84,6 +84,7 @@ Ex: vlan1, vlan2, vlan3 …. vlan4094
 
 #### 2. Export the environment variables LD_LIBRARY_PATH, IPDK_RECIPE and SDE_INSTALL and start running the infrap4d
 ```
+    alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"
     sudo $IPDK_RECIPE/install/bin/infrap4d
 ```
 #### 3. Create two VHOST user ports:
@@ -117,7 +118,7 @@ Note:
     ip link set dev eth0 up
 ```
 #### 7. Bring up the TAP and or dummy interfaces
-  - 7.1 Option1: Use one of the TAP ports as tunnel termination and assign IP address to the TAP port.
+  - 7.1 Option 1: Use one of the TAP ports as tunnel termination and assign IP address to the TAP port.
   ```
     ip link set dev TAP0 up
     ip addr add 40.1.1.1/24 dev TAP1
@@ -125,12 +126,24 @@ Note:
     ip link set dev TAP2 up
     ip link set dev TAP3 up
   ```
+  - 7.2 Option 2: Create a dummy port and use it for tunnel termination. Route to reach dummy port will be statically configured on peer or this route will be re-distributed to the peer via routing protocols available from FRR.
+  ```
+    ip link add dev TEP1 type dummy
+
+    ip link set dev TAP0 up
+    ip link set dev TAP1 up
+    ip link set dev TAP2 up
+    ip link set dev TAP3 up
+    ip link set dev TEP1 up
+  ```
 
 #### 8. Set the pipeline
 ```
     p4rt-ctl set-pipe br0 lnw.pb.bin p4Info.txt
 ```
+
 #### 9. Start and run ovs-vswitchd server and ovsdb-server
+Kill any existing ovs process if running.
 ```
 mkdir -p $IPDK_RECIPE/install/var/run/openvswitch
 rm -rf $IPDK_RECIPE/install/etc/openvswitch/conf.db
@@ -151,15 +164,19 @@ sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-br br-int
 ifconfig br-int up
 ```
 
-#### 9. Configure VXLAN port
-   Using one of the TAP ports for tunnel termination.
+#### 10. Configure VXLAN port
+  - 10.1 Option 1: When one of the TAP ports is used for tunnel termination.
 ```
     sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=40.1.1.2 options:dst_port=4789
+```
+  - 10.2 Option 2: When a dummy port is used for tunnel termination. Here remote IP is on a different network, route to reach peer need to be statically configure (refer section 14.1) or learn via FRR (refer section 14.2).
+```
+    sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=30.1.1.1 options:dst_port=4789
 ```
 Note:
     - VXLAN destination port should always be standard port. i.e., 4789. (limitation by p4 parser)
 
-#### 10. Configure VLAN ports on TAP0 and add them to br-int
+#### 11. Configure VLAN ports on TAP0 and add them to br-int
 ```
     ip link add link TAP0 name vlan1 type vlan id 1
     ip link add link TAP0 name vlan2 type vlan id 2
@@ -172,7 +189,7 @@ Note:
      - All VLAN interfaces should be created on top of TAP ports, and should always be in lowercase format "vlan+vlan_id. (Eg: vlan1, vlan2, vlan3 …. vlan4094)
 
 
-#### 11. Configure rules to push and pop VLAN from vhost 0 and 1 ports to TAP0 port (vhost-user and vlan port mapping)
+#### 12. Configure rules to push and pop VLAN from vhost 0 and 1 ports to TAP0 port (vhost-user and vlan port mapping)
 ```
 Note: Port number used in p4rt-ctl commands are target datapath indexes(unique identifier for each port) which can be queried using following commands below. With current SDE implementation, both tdi-portin-id and tdi-portout-id are the same.
 
@@ -209,7 +226,7 @@ Note: Port number used in p4rt-ctl commands are target datapath indexes(unique i
   p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_vlan_pkts_table "istd.input_port=6,local_metadata.vlan_id=2,action=linux_networking_control.pop_vlan_fwd(1)"
   ```
 
-#### 12. Configure rules for control packets coming in and out of physical port
+#### 13. Configure rules for control packets coming in and out of physical port
   - **Rule for: Any rx control packet from phy port0(TDP 2) should be sent it to it corresponding control port TAP1(TDP 3)**
   ```
     p4rt-ctl add-entry br0 linux_networking_control.handle_rx_control_pkts_table "istd.input_port=2,action=linux_networking_control.set_control_dest(3)"
@@ -227,7 +244,47 @@ Note: Port number used in p4rt-ctl commands are target datapath indexes(unique i
     p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table "istd.input_port=5,action=linux_networking_control.set_control_dest(4)"
   ```
 
-#### 14. Test the ping scenarios:
+#### 14. Configure routes only when dummy port is used for tunnel termination.
+  - 14.1 Option 1: Configure static route.
+
+    ```
+    ip addr add 40.1.1.1/24 dev TEP1
+    ip addr add 50.1.1.1/24 dev TAP1
+    ip route add 30.1.1.1 nexthop via 50.1.1.2 dev TAP1
+    ```
+
+  - 14.2 Option 2: Learn dynamic routes via FRR (iBGP route distribution)
+    - 14.2.1 Install FRR
+      - Install FRR via default package manager, like "apt install frr" for Ubuntu /"dnf install frr" for Fedora.
+      - If not, refer to official FRR documentation available at https://docs.frrouting.org/en/latest/installation.html and install according to your distribution.
+    - 14.2.2 Configure FRR
+      - Modify /etc/frr/daemons to enable bgpd daemon
+      - Restart FRR service. systemctl restart frr
+      - Start VTYSH process, which is a CLI provided by FRR for user configurations.
+      - Set below configuration on the DUT (host1) for singlepath scenario.
+        ```
+        interface TAP1
+        ip address 50.1.1.1/24
+        exit
+        !
+        interface TEP1
+        ip address 40.1.1.1/24
+        exit
+        !
+        router bgp 65000
+        bgp router-id 40.1.1.1
+        neighbor 50.1.1.2 remote-as 65000
+        !
+        address-family ipv4 unicast
+          network 40.1.1.0/24
+        exit-address-family
+        ```
+      - Once Peer is also configured, we should see neighbor 50.1.1.2 is learnt on DUT (host1) and also route learnt on the kernel.
+        ```
+        30.1.1.0/24 nhid 54 via 50.1.1.2 dev TAP1 proto bgp metric 20
+        ```
+
+#### 15. Test the ping scenarios:
   - Ping between VM's on the same host
   - Underlay ping
   - Overlay ping: Ping between VM's on different hosts

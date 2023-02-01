@@ -303,15 +303,25 @@ services that are available for a p4runtime client.
     ``COUNTER_FLOW``: Refers to the counter ID (generated ID by p4c, refer to bfrt.json file)
     and the counter table index. Format "counter_id=<number>,index=<number>"
 
-Logs and Analysis
-------------------
+16. Get flow dump entries ::
 
-    a) If the user sees any ERROR logs while running 'p4rt-ctl' or 'gnmi-cli' commands,
-    more details can be found in either 'ovs-vswitchd.log' or 'p4_driver.log' files.
+    $ p4rt-ctl dump-entries SWITCH [TABLE]
+    $ Example: p4rt-ctl dump-entries br0
 
-    b) ovs-vswitchd.log maintains the running logs and errors from the OVS submodules.
-    This file path is given as a '--log-file' parameter, while the 'ovs-vswitchd' process is run.
-    Ex:- ovs-vswitchd unix:$RUN_OVS/var/run/openvswitch/db.sock --log-file=/tmp/ovs-vswitchd.log
+  .. note::
 
-    c) p4_driver.log maintains the running logs and errors from the P4-SDE and target submodule.
-    This file is usually created in the working directory, from where run_ovs.sh script is run.
+    ``SWITCH``: Refers to the bridge name, which maps to device name
+    internally.
+    ``TABLE``: Refers to table entry from the p4 file.
+
+Known Issues
+-------------
+
+    1) SWITCH parameter specified in ``p4rt-ctl`` commands are not really
+    utilized in current releases. It accepts any kind of value
+
+    2) counter_id=0 in ``p4rt-ctl get-counter`` for indirect counters
+    is not supported in current release. Flow counters index=unset or index=0
+    does not give cumulative byte count.
+
+    3) Runtime validation of ``value`` for each key in ``p4rt-ctl`` is not supported.
