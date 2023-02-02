@@ -1,89 +1,135 @@
-# networking-recipe
+# IPDK Networking Recipe (P4 Control Plane)
 
-IPDK Networking Recipe (P4 Control Plane)
+## Overview
 
-## Background
+The IPDK Networking Recipe (originally P4-OVS Split Architecture)
+modularizes P4-OVS and reduces coupling between its components, making the
+code easier to maintain and more suitable for upstreaming. It moves the
+P4-specific components of the integrated architecture of P4-OVS to a separate
+process called infrap4d.
 
-The initial implementation of P4-OVS was both physically and logically
-monolithic.
+![Networking Recipe Architecture](docs/images/networking-recipe-architecture.png)
 
-- Two foreign components (Stratum and the Kernel Monitor) were added to a
-  fork of the Open vSwitch repository.
+## infrap4d
 
-- OvS was modified to build these components and include them in
-  `ovs-vswitchd`.
+Infrap4d integrates Stratum, the Kernel Monitor (krnlmon), Switch Abstraction
+Interface (SAI), Table Driven Interface (TDI), and a P4 target driver into a
+separate process (daemon).
 
-- Stratum initialization was adapted to allow OvS to start the P4 Runtime
-  and gNMI services.
+![Infrap4d Architecture](docs/images/infrap4d-architecture.png)
 
-- Extensive changes were made to Stratum to support P4-enabled IPDK hardware
-  and software switches.
+## Stratum
 
-## Transition to P4 Control Plane
+Stratum is an open-source silicon-independent switch operating system.
+It is a component of Infrap4d that provides the P4Runtime and gNMI/Openconfig
+capabilities for P4 flow rule offloads and port configuration offloads.
+Stratum is augmented with a new tdi platform layer that processes P4rt and
+gNMI requests and interacts with the underlying P4 target driver through TDI.
+A new ipdk platform layer provides IPDK-specific replacements for several
+TDI modules that allow it to handle configuration differences between IPUs
+and the switches for which Stratum was developed.
 
-### Completed
+## Table Driven Interface (TDI)
 
-The P4 Control Plane (formerly known as the Split Architecture) modularizes
-P4-OVS, making the code easier to maintain and more suitable for upstreaming.
+TDI (Table Driven Interface) provides a target-agnostic interface to the
+driver for a P4-programmable device. It is a set of APIs that enable
+configuration and management of P4 programmable and fixed functions of a
+backend device in a uniform and dynamic way. Different targets like bmv2
+and P4-DPDK can choose to implement their own backends for different P4
+and non-P4 objects but can share a common TDI. Stratum talks to the
+target-specific driver through the TDI front-end interface.
 
-- Removed foreign components from the OvS repository, together with most
-  of the changes to OvS itself.
+## Kernel Monitor (krnlmon)
 
-- Reengineered the Stratum modifications to be non-breaking and suitable for
-  upstreaming to the parent project. Made `tdi` a distinct platform type,
-  with `tofino` and `dpdk` variants (targets).
+The Kernel Monitor receives RFC 3549 messages from the Linux Kernel over a
+Netlink socket when changes are made to the kernel networking data structures.
+It listens for network events (link, address, neighbor, route, tunnel, etc.)
+and issues calls to update the P4 tables via SAI and TDI. The kernel monitor
+is an optional component of infrap4d.
 
-- Extracted the Kernel Monitor and make it a separate component. Removed
-  OvS dependencies, and refactored for modularity and to support unit testing.
+## Switch Abstraction Interface (SAI)
 
-- Created a new component (`infrap4d`) that combines Stratum, the Kernel
-  Monitor, TDI, and a P4 target driver into a separate process (daemon).
+Switch Abstraction Interface (SAI) defines a vendor-independent interface
+for switching ASICs.
 
-- Created a superproject (`networking-recipe`) to integrate the components
-  and orchestrate the overall build.
+## Interfaces
 
-- Updated OvS to a more recent version.
+### P4Runtime
 
-### In Progress
+The P4Runtime API is a control plane specification for managing the
+data plane elements of a device defined or described by a P4 program.
 
-- Integrate the Kernel Monitor into `infrap4d`. Merge changes that were
-  made in P4-OVS after the original split was done.
+### gNMI
 
-- Create a component (`ovs-p4rt`) that can be linked with `ovs-vswitchd`
-  to allow OvS to communicate with `infrap4d`.
+gRPC Network Management Interface (gNMI) is a gRPC-based protocol to manage
+network devices.
 
-- Update to the current version of Stratum.
+## Clients
 
-- Upstream the OvS and Stratum changes to the parent projects.
+1. `ovs-p4rt`: A library (C++ with a C interface) that allows ovs-vswitchd
+   and ovsdb-server to communicate with the P4Runtime Server in infrap4d
+   via gRPC. It is used to program (insert/modify/delete) P4 forwarding
+   tables in the pipeline.
 
-## Changes from P4-OVS
+2. `p4rt-ctl`: A Python-based P4Runtime client which talks to the P4Runtime
+   Server in infrap4d via gRPC, to program the P4 pipeline and insert/delete
+   P4 table entries.
 
-- The `external`, `p4runtime`, `stratum`, and `unit_test` directories
-  have been removed from the `ovs` repository.
+3. `gnmi-ctl`: A gRPC-based C++ network management interface client to handle
+   port configurations and program fixed functions in the P4 pipeline.
 
-- The `p4proto` directory has been removed. Locally-modified Stratum files
-  were merged back into Stratum or discarded. Target-specific changes were
-  made part of the `dpdk` and `tofino` variants of the `tdi` platform.
+## Download
 
-- OvS no longer manages Stratum or the Kernel Monitor. It also no longer
-  makes direct calls to the Kernel Monitor or switch driver. All communication
-  with Stratum will be by means of calls to the OvS client API (`ovs-p4rt`),
-  which sends gRPC requests to `infrap4d`.
+To download the source code for the Networking Recipe:
 
-- The `barefoot` Stratum code has been restored to its original state.
+```bash
+git clone --recursive https://github.com/ipdk-io/networking-recipe
+```
 
-## Repositories
+## Targets
 
-Implementation is being done incrementally through ipdk-io repositories.
+The IPDK Networking Recipe can be built to support different targets.
+See the target-specific instructions for information on how to set up,
+build, and use a particular target.
 
-- OvS development takes place on the `split-arch` branch of the
-  `ipdk-io/ovs` repository.
+| Target | Instructions |
+| ------ | ------------ |
+| dpdk   | [IPDK Networking Recipe for DPDK](https://github.com/ipdk-io/networking-recipe/blob/main/docs/ipdk-dpdk.md) |
+| tofino | [IPDK Networking Recipe for Tofino](https://github.com/ipdk-io/networking-recipe/blob/main/docs/ipdk-tofino.md) |
 
-- Stratum development takes place on the `split-arch` branch of the
-  `ipdk-io/stratum-dev` repository.
+## make-all.sh
 
-- Kernel Monitor development takes place on the `main` branch of the
-  `ipdk-io/krnlmon` repository.
+The `make-all.sh` script provides a convenient way to build the
+Networking Recipe for a specific target.
 
-- Superproject development takes place on the `main` branch of the
-  `ipdk-io/networking-recipe` repository.
+```bash
+./make-all.sh [--ovs] -target <target>
+```
+
+### General options
+
+| Parameter | Value | Description |
+| --------- | ----- | ----------- |
+| `--prefix` |  _path_ | Path to the directory in which build artifacts should be installed. Sets the  `CMAKE_INSTALL_DIR` CMake variable. Default value is `./install`. |
+| `--sde-install` | _path_ | Path to install directory for the target driver (SDE). Sets the `SDE_INSTALL_DIR` CMake variable. Defaults to the value of the `SDE_INSTALL` environment variable. |
+| `--target` | _target_ | Target to build for (`dpdk` or `tofino`). Sets the `DPDK_TARGET` or `TOFINO_TARGET` CMake variable. Currently defaults to `tofino`. |
+
+Parameter names may be abbreviated to any shorter form as long as it is unique.
+
+### Developer options
+
+| Parameter | Value | Description |
+| --------- | ----- | ----------- |
+| `--clean` | | Remove main _build_ and _install_ directories, then build. |
+| `--debug` | | Build with debug configuration. |
+| `--dep-install` | _path_ | Path to an optional install directory for dependency libraries. Sets the `DEPEND_INSTALL_DIR` CMake variable. Defaults to the value of the `DEPEND_INSTALL` environment variable. |
+| `--develop` | | Create separate build and install trees for OVS (`ovs/build` and `ovs/install`). The `--clean` option does not remove these directories. This allows you to do a clean build of the non-OVS code without having to rebuild OVS. |
+| `--no-ovs` | Disable support for Open vSwitch (OvS). |
+| `--ovs` | | Enable support for Open vSwitch (OvS). |
+
+These options are primarily of interest to developers working on the recipe.
+
+## Note
+
+The build files, CMake variables, environment variables, and `make-all`
+script are under active development and are expected to change.

@@ -29,7 +29,7 @@ export DEPEND_INSTALL=$3
 
 # Get the OS and Version details
 # shellcheck source=/dev/null
-. "$IPDK_RECIPE/scripts/es2k/os_ver_details.sh"
+. "$IPDK_RECIPE/scripts/dpdk/os_ver_details.sh"
 get_os_ver_details
 echo "OS and Version details..."
 echo "$OS : $VER"
@@ -53,7 +53,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64
 
 # Update Dependent libraries
 export LD_LIBRARY_PATH=$DEPEND_INSTALL/lib:$DEPEND_INSTALL/lib64:$LD_LIBRARY_PATH
-export PATH=$DEPEND_INSTALL/bin:$DEPEND_INSTALL/sbin:$IPDK_RECIPE/install/sbin:$IPDK_RECIPE/install/bin:$PATH
+export PATH=$DEPEND_INSTALL/bin:$DEPEND_INSTALL/sbin:$PATH
 export LIBRARY_PATH=$DEPEND_INSTALL/lib:$DEPEND_INSTALL/lib64:$LIBRARY_PATH
 
 echo ""

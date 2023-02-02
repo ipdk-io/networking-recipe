@@ -1,16 +1,18 @@
 # CMake build file for Stratum code.
 #
-# Copyright 2022 Intel Corporation
+# Copyright 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
+#
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
+
 project(stratum)
 
 #############################
 # Symbolic path definitions #
 #############################
 
-set(GOOGLE_SOURCE_DIR
+set(GOOGLEAPIS_SOURCE_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/googleapis" CACHE PATH
     "Path to Google APIs source directory")
 
@@ -22,14 +24,14 @@ set(STRATUM_SOURCE_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/stratum" CACHE PATH
     "Path to Stratum source directory")
 
-set(PROTO_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
+set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
-file(MAKE_DIRECTORY ${PROTO_OUT_DIR})
+file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
 set(STRATUM_INCLUDES
     ${STRATUM_SOURCE_DIR}
     # Protobuf C++ header files.
-    ${PROTO_OUT_DIR}
+    ${PB_OUT_DIR}
 )
 
 #####################
@@ -76,6 +78,8 @@ add_library(stratum_lib_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/lib/macros.h
     ${STRATUM_SOURCE_DIR}/stratum/lib/security/auth_policy_checker.cc
     ${STRATUM_SOURCE_DIR}/stratum/lib/security/auth_policy_checker.h
+    ${STRATUM_SOURCE_DIR}/stratum/lib/security/credentials_manager.cc
+    ${STRATUM_SOURCE_DIR}/stratum/lib/security/credentials_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/lib/utils.cc
     ${STRATUM_SOURCE_DIR}/stratum/lib/utils.h
     ${STRATUM_SOURCE_DIR}/stratum/public/lib/error.cc
@@ -84,7 +88,7 @@ add_library(stratum_lib_o OBJECT
 
 target_include_directories(stratum_lib_o PRIVATE ${STRATUM_INCLUDES})
 
-add_dependencies(stratum_lib_o stratum_proto)
+add_dependencies(stratum_lib_o stratum_proto gnmi_proto)
 
 ############################
 # stratum_hal_lib_common_o #
@@ -108,6 +112,11 @@ add_library(stratum_hal_lib_common_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/writer_interface.h
 )
 
+set_source_files_properties(
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/config_monitoring_service.cc
+    PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-declarations"
+)
+
 target_include_directories(stratum_hal_lib_common_o PRIVATE
     ${STRATUM_INCLUDES}
     ${SDE_INSTALL_DIR}/include
@@ -115,6 +124,7 @@ target_include_directories(stratum_hal_lib_common_o PRIVATE
 
 add_dependencies(stratum_hal_lib_common_o
     gnmi_proto
+    openconfig_proto
     stratum_proto
 )
 
@@ -289,12 +299,6 @@ target_include_directories(stratum_target_o PRIVATE
     ${SDE_INSTALL_DIR}/include
 )
 
-if(WITH_KRNLMON)
-    target_compile_definitions(stratum_target_o PRIVATE KRNLMON_SUPPORT)
-    target_include_directories(stratum_target_o PRIVATE ${KRNLMON_SOURCE_DIR})
-    add_dependencies(stratum_target_o krnlmon)
-endif()
-
 add_dependencies(stratum_target_o stratum_proto)
 
 ##################
@@ -332,13 +336,13 @@ target_include_directories(stratum_main_o PRIVATE
     ${SDE_INSTALL_DIR}/include
 )
 
-add_dependencies(stratum_main_o stratum_proto)
+add_dependencies(stratum_main_o stratum_proto gnmi_proto)
 
-##############
-# libstratum #
-##############
+#####################
+# libstratum_static #
+#####################
 
-add_library(stratum STATIC
+add_library(stratum_static STATIC
     $<TARGET_OBJECTS:stratum_glue_o>
     $<TARGET_OBJECTS:stratum_lib_o>
     $<TARGET_OBJECTS:stratum_hal_lib_common_o>
@@ -349,7 +353,7 @@ add_library(stratum STATIC
     $<TARGET_OBJECTS:stratum_main_o>
 )
 
-target_link_libraries(stratum PUBLIC
+target_link_libraries(stratum_static PUBLIC
     absl::strings absl::synchronization absl::graphcycles_internal
     absl::stacktrace absl::symbolize absl::malloc_internal
     absl::debugging_internal absl::demangle_internal absl::time
@@ -361,10 +365,10 @@ target_link_libraries(stratum PUBLIC
     absl::bad_variant_access
 )
 
-target_link_libraries(stratum PUBLIC glog gflags grpc protobuf grpc++)
-target_link_libraries(stratum PUBLIC pthread)
+target_link_libraries(stratum_static PUBLIC glog gflags grpc protobuf grpc++)
+target_link_libraries(stratum_static PUBLIC pthread)
 
-target_link_libraries(stratum PUBLIC
+target_link_libraries(stratum_static PUBLIC
     openconfig_proto
     stratum_proto
     gnmi_proto
@@ -372,7 +376,7 @@ target_link_libraries(stratum PUBLIC
     p4runtime_proto
 )
 
-target_link_libraries(stratum PUBLIC pthread)
+target_link_libraries(stratum_static PUBLIC pthread)
 
 # tdi
 find_library(LIBTDI tdi ${SDE_INSTALL_DIR}/lib)
@@ -412,7 +416,7 @@ if(TOFINO_TARGET)
     add_library(driver SHARED IMPORTED)
     set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
 
-    target_link_libraries(stratum PUBLIC
+    target_link_libraries(stratum_static PUBLIC
         driver
         tdi
         tdi_json_parser
@@ -448,7 +452,7 @@ elseif(DPDK_TARGET)
     set_property(TARGET target_utils
                  PROPERTY IMPORTED_LOCATION ${LIBTARGET_UTILS})
 
-    target_link_libraries(stratum PUBLIC
+    target_link_libraries(stratum_static PUBLIC
         driver
         bf_switchd_lib
         tdi
@@ -457,15 +461,11 @@ elseif(DPDK_TARGET)
         target_sys
     )
 
-    if(WITH_KRNLMON)
-        target_link_libraries(stratum PUBLIC krnlmon)
-    endif()
-
-    target_link_directories(stratum PUBLIC
+    target_link_directories(stratum_static PUBLIC
         ${SDE_INSTALL}/lib
         ${DPDK_LIBRARY_DIRS})
 
-    target_link_options(stratum PUBLIC ${DPDK_LD_FLAGS} ${DPDK_LDFLAGS_OTHER})
+    target_link_options(stratum_static PUBLIC ${DPDK_LD_FLAGS} ${DPDK_LDFLAGS_OTHER})
 elseif(ES2K_TARGET)
     # ES2000 driver
     find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
@@ -547,23 +547,23 @@ elseif(ES2K_TARGET)
     set_property(TARGET rte_net_idpf
             PROPERTY IMPORTED_LOCATION ${LIBRTE_NET_IDPF})    
 
-    target_link_libraries(stratum PUBLIC
+    target_link_libraries(stratum_static PUBLIC
         driver
         bf_switchd_lib
         tdi
         tdi_json_parser
         target_utils
         target_sys
-	xeoncp
-	vfio
-	cpf
-	cpf_pmd_infra
-	rte_net_idpf
+        xeoncp
+        vfio
+        cpf
+        cpf_pmd_infra
+        rte_net_idpf
     )
 
-    target_link_directories(stratum PUBLIC
+    target_link_directories(stratum_static PUBLIC
         ${SDE_INSTALL}/lib
         ${DPDK_LIBRARY_DIRS})
 
-    target_link_options(stratum PUBLIC ${ES2K_LD_FLAGS} ${ES2K_LDFLAGS_OTHER})
+    target_link_options(stratum_static PUBLIC ${ES2K_LD_FLAGS} ${ES2K_LDFLAGS_OTHER})
 endif()

@@ -1,0 +1,33 @@
+# Copyright 2022 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Patches the gRPC build script to set the install RUNPATH in the
+# protobuf compiler plugins to the relative path of the library
+# directory.
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 824886600..5ba8f9384 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11173,6 +11173,10 @@ add_executable(grpc_cpp_plugin
+   src/compiler/cpp_plugin.cc
+ )
+ 
++set_target_properties(grpc_cpp_plugin
++  PROPERTIES INSTALL_RPATH $ORIGIN/../@CMAKE_INSTALL_LIBDIR@
++)
++
+ target_include_directories(grpc_cpp_plugin
+   PRIVATE
+     ${CMAKE_CURRENT_SOURCE_DIR}
+@@ -11368,6 +11372,10 @@ add_executable(grpc_python_plugin
+   src/compiler/python_plugin.cc
+ )
+ 
++set_target_properties(grpc_python_plugin
++  PROPERTIES INSTALL_RPATH $ORIGIN/../@CMAKE_INSTALL_LIBDIR@
++)
++
+ target_include_directories(grpc_python_plugin
+   PRIVATE
+     ${CMAKE_CURRENT_SOURCE_DIR}

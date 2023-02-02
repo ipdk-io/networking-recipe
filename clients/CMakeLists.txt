@@ -16,9 +16,11 @@ add_executable(gnmi_cli
     ${STRATUM_SOURCE_DIR}/stratum/tools/gnmi/gnmi_cli.cc
 )
 
+set_install_rpath(gnmi_cli ${EXEC_ELEMENT} ${DEP_ELEMENT})
+
 target_link_libraries(gnmi_cli
     PUBLIC
-        stratum
+        stratum_static
         gnmi_proto grpc_proto
         grpc protobuf gflags grpc++
         pthread re2
@@ -31,7 +33,7 @@ endif()
 target_include_directories(gnmi_cli
     PRIVATE
         ${STRATUM_SOURCE_DIR}
-        ${PROTO_OUT_DIR}
+        ${PB_OUT_DIR}
 )
 
 add_dependencies(gnmi_cli
@@ -54,10 +56,12 @@ add_executable(tdi_pipeline_builder
 # Suppress "warning: attribute ignored" on ABSL_MUST_USE_RESULT [[nodiscard]]
 target_compile_options(tdi_pipeline_builder PRIVATE -Wno-attributes)
 
+set_install_rpath(tdi_pipeline_builder ${EXEC_ELEMENT} ${DEP_ELEMENT})
+
 target_include_directories(tdi_pipeline_builder
     PRIVATE
         ${STRATUM_SOURCE_DIR}
-        ${PROTO_OUT_DIR}
+        ${PB_OUT_DIR}
 )
 
 target_link_libraries(tdi_pipeline_builder PUBLIC stratum_proto p4runtime_proto)
@@ -66,8 +70,8 @@ target_link_libraries(tdi_pipeline_builder PUBLIC
     protobuf gflags glog grpc grpc++
 )
 
-target_link_libraries(tdi_pipeline_builder PRIVATE stratum)
+target_link_libraries(tdi_pipeline_builder PRIVATE stratum_static)
 
-add_dependencies(tdi_pipeline_builder stratum p4runtime_proto stratum_proto)
+add_dependencies(tdi_pipeline_builder p4runtime_proto stratum_proto)
 
 install(TARGETS tdi_pipeline_builder RUNTIME)

@@ -254,28 +254,34 @@ Limitations/Note
     ``unicast packets/bytes``, and the rest of the other fields are displayed
     as zero.
 
-    3) When tunnel is enabled, the expected total size of the overlay packet
-    is less than or equal to 1514 Bytes. To match this size, user need to
-    adjust overlay network interface MTU size not more than 1450 Bytes.
-    Underlay fragmentation is not support, so we need to make sure packet is
-    with in the MTU size of the underlay port.
-
-    4) For any udp/tcp packets from overlay network, if checksum issues are
-    noticed on interfaces which are of type VIRTIO-NET, it is recommended to
-    disable checksum using below command.
-    $ ethtool --offload <netdev-name> rx off tx off
-
-    5) pna_tcp_connection_tracking demonstrates the PNA add_on_miss feature and
-    flow aging for auto learn flows. It supports partial implementation of TCP
-    state machine.
-
-    6) ``gnmi-ctl get`` counters command doesn't work for the TAP ports that
+    3) ``gnmi-ctl get`` counters command doesn't work for the TAP ports that
     are added as control ports. For these control ports, stats can be observed
     through the standard ovs-ofctl dump-ports command.
 
-    7) ``gnmi-ctl get`` command shows target datapath index as 0 for all control
+    4) ``gnmi-ctl get`` command shows target datapath index as 0 for all control
     TAP ports.
 
-    8) Number of ports configured should be power 2. No port configuration is
+    5) Number of ports configured should be power 2. No port configuration is
     allowed once PIPELINE is enabled. MODIFY and DELETE operations on ports are
     not supported once the port is added to DPDK target backend.
+
+    6) Runtime validation of ``value`` for each key in ``gnmi-cli`` is not supported.
+
+    7) P4 DPDK backend supports both PSA and PNA architectures. Based on the architecture
+    used in the P4 program, P4 compiler emits the pipeline name differently.
+    If P4 program is defined for
+    ``PNA architecture`` P4 compiler emits the PIPELINE name as "pipe" irrespective of the name defined in the P4 program.
+    ``PSA architecture`` P4 compiler uses and emits the PIPELINE name defined by the user in the program.
+                         Currently it supports only ingress pipelines.
+
+    This pipeline name is referred in below three places and consumed by infrap4d to program the target.
+    ``p4_pipeline_name`` in /usr/share/stratum/dpdk/dpdk_skip_p4.conf file.
+    ``p4_pipeline_name`` in conf file used in tdi_pipeline_builder to generate pb.bin.
+    ``pipeline-name`` parameter in gnmi-ctl, while configuring the PORT
+          Ex: gnmi-ctl set "device:virtual-device,name:TAP1,pipeline-name:pipe,mtu:1500,port-type:TAP"
+
+    Infrap4d assumes pipeline name is defaulted to "pipe". If the P4 program is defined for PSA architecture
+    and uses a pipeline name other than "pipe", we need to manually change the 'pipeline name' at all the above
+    three places to the ingress pipeline name mentioned in the p4 file.
+
+    Hence to avoid this handcrafting, we recommend using the ingress pipeline name as "pipe" for all the PSA programs.

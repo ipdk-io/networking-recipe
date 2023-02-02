@@ -15,9 +15,11 @@ add_executable(gnmi-ctl
     gnmi_ctl_utils.h
 )
 
+set_install_rpath(gnmi-ctl ${EXEC_ELEMENT} ${DEP_ELEMENT})
+
 target_link_libraries(gnmi-ctl
     PUBLIC
-        stratum
+        stratum_static
         gnmi_proto grpc_proto
         grpc protobuf gflags grpc++
         pthread re2
@@ -26,7 +28,7 @@ target_link_libraries(gnmi-ctl
 target_include_directories(gnmi-ctl
     PRIVATE
         ${STRATUM_SOURCE_DIR}
-        ${PROTO_OUT_DIR}
+        ${PB_OUT_DIR}
 )
 
 add_dependencies(gnmi-ctl
