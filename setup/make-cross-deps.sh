@@ -22,4 +22,4 @@ cmake -S . -B ${CROSS_BUILD} \
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} \
     -DCMAKE_INSTALL_PREFIX=${CROSS_INSTALL}
 
-cmake --build ${CROSS_BUILD} -j12
+cmake --build ${CROSS_BUILD} -j8

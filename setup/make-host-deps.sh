@@ -16,7 +16,7 @@ if [ -n "${SDKTARGETSYSROOT}" ]; then
     echo "The host dependencies must be built WITHOUT sourcing"
     echo "the cross-compile environment variables."
     echo "-----------------------------------------------------"
-    echo 
+    echo ""
     exit 1
 fi
 HOST_BUILD=build
