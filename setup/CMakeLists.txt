@@ -257,7 +257,8 @@ endif()
 #############
 
 ExternalProject_Add(gmock-gbl
-  GIT_REPOSITORY  https://github.com/apriorit/gmock-global-sample.git
+  GIT_REPOSITORY  ${GMOCK_GBL_GIT_URL}
+  GIT_TAG         ${GMOCK_GIT_GIT_TAG}
   GIT_PROGRESS    ON
 
   SOURCE_DIR
