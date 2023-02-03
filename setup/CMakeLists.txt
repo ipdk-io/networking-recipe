@@ -125,6 +125,9 @@ endif()
 # GRPC #
 ########
 
+# This is a brute-force solution, but CMAKE_INSTALL_LIBDIR isn't
+# doing the trick.
+set(GRPC_INSTALL_RPATH $ORIGIN/../lib:$ORIGIN/../lib64)
 configure_file(grpc.patch.in ${CMAKE_SOURCE_DIR}/grpc.patch @ONLY)
 
 if(CMAKE_CROSSCOMPILING)

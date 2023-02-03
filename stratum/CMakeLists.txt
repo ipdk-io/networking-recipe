@@ -471,7 +471,6 @@ elseif(DPDK_TARGET)
     )
 elseif(ES2K_TARGET)
     include(es2k-driver.cmake)
-
     target_link_libraries(stratum_static PUBLIC ${ES2K_DRIVER_LIBS})
     target_link_directories(stratum_static PUBLIC ${ES2K_LINK_DIRS})
 endif()

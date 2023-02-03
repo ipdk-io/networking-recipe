@@ -98,7 +98,7 @@ set(ES2K_DRIVER_LIBS
     tdi_json_parser
     target_utils
     target_sys
-    xeoncp
+    es2kcp
     vfio
     cpf
     cpf_pmd_infra

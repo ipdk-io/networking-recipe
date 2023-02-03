@@ -1,3 +1,4 @@
+#!/bin/bash
 _BUILD_DIR=ovs/build
 _INSTALL_DIR=${SDKTARGETSYSROOT}/opt/ovs
 
