@@ -98,7 +98,7 @@ elseif(TOFINO_TARGET)
     set(WITH_OVSP4RT OFF)
 elseif(ES2K_TARGET)
     set(WITH_KRNLMON OFF)
-    set(WITH_OVSP4RT OFF)
+    set(WITH_OVSP4RT ON)
 endif()
 
 cmake_print_variables(WITH_KRNLMON)
@@ -120,9 +120,9 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-####################################
-# find_xxxx() command search paths #
-####################################
+############################
+# find_xxxx() search paths #
+############################
 
 if(CMAKE_CROSSCOMPILING)
     # CMAKE_FIND_ROOT_PATH specifies directories of TARGET platform

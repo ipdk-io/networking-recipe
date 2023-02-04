@@ -1,4 +1,17 @@
 #!/bin/bash
+
+# Sample script to configure and cross-compile Open vSwitch
+# for the ES2K ACC platform. The build artifacts are installed
+# in the SYSROOT /opt/ovs directory.
+
+if [ -z "${SDKTARGETSYSROOT}" ]; then
+    echo ""
+    echo "Error: SDKTARGETSYSROOT is not defined!"
+    echo "Did you forget to source the environment variables?"
+    echo ""
+    exit 1
+fi
+
 _BUILD_DIR=ovs/build
 _INSTALL_DIR=${SDKTARGETSYSROOT}/opt/ovs
 
