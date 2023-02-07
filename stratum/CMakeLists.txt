@@ -378,99 +378,16 @@ target_link_libraries(stratum_static PUBLIC
 
 target_link_libraries(stratum_static PUBLIC pthread)
 
-# tdi
-find_library(LIBTDI tdi ${SDE_INSTALL_DIR}/lib)
-if(NOT LIBTDI)
-    message(FATAL_ERROR "Cannot find library: tdi")
-endif()
-
-add_library(tdi SHARED IMPORTED)
-set_property(TARGET tdi PROPERTY IMPORTED_LOCATION ${LIBTDI})
-
-# tdi_json_parser
-find_library(LIBTDI_JSON_PARSER tdi_json_parser ${SDE_INSTALL_DIR}/lib)
-if(NOT LIBTDI_JSON_PARSER)
-    message(FATAL_ERROR "Cannot find library: tdi_json_parser")
-endif()
-
-add_library(tdi_json_parser SHARED IMPORTED)
-set_property(TARGET tdi_json_parser
-             PROPERTY IMPORTED_LOCATION ${LIBTDI_JSON_PARSER})
-
-# target_sys
-find_library(LIBTARGET_SYS target_sys ${SDE_INSTALL_DIR}/lib)
-if(NOT LIBTARGET_SYS)
-    message(FATAL_ERROR "Cannot find library: target_sys")
-endif()
-
-add_library(target_sys SHARED IMPORTED)
-set_property(TARGET target_sys PROPERTY IMPORTED_LOCATION ${LIBTARGET_SYS})
-
-if(TOFINO_TARGET)
-    # Tofino driver
-    find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
-    if(NOT LIBDRIVER)
-        message(FATAL_ERROR "Cannot find library: driver")
-    endif()
-
-    add_library(driver SHARED IMPORTED)
-    set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
-
-    target_link_libraries(stratum_static PUBLIC
-        driver
-        tdi
-        tdi_json_parser
-        target_sys
-    )
-elseif(DPDK_TARGET)
-    # DPDK driver
-    find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
-    if(NOT LIBDRIVER)
-        message(FATAL_ERROR "Cannot find library: driver")
-    endif()
-
-    add_library(driver SHARED IMPORTED)
-    set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
-
-    # bf_switchd_lib
-    find_library(LIBBF_SWITCHD bf_switchd_lib ${SDE_INSTALL_DIR}/lib)
-    if(NOT LIBBF_SWITCHD)
-        message(FATAL_ERROR "Cannot find library: bf_switchd_lib")
-    endif()
-
-    add_library(bf_switchd_lib SHARED IMPORTED)
-    set_property(TARGET bf_switchd_lib
-                 PROPERTY IMPORTED_LOCATION ${LIBBF_SWITCHD})
-
-    # target_utils
-    find_library(LIBTARGET_UTILS target_utils ${SDE_INSTALL_DIR}/lib)
-    if(NOT LIBTARGET_UTILS)
-        message(FATAL_ERROR "Cannot find library: target_utils")
-    endif()
-
-    add_library(target_utils SHARED IMPORTED)
-    set_property(TARGET target_utils
-                 PROPERTY IMPORTED_LOCATION ${LIBTARGET_UTILS})
-
-    target_link_libraries(stratum_static PUBLIC
-        driver
-        bf_switchd_lib
-        tdi
-        tdi_json_parser
-        target_utils
-        target_sys
-    )
-
-    target_link_directories(stratum_static PUBLIC
-        ${SDE_INSTALL}/lib
-        ${DPDK_LIBRARY_DIRS})
-
-    target_link_options(stratum_static PUBLIC
-        ${DPDK_LD_FLAGS}
-        ${DPDK_LDFLAGS_OTHER}
-    )
+if(DPDK_TARGET)
+    include(dpdk-driver.cmake)
+    target_link_libraries(stratum_static PUBLIC ${DRIVER_SDK_LIBS})
+    target_link_directories(stratum_static PUBLIC ${DRIVER_SDK_DIRS})
+    target_link_options(stratum_static PUBLIC ${DRIVER_SDK_OPTS})
 elseif(ES2K_TARGET)
     include(es2k-driver.cmake)
-    target_link_libraries(stratum_static PUBLIC ${ES2K_DRIVER_LIBS})
-    target_link_directories(stratum_static PUBLIC ${ES2K_LINK_DIRS})
+    target_link_libraries(stratum_static PUBLIC ${DRIVER_SDK_LIBS})
+    target_link_directories(stratum_static PUBLIC ${DRIVER_SDK_DIRS})
+elseif(TOFINO_TARGET)
+    include(tofino-driver.cmake)
+    target_link_libraries(stratum_static PUBLIC ${DRIVER_SDK_LIBS})
 endif()
