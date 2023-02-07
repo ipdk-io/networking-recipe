@@ -12,16 +12,16 @@ function(define_es2k_driver _LIBS _DIRS)
     # Targets #
     ###########
 
-    # es2k::bf_switchd_lib
+    # bf_switchd_lib
     find_library(LIBBF_SWITCHD bf_switchd_lib REQUIRED)
-    add_library(es2k::bf_switchd_lib SHARED IMPORTED)
-    set_property(TARGET es2k::bf_switchd_lib
+    add_library(bf_switchd_lib SHARED IMPORTED)
+    set_property(TARGET bf_switchd_lib
                  PROPERTY IMPORTED_LOCATION ${LIBBF_SWITCHD})
 
-    # es2k::cpf
+    # cpf
     find_library(LIBCPF cpf REQUIRED)
-    add_library(es2k::cpf SHARED IMPORTED)
-    set_property(TARGET es2k::cpf PROPERTY IMPORTED_LOCATION ${LIBCPF})
+    add_library(cpf SHARED IMPORTED)
+    set_property(TARGET cpf PROPERTY IMPORTED_LOCATION ${LIBCPF})
 
     # es2k:cpf_pmd_infra
     find_library(LIBCPF_PMD_INFRA cpf_pmd_infra REQUIRED)
@@ -29,54 +29,54 @@ function(define_es2k_driver _LIBS _DIRS)
     set_property(TARGET es2k:cpf_pmd_infra
                  PROPERTY IMPORTED_LOCATION ${LIBCPF_PMD_INFRA})
 
-    # es2k::driver
+    # driver
     find_library(LIBDRIVER driver REQUIRED)
-    add_library(es2k::driver SHARED IMPORTED)
-    set_property(TARGET es2k::driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
+    add_library(driver SHARED IMPORTED)
+    set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
 
-    # es2k::es2kcp
+    # es2kcp
     if(CMAKE_CROSSCOMPILING)
         # TODO: Base selection on the platform type.
         find_library(LIBES2KCP acccp REQUIRED)
       else()
         find_library(LIBES2KCP xeoncp REQUIRED)
     endif()
-    add_library(es2k::es2kcp SHARED IMPORTED)
-    set_property(TARGET es2k::es2kcp PROPERTY IMPORTED_LOCATION ${LIBES2KCP})
+    add_library(es2kcp SHARED IMPORTED)
+    set_property(TARGET es2kcp PROPERTY IMPORTED_LOCATION ${LIBES2KCP})
 
-    # es2k::rte_net_idpf
+    # rte_net_idpf
     find_library(LIBRTE_NET_IDPF rte_net_idpf REQUIRED)
-    add_library(es2k::rte_net_idpf SHARED IMPORTED)
-    set_property(TARGET es2k::rte_net_idpf
+    add_library(rte_net_idpf SHARED IMPORTED)
+    set_property(TARGET rte_net_idpf
                  PROPERTY IMPORTED_LOCATION ${LIBRTE_NET_IDPF})
 
-    # es2k::target_utils
+    # target_utils
     find_library(LIBTARGET_UTILS target_utils REQUIRED)
-    add_library(es2k::target_utils SHARED IMPORTED)
-    set_property(TARGET es2k::target_utils
+    add_library(target_utils SHARED IMPORTED)
+    set_property(TARGET target_utils
                  PROPERTY IMPORTED_LOCATION ${LIBTARGET_UTILS})
 
-    # es2k::vfio
+    # vfio
     find_library(LIBVFIO vfio REQUIRED)
-    add_library(es2k::vfio SHARED IMPORTED)
-    set_property(TARGET es2k::vfio PROPERTY IMPORTED_LOCATION ${LIBVFIO})
+    add_library(vfio SHARED IMPORTED)
+    set_property(TARGET vfio PROPERTY IMPORTED_LOCATION ${LIBVFIO})
 
     #############
     # Variables #
     #############
 
     set(${_LIBS}
-        es2k::driver
-        es2k::bf_switchd_lib
-        es2k::tdi
-        es2k::tdi_json_parser
-        es2k::target_utils
-        es2k::target_sys
-        es2k::es2kcp
-        es2k::vfio
-        es2k::cpf
+        driver
+        bf_switchd_lib
+        tdi
+        tdi_json_parser
+        target_utils
+        target_sys
+        es2kcp
+        vfio
+        cpf
         es2k:cpf_pmd_infra
-        es2k::rte_net_idpf
+        rte_net_idpf
         PARENT_SCOPE
     )
 

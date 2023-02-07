@@ -12,26 +12,26 @@ function(define_tofino_driver _LIBS)
     # Libraries #
     #############
 
-    # tofino::driver
+    # driver
     find_library(LIBDRIVER driver REQUIRED)
-    add_library(tofino::driver SHARED IMPORTED)
-    set_property(TARGET tofino::driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
+    add_library(driver SHARED IMPORTED)
+    set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
 
-    # tofino::target_sys
+    # target_sys
     find_library(LIBTARGET_SYS target_sys REQUIRED)
-    add_library(tofino::target_sys SHARED IMPORTED)
-    set_property(TARGET tofino::target_sys
+    add_library(target_sys SHARED IMPORTED)
+    set_property(TARGET target_sys
                  PROPERTY IMPORTED_LOCATION ${LIBTARGET_SYS})
 
-    # tofino::tdi
+    # tdi
     find_library(LIBTDI tdi REQUIRED)
-    add_library(tofino::tdi SHARED IMPORTED)
-    set_property(TARGET tofino::tdi PROPERTY IMPORTED_LOCATION ${LIBTDI})
+    add_library(tdi SHARED IMPORTED)
+    set_property(TARGET tdi PROPERTY IMPORTED_LOCATION ${LIBTDI})
 
-    # tofino::tdi_json_parser
+    # tdi_json_parser
     find_library(LIBTDI_JSON_PARSER tdi_json_parser REQUIRED)
-    add_library(tofino::tdi_json_parser SHARED IMPORTED)
-    set_property(TARGET tofino::tdi_json_parser
+    add_library(tdi_json_parser SHARED IMPORTED)
+    set_property(TARGET tdi_json_parser
                  PROPERTY IMPORTED_LOCATION ${LIBTDI_JSON_PARSER})
 
     #############
@@ -39,10 +39,10 @@ function(define_tofino_driver _LIBS)
     #############
 
     set(${_LIBS}
-        tofino::driver
-        tofino::tdi
-        tofino::tdi_json_parser
-        tofino::target_sys
+        driver
+        tdi
+        tdi_json_parser
+        target_sys
         PARENT_SCOPE
     )
 
