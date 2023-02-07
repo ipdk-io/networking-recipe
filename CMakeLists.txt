@@ -98,7 +98,7 @@ elseif(TOFINO_TARGET)
     set(WITH_OVSP4RT OFF)
 elseif(ES2K_TARGET)
     set(WITH_KRNLMON OFF)
-    set(WITH_OVSP4RT ON)
+    set(WITH_OVSP4RT OFF)
 endif()
 
 cmake_print_variables(WITH_KRNLMON)
