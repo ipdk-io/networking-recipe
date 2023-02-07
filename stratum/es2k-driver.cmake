@@ -81,7 +81,7 @@ function(define_es2k_driver _LIBS _DIRS)
     )
 
     set(${_DIRS}
-        ${SDE_INSTALL}/lib
+        ${SDE_INSTALL_DIR}/lib
         PARENT_SCOPE
     )
 endfunction(define_es2k_driver)

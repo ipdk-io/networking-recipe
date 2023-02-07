@@ -60,7 +60,7 @@ function(define_dpdk_driver _LIBS _DIRS _OPTS)
     )
 
     set(${_DIRS}
-        ${SDE_INSTALL}/lib
+        ${SDE_INSTALL_DIR}/lib
         ${DPDK_LIBRARY_DIRS}
         PARENT_SCOPE
     )
