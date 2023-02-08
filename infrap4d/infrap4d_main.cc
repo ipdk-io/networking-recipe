@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #if defined(DPDK_TARGET)
-#include "stratum/hal/bin/tdi/dpdk/dpdk_main.h"
+  #include "stratum/hal/bin/tdi/dpdk/dpdk_main.h"
+#elif defined(ES2K_TARGET)
+  #include "stratum/hal/bin/tdi/es2k/es2k_main.h"
 #else
   #error "TDI target type not defined!"
 #endif
@@ -23,6 +25,8 @@ static inline ::util::Status target_main(absl::Notification* ready_sync,
                                          absl::Notification* done_sync) {
 #if defined(DPDK_TARGET)
   return stratum::hal::tdi::DpdkMain(ready_sync, done_sync);
+#elif defined(ES2K_TARGET)
+  return stratum::hal::tdi::Es2kMain(ready_sync, done_sync);
 #else
   #error "TDI target type not defined!"
 #endif

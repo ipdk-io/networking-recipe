@@ -30,25 +30,26 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
                "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
 # Update pkg-config search path.
+set(_save_CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})
+list(PREPEND CMAKE_PREFIX_PATH ${OVS_INSTALL_DIR})
 set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
 
 pkg_check_modules(LIBOVS REQUIRED libopenvswitch)
 pkg_check_modules(OFPROTO REQUIRED libofproto)
 pkg_check_modules(SFLOW REQUIRED libsflow)
 
-message(STATUS "Checking for library 'libvswitchd'")
-find_library(LIBVSWITCHD vswitchd)
-if(LIBVSWITCHD STREQUAL "LIBVSWITCHD-NOTFOUND")
-    message(FATAL_ERROR "Cannot find OVS libvswitchd")
-endif()
-message(STATUS "  Found ${LIBVSWITCHD}")
+set(CMAKE_PREFIX_PATH ${_save_CMAKE_PREFIX_PATH})
+unset(_save_CMAKE_PREFIX_PATH)
 
-message(STATUS "Checking for library 'libtestcontroller'")
-find_library(LIBTESTCONTROLLER testcontroller)
-if(NOT LIBTESTCONTROLLER)
-  message(FATAL_ERROR "Cannot find OVS libtestcontroller")
+find_library(LIBVSWITCHD vswitchd REQUIRED)
+find_library(LIBTESTCONTROLLER testcontroller REQUIRED)
+
+# libunwind appears to be missing in the ACC build
+# include it conditionally
+find_library(LIBUNWIND unwind)
+if(LIBUNWIND)
+    set(UNWIND unwind)
 endif()
-message(STATUS "  Found ${LIBTESTCONTROLLER}")
 
 #################
 # ovs_sidecar_o #
@@ -93,7 +94,7 @@ target_link_libraries(ovs-vswitchd
         ${SFLOW_LINK_LIBRARIES}
     PUBLIC
         atomic
-        unwind
+        ${UNWIND}
         rt m pthread
 )
 
@@ -138,7 +139,7 @@ target_link_libraries(ovs-testcontroller
     PUBLIC
         atomic
         rt
-        unwind
+        ${UNWIND}
 )
 
 target_link_libraries(ovs-testcontroller PUBLIC

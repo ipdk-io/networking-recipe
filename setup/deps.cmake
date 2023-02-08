@@ -16,6 +16,9 @@ set(GFLAGS_GIT_TAG 827c769e5fc98e0f2a34c47cef953cc6328abced) # master~5
 set(GLOG_GIT_URL https://github.com/google/glog.git)
 set(GLOG_GIT_TAG a8e0007e96ff96145022c488e367da10f835c75d) # v0.6.0-rc1
 
+set(GMOCK_GBL_GIT_URL "https://github.com/apriorit/gmock-global-sample.git")
+set(GMOCK_GBL_GIT_TAG "3d7b4de5bc12d35d4e12f1deef2ec0248b55a976")
+
 set(GRPC_GIT_URL https://github.com/google/grpc.git)
 set(GRPC_GIT_TAG 90ccf24d22b6fc909a1021ebd89fd8c838467d26) # v1.50.1
 

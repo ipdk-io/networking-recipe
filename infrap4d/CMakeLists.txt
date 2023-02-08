@@ -17,10 +17,10 @@ if(WITH_KRNLMON)
     add_executable(infrap4d infrap4d_main.cc)
 elseif(DPDK_TARGET)
     add_executable(infrap4d ${STRATUM_TDI_BIN_DIR}/dpdk/main.cc)
-elseif(TOFINO_TARGET)
-    add_executable(infrap4d ${STRATUM_TDI_BIN_DIR}/tofino/main.cc)
 elseif(ES2K_TARGET)
     add_executable(infrap4d ${STRATUM_TDI_BIN_DIR}/es2k/main.cc)
+elseif(TOFINO_TARGET)
+    add_executable(infrap4d ${STRATUM_TDI_BIN_DIR}/tofino/main.cc)
 endif()
 
 target_sources(infrap4d PRIVATE $<TARGET_OBJECTS:daemon_o>)
@@ -53,14 +53,6 @@ if(DPDK_TARGET)
         DESTINATION
             ${CMAKE_INSTALL_PREFIX}/share/stratum/dpdk
     )
-elseif(TOFINO_TARGET)
-  install(
-      FILES
-          ${STRATUM_BFRT_BIN_DIR}/tofino_skip_p4_no_bsp.conf
-          ${STRATUM_BFRT_BIN_DIR}/tofino_skip_p4.conf
-      DESTINATION
-          ${CMAKE_INSTALL_PREFIX}/share/stratum
-  )
 elseif(ES2K_TARGET)
     install(
         FILES
@@ -68,5 +60,13 @@ elseif(ES2K_TARGET)
             ${STRATUM_TDI_BIN_DIR}/es2k/es2k_skip_p4.conf
         DESTINATION
             ${CMAKE_INSTALL_PREFIX}/share/stratum/es2k
+    )
+elseif(TOFINO_TARGET)
+    install(
+        FILES
+            ${STRATUM_BFRT_BIN_DIR}/tofino_skip_p4_no_bsp.conf
+            ${STRATUM_BFRT_BIN_DIR}/tofino_skip_p4.conf
+        DESTINATION
+            ${CMAKE_INSTALL_PREFIX}/share/stratum
     )
 endif()

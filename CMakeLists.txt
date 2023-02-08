@@ -23,6 +23,9 @@ include(GNUInstallDirs)
 
 option(SET_RPATH "Set RPATH in libraries and executables" OFF)
 
+cmake_print_variables(CMAKE_SYSROOT)
+cmake_print_variables(CMAKE_TOOLCHAIN_FILE)
+
 #############################
 # Symbolic path definitions #
 #############################
@@ -38,6 +41,8 @@ set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
 
 set(SDE_INSTALL_DIR "$ENV{SDE_INSTALL}" CACHE PATH
     "SDE install directory")
+
+set(HOST_DEPEND_DIR "" CACHE PATH "Host dependencies install directory")
 
 set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
@@ -55,7 +60,7 @@ option(ES2K_TARGET      "Build for ES2000 target" OFF)
 # - Use precedence to deal with multiple selections.
 # - Ensure that individual target options are consistent
 #   so we can use them to control the build.
-# - Default to TOFINO_TARGET.
+# - Default to DPDK_TARGET.
 set(_target_action "Building")
 set(_default_target "DPDK_TARGET")
 if(TOFINO_TARGET)
@@ -64,12 +69,12 @@ if(TOFINO_TARGET)
     set(ES2K_TARGET OFF)
 elseif(DPDK_TARGET)
     set(TARGETFLAG DPDK_TARGET)
+    set(ES2K_TARGET OFF)
     set(TOFINO_TARGET OFF)
-    set(DPDK_TARGET OFF)
 elseif(ES2K_TARGET)
     set(TARGETFLAG ES2K_TARGET)
-    set(TOFINO_TARGET OFF)
     set(DPDK_TARGET OFF)
+    set(TOFINO_TARGET OFF)
 else()
     set(TARGETFLAG ${_default_target})
     set(${_default_target} ON)
@@ -115,26 +120,48 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-#####################
-# CMAKE_PREFIX_PATH #
-#####################
+############################
+# find_xxxx() search paths #
+############################
 
-# CMAKE_PREFIX_PATH specifies the directories to be searched by
-# find_file(), find_library(), find_path(), and find_program().
-# We only specify the install directory. The individual commands
-# each have their own lists of subdirectories to search.
+if(CMAKE_CROSSCOMPILING)
+    # CMAKE_FIND_ROOT_PATH specifies directories of TARGET platform
+    # files to be searched by the various find_xxxx() commands. It is
+    # not normally searched by find_program(), since the executables
+    # we're interested are primarily HOST programs.
 
-if(NOT DEPEND_INSTALL_DIR STREQUAL "")
-    list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
+    if(NOT DEPEND_INSTALL_DIR STREQUAL "")
+        list(APPEND CMAKE_FIND_ROOT_PATH ${DEPEND_INSTALL_DIR})
+    endif()
+
+    list(APPEND CMAKE_FIND_ROOT_PATH ${SDE_INSTALL_DIR})
+
+    if(NOT OVS_INSTALL_DIR STREQUAL "")
+        list(APPEND CMAKE_FIND_ROOT_PATH ${OVS_INSTALL_DIR})
+    endif()
+else()
+    # CMAKE_PREFIX_PATH specifies directories of HOST platform files
+    # to be searched by the various find_xxxx() commands.
+
+    if(NOT DEPEND_INSTALL_DIR STREQUAL "")
+        list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
+    endif()
+
+    list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
+
+    if(NOT OVS_INSTALL_DIR STREQUAL "")
+        list(APPEND CMAKE_PREFIX_PATH ${OVS_INSTALL_DIR})
+    endif()
 endif()
 
-list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
-
-if(NOT OVS_INSTALL_DIR STREQUAL "")
-    list(APPEND CMAKE_PREFIX_PATH ${OVS_INSTALL_DIR})
+if(NOT HOST_DEPEND_DIR STREQUAL "")
+    list(APPEND CMAKE_PREFIX_PATH ${HOST_DEPEND_DIR})
 endif()
 
+list(REMOVE_DUPLICATES CMAKE_FIND_ROOT_PATH)
 list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
+
+cmake_print_variables(CMAKE_FIND_ROOT_PATH)
 cmake_print_variables(CMAKE_PREFIX_PATH)
 
 #####################

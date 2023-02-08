@@ -4,23 +4,26 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-find_package(Protobuf REQUIRED)
+include(FindProtobuf)
 
-###############################
-# Get path to GRPC C++ plugin #
-###############################
+#################################
+# Protobuf compiler executables #
+#################################
 
-find_package(gRPC REQUIRED)
+find_package(Protobuf REQUIRED NO_CMAKE_FIND_ROOT_PATH)
 
-if(TARGET(gRPC::grpc_cpp_plugin))
+find_package(gRPC NO_CMAKE_FIND_ROOT_PATH)
+
+if(gRPC AND TARGET(gRPC::grpc_cpp_plugin))
     get_property(GRPC_CPP_PLUGIN
         TARGET gRPC::grpc_cpp_plugin
         PROPERTY IMPORTED_LOCATION_NOCONFIG)
 else()
-    message(STATUS "gRPC::grpc_cpp_plugin is not a target")
-    find_program(GRPC_CPP_PLUGIN "grpc_cpp_plugin" REQUIRED)
+    find_program(GRPC_CPP_PLUGIN "grpc_cpp_plugin" REQUIRED
+        NO_CMAKE_FIND_ROOT_PATH)
 endif()
 
+cmake_print_variables(PROTOBUF_PROTOC_EXECUTABLE)
 cmake_print_variables(GRPC_CPP_PLUGIN)
 
 ##########################
