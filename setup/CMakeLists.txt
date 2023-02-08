@@ -23,15 +23,20 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24)
 endif()
 
 option(DOWNLOAD     "Download repositories" TRUE)
+option(FORCE_PATCH  "Specify -f when patching" FALSE)
 option(ON_DEMAND    "Build targets on demand" FALSE)
-option(USE_SUDO     "Use sudo when installing" TRUE)
 option(USE_LDCONFIG "Use ldconfig when installing" FALSE)
+option(USE_SUDO     "Use sudo when installing" TRUE)
 
 if(USE_SUDO)
   set(SUDO_CMD "sudo" "-E")
   if(USE_LDCONFIG)
       set(LDCONFIG_CMD COMMAND sudo ldconfig)
   endif()
+endif()
+
+if(FORCE_PATCH)
+  set(FORCE_OPTION "-f")
 endif()
 
 if(CMAKE_CROSSCOMPILING)
@@ -169,7 +174,7 @@ ExternalProject_Add(grpc
 
   PATCH_COMMAND
     # Set RUNPATH in gRPC executables.
-    patch -i ${CMAKE_SOURCE_DIR}/grpc.patch -p1
+    patch -i ${CMAKE_SOURCE_DIR}/grpc.patch -p1 ${FORCE_OPTION}
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/grpc
   CMAKE_ARGS
