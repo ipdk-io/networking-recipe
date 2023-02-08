@@ -193,6 +193,7 @@ add_library(stratum_hal_lib_yang_o OBJECT
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_helpers.h
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_interface.cc
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_interface.h
+    ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_ipsec.cc
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_node.cc
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_optical.cc
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_paths.cc
@@ -260,10 +261,14 @@ add_library(stratum_target_o OBJECT
     # TDI files
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_action_profile_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_action_profile_manager.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_fixed_function_manager.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_fixed_function_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_counter_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_counter_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_ipsec_manager.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_ipsec_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_packetio_manager.cc
