@@ -6,9 +6,13 @@
 
 include(FindProtobuf)
 
-#################################
-# Protobuf compiler executables #
-#################################
+#############################
+# Find Protobuf executables #
+#############################
+
+# The Protobuf compiler and gRPC plugin are host tools, even if we're
+# cross-compiling. NO_CMAKE_FIND_ROOT_PATH ensures that we do not
+# search the cross-compiled binaries for the Protobuf executables.
 
 find_package(Protobuf REQUIRED NO_CMAKE_FIND_ROOT_PATH)
 
@@ -38,7 +42,7 @@ string(JOIN ":" PROTO_IMPORT_PATH
     ${GOOGLEAPIS_SOURCE_DIR}
     ${P4RUNTIME_SOURCE_DIR}/proto
     ${STRATUM_SOURCE_DIR}
-    /usr/local/include
+    /usr/local/include      # variable?
 )
 
 ########################
@@ -116,7 +120,7 @@ function(generate_grpc_files PROTO_FILES SRC_DIR)
             DEPENDS
                 ${SRC_DIR}/${_file}
             COMMENT
-                "Generating gRPC files for ${_file}"
+                "Generating grpc files for ${_file}"
             VERBATIM
         )
 
