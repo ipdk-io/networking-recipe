@@ -13,13 +13,76 @@ if [ -z "${SDKTARGETSYSROOT}" ]; then
     exit 1
 fi
 
-CROSS_BUILD=build
-CROSS_INSTALL=${SDKTARGETSYSROOT}/opt/deps
+_SYSROOT=${SDKTARGETSYSROOT}
 
-rm -fr ${CROSS_BUILD} ${CROSS_INSTALL}
+# Default values
+_BLD_DIR=build
+_DRY_RUN=false
+_PREFIX=//opt/deps
+_TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
-cmake -S . -B ${CROSS_BUILD} \
-    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} \
-    -DCMAKE_INSTALL_PREFIX=${CROSS_INSTALL}
+# Displays help text
+print_help() {
+    echo ""
+    echo "Build target dependency libraries"
+    echo ""
+    echo "Options:"
+    echo "  --build=PATH     -B  Build directory path [${_BLD_DIR}]"
+    echo "  --dry-run        -n  Display cmake parameters and exit"
+    echo "  --prefix=PATH    -P  Install directory prefix [${_PREFIX}]"
+    echo ""
+    echo "'//' at the beginning of a file path will be replaced with the"
+    echo "sysroot directory path."
+    echo ""
+}
 
-cmake --build ${CROSS_BUILD} -j8
+# Parse options
+SHORTOPTS=B:P:T:hn
+LONGOPTS=build:,dry-run,help,prefix:,toolchain:
+
+eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
+
+while true ; do
+    case "$1" in
+    -B|--build)
+        _BLD_DIR=$2
+        shift 2 ;;
+    -h|--help)
+        print_help
+        exit 99 ;;
+    -n|--dry-run)
+        _DRY_RUN=true
+        shift 1 ;;
+    -P|--prefix)
+        _PREFIX=$2
+        shift 2 ;;
+    -T|--toolchain)
+        _TOOLFILE=$2
+        shift 2 ;;
+    --)
+        shift
+        break ;;
+    *)
+        echo "Invalid parameter: $1"
+        exit 1 ;;
+    esac
+done
+
+# Replace "//"" prefix with "${_SYSROOT}/""
+[ "${_PREFIX:0:2}" = "//" ] && _PREFIX=${_SYSROOT}/${_PREFIX:2}
+
+if [ "${_DRY_RUN}" = "true" ]; then
+    echo ""
+    echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
+    echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
+    echo ""
+    exit 0
+fi
+
+rm -fr ${_BLD_DIR} ${_PREFIX}
+
+cmake -S . -B ${_BLD_DIR} \
+    -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
+    -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}
+
+cmake --build ${_BLD_DIR} -j8

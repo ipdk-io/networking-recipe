@@ -12,14 +12,83 @@ if [ -z "${SDKTARGETSYSROOT}" ]; then
     exit 1
 fi
 
-_BUILD_DIR=ovs/build
-_INSTALL_DIR=${SDKTARGETSYSROOT}/opt/ovs
+_SYSROOT=${SDKTARGETSYSROOT}
 
-rm -fr ${_BUILD_DIR} ${_INSTALL_DIR}
+# Default values
+_BLD_DIR=ovs/build
+_BLD_TYPE=RelWithDebInfo
+_PREFIX=//opt/ovs
+_TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
-cmake -S ovs -B ${_BUILD_DIR} \
-    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-    -DCMAKE_INSTALL_PREFIX=${_INSTALL_DIR} \
-    -DP4OVS=ON -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+# Displays help text
+print_help() {
+    echo ""
+    echo "Build and install Open vSwitch"
+    echo ""
+    echo "Options:"
+    echo "  --build=PATH     -B  Build directory path [${_BLD_DIR}]"
+    echo "  --dry-run        -n  Display cmake parameters and exit"
+    echo "  --prefix=PATH    -P  Install directory prefix [${_PREFIX}]"
+    echo ""
+    echo "Environment variables:"
+    echo "  CMAKE_TOOLCHAIN_FILE - cmake toolchain file"
+    echo "  SDKTARGETSYSROOT - sysroot directory"
+    echo ""
+    echo "'//' at the beginning of a file path will be replaced with the"
+    echo "sysroot directory path."
+    echo ""
+}
 
-cmake --build ${_BUILD_DIR} -j8 -- V=0    
+# Parse options
+SHORTOPTS=B:P:T:hn
+LONGOPTS=build:,dry-run,help,ovs:,prefix:,toolchain:
+
+eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
+
+while true ; do
+    case "$1" in
+    -B|--build)
+        _BLD_DIR=$2
+        shift 2 ;;
+    -h|--help)
+        print_help
+        exit 99 ;;
+    -n|--dry-run)
+        _DRY_RUN=true
+        shift 1 ;;
+    -P|--prefix)
+        _PREFIX=$2
+        shift 2 ;;
+    -T|--toolchain)
+        _TOOLFILE=$2
+        shift 2 ;;
+    --)
+        shift
+        break ;;
+    *)
+        echo "Invalid parameter: $1"
+        exit 1 ;;
+    esac
+done
+
+# Substitute ${_SYSROOT}/ for // prefix
+[ "${_PREFIX:0:2}" = "//" ] && _PREFIX=${_SYSROOT}/${_PREFIX:2}
+
+if [ "${_DRY_RUN}" = "true" ]; then
+    echo ""
+    echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
+    echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
+    echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
+    echo ""
+    exit 0
+fi
+
+rm -fr ${_BLD_DIR} ${_PREFIX}
+
+cmake -S ovs -B ${_BLD_DIR} \
+    -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
+    -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
+    -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE} \
+    -DP4OVS=TRUE
+
+cmake --build ${_BLD_DIR} -j8 -- V=0    
