@@ -37,6 +37,7 @@ set(WITH_RUNDIR
 #########################
 
 option(P4OVS "Build OVS with P4Runtime support" OFF)
+option(WITH_RUNDIRS "Build with runtime directories" OFF)
 
 if(P4OVS)
     set(P4OVS_OPTION --with-p4ovs)
@@ -49,10 +50,18 @@ endif()
 set(SSL_OPTION --disable-ssl)
 
 if(CMAKE_CROSSCOMPILING)
-  set(TARGET_OPTION --target=aarch64-intel-linux-gnu)
-  set(HOST_OPTION --host=aarch64-intel-linux-gnu)
-  set(BUILD_OPTION --build=x86_64-build_pc-linux-gnu)
-  set(WITH_LIBTOOL_SYSROOT --with-libtool-sysroot=${CMAKE_SYSROOT})
+    set(TARGET_OPTION --target=aarch64-intel-linux-gnu)
+    set(HOST_OPTION --host=aarch64-intel-linux-gnu)
+    set(BUILD_OPTION --build=x86_64-build_pc-linux-gnu)
+    set(LIBTOOL_OPTION --with-libtool-sysroot=${CMAKE_SYSROOT})
+endif()
+
+if(WITH_RUNDIRS)
+    set(RUNDIR_OPTIONS
+        --with-dbdir=${WITH_DBDIR}
+        --with-logdir=${WITH_LOGDIR}
+        --with-rundir=${WITH_RUNDIR}
+    )
 endif()
 
 ######################
@@ -70,10 +79,8 @@ ExternalProject_Add(ovs
     ${TARGET_OPTION}
     ${HOST_OPTION}
     ${BUILD_OPTION}
-    ${WITH_LIBTOOL_SYSROOT}
-    --with-dbdir=${WITH_DBDIR}
-    --with-logdir=${WITH_LOGDIR}
-    --with-rundir=${WITH_RUNDIR}
+    ${LIBTOOL_OPTION}
+    ${RUNDIR_OPTIONS}
     ${P4OVS_OPTION}
     ${NDEBUG_OPTION}
     ${SSL_OPTION}
