@@ -174,6 +174,15 @@ if(DPDK_TARGET)
     pkg_check_modules(DPDK REQUIRED libdpdk)
 endif()
 
+########################
+# strip_sysroot_prefix #
+########################
+
+function(strip_sysroot_prefix _IN _OUT)
+    string(REGEX REPLACE "^${CMAKE_SYSROOT}(.+)\$" "\\1" _out "${_IN}")
+    set(${_OUT} ${_out} PARENT_SCOPE)
+endfunction()
+
 ##################
 # RPATH elements #
 ##################
@@ -187,7 +196,7 @@ endif()
 # The ORIGIN element is equivalent to ${CMAKE_PREFIX_PATH}/lib or
 # ${CMAKE_PREFIX_PATH}/lib64.
 #
-# The elements will need to expanded to include /lib64 paths where
+# The elements will need to be expanded to include /lib64 paths where
 # appropriate.
 #
 # We shouldn't need an element for ${SDE_INSTALL_DIR}/lib/x86_64-linux-gnu.
@@ -196,30 +205,35 @@ endif()
 # that we do need to include the DPDK library directory in the RPATH, we
 # can use DPDK_LIBRARY_DIRS, which is defined by pkg_check_modules(DPDK).
 
+# SDE_ELEMENT
+strip_sysroot_prefix(${SDE_INSTALL_DIR} _sde_stem)
 if(EXISTS ${SDE_INSTALL_DIR}/lib)
-    list(APPEND SDE_ELEMENT ${SDE_INSTALL_DIR}/lib)
+    list(APPEND SDE_ELEMENT ${_sde_stem}/lib)
 endif()
 if(EXISTS ${SDE_INSTALL_DIR}/lib64)
-    list(APPEND SDE_ELEMENT ${SDE_INSTALL_DIR}/lib64)
+    list(APPEND SDE_ELEMENT ${_sde_stem}/lib64)
 endif()
+unset(_sde_stem)
 
+# DEP_ELEMENT
+strip_sysroot_prefix(${DEPEND_INSTALL_DIR} _dep_stem)
 if(NOT DEPEND_INSTALL_DIR STREQUAL "")
     if(EXISTS ${DEPEND_INSTALL_DIR}/lib)
-        list(APPEND DEP_ELEMENT ${DEPEND_INSTALL_DIR}/lib)
+        list(APPEND DEP_ELEMENT ${_dep_stem}/lib)
     endif()
     if(EXISTS ${DEPEND_INSTALL_DIR}/lib64)
-        list(APPEND DEP_ELEMENT ${DEPEND_INSTALL_DIR}/lib64)
+        list(APPEND DEP_ELEMENT ${_dep_stem}/lib64)
     endif()
 endif()
+unset(_dep_stem)
 
-set(_libdir ${CMAKE_INSTALL_LIBDIR})
-if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib OR _libdir STREQUAL "lib")
+# EXEC_ELEMENT
+if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib OR CMAKE_INSTALL_LIBDIR STREQUAL "lib")
     list(APPEND EXEC_ELEMENT $ORIGIN/../lib)
 endif()
-if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib64 OR _libdir STREQUAL "lib64")
+if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib64 OR CMAKE_INSTALL_LIBDIR STREQUAL "lib64")
     list(APPEND EXEC_ELEMENT $ORIGIN/../lib64)
 endif()
-unset(_libdir)
 
 ###################
 # RPATH functions #
