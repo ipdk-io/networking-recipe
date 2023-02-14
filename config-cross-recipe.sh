@@ -30,22 +30,25 @@ print_help() {
     echo "Configure recipe build"
     echo ""
     echo "Options:"
-    echo "  --build=PATH     -B  Build directory path [${_BLD_DIR}]"
-    echo "  --deps=PATH      -D  Target dependencies directory [${_DEPS_DIR}]"
+    echo "  --build=DIR      -B  Build directory path [${_BLD_DIR}]"
+    echo "  --deps=DIR*      -D  Target dependencies directory [${_DEPS_DIR}]"
     echo "  --dry-run        -n  Display cmake parameters and exit"
-    echo "  --hostdeps=PATH  -H  Host dependencies directory [${_HOST_DIR}]"
-    echo "  --ovs=PATH       -O  OVS install directory [${_OVS_DIR}]"
-    echo "  --prefix=PATH    -P  Install directory prefix [${_PREFIX}]"
-    echo "  --sde=PATH       -S  SDE install directory [${_SDE_DIR}]"
+    echo "  --hostdeps=DIR*  -H  Host dependencies directory [${_HOST_DIR}]"
+    echo "  --ovs=DIR*       -O  OVS install directory [${_OVS_DIR}]"
+    echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
+    echo "  --sde=DIR*       -S  SDE install directory [${_SDE_DIR}]"
+    echo "  --toolchain=FILE -T  CMake toolchain file"
+    echo ""
+    echo "* '//' at the beginning of the directory path will be replaced"
+    echo "  with the sysroot directory path."
     echo ""
     echo "Environment variables:"
+    echo "  CMAKE_TOOLCHAIN_FILE - Default toolchain file"
     echo "  DEPEND_INSTALL - Default target dependencies directory"
     echo "  HOST_INSTALL - Default host dependencies directory"
     echo "  OVS_INSTALL - Default OVS install directory"
     echo "  SDE_INSTALL - Default SDE install directory"
-    echo ""
-    echo "'//' at the beginning of a file path will be replaced with the"
-    echo "sysroot directory path."
+    echo "  SDKTARGETSYSROOT - sysroot directory"
     echo ""
 }
 
@@ -99,6 +102,7 @@ done
 [ "${_DEPS_DIR:0:2}" = "//" ] && _DEPS_DIR=${_SYSROOT}/${_DEPS_DIR:2}
 [ "${_HOST_DIR:0:2}" = "//" ] && _HOST_DIR=${_SYSROOT}/${_HOST_DIR:2}
 [ "${_OVS_DIR:0:2}" = "//" ] && _OVS_DIR=${_SYSROOT}/${_OVS_DIR:2}
+[ "${_PREFIX:0:2}" = "//" ] && _OVS_DIR=${_SYSROOT}/${_PREFIX:2}
 [ "${_SDE_DIR:0:2}" = "//" ] && _SDE_DIR=${_SYSROOT}/${_SDE_DIR:2}
 
 if [ "${_DRY_RUN}" = "true" ]; then
