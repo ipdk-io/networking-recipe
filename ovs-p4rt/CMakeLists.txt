@@ -1,6 +1,6 @@
 # CMake build file for ovs-p4rt
 #
-# Copyright 2022 Intel Corporation
+# Copyright 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 cmake_minimum_required(VERSION 3.5)
@@ -51,6 +51,12 @@ if(LIBUNWIND)
     set(UNWIND unwind)
 endif()
 
+if(DPDK_TARGET)
+    add_subdirectory(dpdk)
+elseif(ES2K_TARGET)
+    add_subdirectory(es2k)
+endif()
+
 #################
 # ovs_sidecar_o #
 #################
@@ -61,7 +67,7 @@ add_library(ovs_sidecar_o OBJECT
     ovs_p4rt_session.h
     ovs_p4rt_tls_credentials.cc
     ovs_p4rt_tls_credentials.h
-    p4_name_mapping.h
+    $<TARGET_OBJECTS:ovsp4rt_p4_mapping_o>
 )
 
 target_include_directories(ovs_sidecar_o PRIVATE

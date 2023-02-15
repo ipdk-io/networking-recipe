@@ -6,7 +6,13 @@
 #include <arpa/inet.h>
 #include "absl/flags/flag.h"
 #include "openvswitch/ovs-p4rt.h"
-#include "p4_name_mapping.h"
+
+#if defined(DPDK_TARGET)
+  #include "dpdk/p4_name_mapping.h"
+#elif defined(ES2K_TARGET)
+  #include "es2k/p4_name_mapping.h"
+#endif
+
 
 using namespace ovs_p4rt_cpp;
 
@@ -99,6 +105,15 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
   std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
   match->mutable_exact()->set_value(mac_addr);
 
+#if defined(ES2K_TARGET)
+  // Based on p4 program for ES2K, we need to provide a match key Tunnel Flag
+  auto match1 = table_entry->add_match();
+  match1->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
+			              L2_FWD_TX_TABLE_KEY_TUN_FLAG));
+
+  match1->mutable_exact()->set_value(EncodeByteValue(1, 0));
+#endif
+
   if (insert_entry) {
       auto table_action = table_entry->mutable_action();
       auto action = table_action->mutable_action();
@@ -107,12 +122,53 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
         auto param = action->add_params();
         param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD,
                             ACTION_L2_FWD_PARAM_PORT));
-        auto port_id = learn_info.vln_info.vlan_id - 1;
+#if defined(DPDK_TARGET)
+	auto port_id = learn_info.vln_info.vlan_id - 1;
+#elif defined(ES2K_TARGET)
+        auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
+#else
+	auto port_id = 0;
+#endif
         param->set_value(EncodeByteValue(1, port_id));
       }
   }
   return;
 }
+
+#if defined(ES2K_TARGET)
+/* Sem Bypass table is specific to ES2K platform. When Data packets exchange
+ * between overlay network (VSI to VSI), along with l2_fwd_tx table SEM bypass
+ * table also should be programmed.
+ * Match Key: DMAC
+ * Action: VSI ID to which a matching packet need to forwarded.
+ */
+void PrepareSemBypassTableEntry(p4::v1::TableEntry* table_entry,
+                                const struct mac_learning_info learn_info,
+                                const ::p4::config::v1::P4Info p4info,
+                                bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, SEM_BYPASS_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(GetMatchFieldId(p4info, SEM_BYPASS_TABLE,
+			              SEM_BYPASS_TABLE_KEY_DST_MAC));
+
+  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
+  match->mutable_exact()->set_value(mac_addr);
+
+  if (insert_entry) {
+      auto table_action = table_entry->mutable_action();
+      auto action = table_action->mutable_action();
+      action->set_action_id(GetActionId(p4info, SEM_BYPASS_TABLE_ACTION_SET_DEST));
+      {
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(p4info, SEM_BYPASS_TABLE_ACTION_SET_DEST,
+                            ACTION_SET_DEST_PARAM_PORT_ID));
+        auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
+        param->set_value(EncodeByteValue(1, port_id));
+      }
+  }
+  return;
+}
+#endif
 
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info learn_info,
@@ -133,7 +189,13 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
         auto param = action->add_params();
         param->set_param_id(GetParamId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD,
                             ACTION_L2_FWD_PARAM_PORT));
-        auto port_id = learn_info.vln_info.vlan_id - 1;
+#if defined(DPDK_TARGET)
+	auto port_id = learn_info.vln_info.vlan_id - 1;
+#elif defined(ES2K_TARGET)
+        auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
+#else
+	auto port_id = 0;
+#endif
         param->set_value(EncodeByteValue(1, port_id));
       }
   }
@@ -148,8 +210,18 @@ void PrepareFdbTableEntryforTunnel(p4::v1::TableEntry* table_entry,
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_DST_MAC));
+
   std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
   match->mutable_exact()->set_value(mac_addr);
+
+#if defined(ES2K_TARGET)
+  // Based on p4 program for ES2K, we need to provide a match key Tunnel Flag
+  auto match1 = table_entry->add_match();
+  match1->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
+			              L2_FWD_TX_TABLE_KEY_TUN_FLAG));
+
+  match1->mutable_exact()->set_value(EncodeByteValue(1, 0));
+#endif
 
   if (insert_entry) {
       auto table_action = table_entry->mutable_action();
@@ -190,6 +262,26 @@ absl::Status ConfigFdbTxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, insert_entry);
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
 }
+
+#if defined(ES2K_TARGET)
+absl::Status ConfigSemBypassTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
+                                       const struct mac_learning_info learn_info,
+                                       const ::p4::config::v1::P4Info p4info,
+                                       bool insert_entry) {
+  ::p4::v1::Entity entity;
+  ::p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+  if (insert_entry) {
+      table_entry = ovs_p4rt_cpp::SetupTableEntryToInsert(session,
+                                      &write_request, &entity);
+  } else {
+      table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
+                                      &write_request, &entity);
+  }
+  PrepareSemBypassTableEntry(table_entry, learn_info, p4info, insert_entry);
+  return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
+}
+#endif
 
 absl::Status ConfigFdbRxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                        const struct mac_learning_info learn_info,
@@ -254,6 +346,12 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry)
                                            p4info, insert_entry);
         if(!status.ok())
             return;
+#if defined(ES2K_TARGET)
+	status = ConfigSemBypassTableEntry(session.get(), learn_info,
+                                           p4info, insert_entry);
+        if(!status.ok())
+            return;
+#endif
         status = ConfigFdbRxVlanTableEntry(session.get(), learn_info,
                                            p4info, insert_entry);
     }
