@@ -54,10 +54,13 @@ for P4Runtime switches:
   set-pipe SWITCH PROGRAM P4INFO        sets P4 pipeline for switch
   get-pipe SWITCH                       prints raw P4Info representation of
                                         P4 program
-
   add-entry SWITCH TABLE FLOW           adds new table entry
   del-entry SWITCH TABLE KEY            deletes table entry with KEY from TABLE
   dump-entries SWITCH [TBL]             prints table entries
+  add-lut-entry SWITCH TABLE FLOW       adds new table entry into
+                                        MATCH LOOKUP TABLE
+  del-lut-entry SWITCH TABLE KEY        delete a table entry with KEY
+                                        from MATCH LOOKUP TABLE
   set-default-entry SWITCH TBL ACTION   sets default table entry for TBL
   get-default-entry SWITCH TBL          prints default table entry for TBL
 
@@ -332,6 +335,14 @@ class P4InfoHelper(object):
             if pre.name == table_name:
                 return t.match_fields
 
+    def get_vlut_table_id(self, table_name):
+        for a in self.p4info.externs:
+            if (a.extern_type_id == p4info_pb2.P4Ids.MATCH_VALUE_LOOKUP_TABLE or
+                a.extern_type_id == p4info_pb2.P4Ids.TERNARY_MATCH_LOOKUP_TABLE):
+                for instance in a.instances:
+                    if instance.preamble.name == table_name:
+                        return instance.preamble.id
+
     def get_match_field(self, table_name, name=None, id=None):
         for t in self.p4info.tables:
             pre = t.preamble
@@ -380,6 +391,41 @@ class P4InfoHelper(object):
             raise Exception("Unsupported match type with type %r" % match_type)
         return p4runtime_match
 
+    def get_vlut_match_field(self, table_name, name=None, id=None):
+        for a in self.p4info.externs:
+            if (a.extern_type_id == p4info_pb2.P4Ids.MATCH_VALUE_LOOKUP_TABLE or
+                a.extern_type_id == p4info_pb2.P4Ids.TERNARY_MATCH_LOOKUP_TABLE):
+                for instance in a.instances:
+                    if instance.preamble.name == table_name:
+                        mvlut_entry = p4info_pb2.MatchValueLookupTable()
+                        instance.info.Unpack(mvlut_entry)
+                        for mf in mvlut_entry.match_fields:
+                            if name is not None:
+                                if mf.name == name:
+                                    return mf
+                            elif id is not None:
+                                if mf.id == id:
+                                    return mf
+        raise AttributeError("%r has no attribute named %r" %
+                             (table_name, name if name is not None else id))
+
+    def get_vlut_match_field_pb(self, table_name, name, value):
+        p4info_match = self.get_vlut_match_field(table_name, name)
+        bitwidth = p4info_match.bitwidth
+        p4runtime_match = p4runtime_pb2.FieldMatch()
+        p4runtime_match.field_id = p4info_match.id
+        match_type = p4info_match.match_type
+        if match_type == p4info_pb2.MatchField.EXACT:
+            exact = p4runtime_match.exact
+            exact.value = encode(value, bitwidth)
+        elif match_type == p4info_pb2.MatchField.TERNARY:
+            lpm = p4runtime_match.ternary
+            lpm.value = encode(value[0], bitwidth)
+            lpm.mask = encode(value[1], bitwidth)
+        else:
+            raise Exception("Unsupported match type with type %r" % match_type)
+        return p4runtime_match
+
     def get_match_field_value(self, match_field):
         match_type = match_field.WhichOneof("field_match_type")
         if match_type == 'valid':
@@ -394,6 +440,31 @@ class P4InfoHelper(object):
             return (match_field.range.low, match_field.range.high)
         else:
             raise Exception("Unsupported match type with type %r" % match_type)
+
+    def get_vlut_param(self, table_name, name=None, id=None):
+        for a in self.p4info.externs:
+            if (a.extern_type_id == p4info_pb2.P4Ids.MATCH_VALUE_LOOKUP_TABLE or
+                a.extern_type_id == p4info_pb2.P4Ids.TERNARY_MATCH_LOOKUP_TABLE):
+                for instance in a.instances:
+                    if instance.preamble.name == table_name:
+                        mvlut_entry = p4info_pb2.MatchValueLookupTable()
+                        instance.info.Unpack(mvlut_entry)
+                        for p in mvlut_entry.params:
+                            if name is not None:
+                                if p.name == name:
+                                    return p
+                            elif id is not None:
+                                if p.id == id:
+                                    return p
+        raise AttributeError("table %r has no param %r, (has: %r)" %
+                             (table_name, name if name is not None else id,
+                              instance.info.params))
+    def get_vlut_param_pb(self, table_name, param_name, value):
+        p4info_param = self.get_vlut_param(table_name, param_name)
+        p4runtime_param = p4runtime_pb2.MvlutParam.Param()
+        p4runtime_param.param_id = p4info_param.id
+        p4runtime_param.value = encode(value, p4info_param.bitwidth)
+        return p4runtime_param
 
     def get_action_params(self, action_name):
         for a in self.p4info.actions:
@@ -483,6 +554,36 @@ class P4InfoHelper(object):
             table_entry.action.action_profile_group_id = group_id
 
         return table_entry
+
+    def buildExternEntry(self,
+                        table_name,
+                        match_fields=None,
+                        default_action=False,
+                        profile_params=None,
+                        priority=None):
+        one_match_type_is_ternary = False
+        extern_entry = p4runtime_pb2.ExternEntry()
+        if priority is  None:
+            extern_entry.extern_type_id = p4info_pb2.P4Ids.MATCH_VALUE_LOOKUP_TABLE
+        else:
+            extern_entry.extern_type_id = p4info_pb2.P4Ids.TERNARY_MATCH_LOOKUP_TABLE
+        mvlut_entry = p4runtime_pb2.MvlutEntry()
+        mvlut_entry.mvlut_id = self.get_vlut_table_id(table_name)
+
+        if match_fields:
+            mvlut_entry.match.extend([
+                self.get_vlut_match_field_pb(table_name, match_field_name, value)
+                for match_field_name, value in match_fields.items()
+            ])
+
+        param= mvlut_entry.param
+        if profile_params and profile_params != ['']:
+            param.params.extend([
+                self.get_vlut_param_pb(table_name, field_name, value)
+                for field_name, value in profile_params.items()
+            ])
+        extern_entry.entry.Pack(mvlut_entry)
+        return extern_entry
 
     def buildActionProfileMember(self,
                         table_name,
@@ -811,6 +912,20 @@ def parse_action(action):
         act_data = ['']
     return action_name, act_data
 
+def parse_vlut_data(data):
+    """
+    Accepted input types for profile values are
+    Hex Or Decimal
+    """
+    prof_fields = dict()
+    prof_data = data.split(",")
+    if (len(prof_data) > 0):
+        for p_data in prof_data:
+            d = p_data.split("=")
+            prof_fields[d[0]] = (int(d[1], 0) if d[1].find("0x") != -1 else int(d[1]))
+    else:
+        prof_fields= ['']
+    return prof_fields
 
 def parse_flow(flow):
     tmp = flow.split(",action=")
@@ -829,6 +944,15 @@ def parse_flow_ternary(flow):
     match_keys, priority = parse_match_key_ternary(mk)
     action_name, act_data = parse_action(act)
     return match_keys, priority, action_name, act_data
+
+def parse_vlut_flow_ternary(flow):
+    tmp = flow.split(",data:")
+    mk = tmp[0]
+    data = tmp[1]
+
+    match_keys, priority = parse_match_key_ternary(mk)
+    prof_data = parse_vlut_data(data)
+    return match_keys, priority, prof_data
 
 def parse_flow_as(flow):
     if ("priority" in flow):
@@ -878,6 +1002,15 @@ def parse_profile_group(flow):
     ref_members = mem[0]
     max_size = mem[1]
     return group_id[1], ref_members, max_size
+
+def parse_vlut_flow(flow):
+    tmp = flow.split(",data:")
+    mk = tmp[0]
+    data = tmp[1]
+
+    match_keys = parse_match_key(mk)
+    prof_data = parse_vlut_data(data)
+    return match_keys, prof_data
 
 @with_client
 def p4ctl_add_entry(client, bridge, tbl_name, flow):
@@ -1065,6 +1198,73 @@ def p4ctl_del_entry(client, bridge, tbl_name, match_key):
 
     client.write_update(update)
 
+@with_client
+def p4ctl_add_lut_entry(client, bridge, tbl_name, flow):
+    """
+    add-lut-entry SWITCH TABLE MATCH_KEY PROFILE_DATA
+    Example:
+        ovs-p4ctl add-lut-entry br0 pipe.mirror_tbl
+                   prof_id=1,hash=12345,mask=0xff
+    """
+    priority_val = None
+    if (flow.find("priority") != -1):
+        # For match_type ternary, we expect priority to be programmed by user.
+        match_keys, priority_val, prof_data = parse_vlut_flow_ternary(flow)
+    else:
+        # For TableData, ovs-p4ctl expects flow to have 'data:' configured.
+        # In this parse_flow, we use 'data:' as a delimiter.
+        match_keys, prof_data = parse_vlut_flow(flow)
+    p4info = client.get_p4info()
+    if not p4info:
+        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
+
+    helper = P4InfoHelper(p4info)
+
+    ee = helper.buildExternEntry(
+        table_name=tbl_name,
+        match_fields=match_keys,
+        priority=priority_val,
+        profile_params=prof_data
+    )
+
+    update = p4runtime_pb2.Update()
+    update.type = p4runtime_pb2.Update.INSERT
+    update.entity.extern_entry.CopyFrom(ee)
+
+    client.write_update(update)
+
+
+@with_client
+def p4ctl_del_lut_entry(client, bridge, tbl_name, match_key):
+    """
+    del-lut-entry SWITCH TABLE MATCH_KEY
+    Example:
+        ovs-p4ctl del-lut-entry br0 pipe.mirror_tbl
+                   prof_id=1
+    """
+    priority = None
+    if (match_key.find("priority") != -1):
+        # For match_type ternary, we expect priority to be sent by user.
+        key, priority = parse_match_key_ternary(match_key)
+    else:
+        key = parse_match_key(match_key)
+    p4info = client.get_p4info()
+    if not p4info:
+        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
+
+    helper = P4InfoHelper(p4info)
+
+    ee = helper.buildExternEntry(
+        table_name=tbl_name,
+        match_fields=key,
+        priority=priority
+    )
+
+    update = p4runtime_pb2.Update()
+    update.type = p4runtime_pb2.Update.DELETE
+    update.entity.extern_entry.CopyFrom(ee)
+
+    client.write_update(update)
 
 def _format_entry(p4info_helper, table_entry):
     tbl_name = p4info_helper.get_name('tables', table_entry.table_id)
@@ -1527,6 +1727,8 @@ all_commands = {
     "get-default-entry": (p4ctl_get_default_entry, 2),
     "del-entry": (p4ctl_del_entry, 2),
     "dump-entries": (p4ctl_dump_entries, 1),
+    "add-lut-entry": (p4ctl_add_lut_entry, 3),
+    "del-lut-entry": (p4ctl_del_lut_entry, 2),
     "add-action-profile-member": (p4ctl_add_member, 3),
     "delete-action-profile-member": (p4ctl_del_member, 3),
     "add-action-profile-group": (p4ctl_add_group, 3),
