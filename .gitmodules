@@ -1,6 +1,6 @@
 [submodule "stratum/p4runtime"]
 	path = stratum/p4runtime
-	url = https://github.com/p4lang/p4runtime.git
+	url = https://github.com/ipdk-io/p4runtime-dev.git
 [submodule "stratum/googleapis"]
 	path = stratum/googleapis
 	url = https://github.com/googleapis/googleapis.git
