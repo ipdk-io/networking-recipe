@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
+include(FindPkgConfig)
+
+pkg_check_modules(DPDK REQUIRED libdpdk)
+
 # The definitions are encapsulated in a function to limit pollution of the
 # global namespace.
 function(define_dpdk_driver _LIBS _DIRS _OPTS)

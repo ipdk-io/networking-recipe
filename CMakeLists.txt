@@ -17,6 +17,8 @@ endif()
 
 project(networking-recipe VERSION 23.01 LANGUAGES C CXX)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 include(CMakePrintHelpers)
 include(FindPkgConfig)
 include(GNUInstallDirs)
@@ -171,7 +173,11 @@ cmake_print_variables(CMAKE_PREFIX_PATH)
 find_package(absl REQUIRED)
 
 if(DPDK_TARGET)
-    pkg_check_modules(DPDK REQUIRED libdpdk)
+    include(dpdk-driver)
+elseif(ES2K_TARGET)
+    include(es2k-driver)
+elseif(TOFINO_TARGET)
+    include(tofino-driver)
 endif()
 
 ########################

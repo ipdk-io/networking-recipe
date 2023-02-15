@@ -37,6 +37,17 @@ target_link_libraries(infrap4d PRIVATE
     -Wl,--no-whole-archive
 )
 
+if(DPDK_TARGET)
+    target_link_libraries(infrap4d PUBLIC ${DRIVER_SDK_LIBS})
+    target_link_directories(infrap4d PUBLIC ${DRIVER_SDK_DIRS})
+    target_link_options(infrap4d PUBLIC ${DRIVER_SDK_OPTS})
+elseif(ES2K_TARGET)
+    target_link_libraries(infrap4d PUBLIC ${DRIVER_SDK_LIBS})
+    target_link_directories(infrap4d PUBLIC ${DRIVER_SDK_DIRS})
+elseif(TOFINO_TARGET)
+    target_link_libraries(infrap4d PUBLIC ${DRIVER_SDK_LIBS})
+endif()
+
 if(WITH_KRNLMON)
     target_link_libraries(infrap4d PRIVATE krnlmon pthread)
 endif()

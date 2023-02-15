@@ -371,7 +371,6 @@ target_link_libraries(stratum_static PUBLIC
 )
 
 target_link_libraries(stratum_static PUBLIC glog gflags grpc protobuf grpc++)
-target_link_libraries(stratum_static PUBLIC pthread)
 
 target_link_libraries(stratum_static PUBLIC
     openconfig_proto
@@ -382,17 +381,3 @@ target_link_libraries(stratum_static PUBLIC
 )
 
 target_link_libraries(stratum_static PUBLIC pthread)
-
-if(DPDK_TARGET)
-    include(dpdk-driver.cmake)
-    target_link_libraries(stratum_static PUBLIC ${DRIVER_SDK_LIBS})
-    target_link_directories(stratum_static PUBLIC ${DRIVER_SDK_DIRS})
-    target_link_options(stratum_static PUBLIC ${DRIVER_SDK_OPTS})
-elseif(ES2K_TARGET)
-    include(es2k-driver.cmake)
-    target_link_libraries(stratum_static PUBLIC ${DRIVER_SDK_LIBS})
-    target_link_directories(stratum_static PUBLIC ${DRIVER_SDK_DIRS})
-elseif(TOFINO_TARGET)
-    include(tofino-driver.cmake)
-    target_link_libraries(stratum_static PUBLIC ${DRIVER_SDK_LIBS})
-endif()
