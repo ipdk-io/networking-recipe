@@ -102,7 +102,7 @@ done
 [ "${_DEPS_DIR:0:2}" = "//" ] && _DEPS_DIR=${_SYSROOT}/${_DEPS_DIR:2}
 [ "${_HOST_DIR:0:2}" = "//" ] && _HOST_DIR=${_SYSROOT}/${_HOST_DIR:2}
 [ "${_OVS_DIR:0:2}" = "//" ] && _OVS_DIR=${_SYSROOT}/${_OVS_DIR:2}
-[ "${_PREFIX:0:2}" = "//" ] && _OVS_DIR=${_SYSROOT}/${_PREFIX:2}
+[ "${_PREFIX:0:2}" = "//" ] && _PREFIX=${_SYSROOT}/${_PREFIX:2}
 [ "${_SDE_DIR:0:2}" = "//" ] && _SDE_DIR=${_SYSROOT}/${_SDE_DIR:2}
 
 if [ "${_DRY_RUN}" = "true" ]; then
@@ -118,7 +118,7 @@ if [ "${_DRY_RUN}" = "true" ]; then
     exit 0
 fi
 
-rm -fr ${_BLD_DIR} ${_PREFIX}
+rm -fr ${_BLD_DIR}
 
 cmake -S . -B ${_BLD_DIR} \
     -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \

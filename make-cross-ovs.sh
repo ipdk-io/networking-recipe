@@ -84,7 +84,7 @@ if [ "${_DRY_RUN}" = "true" ]; then
     exit 0
 fi
 
-rm -fr ${_BLD_DIR} ${_PREFIX}
+rm -fr ${_BLD_DIR}
 
 cmake -S ovs -B ${_BLD_DIR} \
     -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
