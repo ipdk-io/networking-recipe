@@ -295,6 +295,8 @@ add_library(stratum_target_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_wrapper.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_table_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_table_manager.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_lut_manager.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_lut_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/utils.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/utils.h
 )
