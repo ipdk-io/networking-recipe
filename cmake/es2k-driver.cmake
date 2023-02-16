@@ -23,10 +23,10 @@ function(define_es2k_driver _LIBS _DIRS)
     add_library(cpf SHARED IMPORTED)
     set_property(TARGET cpf PROPERTY IMPORTED_LOCATION ${LIBCPF})
 
-    # es2k:cpf_pmd_infra
+    # cpf_pmd_infra
     find_library(LIBCPF_PMD_INFRA cpf_pmd_infra REQUIRED)
-    add_library(es2k:cpf_pmd_infra SHARED IMPORTED)
-    set_property(TARGET es2k:cpf_pmd_infra
+    add_library(cpf_pmd_infra SHARED IMPORTED)
+    set_property(TARGET cpf_pmd_infra
                  PROPERTY IMPORTED_LOCATION ${LIBCPF_PMD_INFRA})
 
     # driver
@@ -75,7 +75,7 @@ function(define_es2k_driver _LIBS _DIRS)
         es2kcp
         vfio
         cpf
-        es2k:cpf_pmd_infra
+        cpf_pmd_infra
         rte_net_idpf
         PARENT_SCOPE
     )
