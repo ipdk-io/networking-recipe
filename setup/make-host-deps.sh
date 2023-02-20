@@ -9,7 +9,6 @@
 # to run natively on the host or cross-compiled to run on the target
 # platform.
 
-check_environment() {
 if [ -n "${SDKTARGETSYSROOT}" ]; then
     echo ""
     echo "-----------------------------------------------------"
@@ -20,67 +19,61 @@ if [ -n "${SDKTARGETSYSROOT}" ]; then
     echo ""
     exit 1
 fi
-}
 
 # Default values
-_DEFAULT_BUILD=build
-_DEFAULT_INSTALL=host-deps
-_DEFAULT_JOBS=6
-_DEFAULT_SCOPE=minimal
+_BLD_DIR=build
+_CFG_ONLY=false
+_DRY_RUN=false
+_PREFIX=./host-deps
+_NJOBS=6
+_SCOPE=minimal
 
 print_help() {
     echo ""
     echo "Build host dependency libraries"
     echo ""
     echo "Options:"
-    echo "  --build=PATH    Build directory path (Default: ${_DEFAULT_BUILD})"
-    echo "  --config        Only perform configuration step"
-    echo "  --force         Specify -f when patching"
-    echo "  --full          Build all dependency libraries (Default: ${_DEFAULT_SCOPE})"
-    echo "  --install=PATH  Install directory path (Default: ${_DEFAULT_INSTALL})"
-    echo "  --jobs=NJOBS    Number of build threads (Default: ${_DEFAULT_JOBS})"
-    echo "  --minimal       Build required host dependencies only (Default: ${_DEFAULT_SCOPE})"
-    echo "  --no-download   Do not download repositories"
-    echo ""
-    echo "Synonyms:"
-    echo "  -jJNOBS         Same as --jobs=NJOBS"
-    echo "  --prefix=PATH   Same as --install=PATH"
+    echo "  --build=DIR     -B  Build directory path (Default: ${_BLD_DIR})"
+    echo "  --config            Only perform configuration step (Default: ${_CFG_ONLY})"
+    echo "  --dry-run       -n  Display cmake parameters and exit (Default: false)"
+    echo "  --force         -f  Specify -f when patching (Default: false)"
+    echo "  --full              Build all dependency libraries (Default: ${_SCOPE})"
+    echo "  --jobs=NJOBS    -j  Number of build threads (Default: ${_NJOBS})"
+    echo "  --minimal           Build required host dependencies only (Default: ${_SCOPE})"
+    echo "  --no-download       Do not download repositories (Default: false)"
+    echo "  --prefix=DIR    -P  Install directory path (Default: ${_PREFIX})"
     echo ""
 }
 
-# Initial values
-_BUILD_DIR=${_DEFAULT_BUILD}
-_CONFIG_ONLY=false
-_INSTALL_DIR=${_DEFAULT_INSTALL}
-_JOBS=-j${_DEFAULT_JOBS}
-_SCOPE=minimal
-
 # Parse options
-SHORTOPTS=j:
-LONGOPTS=build:,config,force,full,help,install:,jobs:,minimal,no-download,prefix:
+SHORTOPTS=BPfhj:n
+LONGOPTS=build:,config,dry-run,force,full,help,jobs:,minimal,no-download,prefix:
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
 while true ; do
     case "$1" in
-    --build)
+    -B|--build)
         echo "Build directory: $2"
-        _BUILD_DIR=$2
+        _BLD_DIR=$2
         shift 2 ;;
     --config)
-        _CONFIG_ONLY=true
+        _CFG_ONLY=true
         shift ;;
-    --force)
+    -n|--dry-run)
+        _DRY_RUN=true
+        shift ;;
+    -f|--force)
         _FORCE_PATCH="-DFORCE_PATCH=TRUE"
         shift ;;
     --full)
         _SCOPE=full
         shift ;;
-    --install|--prefix)
+    -P|--prefix)
         echo "Install directory: $2"
-        _INSTALL_DIR=$2
+        _PREFIX=$2
         shift 2 ;;
-    --help)
+    -h|--help)
         print_help
         exit 99 ;;
     -j|--jobs)
@@ -101,20 +94,38 @@ while true ; do
     esac
 done
 
-check_environment
-
 if [ "${_SCOPE}" = minimal ]; then
     _ON_DEMAND="-DON_DEMAND=TRUE"
-    _BUILD_TARGET="--target grpc"
+    _TARGET="--target grpc"
 fi
-echo "Performing ${_SCOPE} build"
 
-rm -fr ${_BUILD_DIR} ${_INSTALL_DIR}
+if [ "${_DRY_RUN}" = "true" ]; then
+    echo ""
+    echo "Configure options:"
+    echo "  -DCMAKE_INSTALL_PREFIX=${_PREFIX}"
+    [ -n "${_DOWNLOAD}" ] && echo "  ${_DOWNLOAD}"
+    [ -n "${_FORCE_PATCH}" ] && echo "  ${_FORCE_PATCH}"
+    [ -n "${_ON_DEMAND}" ] && echo "  ${_ON_DEMAND}"
+    echo ""
+    if [ "${_CFG_ONLY}" = "true" ]; then
+        echo "Configure only (${_SCOPE} build)"
+    else
+        echo "Build options:"
+        echo "  -j${_NJOBS}"
+        [ -n "${_TARGET}" ] && echo "  ${_TARGET}"
+        echo ""
+        echo "Will perform a ${_SCOPE} build"
+    fi
+    echo ""
+    exit 0
+fi
 
-cmake -S . -B ${_BUILD_DIR} \
-    -DCMAKE_INSTALL_PREFIX=${_INSTALL_DIR} \
+rm -fr ${_BLD_DIR} ${_PREFIX}
+
+cmake -S . -B ${_BLD_DIR} \
+    -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
     ${_ON_DEMAND} ${_DOWNLOAD} ${_FORCE_PATCH}
 
-if [ "${_CONFIG_ONLY}" = "false" ]; then
-    cmake --build ${_BUILD_DIR} ${_JOBS} ${_BUILD_TARGET}
+if [ "${_CFG_ONLY}" = "false" ]; then
+    cmake --build ${_BLD_DIR} -j${_NJOBS} ${_TARGET}
 fi
