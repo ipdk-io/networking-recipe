@@ -30,7 +30,9 @@ print_help() {
     echo "Options:"
     echo "  --build=DIR      -B  Build directory path [${_BLD_DIR}]"
     echo "  --dry-run        -n  Display cmake parameters and exit"
+    echo "  --force          -f  Specify -f when patching (Default: false)"
     echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
+    echo "  --no-download        Do not download repositories (Default: false)"
     echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
@@ -45,7 +47,7 @@ print_help() {
 
 # Parse options
 SHORTOPTS=B:P:T:hj:n
-LONGOPTS=build:,dry-run,help,prefix:,toolchain:
+LONGOPTS=build:,dry-run,force,jobs:,help,no-download,prefix:,toolchain:
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
@@ -62,6 +64,12 @@ while true ; do
         shift 2 ;;
     -n|--dry-run)
         _DRY_RUN=true
+        shift 1 ;;
+    -f|--force)
+        _FORCE_PATCH="-DFORCE_PATCH=TRUE"
+        shift 1 ;;
+    --no-download)
+        _DOWNLOAD="-DDOWNLOAD=FALSE"
         shift 1 ;;
     -P|--prefix)
         _PREFIX=$2
@@ -86,6 +94,8 @@ if [ "${_DRY_RUN}" = "true" ]; then
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
     echo "JOBS=${_JOBS}"
+    [ -n "${_DOWNLOAD}" ] && echo "${_DOWNLOAD:2}"
+    [ -n "${_FORCE_PATCH}" ] && echo "${_FORCE_PATCH:2}"
     echo ""
     exit 0
 fi
@@ -94,6 +104,7 @@ rm -fr ${_BLD_DIR}
 
 cmake -S . -B ${_BLD_DIR} \
     -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
-    -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}
+    -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE} \
+    ${_DOWNLOAD} ${_FORCE_PATCH}
 
 cmake --build ${_BLD_DIR} -j${_JOBS}
