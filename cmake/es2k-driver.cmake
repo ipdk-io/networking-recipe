@@ -6,7 +6,7 @@
 
 # The definitions are encapsulated in a function to limit pollution of the
 # global namespace.
-function(define_es2k_driver _LIBS _DIRS)
+function(_define_es2k_driver _LIBS _DIRS)
 
     ###########
     # Targets #
@@ -92,6 +92,40 @@ function(define_es2k_driver _LIBS _DIRS)
         ${SDE_INSTALL_DIR}/lib
         PARENT_SCOPE
     )
-endfunction(define_es2k_driver)
+endfunction(_define_es2k_driver)
 
-define_es2k_driver(DRIVER_SDK_LIBS DRIVER_SDK_DIRS)
+# If we're cross-compiling, just return the names of the libraries
+# instead of creating targets.
+function(_define_es2k_libs _LIBS _DIRS)
+    if(CMAKE_CROSSCOMPILING)
+        set(ES2KCP acccp)
+    else()
+        set(ES2KCP xeoncp)
+    endif()
+
+    set(${_LIBS}
+        driver
+        bf_switchd_lib
+        tdi
+        tdi_json_parser
+        target_utils
+        target_sys
+        ${ES2KCP}
+        vfio
+        cpf
+        cpf_pmd_infra
+        rte_net_idpf
+        PARENT_SCOPE
+    )
+
+    set(${_DIRS}
+        ${SDE_INSTALL_DIR}/lib
+        PARENT_SCOPE
+    )
+endfunction(_define_es2k_libs)
+
+if(CMAKE_CROSS_COMPILING)
+    _define_es2k_libs(ES2K_SDK_LIBS ES2K_SDK_DIRS)
+else()
+    _define_es2k_driver(ES2K_SDK_LIBS ES2K_SDK_DIRS)
+endif()
