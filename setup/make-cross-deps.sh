@@ -18,6 +18,7 @@ _SYSROOT=${SDKTARGETSYSROOT}
 # Default values
 _BLD_DIR=build
 _DRY_RUN=false
+_JOBS=8
 _PREFIX=//opt/deps
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
@@ -29,6 +30,7 @@ print_help() {
     echo "Options:"
     echo "  --build=DIR      -B  Build directory path [${_BLD_DIR}]"
     echo "  --dry-run        -n  Display cmake parameters and exit"
+    echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
     echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
@@ -42,7 +44,7 @@ print_help() {
 }
 
 # Parse options
-SHORTOPTS=B:P:T:hn
+SHORTOPTS=B:P:T:hj:n
 LONGOPTS=build:,dry-run,help,prefix:,toolchain:
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
@@ -55,6 +57,9 @@ while true ; do
     -h|--help)
         print_help
         exit 99 ;;
+    -j|--jobs)
+        _JOBS=$2
+        shift 2 ;;
     -n|--dry-run)
         _DRY_RUN=true
         shift 1 ;;
@@ -80,14 +85,15 @@ if [ "${_DRY_RUN}" = "true" ]; then
     echo ""
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
+    echo "JOBS=${_JOBS}"
     echo ""
     exit 0
 fi
 
-rm -fr ${_BLD_DIR} ${_PREFIX}
+rm -fr ${_BLD_DIR}
 
 cmake -S . -B ${_BLD_DIR} \
     -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
     -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}
 
-cmake --build ${_BLD_DIR} -j8
+cmake --build ${_BLD_DIR} -j${_JOBS}
