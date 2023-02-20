@@ -21,13 +21,16 @@ function(define_es2k_driver _LIBS _DIRS)
     # cpf
     find_library(LIBCPF cpf REQUIRED)
     add_library(cpf SHARED IMPORTED)
-    set_property(TARGET cpf PROPERTY IMPORTED_LOCATION ${LIBCPF})
+    set_target_properties(cpf PROPERTIES
+                          IMPORTED_LOCATION ${LIBCPF}
+                          IMPORTED_NO_SONAME ON)
 
     # cpf_pmd_infra
     find_library(LIBCPF_PMD_INFRA cpf_pmd_infra REQUIRED)
     add_library(cpf_pmd_infra SHARED IMPORTED)
-    set_property(TARGET cpf_pmd_infra
-                 PROPERTY IMPORTED_LOCATION ${LIBCPF_PMD_INFRA})
+    set_target_properties(cpf_pmd_infra PROPERTIES
+                          IMPORTED_LOCATION ${LIBCPF_PMD_INFRA}
+                          IMPORTED_NO_SONAME ON)
 
     # driver
     find_library(LIBDRIVER driver REQUIRED)
@@ -38,17 +41,20 @@ function(define_es2k_driver _LIBS _DIRS)
     if(CMAKE_CROSSCOMPILING)
         # TODO: Base selection on the platform type.
         find_library(LIBES2KCP acccp REQUIRED)
-      else()
+    else()
         find_library(LIBES2KCP xeoncp REQUIRED)
     endif()
     add_library(es2kcp SHARED IMPORTED)
-    set_property(TARGET es2kcp PROPERTY IMPORTED_LOCATION ${LIBES2KCP})
+    set_target_properties(es2kcp PROPERTIES
+                          IMPORTED_LOCATION ${LIBES2KCP}
+                          IMPORTED_NO_SONAME ON)
 
     # rte_net_idpf
     find_library(LIBRTE_NET_IDPF rte_net_idpf REQUIRED)
     add_library(rte_net_idpf SHARED IMPORTED)
-    set_property(TARGET rte_net_idpf
-                 PROPERTY IMPORTED_LOCATION ${LIBRTE_NET_IDPF})
+    set_target_properties(rte_net_idpf PROPERTIES
+                          IMPORTED_LOCATION ${LIBRTE_NET_IDPF}
+                          IMPORTED_NO_SONAME ON)
 
     # target_utils
     find_library(LIBTARGET_UTILS target_utils REQUIRED)
@@ -59,7 +65,9 @@ function(define_es2k_driver _LIBS _DIRS)
     # vfio
     find_library(LIBVFIO vfio REQUIRED)
     add_library(vfio SHARED IMPORTED)
-    set_property(TARGET vfio PROPERTY IMPORTED_LOCATION ${LIBVFIO})
+    set_target_properties(vfio PROPERTIES
+                          IMPORTED_LOCATION
+                          ${LIBVFIO} IMPORTED_NO_SONAME ON)
 
     #############
     # Variables #
