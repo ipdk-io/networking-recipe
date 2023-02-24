@@ -138,14 +138,19 @@ void add_path_elem(std::string elem_name, std::string elem_kv,
 }
 
 void build_gnmi_path(std::string path_str, ::gnmi::Path* path) {
-  std::regex ex("/([^/\\[]+)(\\[([^=]+=[^\\]]+)\\])?");
-  std::sregex_iterator iter(path_str.begin(), path_str.end(), ex);
-  std::sregex_iterator end;
-  while (iter != end) {
-    std::smatch sm = *iter;
-    auto* elem = path->add_elem();
-    add_path_elem(sm.str(1), sm.str(2), elem);
-    iter++;
+  try {
+    std::regex ex("/([^/\\[]+)(\\[([^=]+=[^\\]]+)\\])?");
+    std::sregex_iterator iter(path_str.begin(), path_str.end(), ex);
+    std::sregex_iterator end;
+    while (iter != end) {
+      std::smatch sm = *iter;
+      auto* elem = path->add_elem();
+      add_path_elem(sm.str(1), sm.str(2), elem);
+      iter++;
+    }
+  } catch (std::exception& e) {
+    std::cout << "An exception occurred in build_gnmi_path. Exception nr "
+              << e.what() << std::endl;
   }
 }
 
