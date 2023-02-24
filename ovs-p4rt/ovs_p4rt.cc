@@ -95,8 +95,8 @@ int GetMatchFieldId(const ::p4::config::v1::P4Info &p4info,
 }
 
 void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
-                                const struct mac_learning_info learn_info,
-                                const ::p4::config::v1::P4Info p4info,
+                                const struct mac_learning_info &learn_info,
+                                const ::p4::config::v1::P4Info &p4info,
                                 bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
@@ -143,8 +143,8 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
  * Action: VSI ID to which a matching packet need to forwarded.
  */
 void PrepareSemBypassTableEntry(p4::v1::TableEntry* table_entry,
-                                const struct mac_learning_info learn_info,
-                                const ::p4::config::v1::P4Info p4info,
+                                const struct mac_learning_info &learn_info,
+                                const ::p4::config::v1::P4Info &p4info,
                                 bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, SEM_BYPASS_TABLE));
   auto match = table_entry->add_match();
@@ -171,8 +171,8 @@ void PrepareSemBypassTableEntry(p4::v1::TableEntry* table_entry,
 #endif
 
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
-                                const struct mac_learning_info learn_info,
-                                const ::p4::config::v1::P4Info p4info,
+                                const struct mac_learning_info &learn_info,
+                                const ::p4::config::v1::P4Info &p4info,
                                 bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_RX_WITH_TUNNEL_TABLE));
   auto match = table_entry->add_match();
@@ -204,8 +204,8 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 void PrepareFdbTableEntryforTunnel(p4::v1::TableEntry* table_entry,
-                                   const struct mac_learning_info learn_info,
-                                   const ::p4::config::v1::P4Info p4info,
+                                   const struct mac_learning_info &learn_info,
+                                   const ::p4::config::v1::P4Info &p4info,
                                    bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
@@ -246,8 +246,8 @@ void PrepareFdbTableEntryforTunnel(p4::v1::TableEntry* table_entry,
 }
 
 absl::Status ConfigFdbTxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
-                                       const struct mac_learning_info learn_info,
-                                       const ::p4::config::v1::P4Info p4info,
+                                       const struct mac_learning_info &learn_info,
+                                       const ::p4::config::v1::P4Info &p4info,
                                        bool insert_entry) {
   ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
@@ -265,8 +265,8 @@ absl::Status ConfigFdbTxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
 
 #if defined(ES2K_TARGET)
 absl::Status ConfigSemBypassTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
-                                       const struct mac_learning_info learn_info,
-                                       const ::p4::config::v1::P4Info p4info,
+                                       const struct mac_learning_info &learn_info,
+                                       const ::p4::config::v1::P4Info &p4info,
                                        bool insert_entry) {
   ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
@@ -284,8 +284,8 @@ absl::Status ConfigSemBypassTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
 #endif
 
 absl::Status ConfigFdbRxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
-                                       const struct mac_learning_info learn_info,
-                                       const ::p4::config::v1::P4Info p4info,
+                                       const struct mac_learning_info &learn_info,
+                                       const ::p4::config::v1::P4Info &p4info,
                                        bool insert_entry) {
   ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
@@ -302,8 +302,8 @@ absl::Status ConfigFdbRxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
 }
 
 absl::Status ConfigFdbTunnelTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
-                                       const struct mac_learning_info learn_info,
-                                       const ::p4::config::v1::P4Info p4info,
+                                       const struct mac_learning_info &learn_info,
+                                       const ::p4::config::v1::P4Info &p4info,
                                        bool insert_entry) {
   ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
@@ -362,8 +362,8 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry)
 }
 
 void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
-                            const struct tunnel_info tunnel_info,
-                            const ::p4::config::v1::P4Info p4info,
+                            const struct tunnel_info &tunnel_info,
+                            const ::p4::config::v1::P4Info &p4info,
                             bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, VXLAN_ENCAP_MOD_TABLE));
   auto match = table_entry->add_match();
@@ -408,8 +408,8 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 void PrepareDecapTableEntry(p4::v1::TableEntry* table_entry,
-                            const struct tunnel_info tunnel_info,
-                            const ::p4::config::v1::P4Info p4info,
+                            const struct tunnel_info &tunnel_info,
+                            const ::p4::config::v1::P4Info &p4info,
                             bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, IPV4_TUNNEL_TERM_TABLE));
   auto match = table_entry->add_match();
@@ -443,8 +443,8 @@ void PrepareDecapTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 absl::Status ConfigEncapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
-                                   const struct tunnel_info tunnel_info,
-                                   const ::p4::config::v1::P4Info p4info,
+                                   const struct tunnel_info &tunnel_info,
+                                   const ::p4::config::v1::P4Info &p4info,
                                    bool insert_entry) {
   p4::v1::Entity entity;
   p4::v1::WriteRequest write_request;
@@ -462,8 +462,8 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
 }
 
 absl::Status ConfigDecapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
-                                   const struct tunnel_info tunnel_info,
-                                   const ::p4::config::v1::P4Info p4info,
+                                   const struct tunnel_info &tunnel_info,
+                                   const ::p4::config::v1::P4Info &p4info,
                                    bool insert_entry) {
   p4::v1::Entity entity;
   p4::v1::WriteRequest write_request;
