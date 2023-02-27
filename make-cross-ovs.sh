@@ -17,6 +17,7 @@ _SYSROOT=${SDKTARGETSYSROOT}
 # Default values
 _BLD_DIR=ovs/build
 _BLD_TYPE=RelWithDebInfo
+_JOBS=8
 _PREFIX=//opt/ovs
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
@@ -28,6 +29,7 @@ print_help() {
     echo "Options:"
     echo "  --build=DIR      -B  Build directory path [${_BLD_DIR}]"
     echo "  --dry-run        -n  Display cmake parameters and exit"
+    echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
     echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
@@ -41,8 +43,8 @@ print_help() {
 }
 
 # Parse options
-SHORTOPTS=B:P:T:hn
-LONGOPTS=build:,dry-run,help,ovs:,prefix:,toolchain:
+SHORTOPTS=B:P:T:hj:n
+LONGOPTS=build:,dry-run,help,jobs:,prefix:,toolchain:
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
@@ -51,12 +53,15 @@ while true ; do
     -B|--build)
         _BLD_DIR=$2
         shift 2 ;;
-    -h|--help)
-        print_help
-        exit 99 ;;
     -n|--dry-run)
         _DRY_RUN=true
         shift 1 ;;
+    -h|--help)
+        print_help
+        exit 99 ;;
+    -j|--jobs)
+        _JOBS=$2
+        shift 2 ;;
     -P|--prefix)
         _PREFIX=$2
         shift 2 ;;
@@ -72,7 +77,7 @@ while true ; do
     esac
 done
 
-# Substitute ${_SYSROOT}/ for // prefix
+# Substitute ${_SYSROOT}/ for '//' prefix
 [ "${_PREFIX:0:2}" = "//" ] && _PREFIX=${_SYSROOT}/${_PREFIX:2}
 
 if [ "${_DRY_RUN}" = "true" ]; then
@@ -80,6 +85,7 @@ if [ "${_DRY_RUN}" = "true" ]; then
     echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
+    echo "JOBS=${_JOBS}"
     echo ""
     exit 0
 fi
@@ -92,4 +98,4 @@ cmake -S ovs -B ${_BLD_DIR} \
     -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE} \
     -DP4OVS=TRUE
 
-cmake --build ${_BLD_DIR} -j8 -- V=0    
+cmake --build ${_BLD_DIR} -j${_JOBS} -- V=0
