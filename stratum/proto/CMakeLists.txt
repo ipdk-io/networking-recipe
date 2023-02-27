@@ -45,6 +45,9 @@ string(JOIN ":" PROTO_IMPORT_PATH
     /usr/local/include      # variable?
 )
 
+set(PB_HEADER_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/stratum/pb)
+set(DOT_PROTO_INSTALL_DIR ${CMAKE_INSTALL_DATAROOTDIR}/stratum/proto)
+
 ########################
 # generate_proto_files #
 ########################
@@ -78,14 +81,22 @@ function(generate_proto_files PROTO_FILES SRC_DIR)
             VERBATIM
         )
 
-        # Install header files in include/stratum/pb.
-        install(FILES ${_hdr} DESTINATION
-                ${CMAKE_INSTALL_PREFIX}/include/stratum/pb/${_path})
+        # Install .pb.h file in include/.
+        install(
+            FILES
+                ${_hdr}
+            DESTINATION
+                ${PB_HEADER_INSTALL_DIR}/${_path}
+        )
 
+        # Install .proto file in share/.
         if(INSTALL-PROTO)
-            # Install protobuf files in share/stratum/proto.
-            install(FILES ${SRC_DIR}/${_file} DESTINATION
-                    ${CMAKE_INSTALL_PREFIX}/share/stratum/proto/${_path})
+            install(
+                FILES
+                    ${SRC_DIR}/${_file}
+                DESTINATION
+                    ${DOT_PROTO_INSTALL_DIR}/${_path}
+            )
         endif()
     endforeach()
 endfunction(generate_proto_files)
@@ -124,13 +135,22 @@ function(generate_grpc_files PROTO_FILES SRC_DIR)
             VERBATIM
         )
 
-        install(FILES ${_hdr} DESTINATION
-                ${CMAKE_INSTALL_PREFIX}/include/stratum/pb/${_path})
+        # Install .pb.h file in include/.
+        install(
+            FILES
+                ${_hdr}
+            DESTINATION
+                ${PB_HEADER_INSTALL_DIR}/${_path}
+            )
 
+        # Install .proto file in share/.
         if(INSTALL-PROTO)
-            # Install protobuf files in share/stratum/proto.
-            install(FILES ${SRC_DIR}/${_file} DESTINATION
-                    ${CMAKE_INSTALL_PREFIX}/share/stratum/proto/${_path})
+            install(
+                FILES
+                    ${SRC_DIR}/${_file}
+                DESTINATION
+                    ${DOT_PROTO_INSTALL_DIR}/${_path}
+            )
         endif()
     endforeach()
 endfunction(generate_grpc_files)

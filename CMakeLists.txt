@@ -27,6 +27,7 @@ option(SET_RPATH "Set RPATH in libraries and executables" OFF)
 
 cmake_print_variables(CMAKE_SYSROOT)
 cmake_print_variables(CMAKE_TOOLCHAIN_FILE)
+cmake_print_variables(CMAKE_STAGING_PREFIX)
 
 #############################
 # Symbolic path definitions #

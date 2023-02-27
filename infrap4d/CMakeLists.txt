@@ -62,7 +62,7 @@ if(DPDK_TARGET)
             ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_port_config.pb.txt
             ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_skip_p4.conf
         DESTINATION
-            ${CMAKE_INSTALL_PREFIX}/share/stratum/dpdk
+            ${CMAKE_INSTALL_DATAROOTDIR}/stratum/dpdk
     )
 elseif(ES2K_TARGET)
     install(
@@ -70,7 +70,7 @@ elseif(ES2K_TARGET)
 	    ${STRATUM_TDI_BIN_DIR}/es2k/es2k_port_config.pb.txt
             ${STRATUM_TDI_BIN_DIR}/es2k/es2k_skip_p4.conf
         DESTINATION
-            ${CMAKE_INSTALL_PREFIX}/share/stratum/es2k
+            ${CMAKE_INSTALL_DATAROOTDIR}/stratum/es2k
     )
 elseif(TOFINO_TARGET)
     install(
@@ -78,6 +78,6 @@ elseif(TOFINO_TARGET)
             ${STRATUM_BFRT_BIN_DIR}/tofino_skip_p4_no_bsp.conf
             ${STRATUM_BFRT_BIN_DIR}/tofino_skip_p4.conf
         DESTINATION
-            ${CMAKE_INSTALL_PREFIX}/share/stratum
+            ${CMAKE_INSTALL_DATAROOTDIR}/stratum
     )
 endif()
