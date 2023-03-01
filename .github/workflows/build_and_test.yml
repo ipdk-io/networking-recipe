@@ -19,7 +19,7 @@ jobs:
 
   build_and_test:
     timeout-minutes: 100
-    runs-on: gasp
+    runs-on: ubuntu-20.04
     steps:
       - name: 'Checkout p4-dpdk repo'
         uses: actions/checkout@v3
@@ -84,17 +84,16 @@ jobs:
 
   py_bandit_test:
      timeout-minutes: 10
-     runs-on: gasp
+     runs-on: ubuntu-20.04
      steps:
-       - name: 'checkout Networking Recipe'
+       - name: 'Check out Networking Recipe'
          uses: actions/checkout@v3
          with:
            path: ipdk.recipe
-           
-       - name: "Run Bandit"  
-         uses: mdegis/bandit-action@v1
+
+       - name: 'Run Bandit'
+         uses: tj-actions/bandit@v5.1
          with:
-           path: "./ipdk.recipe/clients/p4rt-ctl/p4rt-ctl.in"
-           level: high
-           confidence: high
-           exit_zero: true
+           targets: |  # or a single string "."
+            ./ipdk.recipe/clients/p4rt-ctl/p4rt-ctl.in
+           options: "-v"
