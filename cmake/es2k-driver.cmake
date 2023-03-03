@@ -69,6 +69,36 @@ function(_define_es2k_driver _LIBS _DIRS)
                           IMPORTED_LOCATION
                           ${LIBVFIO} IMPORTED_NO_SONAME ON)
 
+    # rte_flow_shim
+    find_library(LIBRTE_FLOW_SHIM rte_flow_shim ${SDE_INSTALL_DIR}/lib)
+    if(NOT LIBRTE_FLOW_SHIM)
+        message(FATAL_ERROR "Cannot find library: rte_flow_shim")
+    endif()
+
+    add_library(rte_flow_shim SHARED IMPORTED)
+    set_property(TARGET rte_flow_shim
+                 PROPERTY IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM})
+
+    # cmdline lib
+    find_library(LIBRTE_CMDLINE rte_cmdline ${SDE_INSTALL_DIR}/lib64)
+    if(NOT LIBRTE_CMDLINE)
+        message(FATAL_ERROR "Cannot find library: librte_cmdline")
+    endif()
+
+    add_library(rte_cmdline SHARED IMPORTED)
+    set_property(TARGET rte_cmdline
+            PROPERTY IMPORTED_LOCATION ${LIBRTE_CMDLINE})
+
+    # rte_flow_shim_cli
+    find_library(LIBRTE_FLOW_SHIM_CLI rte_flow_api_cli ${SDE_INSTALL_DIR}/lib)
+    if(NOT LIBRTE_FLOW_SHIM_CLI)
+        message(FATAL_ERROR "Cannot find library: rte_flow_shim_api_cli")
+    endif()
+
+    add_library(rte_flow_api_cli SHARED IMPORTED)
+    set_property(TARGET rte_flow_api_cli
+            PROPERTY IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM_CLI})
+
     #############
     # Variables #
     #############
@@ -85,6 +115,9 @@ function(_define_es2k_driver _LIBS _DIRS)
         cpf
         cpf_pmd_infra
         rte_net_idpf
+	rte_flow_shim
+        rte_cmdline
+        rte_flow_api_cli
         PARENT_SCOPE
     )
 
