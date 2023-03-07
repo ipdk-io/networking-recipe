@@ -1,8 +1,12 @@
 #!/bin/bash
-
+#
+# Copyright 2023 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+#
 # Sample script to configure and cross-compile Open vSwitch
 # for the ES2K ACC platform. The build artifacts are installed
-# in the SYSROOT /opt/ovs directory.
+# by default in the SYSROOT /opt/ovs directory.
+#
 
 if [ -z "${SDKTARGETSYSROOT}" ]; then
     echo ""

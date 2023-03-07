@@ -23,8 +23,6 @@ include(CMakePrintHelpers)
 include(FindPkgConfig)
 include(GNUInstallDirs)
 
-option(SET_RPATH "Set RPATH in libraries and executables" OFF)
-
 cmake_print_variables(CMAKE_SYSROOT)
 cmake_print_variables(CMAKE_TOOLCHAIN_FILE)
 cmake_print_variables(CMAKE_STAGING_PREFIX)
@@ -93,15 +91,14 @@ unset(_target_action)
 # Feature toggles #
 ###################
 
-if(DPDK_TARGET)
-    set(WITH_KRNLMON ON)
-    set(WITH_OVSP4RT ON)
-elseif(TOFINO_TARGET)
+option(SET_RPATH    "Set RPATH in libraries and executables" OFF)
+
+option(WITH_KRNLMON "Enable Kernel Monitor support" ON)
+option(WITH_OVSP4RT "Enable OVS support" ON)
+
+if(TOFINO_TARGET)
     set(WITH_KRNLMON OFF)
     set(WITH_OVSP4RT OFF)
-elseif(ES2K_TARGET)
-    set(WITH_KRNLMON ON)
-    set(WITH_OVSP4RT ON)
 endif()
 
 cmake_print_variables(WITH_KRNLMON)
