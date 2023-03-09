@@ -70,11 +70,48 @@ function(_define_es2k_driver _LIBS _DIRS)
                           ${LIBVFIO} IMPORTED_NO_SONAME ON)
 
 
+
+    if (RTE_FLOW_SHIM)
+        # rte_flow_shim
+        find_library(LIBRTE_FLOW_SHIM rte_flow_shim REQUIRED)
+        if(NOT LIBRTE_FLOW_SHIM)
+        message(FATAL_ERROR "Cannot find library: rte_flow_shim")
+        endif()
+
+        add_library(rte_flow_shim SHARED IMPORTED)
+        set_target_properties(rte_flow_shim
+		PROPERTIES IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM} 
+		IMPORTED_NO_SONAME ON)
+
+        # cmdline lib
+        find_library(LIBRTE_CMDLINE rte_cmdline REQUIRED)
+        if(NOT LIBRTE_CMDLINE)
+        message(FATAL_ERROR "Cannot find library: librte_cmdline")
+        endif()
+
+        add_library(rte_cmdline SHARED IMPORTED)
+        set_target_properties(rte_cmdline
+		PROPERTIES IMPORTED_LOCATION ${LIBRTE_CMDLINE}
+		IMPORTED_NO_SONAME ON)
+
+        # rte_flow_shim_cli
+        find_library(LIBRTE_FLOW_SHIM_CLI rte_flow_api_cli REQUIRED)
+        if(NOT LIBRTE_FLOW_SHIM_CLI)
+        message(FATAL_ERROR "Cannot find library: rte_flow_shim_api_cli")
+        endif()
+
+        add_library(rte_flow_api_cli SHARED IMPORTED)
+        set_target_properties(rte_flow_api_cli
+		PROPERTIES IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM_CLI}
+		IMPORTED_NO_SONAME ON)
+
+     endif()
+
     #############
     # Variables #
     #############
 
-    set(${_LIBS}
+    set(_libs
         driver
         bf_switchd_lib
         tdi
@@ -86,64 +123,20 @@ function(_define_es2k_driver _LIBS _DIRS)
         cpf
         cpf_pmd_infra
         rte_net_idpf
-        PARENT_SCOPE
     )
 
     set(${_DIRS}
         ${SDE_INSTALL_DIR}/lib
         PARENT_SCOPE
     )
-
     if (RTE_FLOW_SHIM)
-        add_compile_definitions(RTE_FLOW_SHIM)
-        # rte_flow_shim
-        find_library(LIBRTE_FLOW_SHIM rte_flow_shim ${SDE_INSTALL_DIR}/lib)
-        if(NOT LIBRTE_FLOW_SHIM)
-        message(FATAL_ERROR "Cannot find library: rte_flow_shim")
-        endif()
-
-        add_library(rte_flow_shim SHARED IMPORTED)
-        set_property(TARGET rte_flow_shim
-             PROPERTY IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM})
-
-        # cmdline lib
-        find_library(LIBRTE_CMDLINE rte_cmdline ${SDE_INSTALL_DIR}/lib64)
-        if(NOT LIBRTE_CMDLINE)
-        message(FATAL_ERROR "Cannot find library: librte_cmdline")
-        endif()
-
-        add_library(rte_cmdline SHARED IMPORTED)
-        set_property(TARGET rte_cmdline
-            PROPERTY IMPORTED_LOCATION ${LIBRTE_CMDLINE})
-
-        # rte_flow_shim_cli
-        find_library(LIBRTE_FLOW_SHIM_CLI rte_flow_api_cli ${SDE_INSTALL_DIR}/lib)
-        if(NOT LIBRTE_FLOW_SHIM_CLI)
-        message(FATAL_ERROR "Cannot find library: rte_flow_shim_api_cli")
-        endif()
-
-        add_library(rte_flow_api_cli SHARED IMPORTED)
-        set_property(TARGET rte_flow_api_cli
-            PROPERTY IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM_CLI})
-
-        set(${_LIBS}
-            driver
-            bf_switchd_lib
-            tdi
-            tdi_json_parser
-            target_utils
-            target_sys
-            es2kcp
-            vfio
-            cpf
-            cpf_pmd_infra
-            rte_net_idpf
+         list(APPEND _libs
             rte_flow_shim
             rte_cmdline
             rte_flow_api_cli
-            PARENT_SCOPE
          )
-     endif()
+    endif()
+    set(${_LIBS} ${_libs} PARENT_SCOPE)
 endfunction(_define_es2k_driver)
 
 # If we're cross-compiling, just return the names of the libraries
