@@ -117,7 +117,7 @@ build_recipe() {
         -DSDE_INSTALL_DIR=${_SDE_DIR} \
         ${_WITH_KRNLMON} ${_WITH_OVSP4RT} \
         ${_SET_RPATH} \
-        ${_TARGET_TYPE} -DRTE_FLOW_SHIM=TRUE
+        ${_TARGET_TYPE}
 
     cmake --build ${_BLD_DIR} -j${_JOBS} --target install
 }
