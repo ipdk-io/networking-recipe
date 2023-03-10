@@ -27,7 +27,6 @@ _OVS_DIR="${OVS_INSTALL:-//opt/ovs}"
 _PREFIX=install
 _SDE_DIR="${SDE_INSTALL:-//opt/p4sde}"
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
-_RTE_FLOW_SHIM=TRUE
 
 # Displays help text
 print_help() {
@@ -44,7 +43,7 @@ print_help() {
     echo "  --no-krnlmon         Exclude Kernel Monitor"
     echo "  --no-ovs             Exclude OVS support"
     echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
-    echo "  --rfs-disable        Disable rte_flow_shim(experimental)"
+    echo "  --rfs-enable         Enable rte_flow_shim(experimental)"
     echo "  --sde=DIR*       -S  SDE install directory [${_SDE_DIR}]"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
@@ -64,7 +63,7 @@ print_help() {
 # Parse options
 SHORTOPTS=B:D:H:O:P:S:T:hn
 LONGOPTS=build:,deps:,dry-run,help,hostdeps:,ovs:,prefix:,sde:,toolchain:
-LONGOPTS=${LONGOPTS},no-krnlmon,no-ovs,rfs-disable
+LONGOPTS=${LONGOPTS},no-krnlmon,no-ovs,rfs-enable
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
@@ -92,8 +91,8 @@ while true ; do
     --no-ovs)
         _WITH_OVSP4RT=FALSE
         shift 1 ;;
-    --rfs-disable)
-        _RTE_FLOW_SHIM=
+    --rfs-enable)
+        _RTE_FLOW_SHIM=TRUE
 	shift 1 ;;
     -O|--ovs)
         _OVS_DIR=$2
@@ -128,6 +127,7 @@ done
 [ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON=-DWITH_KRNLMON=${_WITH_KRNLMON}
 [ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT=-DWITH_OVSP4RT=${_WITH_OVSP4RT}
 
+# Exand RTE_FLOW_SHIM if not empty
 [ -n "${_RTE_FLOW_SHIM}" ] && _RTE_FLOW_SHIM=-DRTE_FLOW_SHIM=${_RTE_FLOW_SHIM}
 
 if [ "${_DRY_RUN}" = "true" ]; then
