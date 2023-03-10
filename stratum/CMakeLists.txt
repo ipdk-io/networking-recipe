@@ -306,10 +306,6 @@ target_include_directories(stratum_target_o PRIVATE
     ${SDE_INSTALL_DIR}/include
 )
 
-if (RTE_FLOW_SHIM)
-    target_compile_definitions(stratum_target_o PRIVATE RTE_FLOW_SHIM)
-endif()
-
 add_dependencies(stratum_target_o stratum_proto)
 
 ##################
@@ -341,9 +337,6 @@ endif()
 add_library(stratum_main_o OBJECT
     ${STRATUM_MAIN_FILES}
 )
-if (RTE_FLOW_SHIM)
-    target_compile_definitions(stratum_main_o PRIVATE RTE_FLOW_SHIM)
-endif()
 
 target_include_directories(stratum_main_o PRIVATE
     ${STRATUM_INCLUDES}

@@ -96,15 +96,9 @@ option(SET_RPATH    "Set RPATH in libraries and executables" OFF)
 option(WITH_KRNLMON "Enable Kernel Monitor support" ON)
 option(WITH_OVSP4RT "Enable OVS support" ON)
 
-option(RTE_FLOW_SHIM "Enable rte_flow_shim support" OFF)
-
 if(TOFINO_TARGET)
     set(WITH_KRNLMON OFF)
     set(WITH_OVSP4RT OFF)
-endif()
-
-if(ES2K_TARGET)
-    set(RTE_FLOW_SHIM ON)
 endif()
 
 cmake_print_variables(WITH_KRNLMON)

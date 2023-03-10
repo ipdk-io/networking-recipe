@@ -70,40 +70,26 @@ function(_define_es2k_driver _LIBS _DIRS)
                           ${LIBVFIO} IMPORTED_NO_SONAME ON)
 
 
-
+    # rte_flow_shim valid only for ES2K_TARGET
     if (RTE_FLOW_SHIM)
         # rte_flow_shim
         find_library(LIBRTE_FLOW_SHIM rte_flow_shim REQUIRED)
-        if(NOT LIBRTE_FLOW_SHIM)
-        message(FATAL_ERROR "Cannot find library: rte_flow_shim")
-        endif()
-
         add_library(rte_flow_shim SHARED IMPORTED)
         set_target_properties(rte_flow_shim
-		PROPERTIES IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM} 
-		IMPORTED_NO_SONAME ON)
+		PROPERTIES IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM})
 
         # cmdline lib
         find_library(LIBRTE_CMDLINE rte_cmdline REQUIRED)
-        if(NOT LIBRTE_CMDLINE)
-        message(FATAL_ERROR "Cannot find library: librte_cmdline")
-        endif()
-
         add_library(rte_cmdline SHARED IMPORTED)
         set_target_properties(rte_cmdline
-		PROPERTIES IMPORTED_LOCATION ${LIBRTE_CMDLINE}
-		IMPORTED_NO_SONAME ON)
+		PROPERTIES IMPORTED_LOCATION ${LIBRTE_CMDLINE})
 
         # rte_flow_shim_cli
         find_library(LIBRTE_FLOW_SHIM_CLI rte_flow_api_cli REQUIRED)
-        if(NOT LIBRTE_FLOW_SHIM_CLI)
-        message(FATAL_ERROR "Cannot find library: rte_flow_shim_api_cli")
-        endif()
-
         add_library(rte_flow_api_cli SHARED IMPORTED)
         set_target_properties(rte_flow_api_cli
-		PROPERTIES IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM_CLI}
-		IMPORTED_NO_SONAME ON)
+		PROPERTIES IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM_CLI})
+	
 
      endif()
 
@@ -125,10 +111,6 @@ function(_define_es2k_driver _LIBS _DIRS)
         rte_net_idpf
     )
 
-    set(${_DIRS}
-        ${SDE_INSTALL_DIR}/lib
-        PARENT_SCOPE
-    )
     if (RTE_FLOW_SHIM)
          list(APPEND _libs
             rte_flow_shim
@@ -136,7 +118,13 @@ function(_define_es2k_driver _LIBS _DIRS)
             rte_flow_api_cli
          )
     endif()
+
     set(${_LIBS} ${_libs} PARENT_SCOPE)
+
+    set(${_DIRS}
+        ${SDE_INSTALL_DIR}/lib
+        PARENT_SCOPE
+    )
 endfunction(_define_es2k_driver)
 
 # If we're cross-compiling, just return the names of the libraries
