@@ -261,14 +261,10 @@ add_library(stratum_target_o OBJECT
     # TDI files
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_action_profile_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_action_profile_manager.h
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_fixed_function_manager.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_fixed_function_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_counter_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_counter_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.h
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_ipsec_manager.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_ipsec_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_packetio_manager.cc
@@ -300,6 +296,15 @@ add_library(stratum_target_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/utils.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/utils.h
 )
+
+if(ES2K_TARGET)
+    target_sources(stratum_target_o PRIVATE
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_fixed_function_manager.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_fixed_function_manager.h
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_ipsec_manager.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_ipsec_manager.h
+    )
+endif()
 
 target_include_directories(stratum_target_o PRIVATE
     ${STRATUM_INCLUDES}
