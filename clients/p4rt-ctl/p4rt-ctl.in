@@ -76,6 +76,11 @@ for P4Runtime switches:
   reset-counter SWITCH CTR_TBL CTR_FLOW resets counter table entry
 """
 
+# Global variable that main() will set based on command line argument
+# This variable will be accessed in P4RuntimeClient to open client channel
+# in appropriate mode
+grpc_insecure_mode = False
+
 def usage():
     print(USAGE)
     sys.exit(0)
@@ -642,38 +647,38 @@ class P4RuntimeClient:
         self.device_id = device_id
         self.election_id = election_id
 
-        root_ca_file_path = '/usr/share/stratum/certs/ca.crt'
-        client_key_file_path = '/usr/share/stratum/certs/client.key'
-        client_crt_file_path = '/usr/share/stratum/certs/client.crt'
-
-        rootca_exists = os.path.isfile(root_ca_file_path)
-        clientkey_exists = os.path.isfile(client_key_file_path)
-        clientcrt_exists = os.path.isfile(client_crt_file_path)
-
-        if rootca_exists and clientkey_exists and clientcrt_exists:
-            try:
-                with open(root_ca_file_path, 'rb') as rootca:
-                    with open(client_key_file_path, 'rb') as clientkey:
-                        with open(client_crt_file_path, 'rb') as clientcrt:
-                            creds = grpc.ssl_channel_credentials(rootca.read(), clientkey.read(), clientcrt.read())
-                
-                if creds is not None:
-                    self.channel = grpc.secure_channel(grpc_addr, creds)
-                else:
-                    self.print_warning_message("Credentials error accessing certificate/key files", grpc_addr)
-                    self.channel = grpc.insecure_channel(grpc_addr)
-            except Exception as e:
-                raise e
-        else:
-            self.print_warning_message("Unable to locate TLS certificates", grpc_addr)
+        if grpc_insecure_mode is True:
+            # Attempt insecure channel only if user provides flag
             self.channel = grpc.insecure_channel(grpc_addr)
+        else:
+            root_ca_file_path = '/usr/share/stratum/certs/ca.crt'
+            client_key_file_path = '/usr/share/stratum/certs/client.key'
+            client_crt_file_path = '/usr/share/stratum/certs/client.crt'
+
+            rootca_exists = os.path.isfile(root_ca_file_path)
+            clientkey_exists = os.path.isfile(client_key_file_path)
+            clientcrt_exists = os.path.isfile(client_crt_file_path)
+
+            if rootca_exists and clientkey_exists and clientcrt_exists:
+                try:
+                    with open(root_ca_file_path, 'rb') as rootca:
+                        with open(client_key_file_path, 'rb') as clientkey:
+                            with open(client_crt_file_path, 'rb') as clientcrt:
+                                creds = grpc.ssl_channel_credentials(rootca.read(),
+                                                                     clientkey.read(),
+                                                                     clientcrt.read())
+
+                    if creds is not None:
+                        self.channel = grpc.secure_channel(grpc_addr, creds)
+                    else:
+                        print("Credentials error accessing certificate/key files")
+                except Exception as e:
+                    raise e
+            else:
+                print("Unable to locate TLS certificates")
 
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
         self.set_up_stream()
-
-    def print_warning_message(self, custom_text, grpc_insecure):
-        print("*** Warning: " + custom_text + " ***")
-        print("Attempting P4RT communication over insecure channel on port " + grpc_insecure + "...")
 
     def set_up_stream(self):
         self.stream_out_q = queue.Queue()
@@ -1753,8 +1758,10 @@ def main():
         sys.exit(1)
     parser = argparse.ArgumentParser(usage=USAGE)
     parser.add_argument('command', help='Subcommand to run')
+    parser.add_argument('--grpc_use_insecure_mode', action='store_true',
+                        help='grpc communication in insecure mode (must be final arg)')
 
-    args = parser.parse_args(sys.argv[1:2])
+    args, unknown = parser.parse_known_args()
     if args.command not in all_commands.keys():
         usage()
 
@@ -1763,7 +1770,13 @@ def main():
         # but first validate number of arguments
         validate_args(sys.argv, command=args.command,
                       expected_nr=all_commands[args.command][1])
-        all_commands[args.command][0](*sys.argv[2:])
+        # Update global var value
+        global grpc_insecure_mode
+        grpc_insecure_mode = args.grpc_use_insecure_mode
+        if args.grpc_use_insecure_mode is True:
+            all_commands[args.command][0](*sys.argv[2:-1])
+        else:
+            all_commands[args.command][0](*sys.argv[2:])
     except Exception as e:
         print("Error:", str(e))
         sys.exit(1)
