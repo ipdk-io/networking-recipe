@@ -329,7 +329,6 @@ void traverse_params(char** path, char* node_path, char* config_value,
 
   std::shared_ptr<::grpc::Channel> channel;
   if (FLAGS_grpc_use_insecure_mode) {
-    ::grpc::Status status;
     std::shared_ptr<::grpc::ChannelCredentials> channel_credentials =
       ::grpc::InsecureChannelCredentials();
     channel = ::grpc::CreateChannel(FLAGS_grpc_addr, channel_credentials);
