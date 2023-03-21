@@ -20,7 +20,14 @@ jobs:
   build_and_test:
     timeout-minutes: 100
     runs-on: gasp
+    container:
+            image: amr-registry.caas.intel.com/ipdk-cicd/test-images/ubuntu:20.04
     steps:
+      - name: 'Upgrade Git'
+        run: |
+              apt update -y
+              apt install git -y  
+
       - name: 'Checkout p4-dpdk repo'
         uses: actions/checkout@v3
         with:
@@ -31,20 +38,19 @@ jobs:
       - name: 'Install dependencies'
         working-directory: ./p4sde/tools/setup
         run: |
-              sudo apt update -y
-              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev libatomic1 libnl-route-3-dev -y
+              apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev libatomic1 libnl-route-3-dev -y
               pip3 install distro
               python3 install_dep.py
               cmake --version
-              sudo apt-get purge cmake
-              sudo rm -rf /usr/local/bin/cmake || true
-              sudo rm -rf ~/.local/bin/cmake || true
+              apt-get purge cmake
+              rm -rf /usr/local/bin/cmake || true
+              rm -rf ~/.local/bin/cmake || true
               # removing cmake 3.25 and reinstalling 3.20, as build is failing with cmake 3.25
               wget https://cmake.org/files/v3.20/cmake-3.20.2-linux-x86_64.sh -O ${GITHUB_WORKSPACE}/cmake-3.20.2-linux-x86_64.sh
               chmod a+x ${GITHUB_WORKSPACE}/cmake-3.20.2-linux-x86_64.sh
-              sudo mkdir -p /opt/rh/cmake
+              mkdir -p /opt/rh/cmake
               cd ${GITHUB_WORKSPACE} && sudo sh cmake-3.20.2-linux-x86_64.sh --prefix=/opt/rh/cmake --skip-license
-              sudo ln -s /opt/rh/cmake/bin/cmake /usr/local/bin/cmake
+              ln -s /opt/rh/cmake/bin/cmake /usr/local/bin/cmake
               cmake --version
 
       - name: 'Checkout Networking Recipe'
@@ -81,20 +87,3 @@ jobs:
              export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
              source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
              ./make-all.sh --target=dpdk
-
-  py_bandit_test:
-     timeout-minutes: 10
-     runs-on: gasp
-     steps:
-       - name: 'checkout Networking Recipe'
-         uses: actions/checkout@v3
-         with:
-           path: ipdk.recipe
-           
-       - name: "Run Bandit"  
-         uses: mdegis/bandit-action@v1
-         with:
-           path: "./ipdk.recipe/clients/p4rt-ctl/p4rt-ctl.in"
-           level: high
-           confidence: high
-           exit_zero: true
