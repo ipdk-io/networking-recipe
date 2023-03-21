@@ -661,17 +661,20 @@ class P4RuntimeClient:
 
             if rootca_exists and clientkey_exists and clientcrt_exists:
                 try:
-                    with open(root_ca_file_path, 'rb') as rootca:
-                        with open(client_key_file_path, 'rb') as clientkey:
-                            with open(client_crt_file_path, 'rb') as clientcrt:
-                                creds = grpc.ssl_channel_credentials(rootca.read(),
-                                                                     clientkey.read(),
-                                                                     clientcrt.read())
-
+                    rootca = open(root_ca_file_path, 'rb')
+                    clientkey = open(client_key_file_path, 'rb')
+                    clientcrt = open(client_crt_file_path, 'rb')
+                    creds = grpc.ssl_channel_credentials(rootca.read(),
+                                                         clientkey.read(),
+                                                         clientcrt.read())
                     if creds is not None:
                         self.channel = grpc.secure_channel(grpc_addr, creds)
                     else:
                         print("Credentials error accessing certificate/key files")
+
+                    rootca.close()
+                    clientkey.close()
+                    clientcrt.close()
                 except Exception as e:
                     raise e
             else:
@@ -680,6 +683,7 @@ class P4RuntimeClient:
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
         self.set_up_stream()
 
+    def 
     def set_up_stream(self):
         self.stream_out_q = queue.Queue()
         self.stream_in_q = queue.Queue()
