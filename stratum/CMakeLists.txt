@@ -304,6 +304,8 @@ elseif(ES2K_TARGET)
         ${STRATUM_TDI_LIB_DIR}/es2k/es2k_chassis_manager.h
         ${STRATUM_TDI_LIB_DIR}/es2k/es2k_hal.cc
         ${STRATUM_TDI_LIB_DIR}/es2k/es2k_hal.h
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_port_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_port_manager.h
         ${STRATUM_TDI_LIB_DIR}/es2k/es2k_sde_target.cc
         ${STRATUM_TDI_LIB_DIR}/es2k/es2k_sde_utils.cc
         ${STRATUM_TDI_LIB_DIR}/es2k/es2k_switch.cc
