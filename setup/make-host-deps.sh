@@ -42,12 +42,13 @@ print_help() {
     echo "  --minimal           Build required host dependencies only (Default: ${_SCOPE})"
     echo "  --no-download       Do not download repositories (Default: false)"
     echo "  --prefix=DIR    -P  Install directory path (Default: ${_PREFIX})"
+    echo "  --sudo              Use sudo when installing (Default: false)"
     echo ""
 }
 
 # Parse options
 SHORTOPTS=BPfhj:n
-LONGOPTS=build:,config,dry-run,force,full,help,jobs:,minimal,no-download,prefix:
+LONGOPTS=build:,config,dry-run,force,full,help,jobs:,minimal,no-download,prefix:,sudo
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
@@ -69,10 +70,6 @@ while true ; do
     --full)
         _SCOPE=full
         shift ;;
-    -P|--prefix)
-        echo "Install directory: $2"
-        _PREFIX=$2
-        shift 2 ;;
     -h|--help)
         print_help
         exit 99 ;;
@@ -85,6 +82,13 @@ while true ; do
     --no-download)
         _DOWNLOAD="-DDOWNLOAD=FALSE"
         shift ;;
+    -P|--prefix)
+        echo "Install directory: $2"
+        _PREFIX=$2
+        shift 2 ;;
+    --sudo)
+	_USE_SUDO="-DUSE_SUDO=TRUE"
+	shift ;;
     --)
         shift
         break ;;
@@ -102,10 +106,11 @@ fi
 if [ "${_DRY_RUN}" = "true" ]; then
     echo ""
     echo "Configure options:"
-    echo "  -DCMAKE_INSTALL_PREFIX=${_PREFIX}"
-    [ -n "${_DOWNLOAD}" ] && echo "  ${_DOWNLOAD}"
-    [ -n "${_FORCE_PATCH}" ] && echo "  ${_FORCE_PATCH}"
-    [ -n "${_ON_DEMAND}" ] && echo "  ${_ON_DEMAND}"
+    echo "  CMAKE_INSTALL_PREFIX=${_PREFIX}"
+    [ -n "${_DOWNLOAD}" ] && echo "  ${_DOWNLOAD:2}"
+    [ -n "${_FORCE_PATCH}" ] && echo "  ${_FORCE_PATCH:2}"
+    [ -n "${_ON_DEMAND}" ] && echo "  ${_ON_DEMAND:2}"
+    [ -n "${_USE_SUDO}" ] && echo "  ${_USE_SUDO:2}"
     echo ""
     if [ "${_CFG_ONLY}" = "true" ]; then
         echo "Configure only (${_SCOPE} build)"
@@ -124,7 +129,7 @@ rm -fr ${_BLD_DIR} ${_PREFIX}
 
 cmake -S . -B ${_BLD_DIR} \
     -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
-    ${_ON_DEMAND} ${_DOWNLOAD} ${_FORCE_PATCH}
+    ${_ON_DEMAND} ${_DOWNLOAD} ${_FORCE_PATCH} ${_USE_SUDO}
 
 if [ "${_CFG_ONLY}" = "false" ]; then
     cmake --build ${_BLD_DIR} -j${_NJOBS} ${_TARGET}

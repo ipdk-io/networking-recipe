@@ -26,7 +26,12 @@ option(DOWNLOAD     "Download repositories" TRUE)
 option(FORCE_PATCH  "Specify -f when patching" FALSE)
 option(ON_DEMAND    "Build targets on demand" FALSE)
 option(USE_LDCONFIG "Use ldconfig when installing" FALSE)
-option(USE_SUDO     "Use sudo when installing" TRUE)
+
+# Note: USE_SUDO should be DISABLED by default.
+# This is in keeping with the following security principles:
+# - Principle of Least Privilege
+# - Secure By Default
+option(USE_SUDO     "Use sudo when installing" FALSE)
 
 if(USE_SUDO)
   set(SUDO_CMD "sudo" "-E")

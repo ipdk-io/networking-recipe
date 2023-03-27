@@ -34,6 +34,7 @@ print_help() {
     echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
     echo "  --no-download        Do not download repositories (Default: false)"
     echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
+    echo "  --sudo               Use sudo when installing (Default: false)"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
     echo "* '//' at the beginning of the directory path will be replaced"
@@ -47,7 +48,7 @@ print_help() {
 
 # Parse options
 SHORTOPTS=B:P:T:hj:n
-LONGOPTS=build:,dry-run,force,jobs:,help,no-download,prefix:,toolchain:
+LONGOPTS=build:,dry-run,force,jobs:,help,no-download,prefix:,sudo,toolchain:
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
@@ -74,6 +75,9 @@ while true ; do
     -P|--prefix)
         _PREFIX=$2
         shift 2 ;;
+    --sudo)
+	_USE_SUDO="-DUSE_SUDO=TRUE"
+	shift ;;
     -T|--toolchain)
         _TOOLFILE=$2
         shift 2 ;;
@@ -96,6 +100,7 @@ if [ "${_DRY_RUN}" = "true" ]; then
     echo "JOBS=${_JOBS}"
     [ -n "${_DOWNLOAD}" ] && echo "${_DOWNLOAD:2}"
     [ -n "${_FORCE_PATCH}" ] && echo "${_FORCE_PATCH:2}"
+    [ -n "${_USE_SUDO}" ] && echo "${_USE_SUDO:2}"
     echo ""
     exit 0
 fi
@@ -105,6 +110,6 @@ rm -fr ${_BLD_DIR}
 cmake -S . -B ${_BLD_DIR} \
     -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
     -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE} \
-    ${_DOWNLOAD} ${_FORCE_PATCH}
+    ${_DOWNLOAD} ${_FORCE_PATCH} ${_USE_SUDO}
 
 cmake --build ${_BLD_DIR} -j${_JOBS}
