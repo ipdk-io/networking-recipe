@@ -683,7 +683,6 @@ class P4RuntimeClient:
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
         self.set_up_stream()
 
-    def 
     def set_up_stream(self):
         self.stream_out_q = queue.Queue()
         self.stream_in_q = queue.Queue()
