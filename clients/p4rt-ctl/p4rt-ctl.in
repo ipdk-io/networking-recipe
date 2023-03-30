@@ -651,37 +651,44 @@ class P4RuntimeClient:
             # Attempt insecure channel only if user provides flag
             self.channel = grpc.insecure_channel(grpc_addr)
         else:
-            root_ca_file_path = '/usr/share/stratum/certs/ca.crt'
-            client_key_file_path = '/usr/share/stratum/certs/client.key'
-            client_crt_file_path = '/usr/share/stratum/certs/client.crt'
-
-            rootca_exists = os.path.isfile(root_ca_file_path)
-            clientkey_exists = os.path.isfile(client_key_file_path)
-            clientcrt_exists = os.path.isfile(client_crt_file_path)
-
-            if rootca_exists and clientkey_exists and clientcrt_exists:
-                try:
-                    rootca = open(root_ca_file_path, 'rb')
-                    clientkey = open(client_key_file_path, 'rb')
-                    clientcrt = open(client_crt_file_path, 'rb')
-                    creds = grpc.ssl_channel_credentials(rootca.read(),
-                                                         clientkey.read(),
-                                                         clientcrt.read())
-                    if creds is not None:
-                        self.channel = grpc.secure_channel(grpc_addr, creds)
-                    else:
-                        print("Credentials error accessing certificate/key files")
-
-                    rootca.close()
-                    clientkey.close()
-                    clientcrt.close()
-                except Exception as e:
-                    raise e
+            creds = self.get_tls_channel_credentials()
+            if creds is not None:
+                self.channel = grpc.secure_channel(grpc_addr, creds)
             else:
-                print("Unable to locate TLS certificates")
+                print("Credentials error. Install TLS certificates or use insecure mode")
+                exit(1)
 
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
         self.set_up_stream()
+
+    def get_tls_channel_credentials(self):
+        root_ca_file_path = '/usr/share/stratum/certs/ca.crt'
+        client_key_file_path = '/usr/share/stratum/certs/client.key'
+        client_crt_file_path = '/usr/share/stratum/certs/client.crt'
+
+        rootca_exists = os.path.isfile(root_ca_file_path)
+        clientkey_exists = os.path.isfile(client_key_file_path)
+        clientcrt_exists = os.path.isfile(client_crt_file_path)
+
+        if rootca_exists and clientkey_exists and clientcrt_exists:
+            try:
+                rootca = open(root_ca_file_path, 'rb')
+                clientkey = open(client_key_file_path, 'rb')
+                clientcrt = open(client_crt_file_path, 'rb')
+                creds = grpc.ssl_channel_credentials(rootca.read(),
+                                                     clientkey.read(),
+                                                     clientcrt.read())
+                rootca.close()
+                clientkey.close()
+                clientcrt.close()
+
+                return creds
+
+            except Exception as e:
+                raise e
+        else:
+            print("Unable to locate TLS certificates")
+            return None
 
     def set_up_stream(self):
         self.stream_out_q = queue.Queue()
