@@ -18,7 +18,7 @@ is /usr/share/stratum/certs but can be overridden with a flag (details below).
 
 It is also possible to run this tool in an insecure mode. Communication can be
 established as long as the gNMI server also runs/supports insecure mode. To use
-insecure mode, use flag `--secure_mode=false`.
+insecure mode, use flag `--grpc_use_insecure_mode=true`.
 
 ### Usage
 
@@ -47,7 +47,7 @@ optional arguments:
   --ca-cert                CA certificate
   --client-cert            gRPC Client certificate
   --client-key             gRPC Client key
-  --secure_mode            Turn secure mode on/off (default: true)
+  --grpc_use_insecure_mode Insecure mode (default: false)
 ```
 
 ### Examples

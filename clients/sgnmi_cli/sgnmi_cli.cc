@@ -25,8 +25,8 @@
 
 #define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
-DEFINE_bool(secure_mode, true,
-              "grpc communication in secure mode");
+DEFINE_bool(grpc_use_insecure_mode, false,
+              "grpc communication in insecure mode");
 DEFINE_string(grpc_addr, stratum::kLocalStratumUrl, "gNMI server address");
 DEFINE_string(bool_val, "", "Boolean value to be set");
 DEFINE_string(int_val, "", "Integer value to be set (64-bit)");
@@ -88,7 +88,7 @@ optional arguments:
   --ca-cert                CA certificate
   --client-cert            gRPC Client certificate
   --client-key             gRPC Client key
-  --secure_mode            Turn secure mode on/off (default: true)
+  --grpc_use_insecure_mode Insecure mode (default: false)
 )USAGE";
 
 // Pipe file descriptors used to transfer signals from the handler to the cancel
@@ -271,7 +271,7 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
   });
 
   std::shared_ptr<::grpc::Channel> channel;
-  if (FLAGS_secure_mode) {
+  if (FLAGS_grpc_use_insecure_mode) {
     ASSIGN_OR_RETURN(auto credentials_manager,
                     CredentialsManager::CreateInstance(true));
     channel = ::grpc::CreateChannel(
