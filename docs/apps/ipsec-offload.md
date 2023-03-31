@@ -136,4 +136,4 @@ re-keying mechanism in IKE protocol.
 A gNMI subscription stream is opened from the gNMI client listening to these
 notification messages originating in the target. Upon receiving this
 notification, client will initiate the re-keying mechanism to refresh
-the encyrption keys.
+the encryption keys.
