@@ -278,6 +278,8 @@ if(TOFINO_TARGET)
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_chassis_manager.h
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.h
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_port_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_port_manager.h
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_target.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_utils.cc
         ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.cc
