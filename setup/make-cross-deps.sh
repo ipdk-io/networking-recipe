@@ -29,6 +29,7 @@ print_help() {
     echo ""
     echo "Options:"
     echo "  --build=DIR      -B  Build directory path [${_BLD_DIR}]"
+    echo "  --cxx=VERSION    -c  CXX_STANDARD to build dependencies (Default: empty)"
     echo "  --dry-run        -n  Display cmake parameters and exit"
     echo "  --force          -f  Specify -f when patching (Default: false)"
     echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
@@ -48,7 +49,7 @@ print_help() {
 
 # Parse options
 SHORTOPTS=B:P:T:hj:n
-LONGOPTS=build:,dry-run,force,jobs:,help,no-download,prefix:,sudo,toolchain:
+LONGOPTS=build:,cxx:,dry-run,force,jobs:,help,no-download,prefix:,sudo,toolchain:
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
@@ -56,6 +57,9 @@ while true ; do
     case "$1" in
     -B|--build)
         _BLD_DIR=$2
+        shift 2 ;;
+    --cxx)
+        _CXX_STANDARD_OPTION="-DCXX_STANDARD=$2"
         shift 2 ;;
     -h|--help)
         print_help
@@ -98,6 +102,7 @@ if [ "${_DRY_RUN}" = "true" ]; then
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
     echo "JOBS=${_JOBS}"
+    [ -n "${_CXX_STANDARD_OPTION}" ] && echo "${_CXX_STANDARD_OPTION:2}"
     [ -n "${_DOWNLOAD}" ] && echo "${_DOWNLOAD:2}"
     [ -n "${_FORCE_PATCH}" ] && echo "${_FORCE_PATCH:2}"
     [ -n "${_USE_SUDO}" ] && echo "${_USE_SUDO:2}"
@@ -110,6 +115,7 @@ rm -fr ${_BLD_DIR}
 cmake -S . -B ${_BLD_DIR} \
     -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
     -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE} \
+    ${_CXX_STANDARD_OPTION} \
     ${_DOWNLOAD} ${_FORCE_PATCH} ${_USE_SUDO}
 
 cmake --build ${_BLD_DIR} -j${_JOBS}
