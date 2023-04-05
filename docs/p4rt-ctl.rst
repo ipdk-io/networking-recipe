@@ -325,18 +325,3 @@ Known Issues
     does not give cumulative byte count.
 
     3) Runtime validation of ``value`` for each key in ``p4rt-ctl`` is not supported.
-
-
-Secure and insecure modes
--------------------------
-p4rt-ctl can be controlled to establish a gRPC connection either via secure mode
-using TLS certificates (default behavior), or via insecure mode.
-
-Note that the P4Runtime client and server should run in a matching state in order to
-successfully establish connection and communicate via gRPC.
-
-If insecure mode is required, user will need the `--grpc_use_insecure_mode`
-flag at the end of the command (note that this flag MUST be at end of the command).
-
-An example to set-pipe using insecure mode:
-    $ p4rt-ctl set-pipe br0 sample.pb.bin p4info.txt --grpc_use_insecure_mode
