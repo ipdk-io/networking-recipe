@@ -656,7 +656,7 @@ class P4RuntimeClient:
                     with open(client_key_file_path, 'rb') as clientkey:
                         with open(client_crt_file_path, 'rb') as clientcrt:
                             creds = grpc.ssl_channel_credentials(rootca.read(), clientkey.read(), clientcrt.read())
-                
+
                 if creds is not None:
                     self.channel = grpc.secure_channel(grpc_addr, creds)
                 else:
