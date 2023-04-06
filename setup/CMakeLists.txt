@@ -50,6 +50,14 @@ else()
   list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
 endif()
 
+##########################
+# Set CMAKE_CXX_STANDARD #
+#########################
+if(CXX_STANDARD)
+  set(version_ABSL_CXX_STANDARD -DABSL_CXX_STANDARD=${CXX_STANDARD})
+  set(version_CMAKE_CXX_STANDARD -DCMAKE_CXX_STANDARD=${CXX_STANDARD})
+endif()
+
 ###################
 # GetDownloadSpec #
 ###################
@@ -89,6 +97,8 @@ ExternalProject_Add(abseil-cpp
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
     -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
+    ${version_ABSL_CXX_STANDARD}
+    ${version_CMAKE_CXX_STANDARD}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
     -DCMAKE_INSTALL_RPATH=$ORIGIN
     -DBUILD_SHARED_LIBS=on
@@ -189,6 +199,7 @@ ExternalProject_Add(grpc
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
     -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
     -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
+    ${version_CMAKE_CXX_STANDARD}
     -DBUILD_SHARED_LIBS=on
     -DgRPC_ABSL_PROVIDER=package
     -DgRPC_PROTOBUF_PROVIDER=package

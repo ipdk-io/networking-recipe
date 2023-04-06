@@ -35,6 +35,7 @@ print_help() {
     echo "Options:"
     echo "  --build=DIR     -B  Build directory path (Default: ${_BLD_DIR})"
     echo "  --config            Only perform configuration step (Default: ${_CFG_ONLY})"
+    echo "  --cxx=VERSION   -C  CXX_STANDARD to build dependencies Default: empty)"
     echo "  --dry-run       -n  Display cmake parameters and exit (Default: false)"
     echo "  --force         -f  Specify -f when patching (Default: false)"
     echo "  --full              Build all dependency libraries (Default: ${_SCOPE})"
@@ -48,7 +49,7 @@ print_help() {
 
 # Parse options
 SHORTOPTS=BPfhj:n
-LONGOPTS=build:,config,dry-run,force,full,help,jobs:,minimal,no-download,prefix:,sudo
+LONGOPTS=build:,config,cxx:,dry-run,force,full,help,jobs:,minimal,no-download,prefix:,sudo
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
@@ -61,6 +62,9 @@ while true ; do
     --config)
         _CFG_ONLY=true
         shift ;;
+    --cxx)
+        _CXX_STANDARD_OPTION="-DCXX_STANDARD=$2"
+        shift 2 ;;
     -n|--dry-run)
         _DRY_RUN=true
         shift ;;
@@ -107,6 +111,7 @@ if [ "${_DRY_RUN}" = "true" ]; then
     echo ""
     echo "Configure options:"
     echo "  CMAKE_INSTALL_PREFIX=${_PREFIX}"
+    [ -n "${_CXX_STANDARD_OPTION}" ] && echo "  ${_CXX_STANDARD_OPTION:2}"
     [ -n "${_DOWNLOAD}" ] && echo "  ${_DOWNLOAD:2}"
     [ -n "${_FORCE_PATCH}" ] && echo "  ${_FORCE_PATCH:2}"
     [ -n "${_ON_DEMAND}" ] && echo "  ${_ON_DEMAND:2}"
@@ -129,6 +134,7 @@ rm -fr ${_BLD_DIR} ${_PREFIX}
 
 cmake -S . -B ${_BLD_DIR} \
     -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
+    ${_CXX_STANDARD_OPTION} \
     ${_ON_DEMAND} ${_DOWNLOAD} ${_FORCE_PATCH} ${_USE_SUDO}
 
 if [ "${_CFG_ONLY}" = "false" ]; then
