@@ -229,6 +229,8 @@ add_library(stratum_tdi_common_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_clone_session.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_common.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_counter.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_flags.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_flags.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_helpers.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_helpers.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_interface.h
