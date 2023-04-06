@@ -12,7 +12,7 @@
 
 _BLD_TYPE="RelWithDebInfo"
 _DEPS_DIR=${DEPEND_INSTALL}
-_HOST_DIR=${HOST_INSTALL:-setup/host-deps}
+_HOST_DIR=${HOST_INSTALL}
 _JOBS=8
 _OVS_DIR="${OVS_INSTALL:-ovs/install}"
 _PREFIX="install"
@@ -152,6 +152,9 @@ while true ; do
     -P|--prefix)
         _PREFIX=$2
         shift 2 ;;
+    --rpath)
+	_RPATH=ON
+	shift 1 ;;
     -S|--sde)
         _SDE_DIR=$2
         shift 2 ;;
