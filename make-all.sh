@@ -6,6 +6,9 @@
 # Sample script to configure and build the P4 Control Plane software.
 #
 
+# Abort on error.
+set -e
+
 ##################
 # Default values #
 ##################
@@ -146,9 +149,9 @@ while true ; do
     -H|--hostdeps)
         _HOST_DIR=$2
         shift 2 ;;
-    -O|--ovsdir)
+    -O|--ovs)
         _OVS_DIR=$2
-        shift ;;
+        shift 2 ;;
     -P|--prefix)
         _PREFIX=$2
         shift 2 ;;
@@ -244,9 +247,6 @@ fi
 ################
 # Do the build #
 ################
-
-# Abort on error.
-set -e
 
 # First build OVS
 if [ ${_WITH_OVS} -ne 0 ]; then
