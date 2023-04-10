@@ -130,11 +130,11 @@ build_recipe() {
 ######################
 
 SHORTOPTS=D:H:O:P:S:T:
-SHORTOPTS=${SHORTOPTS}hn
+SHORTOPTS=${SHORTOPTS}hj:n
 
 LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,target:,toolchain:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
-LONGOPTS=${LONGOPTS},dry-run,help,no-krnlmon,no-ovs,rpath,no-rpath
+LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs,rpath,no-rpath
 
 GETOPTS=`getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 eval set -- "${GETOPTS}"
