@@ -16,7 +16,9 @@ include(GNUInstallDirs)
 include(deps.cmake)
 
 # Define default CXX standard
-include(cxx_standard.cmake)
+if(NOT CMAKE_CROSSCOMPILING)
+  include(cxx_standard.cmake)
+endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24 AND
     ${CMAKE_VERSION} VERSION_LESS 3.26)
@@ -58,11 +60,13 @@ endif()
 # Set CMAKE_CXX_STANDARD #
 #########################
 if(CXX_STANDARD)
-  set(_CXX_CURRENT_STANDARD=${CXX_STANDARD})
+  set(_CXX_CURRENT_STANDARD ${CXX_STANDARD})
 endif()
 
-set(version_ABSL_CXX_STANDARD -DABSL_CXX_STANDARD=${_CXX_CURRENT_STANDARD})
-set(version_CMAKE_CXX_STANDARD -DCMAKE_CXX_STANDARD=${_CXX_CURRENT_STANDARD})
+if(DEFINED _CXX_CURRENT_STANDARD)
+  set(version_ABSL_CXX_STANDARD -DABSL_CXX_STANDARD=${_CXX_CURRENT_STANDARD})
+  set(version_CMAKE_CXX_STANDARD -DCMAKE_CXX_STANDARD=${_CXX_CURRENT_STANDARD})
+endif()
 
 ###################
 # GetDownloadSpec #
