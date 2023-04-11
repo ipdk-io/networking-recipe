@@ -15,10 +15,14 @@ include(GNUInstallDirs)
 # Define git repository tags and urls.
 include(deps.cmake)
 
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24)
+# Define default CXX standard
+include(cxx_standard.cmake)
+
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24 AND
+    ${CMAKE_VERSION} VERSION_LESS 3.26)
   message(STATUS "CMake version is ${CMAKE_VERSION}")
   message(STATUS "Protobuf build is broken in CMake 3.24.x and 3.25.x")
-  message(STATUS "Versions 3.16 through 3.22 are recommended")
+  message(STATUS "Versions 3.16 through 3.22 and 3.26.1 and above are recommended")
   message(FATAL_ERROR "Invalid CMake version")
 endif()
 
@@ -54,9 +58,11 @@ endif()
 # Set CMAKE_CXX_STANDARD #
 #########################
 if(CXX_STANDARD)
-  set(version_ABSL_CXX_STANDARD -DABSL_CXX_STANDARD=${CXX_STANDARD})
-  set(version_CMAKE_CXX_STANDARD -DCMAKE_CXX_STANDARD=${CXX_STANDARD})
+  set(_CXX_CURRENT_STANDARD=${CXX_STANDARD})
 endif()
+
+set(version_ABSL_CXX_STANDARD -DABSL_CXX_STANDARD=${_CXX_CURRENT_STANDARD})
+set(version_CMAKE_CXX_STANDARD -DCMAKE_CXX_STANDARD=${_CXX_CURRENT_STANDARD})
 
 ###################
 # GetDownloadSpec #
@@ -304,25 +310,6 @@ ExternalProject_Add(glog
 )
 if(ON_DEMAND)
   set_target_properties(glog PROPERTIES EXCLUDE_FROM_ALL TRUE)
-endif()
-
-#############
-# GMOCK_GBL #
-#############
-
-GetDownloadSpec(DOWNLOAD_GMOCK_GBL ${GMOCK_GBL_GIT_URL} ${GMOCK_GBL_GIT_TAG})
-
-ExternalProject_Add(gmock-gbl
-  ${DOWNLOAD_GMOCK_GBL}
-
-  SOURCE_DIR
-    ${CMAKE_SOURCE_DIR}/gmock-gbl
-  CMAKE_ARGS
-    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-)
-if(ON_DEMAND)
-  set_target_properties(gmock-gbl PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
 #########
