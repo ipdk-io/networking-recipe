@@ -31,11 +31,6 @@ if(WITH_KRNLMON)
     target_include_directories(infrap4d PRIVATE ${KRNLMON_SOURCE_DIR})
 endif()
 
-if (RTE_FLOW_SHIM)
-    target_compile_definitions(infrap4d PRIVATE RTE_FLOW_SHIM)
-    target_include_directories(infrap4d PRIVATE ${SDE_INSTALL_DIR}/include)
-endif()
-
 target_link_libraries(infrap4d PRIVATE
     -Wl,--whole-archive
     stratum_static

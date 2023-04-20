@@ -69,30 +69,6 @@ function(_define_es2k_driver _LIBS _DIRS)
                           IMPORTED_LOCATION
                           ${LIBVFIO} IMPORTED_NO_SONAME ON)
 
-
-    # rte_flow_shim valid only for ES2K_TARGET
-    if (RTE_FLOW_SHIM)
-        # rte_flow_shim
-        find_library(LIBRTE_FLOW_SHIM rte_flow_shim REQUIRED)
-        add_library(rte_flow_shim SHARED IMPORTED)
-        set_target_properties(rte_flow_shim
-		PROPERTIES IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM})
-
-        # cmdline lib
-        find_library(LIBRTE_CMDLINE rte_cmdline REQUIRED)
-        add_library(rte_cmdline SHARED IMPORTED)
-        set_target_properties(rte_cmdline
-		PROPERTIES IMPORTED_LOCATION ${LIBRTE_CMDLINE})
-
-        # rte_flow_shim_cli
-        find_library(LIBRTE_FLOW_SHIM_CLI rte_flow_api_cli REQUIRED)
-        add_library(rte_flow_api_cli SHARED IMPORTED)
-        set_target_properties(rte_flow_api_cli
-		PROPERTIES IMPORTED_LOCATION ${LIBRTE_FLOW_SHIM_CLI})
-	
-
-     endif()
-
     #############
     # Variables #
     #############
@@ -110,14 +86,6 @@ function(_define_es2k_driver _LIBS _DIRS)
         cpf_pmd_infra
         rte_net_idpf
     )
-
-    if (RTE_FLOW_SHIM)
-         list(APPEND _libs
-            rte_flow_shim
-            rte_cmdline
-            rte_flow_api_cli
-         )
-    endif()
 
     set(${_LIBS} ${_libs} PARENT_SCOPE)
 

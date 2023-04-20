@@ -43,7 +43,6 @@ print_help() {
     echo "  --no-krnlmon         Exclude Kernel Monitor"
     echo "  --no-ovs             Exclude OVS support"
     echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
-    echo "  --rfs-enable         Enable rte_flow_shim(experimental)"
     echo "  --sde=DIR*       -S  SDE install directory [${_SDE_DIR}]"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
@@ -91,9 +90,6 @@ while true ; do
     --no-ovs)
         _WITH_OVSP4RT=FALSE
         shift 1 ;;
-    --rfs-enable)
-        _RTE_FLOW_SHIM=TRUE
-	shift 1 ;;
     -O|--ovs)
         _OVS_DIR=$2
         shift 2 ;;
@@ -127,9 +123,6 @@ done
 [ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON=-DWITH_KRNLMON=${_WITH_KRNLMON}
 [ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT=-DWITH_OVSP4RT=${_WITH_OVSP4RT}
 
-# Exand RTE_FLOW_SHIM if not empty
-[ -n "${_RTE_FLOW_SHIM}" ] && _RTE_FLOW_SHIM=-DRTE_FLOW_SHIM=${_RTE_FLOW_SHIM}
-
 if [ "${_DRY_RUN}" = "true" ]; then
     echo ""
     echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
@@ -141,7 +134,6 @@ if [ "${_DRY_RUN}" = "true" ]; then
     echo "SDE_INSTALL_DIR=${_SDE_DIR}"
     [ -n "${_WITH_KRNLMON}" ] && echo "${_WITH_KRNLMON:2}"
     [ -n "${_WITH_OVSP4RT}" ] && echo "${_WITH_OVSP4RT:2}"
-    [ -n "${_RTE_FLOW_SHIM}" ] && echo "${_RTE_FLOW_SHIM:2}"
     echo ""
     exit 0
 fi
@@ -157,6 +149,5 @@ cmake -S . -B ${_BLD_DIR} \
     -DOVS_INSTALL_DIR=${_OVS_DIR} \
     -DSDE_INSTALL_DIR=${_SDE_DIR} \
     ${_WITH_KRNLMON} ${_WITH_OVSP4RT} \
-    ${_RTE_FLOW_SHIM} \
     -DSET_RPATH=TRUE \
     -DES2K_TARGET=ON
