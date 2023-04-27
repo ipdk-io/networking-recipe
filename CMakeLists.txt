@@ -20,6 +20,7 @@ project(networking-recipe VERSION 23.01 LANGUAGES C CXX)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 include(CMakePrintHelpers)
+include(CTest)
 include(FindPkgConfig)
 include(GNUInstallDirs)
 

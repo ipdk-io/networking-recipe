@@ -130,3 +130,5 @@ if(CMAKE_CROSS_COMPILING)
 else()
     _define_es2k_driver(ES2K_SDK_LIBS ES2K_SDK_DIRS)
 endif()
+
+set(DRIVER_SDK_DIRS ${ES2K_SDK_DIRS})
