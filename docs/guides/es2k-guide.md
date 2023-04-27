@@ -1,18 +1,11 @@
-# Building IPDK networking recipe for ES2K target
+# ES2K Setup Guide for P4 Control Plane
 
 ## Overview
 
-This document describes how to build and run IPDK networking recipe on ES2K target.
+This document explains how to install, build, and run P4 Control Plane
+for the ES2K target.
 
 ## Setup
-
-### Build P4 SDE for ES2K
-
-```bash
-git clone https://github.com/intel-innersource/networking.ethernet.acceleration.vswitch.p4-sde.p4-driver.git -b main --recursive p4-driver
-```
-
-For build instructions, refer to [P4 SDE Readme](https://github.com/intel-innersource/networking.ethernet.acceleration.vswitch.p4-sde.p4-driver/blob/main/README#building-and-installing)
 
 ### Install basic utilities
 
@@ -22,10 +15,15 @@ For Ubuntu distro: apt install libatomic1 libnl-route-3-dev libssl-dev
 pip3 install -r requirements.txt
 ```
 
+### Install P4 SDE
+
+Obtain a copy of the SDE for the Intel ES2000 IPU and install it on your
+development system. A common install location is '/opt/p4/p4sde`.
+
 ### Build and install infrap4d dependencies
 
 ```bash
-git clone --recursive https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.networking-recipe.git ipdk.recipe
+git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
 cd ipdk.recipe
 export IPDK_RECIPE=`pwd`
 cd $IPDK_RECIPE/setup
@@ -36,7 +34,7 @@ cmake --build build [-j<njobs>]
 *Note*: If running as non-root user, provide `-DUSE_SUDO=ON` option to cmake
 config.
 
-### Build Networking Recipe
+### Build P4 Control Plane
 
 #### Set environment variables
 
@@ -54,13 +52,13 @@ cd $IPDK_RECIPE
 ./make-all.sh --target=es2k
 ```
 
-*Note*: By default, make-all.sh will create the `install` directory under the
+*Note*: By default, `make-all.sh` will create an `install` directory under the
 networking recipe. User can specify a different directory using `--prefix`
 option to make-all.sh. The following examples assume default `install`
 directory for the executables. If not, user will need to specify the
 appropriate path instead of ./install.
 
-### Run Networking recipe
+### Run Infrap4d
 
 #### Set up the environment required by infrap4d
 
@@ -91,10 +89,13 @@ alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SD
 cd $IPDK_RECIPE
 sudo ./install/sbin/infrap4d
 ```
- *Note*: By default, infrap4d runs in detached mode. If user wants to run infrap4d in attached mode, use --nodetach option.
-All infrap4d logs are by default logged under /var/log/stratum.
-All P4SDE logs are logged in p4_driver.log under $IPDK_RECIPE.
-All OVS logs are logged under /tmp/ovs-vswitchd.log.
+
+*Note*: By default, infrap4d runs in detached mode. If you want to run in
+attached mode, specify the --nodetach command-line option.
+
+- All infrap4d logs are by default logged under `/var/log/stratum`.
+- All P4SDE logs are logged in `p4_driver.log` under `$IPDK_RECIPE`.
+*-All OVS logs are logged under `/tmp/ovs-vswitchd.log`.
 
 ### Run a sample program
 
@@ -109,8 +110,10 @@ alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SD
 
 #### Create IPDF netdevs
 
-After installing ATE Kernel on HOST machine, install the following drivers to bind the network devices (netdevs) to the ES2000 target.
-```
+After installing ATE Kernel on HOST machine, install the following drivers
+to bind the network devices (netdevs) to the ES2000 target.
+
+```bash
 modprobe idpf
 modprobe auxiliary
 modprobe iecm
@@ -121,10 +124,8 @@ modprobe iavf
 
 - P4 programs are available in the P4 SDE repository.
 
-- Install p4c compiler from
-  [p4c](https://github.com/intel-innersource/networking.ipu.software.p4-compiler.p4c.git) repository
-  and follow the readme for procedure. Alternatively, refer to
-  [p4c script](https://github.com/intel-innersource/networking.ipu.software.p4-compiler.p4c/blob/master/README_Compiler_Build_Procedure.md)
+- Obtain a copy of the P4 Compiler for ES2K and install it on your
+  development system.
 
 - Set the environment variable OUTPUT_DIR to the location where artifacts
   should be generated and where p4 files are available
@@ -143,21 +144,22 @@ p4c-pna-xxp -I/usr/lib -I/usr/share/p4c/p4include -I/usr/share/p4c/idpf-lib \
             --bfrt $OUTPUT_DIR/simple_l3_l4_pna.bfrt.json
 ```
 
-*Note*: The above commands will generate three files (simple_l3_l4_pna.p4info.txt,
-simple_l3_l4_pna.bfrt.json and simple_l3_l4_pna.context.json).
+*Note*: The above commands will generate three files
+(`simple_l3_l4_pna.p4info.txt`, `simple_l3_l4_pna.bfrt.json`, and
+`simple_l3_l4_pna.context.json`).
 
-- Modify simple_l3_l4_pna.conf file to provide correct paths for bfrt-config, context,
-  and config.
+- Modify `simple_l3_l4_pna.conf` to specify the correct paths for
+  bfrt-config, context, and config.
 
-- Create a dummy tofino.bin file, which is needed by tdi_pipeline_builder
+- Create a dummy tofino.bin file, which is needed by tdi_pipeline_builder.
 
-```
+```bask
 touch tofino.bin
 ```
 
-- TDI pipeline builder combines the artifacts generated by p4c compiler to
-  generate a single bin file to be pushed from the controller.
-  Generate binary executable using tdi-pipeline builder command below:
+- TDI pipeline builder combines the artifacts generated by the p4c compiler
+  to generate a single bin file to be pushed from the controller.
+  Generate binary executable using the TDI pipeline builder command below:
 
 ```bash
 ./install/bin/tdi_pipeline_builder \
@@ -173,20 +175,24 @@ sudo ./install/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3_l4_pna.pb.bin $OU
 
 #### Configure forwarding rule to receive traffic
 
-Add a forwarding rule to receive traffic on VSI-1 (base offset 16 + VSI ID 1) when the key matches.
+Add a forwarding rule to receive traffic on VSI-1 (base offset 16 + VSI ID 1) \
+when the key matches.
 
 ```bash
 sudo  ./install/bin/p4rt-ctl add-entry br0 MainControlImpl.l3_l4_match_rx \
-                             "hdrs.ipv4[vmeta.common.depth].protocol=0x11,vmeta.common.port_id=0,istd.direction=0,
-                              hdrs.ipv4[vmeta.common.depth].src_ip="192.168.1.10",hdrs.ipv4[vmeta.common.depth].dst_ip="192.168.1.20",
-                              hdrs.udp[vmeta.common.depth].sport=1000,hdrs.udp[vmeta.common.depth].dport=2000,action=MainControlImpl.send(17)"
+    "hdrs.ipv4[vmeta.common.depth].protocol=0x11,vmeta.common.port_id=0,istd.direction=0,
+    hdrs.ipv4[vmeta.common.depth].src_ip="192.168.1.10",hdrs.ipv4[vmeta.common.depth].dst_ip="192.168.1.20",
+    hdrs.udp[vmeta.common.depth].sport=1000,hdrs.udp[vmeta.common.depth].dport=2000,action=MainControlImpl.send(17)"
 ```
 
- *Note*: See [p4rt-ctl Readme](https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.networking-recipe/blob/main/docs/p4rt-ctl.rst) for more information on p4rt-ctl utility.
+ *Note*: See [p4rt-ctl Readme](../clients/p4rt-ctl.rst) for more information
+ on the `p4rt-ctl` utility.
 
 #### Test traffic from link partner to ES2000
 
-Send packet from physical port of link partner to ES2000 using any traffic generator application and listen on netdev corresponding to VSI-1 using `tcpdump`.
+Send a packet from a physical port of link partner to the ES2000 using any
+traffic generator application, and listen on the netdev corresponding to VSI-1
+using `tcpdump`.
 
 ```text
 sendp(Ether(dst="6e:80:97:ae:1e:4e", src="00:00:00:09:03:14")/IP(src="192.168.1.10", dst="192.168.1.20")/UDP(sport=1000, dport=2000)/Raw(load="0"*50), iface='ens78f0')

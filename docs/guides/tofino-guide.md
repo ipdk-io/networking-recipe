@@ -1,8 +1,12 @@
-# IPDK Networking Recipe for Tofino
+# Tofino Setup Guide for P4 Control Plane
 
 ## Overview
 
-This document describes how to build and run IPDK on Tofino HW. Similar steps apply when run on Tofino simulation model. Please refer to Tofino specific documentation for more details.
+This document explains how to install, build, and run the P4 Control Plane
+software on Tofino hardware.
+
+Similar steps apply when running on the Tofino simulation model. Please see
+Tofino-specific documentation for more details.
 
 ## Requirements
 
@@ -38,7 +42,9 @@ git clone --recursive git@github.com:ipdk-io/networking-recipe.git ipdk.recipe
 
 ### Intel P4Studio
 
-Get Intel P4Studio SDE. The untarred directory is henceforth referred to as **sde**. If using an Intel Tofino Reference platform, please also download the BSP package.
+Get Intel P4Studio SDE. The untarred directory is henceforth referred to as
+**sde**. If using an Intel Tofino Reference platform, please also download
+the BSP package.
 
 ```bash
 tar xvf bf-sde-9.11.0-cpr.tgz
@@ -72,7 +78,8 @@ ldconfig
 
 ### Build Intel P4Studio SDE
 
-The below steps are minimal. For a more detailed installation procedure, please refer to the Intel P4Studio SDE Installation Guide.
+The below steps are minimal. For a more detailed installation procedure,
+please refer to the Intel P4Studio SDE Installation Guide.
 
 ```bash
 cd sde/p4studio
@@ -81,7 +88,10 @@ cd ..
 export SDE_INSTALL=sde/install
 ```
 
-> Note: To test with tofino-model, please edit profiles/ipdk.yaml file and change the **asic** configuration from true -> false. Additionally, a bsp-path would also not be required for tofino-model.
+> Note: To test with tofino-model, edit the `profiles/ipdk.yaml` file and
+change the `asic` configuration from `true` to `false`.
+
+Not that `bsp-path` is not required for tofino-model.
 
 ### Build Networking Recipe
 
@@ -111,11 +121,14 @@ LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib \
 
 Following are optional steps to perform set forwarding pipeline.
 
-The following steps describe generating a p4info and pipeline configuration required to perform a set forwarding pipeline from a controller.
+The following steps describe generating a p4info and pipeline configuration
+required to perform a set forwarding pipeline from a controller.
 
-Tofino only supports the TNA architecture. The bf-p4c compiler can still generate PSA compatible P4info files.
+Tofino only supports the TNA architecture. The bf-p4c compiler can still
+generate PSA compatible P4info files.
 
-The tna_exact_match P4 example is used to describe these steps. The same steps will apply for any TNA program.
+The tna_exact_match P4 example is used to describe these steps. The same
+steps will apply for any TNA program.
 
 ```bash
 cd sde/build
@@ -123,7 +136,9 @@ make tna_exact_match
 make install
 ```
 
-The above commands will generate 4 files. The last 3 files are combined together by the TDI pipeline builder to generate a single bin file to be pushed from the controller.
+The above commands will generate 4 files. The last three files are combined
+together by the TDI pipeline builder to generate a single bin file to be
+pushed by the controller.
 
 These files can be found in install/share/tofinopd/tna_exact_match/ directory.
 
@@ -132,7 +147,8 @@ These files can be found in install/share/tofinopd/tna_exact_match/ directory.
 - context.json
 - bf-rt.json
 
-A conf file is also generated. This file holds the location of the above files relative to SDE_INSTALL.
+A conf file is also generated. This file holds the location of the above
+files relative to SDE_INSTALL.
 
 ### Using tdi_pipeline_builder
 

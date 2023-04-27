@@ -1,20 +1,27 @@
-# IPDK Networking Recipe (P4 Control Plane)
+# P4 Control Plane
 
 ## Overview
 
-The IPDK Networking Recipe (originally P4-OVS Split Architecture)
-modularizes P4-OVS and reduces coupling between its components, making the
-code easier to maintain and more suitable for upstreaming. It moves the
-P4-specific components of the integrated architecture of P4-OVS to a separate
-process called infrap4d.
+P4 Control Plane (formerly P4-OVS Split Architecture) modularizes P4-OVS
+and reduces coupling between its components, making the code easier to maintain
+and more suitable for upstreaming. It moves the P4-specific components of the
+architecture to a separate process called `infrap4d`.
 
-![Networking Recipe Architecture](docs/images/networking-recipe-architecture.png)
+![P4 Control Plane Architecture](docs/images/p4-control-plane-architecture.png)
 
-## infrap4d
+## Open vSwitch (OvS)
+
+Open vSwitch is an open-source multi-layer software virtual switch that is
+well-suited to bridging traffic across virtual machines and providing
+connections to the outside world. P4 Control Plane incorporates an optional
+component (`ovs-p4rt`) that allows OVS to communicate with the P4Runtime
+Server in Infrap4d via gRPC.
+
+## Infrap4d
 
 Infrap4d integrates Stratum, the Kernel Monitor (krnlmon), Switch Abstraction
 Interface (SAI), Table Driven Interface (TDI), and a P4 target driver into a
-separate process (daemon).
+single process (daemon).
 
 ![Infrap4d Architecture](docs/images/infrap4d-architecture.png)
 
@@ -43,9 +50,9 @@ target-specific driver through the TDI front-end interface.
 
 The Kernel Monitor receives RFC 3549 messages from the Linux Kernel over a
 Netlink socket when changes are made to the kernel networking data structures.
-It listens for network events (link, address, neighbor, route, tunnel, etc.)
-and issues calls to update the P4 tables via SAI and TDI. The kernel monitor
-is an optional component of infrap4d.
+It listens for network events (link, address, neighbor, route) and issues
+calls to update the P4 tables via SAI and TDI. The kernel monitor is an
+optional component of infrap4d.
 
 ## Switch Abstraction Interface (SAI)
 
@@ -66,21 +73,37 @@ network devices.
 
 ## Clients
 
-1. `ovs-p4rt`: A library (C++ with a C interface) that allows ovs-vswitchd
-   and ovsdb-server to communicate with the P4Runtime Server in infrap4d
-   via gRPC. It is used to program (insert/modify/delete) P4 forwarding
-   tables in the pipeline.
+### ovs-p4rt
 
-2. `p4rt-ctl`: A Python-based P4Runtime client which talks to the P4Runtime
-   Server in infrap4d via gRPC, to program the P4 pipeline and insert/delete
-   P4 table entries.
+A library (C++ with a C interface) that allows ovs-vswitchd and ovsdb-server
+to communicate with the P4Runtime Server in Infrap4d via gRPC. It is used to
+program (insert/modify/delete) P4 forwarding tables in the pipeline.
 
-3. `gnmi-ctl`: A gRPC-based C++ network management interface client to handle
-   port configurations and program fixed functions in the P4 pipeline.
+### p4rt-ctl
+
+A P4Runtime command-line client that talks to the P4Runtime Server in
+Infrap4d via gRPC. It is used to program the P4 pipeline and insert/delete
+P4 table entries.
+
+### gnmi_cli
+
+A gNMI command-line client tool that can be used for testing and sending
+messages to a gNMI server (such as Infrap4d). Part of Stratum.
+
+### sgnmi_cli
+
+A version of `gnmi_cli` that is secure by default. It uses TLS certificates
+to communicate securely with the server.
+
+### gnmi-ctl
+
+A derivative of `gnmi_cli` that was introduced in P4-OVS and continues to
+be part of the DPDK target build. `gnmi-ctl` is being phased out in favor of
+`gnmi_cli` and `sgnmi_cli`.
 
 ## Download
 
-To download the source code for the Networking Recipe:
+To download the source code for P4 Control Plane:
 
 ```bash
 git clone --recursive https://github.com/ipdk-io/networking-recipe
@@ -94,42 +117,6 @@ build, and use a particular target.
 
 | Target | Instructions |
 | ------ | ------------ |
-| dpdk   | [IPDK Networking Recipe for DPDK](https://github.com/ipdk-io/networking-recipe/blob/main/docs/ipdk-dpdk.md) |
-| tofino | [IPDK Networking Recipe for Tofino](https://github.com/ipdk-io/networking-recipe/blob/main/docs/ipdk-tofino.md) |
-
-## make-all.sh
-
-The `make-all.sh` script provides a convenient way to build the
-Networking Recipe for a specific target.
-
-```bash
-./make-all.sh [--ovs] -target <target>
-```
-
-### General options
-
-| Parameter | Value | Description |
-| --------- | ----- | ----------- |
-| `--prefix` |  _path_ | Path to the directory in which build artifacts should be installed. Sets the  `CMAKE_INSTALL_DIR` CMake variable. Default value is `./install`. |
-| `--sde-install` | _path_ | Path to install directory for the target driver (SDE). Sets the `SDE_INSTALL_DIR` CMake variable. Defaults to the value of the `SDE_INSTALL` environment variable. |
-| `--target` | _target_ | Target to build for (`dpdk` or `tofino`). Sets the `DPDK_TARGET` or `TOFINO_TARGET` CMake variable. Currently defaults to `tofino`. |
-
-Parameter names may be abbreviated to any shorter form as long as it is unique.
-
-### Developer options
-
-| Parameter | Value | Description |
-| --------- | ----- | ----------- |
-| `--clean` | | Remove main _build_ and _install_ directories, then build. |
-| `--debug` | | Build with debug configuration. |
-| `--dep-install` | _path_ | Path to an optional install directory for dependency libraries. Sets the `DEPEND_INSTALL_DIR` CMake variable. Defaults to the value of the `DEPEND_INSTALL` environment variable. |
-| `--develop` | | Create separate build and install trees for OVS (`ovs/build` and `ovs/install`). The `--clean` option does not remove these directories. This allows you to do a clean build of the non-OVS code without having to rebuild OVS. |
-| `--no-ovs` | Disable support for Open vSwitch (OvS). |
-| `--ovs` | | Enable support for Open vSwitch (OvS). |
-
-These options are primarily of interest to developers working on the recipe.
-
-## Note
-
-The build files, CMake variables, environment variables, and `make-all`
-script are under active development and are expected to change.
+| dpdk   | [DPDK Setup Guide](docs/guides/dpdk-guide.md) |
+| es2k   | [ES2K Setup Guide](docs/guides/es2k-guide.md) |
+| tofino | [Tofino Setup Guide](docs/guides/tofino-guide.md) |
