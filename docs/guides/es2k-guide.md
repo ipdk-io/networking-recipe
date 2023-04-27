@@ -17,7 +17,7 @@ pip3 install -r requirements.txt
 
 ### Install P4 SDE
 
-Obtain a copy of the SDE for the Intel ES2000 IPU and install it on your
+Obtain a copy of the SDE for the Intel ES2100 IPU and install it on your
 development system. A common install location is '/opt/p4/p4sde`.
 
 ### Build and install infrap4d dependencies
@@ -111,12 +111,11 @@ alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SD
 #### Create IPDF netdevs
 
 After installing ATE Kernel on HOST machine, install the following drivers
-to bind the network devices (netdevs) to the ES2000 target.
+to bind the network devices (netdevs) to the ES2100 target.
 
 ```bash
 modprobe idpf
 modprobe auxiliary
-modprobe iecm
 modprobe iavf
 ```
 
@@ -188,9 +187,9 @@ sudo  ./install/bin/p4rt-ctl add-entry br0 MainControlImpl.l3_l4_match_rx \
  *Note*: See [p4rt-ctl Readme](../clients/p4rt-ctl.rst) for more information
  on the `p4rt-ctl` utility.
 
-#### Test traffic from link partner to ES2000
+#### Test traffic from link partner to ES2100
 
-Send a packet from a physical port of link partner to the ES2000 using any
+Send a packet from a physical port of link partner to the ES2100 using any
 traffic generator application, and listen on the netdev corresponding to VSI-1
 using `tcpdump`.
 

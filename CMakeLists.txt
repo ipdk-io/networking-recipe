@@ -56,7 +56,7 @@ file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
 option(DPDK_TARGET      "Build for DPDK target" OFF)
 option(TOFINO_TARGET    "Build for Tofino target" OFF)
-option(ES2K_TARGET      "Build for ES2000 target" OFF)
+option(ES2K_TARGET      "Build for ES2100 target" OFF)
 
 # Translate target option to TARGETFLAG string.
 # - Use precedence to deal with multiple selections.

@@ -1,4 +1,4 @@
-# Definitions for the ES2000 P4 driver package.
+# Definitions for the ES2100 P4 driver package.
 #
 # Copyright 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
