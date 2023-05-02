@@ -20,13 +20,13 @@
 """
 p4rt-ctl utility controls P4 bridges.
 """
-
 import argparse
 import codecs
-import sys
 import grpc
+import ipaddress
 import logging
 import math
+import netaddr
 import os
 import queue
 import random
@@ -34,6 +34,7 @@ import re
 import socket
 import string
 import struct
+import sys
 import threading
 import time
 from functools import wraps
@@ -225,10 +226,17 @@ def encodeIPv4_base10(ip_addr_string):
 def decodeIPv4(encoded_ip_addr):
     return socket.inet_ntoa(encoded_ip_addr)
 
+def matchesIPv6(ipv6_str):
+    return netaddr.valid_ipv6(ipv6_str)
+
+def encodeIPv6(ipv6_str):
+    return socket.inet_pton(socket.AF_INET6,ipv6_str)
+
+def decodeIPv6(encoded_ip_addr):
+    return socket.inet_ntop(encoded_ip_addr)
 
 def bitwidthToBytes(bitwidth):
     return int(math.ceil(bitwidth / 8.0))
-
 
 def encodeNum(number, bitwidth):
     byte_len = bitwidthToBytes(bitwidth)
@@ -259,6 +267,8 @@ def encode(x, bitwidth):
             encoded_bytes = encodeMac(x)
         elif matchesIPv4(x):
             encoded_bytes = encodeIPv4(x)
+        elif matchesIPv6(x):
+            encoded_bytes = encodeIPv6(x)
         elif str.isdigit(x):
             encoded_bytes = encodeNum(int(x), bitwidth)
         elif is_hex_str(x):
@@ -372,6 +382,7 @@ class P4InfoHelper(object):
         p4runtime_match = p4runtime_pb2.FieldMatch()
         p4runtime_match.field_id = p4info_match.id
         match_type = p4info_match.match_type
+
         if match_type == p4info_pb2.MatchField.EXACT:
             exact = p4runtime_match.exact
             exact.value = encode(value, bitwidth)
@@ -517,8 +528,9 @@ class P4InfoHelper(object):
             # A table can contain more than one match filed and in such cases
             # if one match_type has ternary and other filed is of any type
             # it is considered as ternary match_type.
-            # In these cases we expect priority filed from the user.
+            # In these cases we expect priority field from the user.
             p4info_match = self.get_match_field(table_name, mfn)
+
             if p4info_match.match_type == p4info_pb2.MatchField.TERNARY:
                 one_match_type_is_ternary = True
                 # If match_type is ternary, then priority field is expected
@@ -528,11 +540,9 @@ class P4InfoHelper(object):
 
         if priority is not None and one_match_type_is_ternary:
             table_entry.priority = int(priority)
-
         if match_fields:
             table_entry.match.extend([
-                self.get_match_field_pb(table_name, match_field_name, value)
-                for match_field_name, value in match_fields.items()
+                self.get_match_field_pb(table_name, mfn, value)
             ])
 
         if default_action:
@@ -899,14 +909,17 @@ def parse_action(action):
     MAC - String, Hex or Decimal
     Other - Hex Or Decimal
     """
+
     act_fields = action.split('(')
     action_name = act_fields[0]
     if (len(act_fields) > 1):
+
         params = act_fields[1].split(')')[0]
         act_data = params.split(',')
         act_data = [encodeIPv4_base10(a) if matchesIPv4(a) else
+            (int.from_bytes(encodeIPv6(a), "big") if matchesIPv6(a) else
             (int.from_bytes(encodeMac(a), "big") if matchesMac(a) else
-            (int(a, 0) if a.find("0x") != -1 else int(a)))
+            (int(a, 0) if a.find("0x") != -1 else int(a))))
             for a in act_data]
     else:
         act_data = ['']
