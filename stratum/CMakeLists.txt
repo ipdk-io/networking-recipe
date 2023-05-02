@@ -345,13 +345,13 @@ elseif(DPDK_TARGET)
     # DPDK files
     target_sources(stratum_main_o PRIVATE
         ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.cc
-        ${STRATUM_TDI_BIN_DIR}/tdi_main.h
+        ${STRATUM_TDI_BIN_DIR}/main.h
     )
 elseif(ES2K_TARGET)
     # ES2K files
     target_sources(stratum_main_o PRIVATE
         ${STRATUM_TDI_BIN_DIR}/es2k/es2k_main.cc
-        ${STRATUM_TDI_BIN_DIR}/tdi_main.h
+        ${STRATUM_TDI_BIN_DIR}/main.h
     )
 endif()
 

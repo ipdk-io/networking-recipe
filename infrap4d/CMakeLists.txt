@@ -23,7 +23,7 @@ elseif(TOFINO_TARGET)
 endif()
 
 if(NOT TOFINO_TARGET)
-    target_sources(infrap4d PRIVATE ${STRATUM_TDI_BIN_DIR}/tdi_main.h)
+    target_sources(infrap4d PRIVATE ${STRATUM_TDI_BIN_DIR}/main.h)
 endif()
 
 target_include_directories(infrap4d PRIVATE ${STRATUM_SOURCE_DIR})
