@@ -20,14 +20,13 @@
 """
 p4rt-ctl utility controls P4 bridges.
 """
-import ipaddress
-import netaddr
 import argparse
 import codecs
-import sys
 import grpc
+import ipaddress
 import logging
 import math
+import netaddr
 import os
 import queue
 import random
@@ -35,6 +34,7 @@ import re
 import socket
 import string
 import struct
+import sys
 import threading
 import time
 from functools import wraps
@@ -528,7 +528,7 @@ class P4InfoHelper(object):
             # A table can contain more than one match filed and in such cases
             # if one match_type has ternary and other filed is of any type
             # it is considered as ternary match_type.
-            # In these cases we expect priority filed from the user.
+            # In these cases we expect priority field from the user.
             p4info_match = self.get_match_field(table_name, mfn)
 
             if p4info_match.match_type == p4info_pb2.MatchField.TERNARY:
