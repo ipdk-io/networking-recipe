@@ -90,7 +90,7 @@ function(generate_proto_files PROTO_FILES SRC_DIR)
         )
 
         # Install .proto file in share/.
-        if(INSTALL-PROTO)
+        if(INSTALL_PROTO_FILES)
             install(
                 FILES
                     ${SRC_DIR}/${_file}
@@ -144,7 +144,7 @@ function(generate_grpc_files PROTO_FILES SRC_DIR)
             )
 
         # Install .proto file in share/.
-        if(INSTALL-PROTO)
+        if(INSTALL_PROTO_FILES)
             install(
                 FILES
                     ${SRC_DIR}/${_file}

@@ -38,7 +38,7 @@ set(STRATUM_INCLUDES
 # Compile Protobufs #
 #####################
 
-option(INSTALL-PROTO "Install .proto files" OFF)
+option(INSTALL_PROTO_FILES "Install .proto files" OFF)
 
 add_subdirectory(proto)
 
@@ -345,13 +345,13 @@ elseif(DPDK_TARGET)
     # DPDK files
     target_sources(stratum_main_o PRIVATE
         ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.cc
-        ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.h
+        ${STRATUM_TDI_BIN_DIR}/tdi_main.h
     )
 elseif(ES2K_TARGET)
     # ES2K files
     target_sources(stratum_main_o PRIVATE
         ${STRATUM_TDI_BIN_DIR}/es2k/es2k_main.cc
-        ${STRATUM_TDI_BIN_DIR}/es2k/es2k_main.h
+        ${STRATUM_TDI_BIN_DIR}/tdi_main.h
     )
 endif()
 
@@ -461,3 +461,9 @@ add_stratum_libraries(stratum_static)
 add_library(stratum_shared SHARED)
 add_stratum_objects(stratum_shared)
 add_stratum_libraries(stratum_shared)
+
+#######################
+# configuration files #
+#######################
+
+add_subdirectory(config)
