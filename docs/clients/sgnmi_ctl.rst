@@ -4,13 +4,8 @@ sgnmi_cli executable
 sgnmi_cli is a gNMI client tool that defaults to secure mode of communication
 with a gNMI server. The gRPC communication is secured via TLS certificates. 
 
-A flag is available if user chooses to use insecure mode. Note that the gRPC
-communication will fail is the server does not service requests using insecure
-client credentials.
-
-For information on security and enabling/disabling TLS on gRPC ports, refer to
-guides/security-guide.md
-
+A flag is available if user chooses to use insecure mode.
+For more information on security and refer to guides/security-guide.md document.
 
 Usage
 -----
@@ -51,9 +46,6 @@ Examples
 
 # To subscribe one sample of port operation status per second::
     sgnmi_cli -- sub-sample /interfaces/interface[name=1/1/1]/state/oper-status --interval 1000
-
-# To push chassis config::
-    sgnmi_cli -- --replace --bytes_val_file [chassis config file] set /
 
 # To use insecure mode::
     sgnmi_cli -- -- get /interfaces/interface[name=1/1/1]/state/ifindex --grpc_use_insecure_mode=true

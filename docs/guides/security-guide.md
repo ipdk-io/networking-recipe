@@ -7,9 +7,9 @@ modes, and certificate management.
 
 ## gRPC ports
 
-The IPDK Networking Recipe uses a secure-by-default model. Users wishing to
-open insecure ports, must do so explicitly. It is strongly recommended
-that users do not open insecure ports in production systems.
+The IPDK Networking Recipe uses a secure-by-default model. If you wish to
+open insecure ports, you must do so explicitly. It is strongly recommended
+that you use secure ports in production systems.
 
 ### Secure-by-default (TLS-mode)
 
@@ -19,28 +19,28 @@ The port numbers are:
 * 9339 - an IANA-registered port for gNMI and gNOI
 * 9559 - an IANA-registered port for P4RT
 
-### Generating TLS certificates & installing with script
+### Generating TLS certificates and installing with script
 
 A script is available to generate and install the certificates in order to
-establish gRPC secure-mode communication. This setup script utilizes
+establish gRPC secure-mode communication. This setup script uses
 preconfigured options and uses OpenSSL to generate the certificate and key files. 
 
-Executing this script will generate the certificate and key files; followed by
-installing them to a default location:
+To run the script, which generates certificate and key files and installs to
+a default location:
 
 ```bash
 $IPDK_RECIPE/scripts/security/setup_certs_tls_mode.sh
 ```
 
-### Generating TLS certificates & installing manually
+### Generating TLS certificates and installing manually
 
 The gRPC ports are secured using TLS certificates. A script and reference
 configuration files are available to assist in generating certificates and
-keys using OpenSSL. Users may choose other tools if desired.
+keys using OpenSSL. You may use other tools if you wish.
 
-The reference file uses a simple PKI where a self-signed Certificate
-Authority (CA) is generated. This CA is used to generate server-side
-key & cert files, and client-side key & cert files. This results in a 1-depth
+The reference file uses a simple PKI where a self-signed key and certificate.
+The root level Certificate Authority (CA) is used to generate server-side
+key and cert files, and client-side key and cert files. This results in a 1-depth
 level certificate chain, which will suffice for validation and confirmation
 but may not provide sufficient security for production systems. It is
 highly recommended to use well-known CAs, and generate certificates at multiple
