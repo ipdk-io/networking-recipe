@@ -92,9 +92,12 @@ p4rt-ctl is an executable generated when networking-recipe is built and this exe
 is a P4Runtime client which connects to P4Runtime server running in Stratum via gRPC for
 enabling P4Runtime capabilities.
 
-Each CLI command connects to gRPC ports opened by server, send a protobuf based
+Each CLI command connects to gRPC ports opened by server & sends a protobuf based
 message. Refer to p4runtime.proto for more details on type of messages and
 services that are available for a p4runtime client.
+
+For information on security and enabling TLS on gRPC ports, refer to
+guides/security-guide.md
 
 1. Set a forwarding pipeline::
 
