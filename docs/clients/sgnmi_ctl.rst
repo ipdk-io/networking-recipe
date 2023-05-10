@@ -39,19 +39,20 @@ Examples
 --------
 
 # To get port index (which is used when referring to a port in P4Runtime)::
-    sgnmi_cli -- get /interfaces/interface[name=1/1/1]/state/ifindex
+    sgnmi_cli get /interfaces/interface[name=1/1/1]/state/ifindex
 
 # To set port health indicator::
-    sgnmi_cli -- set /interfaces/interface[name=1/1/1]/config/health-indicator --string-val GOOD
+    sgnmi_cli --proto_bytes="`cat /tmp/sadconfig.txt`" \
+        set "/ipsec-offload/sad/sad-entry[name=1]/config"
 
-# To subscribe one sample of port operation status per second::
-    sgnmi_cli -- sub-sample /interfaces/interface[name=1/1/1]/state/oper-status --interval 1000
+# To subscribe one sample of ipsec-offload notification::
+    sgnmi_cli sub-onchange /ipsec-offload
 
 # To use insecure mode::
-    sgnmi_cli -- -- get /interfaces/interface[name=1/1/1]/state/ifindex --grpc_use_insecure_mode=true
+    sgnmi_cli get /interfaces/interface[name=1/1/1]/state/ifindex --grpc_use_insecure_mode=true
 
 # To specify alternate certificate file paths::
-    sgnmi_cli -- get /interfaces/interface[name=1/1/1]/state/ifindex \
+    sgnmi_cli get /interfaces/interface[name=1/1/1]/state/ifindex \
         --ca-cert=/tmp/ca.crt \
         --client-cert=/tmp/client.crt \
         --client-key=/tmp/client.key
