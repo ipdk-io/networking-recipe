@@ -46,6 +46,7 @@ print_help() {
     echo "  --toolchain=FILE -T  CMake toolchain file [${_TOOLFILE}]"
     echo ""
     echo "Options:"
+    echo "  --coverage           Measure unit test code coverage"
     echo "  --dry-run        -n  Display cmake parameter values and exit"
     echo "  --help           -h  Display this help text"
     echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
@@ -85,10 +86,23 @@ print_cmake_params() {
     echo "SDE_INSTALL_DIR=${_SDE_DIR}"
     [ -n "${_WITH_KRNLMON}" ] && echo "${_WITH_KRNLMON:2}"
     [ -n "${_WITH_OVSP4RT}" ] && echo "${_WITH_OVSP4RT:2}"
+    [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
     echo "${_SET_RPATH:2}"
     echo "${_TARGET_TYPE:2}"
     echo "JOBS=${_JOBS}"
     echo ""
+}
+
+##############
+# config_ovs #
+##############
+
+config_ovs() {
+    cmake -S ovs -B ${_OVS_BLD} \
+        -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
+        -DCMAKE_INSTALL_PREFIX=${_OVS_DIR} \
+        ${_CMAKE_TOOLCHAIN_FILE} \
+        -DP4OVS=ON
 }
 
 #############
@@ -96,20 +110,14 @@ print_cmake_params() {
 #############
 
 build_ovs() {
-    cmake -S ovs -B ${_OVS_BLD} \
-        -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-        -DCMAKE_INSTALL_PREFIX=${_OVS_DIR} \
-        ${_CMAKE_TOOLCHAIN_FILE} \
-        -DP4OVS=ON
-
     cmake --build ${_OVS_BLD} -j6 -- V=0
 }
 
-################
-# build_recipe #
-################
+#################
+# config_recipe #
+#################
 
-build_recipe() {
+config_recipe() {
     cmake -S . -B ${_BLD_DIR} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
         -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
@@ -119,9 +127,16 @@ build_recipe() {
         -DOVS_INSTALL_DIR=${_OVS_DIR} \
         -DSDE_INSTALL_DIR=${_SDE_DIR} \
         ${_WITH_KRNLMON} ${_WITH_OVSP4RT} \
+        ${_COVERAGE} \
         ${_SET_RPATH} \
         ${_TARGET_TYPE}
+}
 
+################
+# build_recipe #
+################
+
+build_recipe() {
     cmake --build ${_BLD_DIR} -j${_JOBS} --target install
 }
 
@@ -134,7 +149,8 @@ SHORTOPTS=${SHORTOPTS}hj:n
 
 LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,target:,toolchain:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
-LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs,rpath,no-rpath
+LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs
+LONGOPTS=${LONGOPTS},coverage,rpath,no-rpath
 
 GETOPTS=`getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 eval set -- "${GETOPTS}"
@@ -156,8 +172,8 @@ while true ; do
         _PREFIX=$2
         shift 2 ;;
     --rpath)
-	_RPATH=ON
-	shift 1 ;;
+        _RPATH=ON
+        shift 1 ;;
     -S|--sde)
         _SDE_DIR=$2
         shift 2 ;;
@@ -178,6 +194,9 @@ while true ; do
         _BLD_TYPE="Release"
         shift ;;
     # Options
+    --coverage)
+        _COVERAGE="-DTEST_COVERAGE=ON"
+        shift ;;
     -n|--dry_run)
         _DRY_RUN=1
         shift ;;
@@ -250,8 +269,10 @@ fi
 
 # First build OVS
 if [ ${_WITH_OVS} -ne 0 ]; then
+    config_ovs
     build_ovs
 fi
 
 # Now build the rest of the recipe.
+config_recipe
 build_recipe
