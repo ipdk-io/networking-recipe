@@ -19,10 +19,10 @@ The port numbers are:
 * 9339 - an IANA-registered port for gNMI and gNOI
 * 9559 - an IANA-registered port for P4RT
 
-### Generating TLS certificates & installing with script
+### Generating TLS certificates and installing with script
 
 A script is available to generate and install the certificates in order to
-establish gRPC secure-mode communication. This setup script uses a
+establish gRPC secure-mode communication. This setup script uses
 preconfigured options and uses OpenSSL to generate the certificate and key files. 
 
 To run the script, which generates certificate and key files and installs to
@@ -32,20 +32,19 @@ a default location:
 $IPDK_RECIPE/scripts/security/setup_certs_tls_mode.sh
 ```
 
-### Generating TLS certificates & installing manually
+### Generating TLS certificates and installing manually
 
 The gRPC ports are secured using TLS certificates. A script and reference
 configuration files are available to assist in generating certificates and
 keys using OpenSSL. You may use other tools if you wish.
 
-The reference file uses a simple PKI where a self-signed Certificate
-Authority (CA) is generated and the same CA is used to generate server
-key & cert, and client key & cert. This results in a 1-depth level
-certificate chain, which will suffice for validation and confirmation
- but may not provide sufficient security for production systems. It is
- highly recommended that you use well-known CAs, and that you generate
- certificates at multiple depth levels in order to conform to higher
- security standards.
+The reference file uses a simple PKI where a self-signed key and certificate.
+The root level Certificate Authority (CA) is used to generate server-side
+key and cert files, and client-side key and cert files. This results in a 1-depth
+level certificate chain, which will suffice for validation and confirmation
+but may not provide sufficient security for production systems. It is
+highly recommended to use well-known CAs, and generate certificates at multiple
+depth levels in order to conform to higher security standards.
 
 The reference files are available here: https://github.com/stratum/stratum/tree/main/tools/tls
 
@@ -71,7 +70,7 @@ COMMON_NAME=localhost ./generate-certs.sh
 
 #### Certificate installation
 
-InfraP4D will check for certificate in the following default location:
+infrap4d will check for certificate in the following default location:
 
 > /usr/share/stratum/certs/
 
@@ -93,8 +92,8 @@ $IPDK_RECIPE/install/sbin/infrap4d  -ca_cert_file=/tmp/certs/ca.crt  -server_cer
 
 ### Client certificate verification
 
-InfraP4D requires connecting gRPC clients to send a valid certificate
-that can be verified. A flag is available to allow you to tune the level
+infrap4d requires connecting gRPC clients to send a valid certificate
+that can be verified. A flag is available to tune the level
 of security required. The available values are:
 
 ```text
@@ -109,12 +108,13 @@ More info on these values can be found on [this gRPC library documentation page]
 
 ### Running in insecure mode
 
-Ports can be opened in insecure mode by user if needed. This is controlled
+Ports can be opened in insecure mode if needed. This is controlled
 by a flag that needs to be enabled at runtime. Change the
 `grpc_open_insecure_ports` value to `true` to open insecure ports.
-Also, make sure `certs` directory is removed from the location mentioned above.
+Also, make sure `certs` directory is removed from the default location mentioned
+above.
 
-To launch Infrap4D with insecure ports 9339 and 9559 open:
+To launch infrap4d with insecure ports 9339 and 9559 open:
 
 ```bash
 $IPDK_RECIPE/install/sbin/infrap4d  -grpc_open_insecure_mode=true
@@ -123,24 +123,23 @@ $IPDK_RECIPE/install/sbin/infrap4d  -grpc_open_insecure_mode=true
 ## gRPC clients
 
 Under default conditions, the gRPC clients will require the TLS certificates
-to establish communication with p4ovs/infrap4d server. The clients will need
+to establish communication with infrap4d. The clients will need
 to use the same ca.crt file and the client.key and client.crt files signed
 by the ca.crt (can copy the generated files from the server if client is not
 on the same system as server).
 
 ### P4RT client
 
-The p4rt-ctl (P4RT client) will default to communicate over secure mode
-(port 9559). If certificates are not available or if there are certificate
-read errors, it will try the insecure port as a fallback mechanism. This may
-fail if insecure ports are not open on the server.
+The p4rt-ctl (P4RT client) will default to communicate via secure mode
+(port 9559). If certificates are not available, the P4RT client will attempt a
+connection using insecure client credentials as a fallback mechanism. Note that
+the communication may fail if infrap4d runs in secure mode only.
 
 ### gNMI client
 
-The gnmi-ctl (gNMI client) requests should be directed to port 9339.
-If you wish to run the gnmi-ctl in insecure mode, a flag is available.
-Note that the insecure mode may fail if insecure ports are not open
-on the server.
+The gnmi-ctl or sgnmi_cli (gNMI clients) requests should be directed to port 9339.
+If infrap4d is enabled to run in insecure mode, a flag is available on client side
+to use insecure mode.
 
 ```bash
 $IPDK_RECIPE/install//bin/gnmi-ctl set <COMMAND>   -grpc_use_insecure_mode=true
