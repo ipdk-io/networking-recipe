@@ -38,14 +38,14 @@ optional arguments:
 Examples
 --------
 
-# To get port index (which is used when referring to a port in P4Runtime)::
+# To get port index::
     sgnmi_cli get /interfaces/interface[name=1/1/1]/state/ifindex
 
-# To set port health indicator::
+# To set Config SADB entry in ipsec-offload::
     sgnmi_cli --proto_bytes="`cat /tmp/sadconfig.txt`" \
         set "/ipsec-offload/sad/sad-entry[name=1]/config"
 
-# To subscribe one sample of ipsec-offload notification::
+# To subscribe to ipsec-offload notifications::
     sgnmi_cli sub-onchange /ipsec-offload
 
 # To use insecure mode::
