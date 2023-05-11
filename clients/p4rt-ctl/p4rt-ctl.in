@@ -538,12 +538,13 @@ class P4InfoHelper(object):
                     print("For ternary match_type, priority field is needed")
                     sys.exit(1)
 
+            if match_fields:
+                table_entry.match.extend([
+                    self.get_match_field_pb(table_name, mfn, value)
+                ])
+
         if priority is not None and one_match_type_is_ternary:
             table_entry.priority = int(priority)
-        if match_fields:
-            table_entry.match.extend([
-                self.get_match_field_pb(table_name, mfn, value)
-            ])
 
         if default_action:
             table_entry.is_default_action = True
