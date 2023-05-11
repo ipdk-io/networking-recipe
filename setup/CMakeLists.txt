@@ -52,6 +52,9 @@ endif()
 
 if(CMAKE_CROSSCOMPILING)
   list(APPEND CMAKE_FIND_ROOT_PATH ${CMAKE_INSTALL_PREFIX})
+  if(NOT HOST_DEPEND_DIR STREQUAL "")
+    list(APPEND CMAKE_PREFIX_PATH ${HOST_DEPEND_DIR})
+  endif()
 else()
   list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
 endif()
@@ -145,6 +148,30 @@ if(ON_DEMAND)
   set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
+##########
+# C-ARES #
+##########
+
+GetDownloadSpec(DOWNLOAD_CARES ${CARES_GIT_URL} ${CARES_GIT_TAG})
+
+ExternalProject_Add(cares
+  ${DOWNLOAD_CARES}
+
+  SOURCE_DIR
+    ${CMAKE_SOURCE_DIR}/c-ares
+  CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+    -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
+  INSTALL_COMMAND
+    ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
+)
+if(ON_DEMAND)
+  set_target_properties(cares PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
+
 ############
 # PROTOBUF #
 ############
@@ -212,6 +239,7 @@ ExternalProject_Add(grpc
     ${version_CMAKE_CXX_STANDARD}
     -DBUILD_SHARED_LIBS=on
     -DgRPC_ABSL_PROVIDER=package
+    -DgRPC_CARES_PROVIDER=package
     -DgRPC_PROTOBUF_PROVIDER=package
     # gRPC builds BoringSSL, which is incompatible with libpython.
     # We use whatever version of OpenSSL is installed instead.
@@ -230,6 +258,7 @@ ExternalProject_Add(grpc
     ${LDCONFIG_CMD}
   DEPENDS
     abseil-cpp
+    cares
     protobuf
     zlib
 )

@@ -8,6 +8,7 @@ grpc.patch
 
 # download directories
 /abseil-cpp
+/c-ares
 /cctz
 /gflags
 /glog

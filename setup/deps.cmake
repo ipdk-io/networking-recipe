@@ -7,6 +7,9 @@
 set(ABSEIL_GIT_URL https://github.com/abseil/abseil-cpp.git)
 set(ABSEIL_GIT_TAG 273292d1cfc0a94a65082ee350509af1d113344d) # 20220623.0
 
+set(CARES_GIT_URL https://github.com/c-ares/c-ares.git)
+set(CARES_GIT_TAG fddf01938d3789e06cc1c3774e4cd0c7d2a89976) # v1.19.0
+
 set(CCTZ_GIT_URL https://github.com/google/cctz.git)
 set(CCTZ_GIT_TAG 02918d62329ef440935862719829d061a5f4beba) # master~25
 
@@ -15,9 +18,6 @@ set(GFLAGS_GIT_TAG 827c769e5fc98e0f2a34c47cef953cc6328abced) # master~5
 
 set(GLOG_GIT_URL https://github.com/google/glog.git)
 set(GLOG_GIT_TAG a8e0007e96ff96145022c488e367da10f835c75d) # v0.6.0-rc1
-
-set(GMOCK_GBL_GIT_URL "https://github.com/apriorit/gmock-global-sample.git")
-set(GMOCK_GBL_GIT_TAG "3d7b4de5bc12d35d4e12f1deef2ec0248b55a976")
 
 set(GRPC_GIT_URL https://github.com/google/grpc.git)
 set(GRPC_GIT_TAG 90ccf24d22b6fc909a1021ebd89fd8c838467d26) # v1.50.1
