@@ -426,15 +426,14 @@ absl::Status ConfigFdbTxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                        const struct mac_learning_info &learn_info,
                                        const ::p4::config::v1::P4Info &p4info,
                                        bool insert_entry) {
-  ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   if (insert_entry) {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToInsert(session,
-                                      &write_request, &entity);
+                                      &write_request);
   } else {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
-                                      &write_request, &entity);
+                                      &write_request);
   }  
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, insert_entry);
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
@@ -444,15 +443,14 @@ absl::Status ConfigFdbTxV6VlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                          const struct mac_learning_info &learn_info,
                                          const ::p4::config::v1::P4Info &p4info,
                                          bool insert_entry) {
-  ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   if (insert_entry) {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToInsert(session,
-                                      &write_request, &entity);
+                                      &write_request);
   } else {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
-                                      &write_request, &entity);
+                                      &write_request);
   }  
   PrepareFdbTxV6VlanTableEntry(table_entry, learn_info, p4info, insert_entry);
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
@@ -463,15 +461,14 @@ absl::Status ConfigSemBypassTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                        const struct mac_learning_info &learn_info,
                                        const ::p4::config::v1::P4Info &p4info,
                                        bool insert_entry) {
-  ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   if (insert_entry) {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToInsert(session,
-                                      &write_request, &entity);
+                                      &write_request);
   } else {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
-                                      &write_request, &entity);
+                                      &write_request);
   }
   PrepareSemBypassTableEntry(table_entry, learn_info, p4info, insert_entry);
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
@@ -482,15 +479,14 @@ absl::Status ConfigFdbRxV6VlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                          const struct mac_learning_info &learn_info,
                                          const ::p4::config::v1::P4Info &p4info,
                                          bool insert_entry) {
-  ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   if (insert_entry) {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToInsert(session,
-                                      &write_request, &entity);
+                                      &write_request);
   } else {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
-                                      &write_request, &entity);
+                                      &write_request);
   }
   PrepareFdbRxV6VlanTableEntry(table_entry, learn_info, p4info, insert_entry);
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
@@ -500,15 +496,14 @@ absl::Status ConfigFdbRxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                        const struct mac_learning_info &learn_info,
                                        const ::p4::config::v1::P4Info &p4info,
                                        bool insert_entry) {
-  ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;  
   if (insert_entry) {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToInsert(session,
-                                      &write_request, &entity);
+                                      &write_request);
   } else {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
-                                      &write_request, &entity);
+                                      &write_request);
   }
   PrepareFdbRxVlanTableEntry(table_entry, learn_info, p4info, insert_entry);
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
@@ -518,15 +513,14 @@ absl::Status ConfigFdbTunnelTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                        const struct mac_learning_info &learn_info,
                                        const ::p4::config::v1::P4Info &p4info,
                                        bool insert_entry) {
-  ::p4::v1::Entity entity;
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   if (insert_entry) {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToInsert(session,
-                                      &write_request, &entity);
+                                      &write_request);
   } else {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
-                                      &write_request, &entity);
+                                      &write_request);
   }
 
   if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
@@ -776,16 +770,15 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                    const struct tunnel_info &tunnel_info,
                                    const ::p4::config::v1::P4Info &p4info,
                                    bool insert_entry) {
-  p4::v1::Entity entity;
   p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToInsert(session,
-                                      &write_request, &entity);
+                                      &write_request);
   } else {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
-                                      &write_request, &entity);
+                                      &write_request);
   }
   if (tunnel_info.local_ip.family == AF_INET &&
       tunnel_info.remote_ip.family == AF_INET) {
@@ -801,16 +794,15 @@ absl::Status ConfigDecapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                    const struct tunnel_info &tunnel_info,
                                    const ::p4::config::v1::P4Info &p4info,
                                    bool insert_entry) {
-  p4::v1::Entity entity;
   p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToInsert(session,
-                                      &write_request, &entity);
+                                      &write_request);
   } else {
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
-                                      &write_request, &entity);
+                                      &write_request);
   }
   if (tunnel_info.local_ip.family == AF_INET &&
       tunnel_info.remote_ip.family == AF_INET) {

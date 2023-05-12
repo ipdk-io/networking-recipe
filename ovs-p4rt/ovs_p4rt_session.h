@@ -98,13 +98,13 @@ absl::Status GetForwardingPipelineConfig(OvsP4rtSession* session,
                                          p4::config::v1::P4Info* p4info);
 
 ::p4::v1::TableEntry* SetupTableEntryToInsert(OvsP4rtSession* session,
-                             ::p4::v1::WriteRequest* req, ::p4::v1::Entity *entity);
+                             ::p4::v1::WriteRequest* req);
 
 ::p4::v1::TableEntry* SetupTableEntryToModify(OvsP4rtSession* session,
-                             ::p4::v1::WriteRequest* req, ::p4::v1::Entity *entity);
+                             ::p4::v1::WriteRequest* req);
 
 ::p4::v1::TableEntry* SetupTableEntryToDelete(OvsP4rtSession* session,
-                             ::p4::v1::WriteRequest* req, ::p4::v1::Entity *entity);
+                             ::p4::v1::WriteRequest* req);
 
 }  // namespace ovs_p4rt_cpp
 
