@@ -23,7 +23,7 @@ development system. A common install location is '/opt/p4/p4sde`.
 ### Build and install infrap4d dependencies
 
 ```bash
-git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
+git clone --recursive https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.networking-recipe.git ipdk.recipe
 cd ipdk.recipe
 export IPDK_RECIPE=`pwd`
 cd $IPDK_RECIPE/setup
