@@ -50,11 +50,22 @@ function(_define_es2k_driver _LIBS _DIRS)
                           IMPORTED_NO_SONAME ON)
 
     # rte_net_idpf
-    find_library(LIBRTE_NET_IDPF rte_net_idpf REQUIRED)
-    add_library(rte_net_idpf SHARED IMPORTED)
-    set_target_properties(rte_net_idpf PROPERTIES
-                          IMPORTED_LOCATION ${LIBRTE_NET_IDPF}
-                          IMPORTED_NO_SONAME ON)
+    find_library(LIBRTE_NET_IDPF rte_net_idpf)
+    if(LIBRTE_NET_IDPF)
+        add_library(rte_net_idpf SHARED IMPORTED)
+        set_target_properties(rte_net_idpf PROPERTIES
+                              IMPORTED_LOCATION ${LIBRTE_NET_IDPF}
+                              IMPORTED_NO_SONAME ON)
+    endif()
+
+    # rte_net_cpfl
+    find_library(LIBRTE_NET_CPFL rte_net_cpfl)
+    if(LIBRTE_NET_CPFL)
+        add_library(rte_net_cpfl SHARED IMPORTED)
+        set_target_properties(rte_net_cpfl PROPERTIES
+                              IMPORTED_LOCATION ${LIBRTE_NET_CPFL}
+                              IMPORTED_NO_SONAME ON)
+    endif()
 
     # target_utils
     find_library(LIBTARGET_UTILS target_utils REQUIRED)
@@ -84,8 +95,15 @@ function(_define_es2k_driver _LIBS _DIRS)
         vfio
         cpf
         cpf_pmd_infra
-        rte_net_idpf
     )
+
+    if(TARGET rte_net_idpf)
+        list(APPEND _libs rte_net_idpf)
+    endif()
+
+    if(TARGET rte_net_cpfl)
+        list(APPEND _libs rte_net_cpfl)
+    endif()
 
     set(${_LIBS} ${_libs} PARENT_SCOPE)
 
