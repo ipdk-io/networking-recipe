@@ -7,6 +7,9 @@
 # to cross-compile for the ES2K ACC platform.
 #
 
+# Abort on error.
+set -e
+
 if [ -z "${SDKTARGETSYSROOT}" ]; then
     echo ""
     echo "Error: SDKTARGETSYSROOT is not defined!"

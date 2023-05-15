@@ -9,6 +9,9 @@
 # to run natively on the host or cross-compiled to run on the target
 # platform.
 
+# Abort on error.
+set -e
+
 if [ -n "${SDKTARGETSYSROOT}" ]; then
     echo ""
     echo "-----------------------------------------------------"

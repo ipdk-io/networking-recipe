@@ -8,6 +8,9 @@
 # by default in the SYSROOT /opt/ovs directory.
 #
 
+# Abort on error.
+set -e
+
 if [ -z "${SDKTARGETSYSROOT}" ]; then
     echo ""
     echo "Error: SDKTARGETSYSROOT is not defined!"
