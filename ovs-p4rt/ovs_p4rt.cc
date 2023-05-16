@@ -155,6 +155,7 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
   return;
 }
 
+#if defined(ES2K_TARGET)
 void PrepareFdbTxV6VlanTableEntry(p4::v1::TableEntry* table_entry,
                                   const struct mac_learning_info &learn_info,
                                   const ::p4::config::v1::P4Info &p4info,
@@ -167,14 +168,12 @@ void PrepareFdbTxV6VlanTableEntry(p4::v1::TableEntry* table_entry,
   std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
   match->mutable_exact()->set_value(mac_addr);
 
-#if defined(ES2K_TARGET)
   // Based on p4 program for ES2K, we need to provide a match key Tunnel Flag
   auto match1 = table_entry->add_match();
   match1->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
 			              L2_FWD_TX_IPV6_TABLE_KEY_TUN_FLAG));
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, 0));
-#endif
 
   if (insert_entry) {
       auto table_action = table_entry->mutable_action();
@@ -185,18 +184,13 @@ void PrepareFdbTxV6VlanTableEntry(p4::v1::TableEntry* table_entry,
         auto param = action->add_params();
         param->set_param_id(GetParamId(p4info, L2_FWD_TX_IPV6_TABLE_ACTION_L2_FWD,
                                        ACTION_L2_FWD_PARAM_PORT));
-#if defined(DPDK_TARGET)
-	auto port_id = learn_info.vln_info.vlan_id - 1;
-#elif defined(ES2K_TARGET)
         auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
-#else
-	auto port_id = 0;
-#endif
         param->set_value(EncodeByteValue(1, port_id));
       }
   }
   return;
 }
+#endif
 
 #if defined(ES2K_TARGET)
 /* Sem Bypass table is specific to ES2K platform. When Data packets exchange
@@ -267,6 +261,7 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
   return;
 }
 
+#if defined(ES2K_TARGET)
 void PrepareFdbRxV6VlanTableEntry(p4::v1::TableEntry* table_entry,
                                   const struct mac_learning_info &learn_info,
                                   const ::p4::config::v1::P4Info &p4info,
@@ -289,19 +284,14 @@ void PrepareFdbRxV6VlanTableEntry(p4::v1::TableEntry* table_entry,
         param->set_param_id(GetParamId(p4info,
                             L2_FWD_RX_IPV6_WITH_TUNNEL_TABLE_ACTION_L2_FWD,
                             ACTION_L2_FWD_PARAM_PORT));
-#if defined(DPDK_TARGET)
-	auto port_id = learn_info.vln_info.vlan_id - 1;
-#elif defined(ES2K_TARGET)
         auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
-#else
-	auto port_id = 0;
-#endif
         param->set_value(EncodeByteValue(1, port_id));
       }
   }
 
   return;
 }
+#endif
 
 void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
                                      const struct mac_learning_info &learn_info,
@@ -324,6 +314,31 @@ void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
   match1->mutable_exact()->set_value(EncodeByteValue(1, 0));
 #endif
 
+#if defined(DPDK_TARGET)
+  if (insert_entry) {
+      auto table_action = table_entry->mutable_action();
+      auto action = table_action->mutable_action();
+      action->set_action_id(GetActionId(p4info,
+                            L2_FWD_TX_TABLE_ACTION_SET_TUNNEL));
+      {
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(p4info,
+                            L2_FWD_TX_TABLE_ACTION_SET_TUNNEL,
+                            ACTION_SET_TUNNEL_PARAM_TUNNEL_ID));
+        param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+      }
+
+      {
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(p4info,
+                            L2_FWD_TX_TABLE_ACTION_SET_TUNNEL,
+                            ACTION_SET_TUNNEL_PARAM_DST_ADDR));
+        std::string ip_address = CanonicalizeIp(learn_info.tnl_info.remote_ip.ip.v4addr.s_addr);
+        param->set_value(ip_address);
+      }
+  }
+
+#elif defined(ES2K_TARGET)
   if (insert_entry) {
       auto table_action = table_entry->mutable_action();
       auto action = table_action->mutable_action();
@@ -346,9 +361,11 @@ void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
         param->set_value(ip_address);
       }
   }
+#endif
   return;
 }
 
+#if defined(ES2K_TARGET)
 void PrepareFdbTableEntryforV6Tunnel(p4::v1::TableEntry* table_entry,
                                      const struct mac_learning_info &learn_info,
                                      const ::p4::config::v1::P4Info &p4info,
@@ -361,14 +378,12 @@ void PrepareFdbTableEntryforV6Tunnel(p4::v1::TableEntry* table_entry,
   std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
   match->mutable_exact()->set_value(mac_addr);
 
-#if defined(ES2K_TARGET)
   // Based on p4 program for ES2K, we need to provide a match key Tunnel Flag
   auto match1 = table_entry->add_match();
   match1->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
 			              L2_FWD_TX_TABLE_KEY_TUN_FLAG));
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, 0));
-#endif
 
   if (insert_entry) {
       auto table_action = table_entry->mutable_action();
@@ -421,6 +436,7 @@ void PrepareFdbTableEntryforV6Tunnel(p4::v1::TableEntry* table_entry,
   }
   return;
 }
+#endif
 
 absl::Status ConfigFdbTxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                        const struct mac_learning_info &learn_info,
@@ -439,6 +455,7 @@ absl::Status ConfigFdbTxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
 }
 
+#if defined(ES2K_TARGET)
 absl::Status ConfigFdbTxV6VlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                          const struct mac_learning_info &learn_info,
                                          const ::p4::config::v1::P4Info &p4info,
@@ -455,6 +472,7 @@ absl::Status ConfigFdbTxV6VlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
   PrepareFdbTxV6VlanTableEntry(table_entry, learn_info, p4info, insert_entry);
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
 }
+#endif
 
 #if defined(ES2K_TARGET)
 absl::Status ConfigSemBypassTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
@@ -475,6 +493,7 @@ absl::Status ConfigSemBypassTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
 }
 #endif
 
+#if defined(ES2K_TARGET)
 absl::Status ConfigFdbRxV6VlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                          const struct mac_learning_info &learn_info,
                                          const ::p4::config::v1::P4Info &p4info,
@@ -491,6 +510,7 @@ absl::Status ConfigFdbRxV6VlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
   PrepareFdbRxV6VlanTableEntry(table_entry, learn_info, p4info, insert_entry);
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
 }
+#endif
 
 absl::Status ConfigFdbRxVlanTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                        const struct mac_learning_info &learn_info,
@@ -523,6 +543,10 @@ absl::Status ConfigFdbTunnelTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                       &write_request);
   }
 
+#if defined(DPDK_TARGET)
+  PrepareFdbTableEntryforV4Tunnel(table_entry, learn_info, p4info,
+                                  insert_entry);
+#elif defined(ES2K_TARGET)
   if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
       learn_info.tnl_info.remote_ip.family == AF_INET6) {
       PrepareFdbTableEntryforV6Tunnel(table_entry, learn_info, p4info,
@@ -531,6 +555,9 @@ absl::Status ConfigFdbTunnelTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
       PrepareFdbTableEntryforV4Tunnel(table_entry, learn_info, p4info,
                                       insert_entry);
   }
+#else
+  return absl::UnknownError("Unsupported platform")
+#endif
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
 }
 
@@ -562,23 +589,24 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry)
         if(!status.ok())
             return;
 
+        status = ConfigFdbRxVlanTableEntry(session.get(), learn_info,
+                                           p4info, insert_entry);
+        if(!status.ok())
+            return;
+
+#if defined(ES2K_TARGET)
 	status = ConfigFdbTxV6VlanTableEntry(session.get(), learn_info,
                                              p4info, insert_entry);
         if(!status.ok())
             return;
-#if defined(ES2K_TARGET)
 	status = ConfigSemBypassTableEntry(session.get(), learn_info,
-                                           p4info, insert_entry);
-        if(!status.ok())
-            return;
-#endif
-        status = ConfigFdbRxVlanTableEntry(session.get(), learn_info,
                                            p4info, insert_entry);
         if(!status.ok())
             return;
 
 	status = ConfigFdbRxV6VlanTableEntry(session.get(), learn_info,
                                              p4info, insert_entry);
+#endif
     }
     if (!status.ok())
         return;
@@ -612,6 +640,7 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
                            ACTION_VXLAN_ENCAP_PARAM_DST_ADDR));
        param->set_value(CanonicalizeIp(tunnel_info.remote_ip.ip.v4addr.s_addr));
      }
+#if defined(ES2K_TARGET)
      {
        auto param = action->add_params();
        param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP,
@@ -621,6 +650,7 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
        param->set_value(EncodeByteValue(2, (((dst_port*2) >> 8) & 0xff),
                                         ((dst_port*2) & 0xff)));
      }
+#endif
      {
        auto param = action->add_params();
        param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP,
@@ -641,6 +671,7 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
   return;
 }
 
+#if defined(ES2K_TARGET)
 void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
                               const struct tunnel_info &tunnel_info,
                               const ::p4::config::v1::P4Info &p4info,
@@ -695,6 +726,7 @@ void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
 
   return;
 }
+#endif
 
 void PrepareDecapTableEntry(p4::v1::TableEntry* table_entry,
                             const struct tunnel_info &tunnel_info,
@@ -716,6 +748,21 @@ void PrepareDecapTableEntry(p4::v1::TableEntry* table_entry,
                        IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_DST));
   match2->mutable_exact()->set_value(CanonicalizeIp(tunnel_info.local_ip.ip.v4addr.s_addr));
 
+#if defined(DPDK_TARGET)
+  if (insert_entry) {
+     auto table_action = table_entry->mutable_action();
+     auto action = table_action->mutable_action();
+     action->set_action_id(GetActionId(p4info, ACTION_DECAP_OUTER_IPV4));
+     {
+       auto param = action->add_params();
+       param->set_param_id(GetParamId(p4info, ACTION_DECAP_OUTER_IPV4,
+                           ACTION_DECAP_OUTER_IPV4_PARAM_TUNNEL_ID));
+       param->set_value(EncodeByteValue(1, tunnel_info.vni));
+
+     }
+  }
+
+#elif defined(ES2K_TARGET)
   if (insert_entry) {
      auto table_action = table_entry->mutable_action();
      auto action = table_action->mutable_action();
@@ -728,9 +775,12 @@ void PrepareDecapTableEntry(p4::v1::TableEntry* table_entry,
 
      }
   }
+#endif
+
   return;
 }
 
+#if defined(ES2K_TARGET)
 void PrepareV6DecapTableEntry(p4::v1::TableEntry* table_entry,
                               const struct tunnel_info &tunnel_info,
                               const ::p4::config::v1::P4Info &p4info,
@@ -765,6 +815,7 @@ void PrepareV6DecapTableEntry(p4::v1::TableEntry* table_entry,
   }
   return;
 }
+#endif
 
 absl::Status ConfigEncapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
                                    const struct tunnel_info &tunnel_info,
@@ -780,6 +831,11 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
                                       &write_request);
   }
+
+#if defined(DPDK_TARGET)
+  PrepareEncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+
+#elif defined(ES2K_TARGET)
   if (tunnel_info.local_ip.family == AF_INET &&
       tunnel_info.remote_ip.family == AF_INET) {
       PrepareEncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
@@ -787,6 +843,10 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
              tunnel_info.remote_ip.family == AF_INET6) {
       PrepareV6EncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
   }
+#else
+  return absl::UnknownError("Unsupported platform")
+#endif
+
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
 }
 
@@ -804,6 +864,10 @@ absl::Status ConfigDecapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
       table_entry = ovs_p4rt_cpp::SetupTableEntryToDelete(session,
                                       &write_request);
   }
+#if defined(DPDK_TARGET)
+  PrepareDecapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+
+#elif defined(ES2K_TARGET)
   if (tunnel_info.local_ip.family == AF_INET &&
       tunnel_info.remote_ip.family == AF_INET) {
       PrepareDecapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
@@ -811,6 +875,9 @@ absl::Status ConfigDecapTableEntry(ovs_p4rt_cpp::OvsP4rtSession* session,
              tunnel_info.remote_ip.family == AF_INET6) {
       PrepareV6DecapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
   }
+#else
+  return absl::UnknownError("Unsupported platform")
+#endif
 
   return ovs_p4rt_cpp::SendWriteRequest(session, write_request);
 }
