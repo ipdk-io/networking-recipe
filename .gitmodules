@@ -12,13 +12,13 @@
 	url = https://github.com/opencomputeproject/SAI.git
 [submodule "stratum/stratum"]
 	path = stratum/stratum
-	url = https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.stratum-dev/
+	url = https://github.com/ipdk-io/stratum-dev.git/
 	branch = split-arch
 [submodule "krnlmon/krnlmon"]
 	path = krnlmon/krnlmon
-	url = https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.krnlmon
+	url = https://github.com/ipdk-io/krnlmon.git
 	branch = main
 [submodule "ovs/ovs"]
 	path = ovs/ovs
-	url = https://github.com/intel-innersource/networking.ipu.mountevans.network-recipes.p4ovs
+	url = https://github.com/ipdk-io/p4ovs.git
 	branch = ipdk-latest

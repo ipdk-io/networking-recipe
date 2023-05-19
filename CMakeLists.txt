@@ -6,14 +6,8 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-option(KLOCWORK "Configure for Klocwork scan" OFF)
-
 # CMAKE_BUILD_TYPE must be set before the first project() command.
-if(KLOCWORK)
-  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Type of build to perform")
-else()
-  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
-endif()
+set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
 
 project(networking-recipe VERSION 23.01 LANGUAGES C CXX)
 
@@ -56,7 +50,7 @@ file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
 option(DPDK_TARGET      "Build for DPDK target" OFF)
 option(TOFINO_TARGET    "Build for Tofino target" OFF)
-option(ES2K_TARGET      "Build for ES2000 target" OFF)
+option(ES2K_TARGET      "Build for ES2K target" OFF)
 
 # Translate target option to TARGETFLAG string.
 # - Use precedence to deal with multiple selections.
