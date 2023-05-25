@@ -11,7 +11,6 @@ the Intel IPU E2100.
 
 - New ES2K target
 - Redesigned make-all.sh script
-- PortManager refactoring
 - P4Runtime fork
 - Default build target
 - Improved security
@@ -106,16 +105,6 @@ Environment variables:
   SDE_INSTALL - Default SDE install directory
   ```
 
-### PortManager refactoring
-
-The `TdiPortManager` class has been extracted from `TdiSdeInterface` and
-moved to a separate header file. The `PortEvent` class is now part of the
-`TdiPortManager` class.
-
-The ES2K, DPDK, and Tofino targets have their own target-specific PortManager
-subclasses and mocks. The `PortConfigParams` and `HotplugConfigParams` classes
-are now part of the `DpdkPortManager` class.
-
 ### P4Runtime fork
 
 P4 Control Plane currently uses a fork of the `p4runtime` repository to
@@ -131,15 +120,6 @@ A corresponding version of the P4Runtime python module is available in the
 The default target for the P4 Control Plane build has been changed from
 `Tofino` to `DPDK`.
 
-### Kernel Monitor
-
-The Kernel Monitor has been updated to support ES2K.
-
-krnlmon is enabled by default for DPDK and ES2K builds. It can be suppressed
-by specifying `--no-krnlmon` on the `make-all.sh` command line. It can also
-be disabled at runtime by specifying `-disable_krnlmon` on the `infrap4d`
-command line.
-
 ### Security improvements
 
 `infrap4d` is now secure by default when built for the DPDK and ES2K targets.
@@ -152,6 +132,17 @@ See the [security guide](../guides/security-guide.md) for more information.
 `sgnmi_cli` is a gNMI client tool that defaults to secure mode. See the
 [sgnmi_cli guide](../clients/sgnmi_cli.rst) for more information.
 
+## Component Changes
+
+### Kernel Monitor
+
+The Kernel Monitor has been updated to support ES2K.
+
+krnlmon is enabled by default for DPDK and ES2K builds. It can be suppressed
+by specifying `--no-krnlmon` on the `make-all.sh` command line. It can also
+be disabled at runtime by specifying `-disable_krnlmon` on the `infrap4d`
+command line.
+
 ### OVS
 
 Open vSwitch (OVS) and the OVS P4Runtime Library (`ovs-p4rt`) are enabled by
@@ -163,6 +154,16 @@ It also builds a library (`ovs-p4rt`) that is linked with `ovs-vswitchd` to
 allow OVS to issue P4Runtime requests to `infrap4d`.
 
 ovs-p4rt has been extended to support ES2K.
+
+### Stratum
+
+The `TdiPortManager` class has been extracted from `TdiSdeInterface` and
+moved to a separate header file. The `PortEvent` class is now part of the
+`TdiPortManager` class.
+
+The ES2K, DPDK, and Tofino targets have their own target-specific PortManager
+subclasses and mocks. The `PortConfigParams` and `HotplugConfigParams` classes
+are now part of the `DpdkPortManager` class.
 
 ## Documentation Changes
 
