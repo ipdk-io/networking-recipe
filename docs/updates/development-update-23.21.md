@@ -12,7 +12,7 @@ the Intel IPU E2100.
 - New ES2K target
 - Redesigned make-all.sh script
 - PortManager refactoring
-- P4Runtime repository
+- P4Runtime fork
 - Default build target
 - Improved security
 
