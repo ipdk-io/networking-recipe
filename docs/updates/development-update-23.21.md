@@ -2,30 +2,30 @@
 
 ## Overview
 
-This is an update ("code drop") to incorporate changes made to support
-the Intel IPU 2100.
+This is an update (code drop) to incorporate changes made to support
+the Intel IPU E2100.
 
 ## What's Changed
 
 ### Highlights
 
-- Implemented ES2K target
-- Rewrote make-all.sh script
-- Completed PortManager refactoring
-- Forked P4Runtime repository
-- Changed default target to DPDK
-- Added `sgnmi_cli` client
+- New ES2K target
+- Redesigned make-all.sh script
+- PortManager refactoring
+- P4Runtime repository
+- Default build target
+- Improved security
 
 ### ES2K Target
 
-This update adds support for a new target, the Intel IPU 2100.
+This update adds support for a new target, the Intel IPU E2100.
 
 The new target is referred to in software as "ES2K". There are plans to
 change this label to something less ASIC-specific prior to the product's
 actual release.
 
 As the third target implemented, the first engineered as an IPU, and the first
-to require cross-compilation, it has had an impact throughout the codebase.
+to require cross-compilation, ES2K has had an impact throughout the codebase.
 
 Component changes:
 
@@ -37,20 +37,21 @@ Build system changes:
 
 - Support separate host and target dependencies
 - Support SYSROOT and STAGING directories
-- Implement aarch64 toolchain file
-- Move P4 SDK/SDE definitions to individual include files
+- Support cross-compilation with aarch64 toolchain file
+- Move P4 driver definitions to include files
 - Improve RPATH (RUNPATH) support
 - Support variations in system library locations
-- Add `make-cross-ovs.sh` and `config-cross-recipe.sh` help scripts to
-  assist with cross-compiling P4 Control Plane
+- Add `make-cross-ovs.sh` and `config-cross-recipe.sh` helper scripts
+  to assist with cross-compiling P4 Control Plane
+- Add infrastructure for Kernel Monitor unit tests
 
 Setup changes:
 
-- Allow dependencies to be built and installed for the Host system (full
-  or minimal) or cross-compiled for the Target system
+- Allow dependencies to be built for the Host system (full or minimal)
+  or cross-compiled for the Target system
 - Remove GMOCK_GBL from dependencies
-- Add CMake option to suppress download
-- Allow CXX standard to be specified for Abseil and gRPC
+- Add cmake option to suppress download
+- Add cmake option to specify CXX standard for Abseil and gRPC
 - Add `make-cross-deps.sh` and `make-host-deps.sh` helper scripts to assist
   with building host and cross-compiled dependencies
 
@@ -105,21 +106,51 @@ Environment variables:
   SDE_INSTALL - Default SDE install directory
   ```
 
-### PortManager classes
+### PortManager refactoring
 
-This update completes the process of extracting the `TdiPortManager` class
-from `TdiSdeInterface`. `TdiPortManager` now has its own header file, and
-the ES2K, DPDK, and Tofino targets have their own target-specific subclasses
-and mocks.
+The `TdiPortManager` class has been extracted from `TdiSdeInterface` and
+moved to a separate header file. The `PortEvent` class is now part of the
+`TdiPortManager` class.
 
-## Components
+The ES2K, DPDK, and Tofino targets have their own target-specific PortManager
+subclasses and mocks. The `PortConfigParams` and `HotplugConfigParams` classes
+are now part of the `DpdkPortManager` class.
+
+### P4Runtime fork
+
+P4 Control Plane currently uses a fork of the `p4runtime` repository to
+support mirroring for ES2K. The development team is working on a replacement
+methodology. We will revert to using the standard `p4runtime` repository once
+the revision is in place.
+
+A corresponding version of the P4Runtime python module is available in the
+`setup` directory as `p4runtime-1.3.0-py3-none-any.whl`.
+
+### Default build target
+
+The default target for the P4 Control Plane build has been changed from
+`Tofino` to `DPDK`.
 
 ### Kernel Monitor
 
-The Kernel Monitor as been updated to support ES2K.
+The Kernel Monitor has been updated to support ES2K.
 
 krnlmon is enabled by default for DPDK and ES2K builds. It can be suppressed
-by specifying `--no-krnlmon` on the `make-all.sh` command line.
+by specifying `--no-krnlmon` on the `make-all.sh` command line. It can also
+be disabled at runtime by specifying `-disable_krnlmon` on the `infrap4d`
+command line.
+
+### Security improvements
+
+`infrap4d` is now secure by default when built for the DPDK and ES2K targets.
+The P4Runtime and gNMI ports are opened with TLS enabled, and require that a
+certificate be provided. This can be overridden on startup by specifying
+`-grpc_open_insecure_mode=true` on the `infrap4d` command line.
+
+See the [security guide](../guides/security-guide.md) for more information.
+
+`sgnmi_cli` is a gNMI client tool that defaults to secure mode. See the
+[sgnmi_cli guide](../clients/sgnmi_cli.rst) for more information.
 
 ### OVS
 
@@ -138,6 +169,10 @@ ovs-p4rt has been extended to support ES2K.
 The `docs` directory has been reorganized and a number of files have been
 renamed.
 
+- Documentation for the command-line clients is in the `clients` subdirectory.
+- The target-specific setup guides and the [security guide](../guides/security-guide.md)
+  are in the `guides` subdirectory.
+
 ## Security Fixes
 
 `c-ares` has been updated to v1.19.0 to address CVE-2022-4904.
@@ -146,4 +181,6 @@ renamed.
 
 - Rename 'ES2K' to a more generic label
   - Will effect file, directory, and class names
+- Add Stratum and Kernel Monitor unit tests
+- Add documentation
 - Update Stratum to a more recent version
