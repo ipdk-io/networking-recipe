@@ -8,7 +8,7 @@ set(ABSEIL_GIT_URL https://github.com/abseil/abseil-cpp.git)
 set(ABSEIL_GIT_TAG 273292d1cfc0a94a65082ee350509af1d113344d) # 20220623.0
 
 set(CARES_GIT_URL https://github.com/c-ares/c-ares.git)
-set(CARES_GIT_TAG fddf01938d3789e06cc1c3774e4cd0c7d2a89976) # v1.19.0
+set(CARES_GIT_TAG 6360e96b5cf8e5980c887ce58ef727e53d77243a) # v1.19.1
 
 set(CCTZ_GIT_URL https://github.com/google/cctz.git)
 set(CCTZ_GIT_TAG 02918d62329ef440935862719829d061a5f4beba) # master~25
