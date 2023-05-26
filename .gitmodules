@@ -20,5 +20,5 @@
 	branch = main
 [submodule "ovs/ovs"]
 	path = ovs/ovs
-	url = https://github.com/ipdk-io/p4ovs.git
+	url = https://github.com/ipdk-io/ovs.git
 	branch = ipdk-latest
