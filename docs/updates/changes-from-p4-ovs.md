@@ -1,6 +1,7 @@
-# Networking Recipe Overview
+# Changes from P4-OVS
 
-IPDK Networking Recipe (P4 Control Plane)
+This document provides an overview of the changes made between P4-OVS and
+the P4 Control Plane.
 
 ## Background
 
@@ -20,8 +21,6 @@ monolithic.
   and software switches.
 
 ## Transition to P4 Control Plane
-
-### Completed
 
 The P4 Control Plane (formerly known as the Split Architecture) modularizes
 P4-OVS, making the code easier to maintain and more suitable for upstreaming.
@@ -50,13 +49,9 @@ P4-OVS, making the code easier to maintain and more suitable for upstreaming.
 - Created a component (`ovs-p4rt`) that can be linked with `ovs-vswitchd`
   to allow OvS to communicate with `infrap4d`.
 
-### Not Yet Done
+- Implemented a CMake-based build system in place of Autotools.
 
-- Update to the current version of Stratum.
-
-- Upstream the OvS and Stratum changes to the parent projects.
-
-## Changes from P4-OVS
+## Physical Differences
 
 - The `external`, `p4runtime`, `stratum`, and `unit_test` directories
   have been removed from the `ovs` repository.
@@ -65,12 +60,14 @@ P4-OVS, making the code easier to maintain and more suitable for upstreaming.
   were merged back into Stratum or discarded. Target-specific changes were
   made part of the `dpdk` and `tofino` variants of the `tdi` platform.
 
+- The `barefoot` Stratum code has been restored to its original state.
+
+## Operational Differences
+
 - OvS no longer manages Stratum or the Kernel Monitor. It also no longer
   makes direct calls to the Kernel Monitor or switch driver. All communication
-  with Stratum will be by means of calls to the OvS client API (`ovs-p4rt`),
+  with Stratum is by means of calls to the OvS client API (`ovs-p4rt`),
   which sends gRPC requests to `infrap4d`.
-
-- The `barefoot` Stratum code has been restored to its original state.
 
 ## Repositories
 

@@ -23,7 +23,7 @@ The port numbers are:
 
 A script is available to generate and install the certificates in order to
 establish gRPC secure-mode communication. This setup script uses
-preconfigured options and uses OpenSSL to generate the certificate and key files. 
+preconfigured options and uses OpenSSL to generate the certificate and key files.
 
 To run the script, which generates certificate and key files and installs to
 a default location:
@@ -46,7 +46,7 @@ but may not provide sufficient security for production systems. It is
 highly recommended to use well-known CAs, and generate certificates at multiple
 depth levels in order to conform to higher security standards.
 
-The reference files are available here: https://github.com/stratum/stratum/tree/main/tools/tls
+The reference files are available here: <https://github.com/stratum/stratum/tree/main/tools/tls>
 
 All certificates are in PEM format.
 
@@ -87,7 +87,10 @@ For example:
 
 ```bash
 # Files present in /tmp/certs/ directory
-$IPDK_RECIPE/install/sbin/infrap4d  -ca_cert_file=/tmp/certs/ca.crt  -server_cert_file=/tmp/certs/stratum.crt  -server_key_file=/tmp/certs/stratum.key
+$IPDK_RECIPE/install/sbin/infrap4d \
+    -ca_cert_file=/tmp/certs/ca.crt \
+    -server_cert_file=/tmp/certs/stratum.crt \
+    -server_key_file=/tmp/certs/stratum.key
 ```
 
 ### Client certificate verification
