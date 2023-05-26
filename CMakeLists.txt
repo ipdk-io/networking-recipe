@@ -1,27 +1,26 @@
 # CMake build file for superproject.
 #
-# Copyright 2022 Intel Corporation
+# Copyright 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
 cmake_minimum_required(VERSION 3.5)
 
-option(KLOCWORK "Configure for Klocwork scan" OFF)
-
 # CMAKE_BUILD_TYPE must be set before the first project() command.
-if(KLOCWORK)
-  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Type of build to perform")
-else()
-  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
-endif()
+set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
 
 project(networking-recipe VERSION 23.01 LANGUAGES C CXX)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 include(CMakePrintHelpers)
+include(CTest)
 include(FindPkgConfig)
 include(GNUInstallDirs)
 
-option(SET_RPATH "Set RPATH in libraries and executables" OFF)
+cmake_print_variables(CMAKE_SYSROOT)
+cmake_print_variables(CMAKE_TOOLCHAIN_FILE)
+cmake_print_variables(CMAKE_STAGING_PREFIX)
 
 #############################
 # Symbolic path definitions #
@@ -39,6 +38,8 @@ set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
 set(SDE_INSTALL_DIR "$ENV{SDE_INSTALL}" CACHE PATH
     "SDE install directory")
 
+set(HOST_DEPEND_DIR "" CACHE PATH "Host dependencies install directory")
+
 set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
 file(MAKE_DIRECTORY ${PB_OUT_DIR})
@@ -49,19 +50,27 @@ file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
 option(DPDK_TARGET      "Build for DPDK target" OFF)
 option(TOFINO_TARGET    "Build for Tofino target" OFF)
+option(ES2K_TARGET      "Build for ES2K target" OFF)
 
 # Translate target option to TARGETFLAG string.
 # - Use precedence to deal with multiple selections.
 # - Ensure that individual target options are consistent
 #   so we can use them to control the build.
-# - Default to TOFINO_TARGET.
+# - Default to DPDK_TARGET.
 set(_target_action "Building")
 set(_default_target "DPDK_TARGET")
 if(TOFINO_TARGET)
     set(TARGETFLAG TOFINO_TARGET)
     set(DPDK_TARGET OFF)
+    set(ES2K_TARGET OFF)
 elseif(DPDK_TARGET)
     set(TARGETFLAG DPDK_TARGET)
+    set(ES2K_TARGET OFF)
+    set(TOFINO_TARGET OFF)
+elseif(ES2K_TARGET)
+    set(TARGETFLAG ES2K_TARGET)
+    set(DPDK_TARGET OFF)
+    set(TOFINO_TARGET OFF)
 else()
     set(TARGETFLAG ${_default_target})
     set(${_default_target} ON)
@@ -77,10 +86,12 @@ unset(_target_action)
 # Feature toggles #
 ###################
 
-if(DPDK_TARGET)
-    set(WITH_KRNLMON ON)
-    set(WITH_OVSP4RT ON)
-elseif(TOFINO_TARGET)
+option(SET_RPATH    "Set RPATH in libraries and executables" OFF)
+
+option(WITH_KRNLMON "Enable Kernel Monitor support" ON)
+option(WITH_OVSP4RT "Enable OVS support" ON)
+
+if(TOFINO_TARGET)
     set(WITH_KRNLMON OFF)
     set(WITH_OVSP4RT OFF)
 endif()
@@ -104,26 +115,48 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-#####################
-# CMAKE_PREFIX_PATH #
-#####################
+############################
+# find_xxxx() search paths #
+############################
 
-# CMAKE_PREFIX_PATH specifies the directories to be searched by
-# find_file(), find_library(), find_path(), and find_program().
-# We only specify the install directory. The individual commands
-# each have their own lists of subdirectories to search.
+if(CMAKE_CROSSCOMPILING)
+    # CMAKE_FIND_ROOT_PATH specifies directories of TARGET platform
+    # files to be searched by the various find_xxxx() commands. It is
+    # not normally searched by find_program(), since the executables
+    # we're interested are primarily HOST programs.
 
-if(NOT DEPEND_INSTALL_DIR STREQUAL "")
-    list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
+    if(NOT DEPEND_INSTALL_DIR STREQUAL "")
+        list(APPEND CMAKE_FIND_ROOT_PATH ${DEPEND_INSTALL_DIR})
+    endif()
+
+    list(APPEND CMAKE_FIND_ROOT_PATH ${SDE_INSTALL_DIR})
+
+    if(NOT OVS_INSTALL_DIR STREQUAL "")
+        list(APPEND CMAKE_FIND_ROOT_PATH ${OVS_INSTALL_DIR})
+    endif()
+else()
+    # CMAKE_PREFIX_PATH specifies directories of HOST platform files
+    # to be searched by the various find_xxxx() commands.
+
+    if(NOT DEPEND_INSTALL_DIR STREQUAL "")
+        list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
+    endif()
+
+    list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
+
+    if(NOT OVS_INSTALL_DIR STREQUAL "")
+        list(APPEND CMAKE_PREFIX_PATH ${OVS_INSTALL_DIR})
+    endif()
 endif()
 
-list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
-
-if(NOT OVS_INSTALL_DIR STREQUAL "")
-    list(APPEND CMAKE_PREFIX_PATH ${OVS_INSTALL_DIR})
+if(NOT HOST_DEPEND_DIR STREQUAL "")
+    list(APPEND CMAKE_PREFIX_PATH ${HOST_DEPEND_DIR})
 endif()
 
+list(REMOVE_DUPLICATES CMAKE_FIND_ROOT_PATH)
 list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
+
+cmake_print_variables(CMAKE_FIND_ROOT_PATH)
 cmake_print_variables(CMAKE_PREFIX_PATH)
 
 #####################
@@ -133,8 +166,21 @@ cmake_print_variables(CMAKE_PREFIX_PATH)
 find_package(absl REQUIRED)
 
 if(DPDK_TARGET)
-    pkg_check_modules(DPDK REQUIRED libdpdk)
+    include(dpdk-driver)
+elseif(ES2K_TARGET)
+    include(es2k-driver)
+elseif(TOFINO_TARGET)
+    include(tofino-driver)
 endif()
+
+########################
+# strip_sysroot_prefix #
+########################
+
+function(strip_sysroot_prefix _IN _OUT)
+    string(REGEX REPLACE "^${CMAKE_SYSROOT}(.+)\$" "\\1" _out "${_IN}")
+    set(${_OUT} ${_out} PARENT_SCOPE)
+endfunction()
 
 ##################
 # RPATH elements #
@@ -149,7 +195,7 @@ endif()
 # The ORIGIN element is equivalent to ${CMAKE_PREFIX_PATH}/lib or
 # ${CMAKE_PREFIX_PATH}/lib64.
 #
-# The elements will need to expanded to include /lib64 paths where
+# The elements will need to be expanded to include /lib64 paths where
 # appropriate.
 #
 # We shouldn't need an element for ${SDE_INSTALL_DIR}/lib/x86_64-linux-gnu.
@@ -158,30 +204,35 @@ endif()
 # that we do need to include the DPDK library directory in the RPATH, we
 # can use DPDK_LIBRARY_DIRS, which is defined by pkg_check_modules(DPDK).
 
+# SDE_ELEMENT
+strip_sysroot_prefix(${SDE_INSTALL_DIR} _sde_stem)
 if(EXISTS ${SDE_INSTALL_DIR}/lib)
-    list(APPEND SDE_ELEMENT ${SDE_INSTALL_DIR}/lib)
+    list(APPEND SDE_ELEMENT ${_sde_stem}/lib)
 endif()
 if(EXISTS ${SDE_INSTALL_DIR}/lib64)
-    list(APPEND SDE_ELEMENT ${SDE_INSTALL_DIR}/lib64)
+    list(APPEND SDE_ELEMENT ${_sde_stem}/lib64)
 endif()
+unset(_sde_stem)
 
+# DEP_ELEMENT
+strip_sysroot_prefix(${DEPEND_INSTALL_DIR} _dep_stem)
 if(NOT DEPEND_INSTALL_DIR STREQUAL "")
     if(EXISTS ${DEPEND_INSTALL_DIR}/lib)
-        list(APPEND DEP_ELEMENT ${DEPEND_INSTALL_DIR}/lib)
+        list(APPEND DEP_ELEMENT ${_dep_stem}/lib)
     endif()
     if(EXISTS ${DEPEND_INSTALL_DIR}/lib64)
-        list(APPEND DEP_ELEMENT ${DEPEND_INSTALL_DIR}/lib64)
+        list(APPEND DEP_ELEMENT ${_dep_stem}/lib64)
     endif()
 endif()
+unset(_dep_stem)
 
-set(_libdir ${CMAKE_INSTALL_LIBDIR})
-if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib OR _libdir STREQUAL "lib")
+# EXEC_ELEMENT
+if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib OR CMAKE_INSTALL_LIBDIR STREQUAL "lib")
     list(APPEND EXEC_ELEMENT $ORIGIN/../lib)
 endif()
-if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib64 OR _libdir STREQUAL "lib64")
+if(EXISTS ${CMAKE_INSTALL_PREFIX}/lib64 OR CMAKE_INSTALL_LIBDIR STREQUAL "lib64")
     list(APPEND EXEC_ELEMENT $ORIGIN/../lib64)
 endif()
-unset(_libdir)
 
 ###################
 # RPATH functions #

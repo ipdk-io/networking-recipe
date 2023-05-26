@@ -1,24 +1,24 @@
-[submodule "ovs/ovs"]
-	path = ovs/ovs
-	url = https://github.com/ipdk-io/ovs
-	branch = ipdk-latest
-[submodule "stratum/stratum"]
-	path = stratum/stratum
-	url = https://github.com/ipdk-io/stratum-dev.git
-	branch = split-arch
 [submodule "stratum/p4runtime"]
 	path = stratum/p4runtime
-	url = https://github.com/p4lang/p4runtime.git
+	url = https://github.com/ipdk-io/p4runtime-dev.git
 [submodule "stratum/googleapis"]
 	path = stratum/googleapis
 	url = https://github.com/googleapis/googleapis.git
 [submodule "ptf-tests"]
 	path = ptf-tests
 	url = https://github.com/ipdk-io/ptf-tests.git
+[submodule "krnlmon/SAI"]
+	path = krnlmon/SAI
+	url = https://github.com/opencomputeproject/SAI.git
+[submodule "stratum/stratum"]
+	path = stratum/stratum
+	url = https://github.com/ipdk-io/stratum-dev.git/
+	branch = split-arch
 [submodule "krnlmon/krnlmon"]
 	path = krnlmon/krnlmon
 	url = https://github.com/ipdk-io/krnlmon.git
 	branch = main
-[submodule "krnlmon/SAI"]
-	path = krnlmon/SAI
-	url = https://github.com/opencomputeproject/SAI.git
+[submodule "ovs/ovs"]
+	path = ovs/ovs
+	url = https://github.com/ipdk-io/p4ovs.git
+	branch = ipdk-latest

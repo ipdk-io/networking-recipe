@@ -1,8 +1,9 @@
-# IPDK Networking Recipe for DPDK
+# DPDK Setup Guide for P4 Control Plane
 
 ## Overview
 
-This document describes how to build and run IPDK networking recipe on DPDK target.
+This document explains how to install, build, and run P4 Control Plane
+for the DPDK target.
 
 ## Setup
 
@@ -12,7 +13,7 @@ This document describes how to build and run IPDK networking recipe on DPDK targ
 git clone --recursive https://github.com/p4lang/p4-dpdk-target.git p4sde
 ```
 
-For build instructions, refer to [P4 SDE Readme](https://github.com/p4lang/p4-dpdk-target/blob/main/README.md#building-and-installing)
+For build instructions, see [P4 SDE Readme](https://github.com/p4lang/p4-dpdk-target/blob/main/README.md#building-and-installing)
 
 ### Install basic utilities
 
@@ -55,17 +56,17 @@ cd $IPDK_RECIPE
 ```
 
 *Note*: By default, make-all.sh will create the `install` directory under the
-networking recipe. User can specify a different directory using `--prefix`
-option to make-all.sh. The following examples assume default `install`
-directory for the executables. If not, user will need to specify the
-appropriate path instead of ./install.
+networking recipe. You can specify a different directory using the `--prefix`
+option to `make-all.sh`. The following examples assume the default `install`
+directory for the executables. If not, you will need to specify the
+appropriate path instead of `./install`.
 
-### Run Networking Recipe
+### Run P4 Control Plane
 
 #### Set up the environment required by infrap4d
 
-*Note*: `sudo` option is required when running copy_config_files.sh since
-we are creating directories and copying config file at system level.
+*Note*: `sudo` is required when running `copy_config_files.sh` since you are
+copying files to system directories.
 
 ```bash
 source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL

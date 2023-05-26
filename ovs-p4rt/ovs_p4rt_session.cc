@@ -86,6 +86,20 @@ absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
     const std::string& address,
     const std::shared_ptr<grpc::ChannelCredentials>& credentials,
     uint32_t device_id, absl::uint128 election_id) {
+
+  /* OVS spawns multiple revalidator threads and handler threads to handle
+   * datapath Notifications.
+   * When multiple L2 MAC's are learnt at the same time, the learn information
+   * can come from revlidator thread or handler thread. On a worst case
+   * scenario, both the threads will call OvsP4rtSession::Create exactly at
+   * the same time and both threads can get same election_id based on API
+   * TimeBasedElectionId(). This causes one of the threads to get stuck and
+   * no further data path information is received by the thread.
+   * To avoid this issue, we add Thread ID to the election ID to generate an
+   * unique election_id, even when two threads receive MAC learn at the same
+   * time.
+   */
+  election_id = election_id + (absl::uint128)pthread_self();
   return Create(CreateP4RuntimeStub(address, credentials), device_id,
                 election_id);
 }
@@ -137,7 +151,7 @@ absl::Status SendWriteRequest(OvsP4rtSession* session,
 }
 
 ::p4::v1::TableEntry* SetupTableEntryToInsert(OvsP4rtSession* session,
-		             ::p4::v1::WriteRequest* req, ::p4::v1::Entity *entity) {
+		             ::p4::v1::WriteRequest* req) {
   req->set_device_id(session->DeviceId());
   *req->mutable_election_id() = session->ElectionId();
   auto* update = req->add_updates();
@@ -146,7 +160,7 @@ absl::Status SendWriteRequest(OvsP4rtSession* session,
 }
 
 ::p4::v1::TableEntry* SetupTableEntryToModify(OvsP4rtSession* session,
-                             ::p4::v1::WriteRequest* req, ::p4::v1::Entity *entity) {
+                             ::p4::v1::WriteRequest* req) {
   req->set_device_id(session->DeviceId());
   *req->mutable_election_id() = session->ElectionId();
   auto* update = req->add_updates();
@@ -155,7 +169,7 @@ absl::Status SendWriteRequest(OvsP4rtSession* session,
 }
 
 ::p4::v1::TableEntry* SetupTableEntryToDelete(OvsP4rtSession* session,
-                             ::p4::v1::WriteRequest* req, ::p4::v1::Entity *entity) {
+                             ::p4::v1::WriteRequest* req) {
   req->set_device_id(session->DeviceId());
   *req->mutable_election_id() = session->ElectionId();
   auto* update = req->add_updates();

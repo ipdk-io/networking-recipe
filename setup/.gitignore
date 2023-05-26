@@ -3,10 +3,12 @@ grpc.patch
 
 # build directories
 /build
+/host-deps
 /install
 
 # download directories
 /abseil-cpp
+/c-ares
 /cctz
 /gflags
 /glog

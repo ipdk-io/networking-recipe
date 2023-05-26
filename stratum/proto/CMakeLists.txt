@@ -4,23 +4,30 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-find_package(Protobuf REQUIRED)
+include(FindProtobuf)
 
-###############################
-# Get path to GRPC C++ plugin #
-###############################
+#############################
+# Find Protobuf executables #
+#############################
 
-find_package(gRPC REQUIRED)
+# The Protobuf compiler and gRPC plugin are host tools, even if we're
+# cross-compiling. NO_CMAKE_FIND_ROOT_PATH ensures that we do not
+# search the cross-compiled binaries for the Protobuf executables.
 
-if(TARGET(gRPC::grpc_cpp_plugin))
+find_package(Protobuf REQUIRED NO_CMAKE_FIND_ROOT_PATH)
+
+find_package(gRPC NO_CMAKE_FIND_ROOT_PATH)
+
+if(gRPC AND TARGET(gRPC::grpc_cpp_plugin))
     get_property(GRPC_CPP_PLUGIN
         TARGET gRPC::grpc_cpp_plugin
         PROPERTY IMPORTED_LOCATION_NOCONFIG)
 else()
-    message(STATUS "gRPC::grpc_cpp_plugin is not a target")
-    find_program(GRPC_CPP_PLUGIN "grpc_cpp_plugin" REQUIRED)
+    find_program(GRPC_CPP_PLUGIN "grpc_cpp_plugin" REQUIRED
+        NO_CMAKE_FIND_ROOT_PATH)
 endif()
 
+cmake_print_variables(PROTOBUF_PROTOC_EXECUTABLE)
 cmake_print_variables(GRPC_CPP_PLUGIN)
 
 ##########################
@@ -35,8 +42,11 @@ string(JOIN ":" PROTO_IMPORT_PATH
     ${GOOGLEAPIS_SOURCE_DIR}
     ${P4RUNTIME_SOURCE_DIR}/proto
     ${STRATUM_SOURCE_DIR}
-    /usr/local/include
+    /usr/local/include      # variable?
 )
+
+set(PB_HEADER_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/stratum/pb)
+set(DOT_PROTO_INSTALL_DIR ${CMAKE_INSTALL_DATAROOTDIR}/stratum/proto)
 
 ########################
 # generate_proto_files #
@@ -71,14 +81,22 @@ function(generate_proto_files PROTO_FILES SRC_DIR)
             VERBATIM
         )
 
-        # Install header files in include/stratum/pb.
-        install(FILES ${_hdr} DESTINATION
-                ${CMAKE_INSTALL_PREFIX}/include/stratum/pb/${_path})
+        # Install .pb.h file in include/.
+        install(
+            FILES
+                ${_hdr}
+            DESTINATION
+                ${PB_HEADER_INSTALL_DIR}/${_path}
+        )
 
-        if(INSTALL-PROTO)
-            # Install protobuf files in share/stratum/proto.
-            install(FILES ${SRC_DIR}/${_file} DESTINATION
-                    ${CMAKE_INSTALL_PREFIX}/share/stratum/proto/${_path})
+        # Install .proto file in share/.
+        if(INSTALL_PROTO_FILES)
+            install(
+                FILES
+                    ${SRC_DIR}/${_file}
+                DESTINATION
+                    ${DOT_PROTO_INSTALL_DIR}/${_path}
+            )
         endif()
     endforeach()
 endfunction(generate_proto_files)
@@ -113,17 +131,26 @@ function(generate_grpc_files PROTO_FILES SRC_DIR)
             DEPENDS
                 ${SRC_DIR}/${_file}
             COMMENT
-                "Generating gRPC files for ${_file}"
+                "Generating grpc files for ${_file}"
             VERBATIM
         )
 
-        install(FILES ${_hdr} DESTINATION
-                ${CMAKE_INSTALL_PREFIX}/include/stratum/pb/${_path})
+        # Install .pb.h file in include/.
+        install(
+            FILES
+                ${_hdr}
+            DESTINATION
+                ${PB_HEADER_INSTALL_DIR}/${_path}
+            )
 
-        if(INSTALL-PROTO)
-            # Install protobuf files in share/stratum/proto.
-            install(FILES ${SRC_DIR}/${_file} DESTINATION
-                    ${CMAKE_INSTALL_PREFIX}/share/stratum/proto/${_path})
+        # Install .proto file in share/.
+        if(INSTALL_PROTO_FILES)
+            install(
+                FILES
+                    ${SRC_DIR}/${_file}
+                DESTINATION
+                    ${DOT_PROTO_INSTALL_DIR}/${_path}
+            )
         endif()
     endforeach()
 endfunction(generate_grpc_files)

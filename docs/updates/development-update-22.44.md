@@ -124,7 +124,10 @@ For Tofino builds, we install the unmodified version of `gnmi_cli`.
 - For any udp/tcp packets from overlay network, if checksum issues are
   noticed on interfaces which are of type VIRTIO-NET, it is recommended to
   disable checksum using below command.
-  $ ethtool --offload <netdev-name> rx off tx off
+
+  ```bash
+  ethtool --offload <netdev-name> rx off tx off
+  ```
 
 - pna_tcp_connection_tracking demonstrates the PNA add_on_miss feature and
   flow aging for auto learn flows. It supports partial implementation of TCP

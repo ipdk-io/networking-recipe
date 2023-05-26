@@ -15,16 +15,29 @@ include(GNUInstallDirs)
 # Define git repository tags and urls.
 include(deps.cmake)
 
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24)
+# Define default CXX standard
+if(NOT CMAKE_CROSSCOMPILING)
+  include(cxx_standard.cmake)
+endif()
+
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24 AND
+    ${CMAKE_VERSION} VERSION_LESS 3.26)
   message(STATUS "CMake version is ${CMAKE_VERSION}")
   message(STATUS "Protobuf build is broken in CMake 3.24.x and 3.25.x")
-  message(STATUS "Versions 3.16 through 3.22 are recommended")
+  message(STATUS "Versions 3.16 through 3.22 and 3.26.1 and above are recommended")
   message(FATAL_ERROR "Invalid CMake version")
 endif()
 
-option(ON_DEMAND    "Build targets on demand" OFF)
-option(USE_SUDO     "Use sudo when installing" OFF)
-option(USE_LDCONFIG "Use ldconfig when installing" OFF)
+option(DOWNLOAD     "Download repositories" TRUE)
+option(FORCE_PATCH  "Specify -f when patching" FALSE)
+option(ON_DEMAND    "Build targets on demand" FALSE)
+option(USE_LDCONFIG "Use ldconfig when installing" FALSE)
+
+# Note: USE_SUDO should be DISABLED by default.
+# This is in keeping with the following security principles:
+# - Principle of Least Privilege
+# - Secure By Default
+option(USE_SUDO     "Use sudo when installing" FALSE)
 
 if(USE_SUDO)
   set(SUDO_CMD "sudo" "-E")
@@ -33,12 +46,51 @@ if(USE_SUDO)
   endif()
 endif()
 
-# CMAKE_PREFIX_PATH specifies the directories to be searched by
-# find_file(), find_library(), find_path(), and find_program().
-#
-# We add our own install prefix to this list so the libraries we build
-# will take precedence over versions installed elsewhere on the system.
-list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
+if(FORCE_PATCH)
+  set(FORCE_OPTION "-f")
+endif()
+
+if(CMAKE_CROSSCOMPILING)
+  list(APPEND CMAKE_FIND_ROOT_PATH ${CMAKE_INSTALL_PREFIX})
+  if(NOT HOST_DEPEND_DIR STREQUAL "")
+    list(APPEND CMAKE_PREFIX_PATH ${HOST_DEPEND_DIR})
+  endif()
+else()
+  list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
+endif()
+
+##########################
+# Set CMAKE_CXX_STANDARD #
+##########################
+
+if(CXX_STANDARD)
+  set(_CXX_CURRENT_STANDARD ${CXX_STANDARD})
+endif()
+
+if(DEFINED _CXX_CURRENT_STANDARD)
+  set(version_ABSL_CXX_STANDARD -DABSL_CXX_STANDARD=${_CXX_CURRENT_STANDARD})
+  set(version_CMAKE_CXX_STANDARD -DCMAKE_CXX_STANDARD=${_CXX_CURRENT_STANDARD})
+endif()
+
+###################
+# GetDownloadSpec #
+###################
+
+# Generates the ExternalProject_Add() parameters needed to Download
+# a git repository and returns them in the VAR parameter. Returns an
+# empty string if the DOWNLOAD option is false.
+function(GetDownloadSpec VAR _url _tag)
+  if(DOWNLOAD)
+    set(_spec
+      GIT_REPOSITORY  ${_url}
+      GIT_TAG         ${_tag}
+      GIT_PROGRESS    ON
+    )
+  else()
+    set(_spec "")
+  endif()
+  set(${VAR} ${_spec} PARENT_SCOPE)
+endfunction(GetDownloadSpec)
 
 ##########
 # ABSEIL #
@@ -47,15 +99,20 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
 # Recommended for CMake 3.8 and up
 set(ABSL_CXX_PROPAGATE_CXX_STD ON)
 
+GetDownloadSpec(DOWNLOAD_ABSL ${ABSEIL_GIT_URL} ${ABSEIL_GIT_TAG})
+
 ExternalProject_Add(abseil-cpp
-  GIT_REPOSITORY  ${ABSEIL_GIT_URL}
-  GIT_TAG         ${ABSEIL_GIT_TAG}
-  GIT_PROGRESS    ON
+  ${DOWNLOAD_ABSL}
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/abseil-cpp
   CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+    -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
+    ${version_ABSL_CXX_STANDARD}
+    ${version_CMAKE_CXX_STANDARD}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
     -DCMAKE_INSTALL_RPATH=$ORIGIN
     -DBUILD_SHARED_LIBS=on
@@ -72,15 +129,18 @@ endif()
 # ZLIB #
 ########
 
+GetDownloadSpec(DOWNLOAD_ZLIB ${ZLIB_GIT_URL} ${ZLIB_GIT_TAG})
+
 ExternalProject_Add(zlib
-  GIT_REPOSITORY  ${ZLIB_GIT_URL}
-  GIT_TAG         ${ZLIB_GIT_FLAG}
-  GIT_PROGRESS    ON
+  ${DOWNLOAD_ZLIB}
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/zlib
   CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+    -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
     ${LDCONFIG_CMD}
@@ -89,21 +149,47 @@ if(ON_DEMAND)
   set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
+##########
+# C-ARES #
+##########
+
+GetDownloadSpec(DOWNLOAD_CARES ${CARES_GIT_URL} ${CARES_GIT_TAG})
+
+ExternalProject_Add(cares
+  ${DOWNLOAD_CARES}
+
+  SOURCE_DIR
+    ${CMAKE_SOURCE_DIR}/c-ares
+  CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+    -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
+  INSTALL_COMMAND
+    ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
+    ${LDCONFIG_CMD}
+)
+if(ON_DEMAND)
+  set_target_properties(cares PROPERTIES EXCLUDE_FROM_ALL TRUE)
+endif()
+
 ############
 # PROTOBUF #
 ############
 
+GetDownloadSpec(DOWNLOAD_PROTOBUF ${PROTOBUF_GIT_URL} ${PROTOBUF_GIT_TAG})
+
 ExternalProject_Add(protobuf
-  GIT_REPOSITORY  ${PROTOBUF_GIT_URL}
-  GIT_TAG         ${PROTOBUF_GIT_TAG}
-  GIT_PROGRESS    ON
+  ${DOWNLOAD_PROTOBUF}
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/protobuf
   CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
-    -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+    -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
     -DBUILD_SHARED_LIBS=on
     -Dprotobuf_BUILD_TESTS=off
   SOURCE_SUBDIR
@@ -122,25 +208,39 @@ endif()
 # GRPC #
 ########
 
+# Patch the gRPC build script to set the RUNPATH of the installed
+# Protobuf compiler plugins to the relative paths of the library
+# directories.
+set(GRPC_INSTALL_RPATH $ORIGIN/../lib64:$ORIGIN/../lib)
 configure_file(grpc.patch.in ${CMAKE_SOURCE_DIR}/grpc.patch @ONLY)
 
+if(CMAKE_CROSSCOMPILING)
+  # If we're cross-compiling for the target system, don't build the
+  # gRPC code generation executables.
+  set(gRPC_BUILD_CODEGEN_OPTION -DgRPC_BUILD_CODEGEN=off)
+endif()
+
+GetDownloadSpec(DOWNLOAD_GRPC ${GRPC_GIT_URL} ${GRPC_GIT_TAG})
+
 ExternalProject_Add(grpc
-  GIT_REPOSITORY  ${GRPC_GIT_URL}
-  GIT_TAG         ${GRPC_GIT_TAG}
-  GIT_PROGRESS    ON
+  ${DOWNLOAD_GRPC}
 
   PATCH_COMMAND
     # Set RUNPATH in gRPC executables.
-    patch -i ${CMAKE_SOURCE_DIR}/grpc.patch -p1
+    patch -i ${CMAKE_SOURCE_DIR}/grpc.patch -p1 ${FORCE_OPTION}
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/grpc
   CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_INSTALL_RPATH=$ORIGIN
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
-    -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+    -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
+    ${version_CMAKE_CXX_STANDARD}
     -DBUILD_SHARED_LIBS=on
     -DgRPC_ABSL_PROVIDER=package
+    -DgRPC_CARES_PROVIDER=package
     -DgRPC_PROTOBUF_PROVIDER=package
     # gRPC builds BoringSSL, which is incompatible with libpython.
     # We use whatever version of OpenSSL is installed instead.
@@ -153,11 +253,13 @@ ExternalProject_Add(grpc
     -DgRPC_BUILD_GRPC_RUBY_PLUGIN=off
     -DgRPC_BUILD_TESTS=off
     -DgRPC_INSTALL=on
+    ${gRPC_BUILD_CODEGEN_OPTION}
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
     ${LDCONFIG_CMD}
   DEPENDS
     abseil-cpp
+    cares
     protobuf
     zlib
 )
@@ -169,15 +271,18 @@ endif()
 # CCTZ #
 ########
 
+GetDownloadSpec(DOWNLOAD_CCTZ ${CCTZ_GIT_URL} ${CCTZ_GIT_TAG})
+
 ExternalProject_Add(cctz
-  GIT_REPOSITORY  ${CCTZ_GIT_URL}
-  GIT_TAG         ${CCTZ_GIT_TAG}
-  GIT_PROGRESS    ON
+  ${DOWNLOAD_CCTZ}
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/cctz
   CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+    -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
     -DCMAKE_POSITION_INDEPENDENT_CODE=on
     -DBUILD_TESTING=off
   INSTALL_COMMAND
@@ -192,16 +297,19 @@ endif()
 # GFLAGS #
 ##########
 
+GetDownloadSpec(DOWNLOAD_GFLAGS ${GFLAGS_GIT_URL} ${GFLAGS_GIT_TAG})
+
 ExternalProject_Add(gflags
-  GIT_REPOSITORY  ${GFLAGS_GIT_URL}
-  GIT_TAG         ${GFLAGS_GIT_TAG}
-  GIT_PROGRESS    ON
+  ${DOWNLOAD_GFLAGS}
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/gflags
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+    -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
     -DBUILD_SHARED_LIBS=on
+    -DBUILD_TESTING=off
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
     ${LDCONFIG_CMD}
@@ -214,17 +322,19 @@ endif()
 # GLOG #
 ########
 
+GetDownloadSpec(DOWNLOAD_GLOG ${GLOG_GIT_URL} ${GLOG_GIT_TAG})
+
 ExternalProject_Add(glog
-  GIT_REPOSITORY  ${GLOG_GIT_URL}
-  GIT_TAG         ${GLOG_GIT_TAG}
-  GIT_PROGRESS    ON
+  ${DOWNLOAD_GLOG}
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/glog
   CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+    -DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}
     -DCMAKE_INSTALL_RPATH=$ORIGIN
-    -Dgflags_DIR:PATH=${CMAKE_INSTALL_PREFIX}/lib/cmake/gflags
     -DWITH_GTEST=OFF
   INSTALL_COMMAND
     ${SUDO_CMD} ${CMAKE_MAKE_PROGRAM} install
@@ -236,35 +346,19 @@ if(ON_DEMAND)
   set_target_properties(glog PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
-#############
-# GMOCK_GBL #
-#############
-
-ExternalProject_Add(gmock-gbl
-  GIT_REPOSITORY  https://github.com/apriorit/gmock-global-sample.git
-  GIT_PROGRESS    ON
-
-  SOURCE_DIR
-    ${CMAKE_SOURCE_DIR}/gmock-gbl
-  CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-)
-if(ON_DEMAND)
-  set_target_properties(gmock-gbl PROPERTIES EXCLUDE_FROM_ALL TRUE)
-endif()
-
 #########
 # GTEST #
 #########
 
+GetDownloadSpec(DOWNLOAD_GTEST ${GTEST_GIT_URL} ${GTEST_GIT_TAG})
+
 ExternalProject_Add(gtest
-  GIT_REPOSITORY  ${GTEST_GIT_URL}
-  GIT_TAG         ${GTEST_GIT_TAG}
-  GIT_PROGRESS    ON
+  ${DOWNLOAD_GTEST}
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/gtest
   CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_INSTALL_RPATH=$ORIGIN
     -DBUILD_SHARED_LIBS=on
@@ -280,14 +374,15 @@ endif()
 # JSON #
 ########
 
+GetDownloadSpec(DOWNLOAD_JSON ${JSON_GIT_URL} ${JSON_GIT_TAG})
+
 ExternalProject_Add(json
-  GIT_REPOSITORY  ${JSON_GIT_URL}
-  GIT_TAG         ${JSON_GIT_TAG}
-  GIT_PROGRESS    ON
+  ${DOWNLOAD_JSON}
 
   SOURCE_DIR
     ${CMAKE_SOURCE_DIR}/json
   CMAKE_ARGS
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DJSON_BuildTests=off
   INSTALL_COMMAND

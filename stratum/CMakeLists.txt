@@ -38,7 +38,7 @@ set(STRATUM_INCLUDES
 # Compile Protobufs #
 #####################
 
-option(INSTALL-PROTO "Install .proto files" OFF)
+option(INSTALL_PROTO_FILES "Install .proto files" OFF)
 
 add_subdirectory(proto)
 
@@ -159,27 +159,14 @@ add_dependencies(stratum_hal_lib_p4_o
     p4runtime_proto
 )
 
-##########################
-# stratum_hal_lib_yang_o #
-##########################
+#############################
+# stratum_yang_parse_tree_o #
+#############################
 
 set(STRATUM_TDI_LIB_DIR  ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi)
 set(STRATUM_YANG_LIB_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/lib/yang)
 
-if(TOFINO_TARGET)
-  set(STRATUM_TARGET_YANG_FILES
-    ${STRATUM_YANG_LIB_DIR}/yang_add_subtree_interface.cc
-  )
-elseif(DPDK_TARGET)
-  set(STRATUM_TARGET_YANG_FILES
-    ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_add_subtree_interface.cc
-    ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_parse_tree_interface.cc
-    ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_parse_tree_interface.h
-  )
-endif()
-
-add_library(stratum_hal_lib_yang_o OBJECT
-    ${STRATUM_TARGET_YANG_FILES}
+add_library(stratum_yang_parse_tree_o OBJECT
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree.cc
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree.h
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_chassis.cc
@@ -189,6 +176,7 @@ add_library(stratum_hal_lib_yang_o OBJECT
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_helpers.h
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_interface.cc
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_interface.h
+    ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_ipsec.cc
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_node.cc
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_optical.cc
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_paths.cc
@@ -197,69 +185,55 @@ add_library(stratum_hal_lib_yang_o OBJECT
     ${STRATUM_YANG_LIB_DIR}/yang_parse_tree_system.cc
 )
 
-target_include_directories(stratum_hal_lib_yang_o PRIVATE
+if(DPDK_TARGET)
+    target_sources(stratum_yang_parse_tree_o PRIVATE
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_add_subtree_interface.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_parse_tree_interface.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_parse_tree_interface.h
+    )
+else()
+    target_sources(stratum_yang_parse_tree_o PRIVATE
+        ${STRATUM_YANG_LIB_DIR}/yang_add_subtree_interface.cc
+    )
+endif()
+
+target_include_directories(stratum_yang_parse_tree_o PRIVATE
     ${STRATUM_INCLUDES}
 )
 
-add_dependencies(stratum_hal_lib_yang_o
+add_dependencies(stratum_yang_parse_tree_o
     gnmi_proto
     stratum_proto
 )
 
-####################
-# stratum_target_o #
-####################
+########################
+# stratum_tdi_common_o #
+########################
 
-if(TOFINO_TARGET)
-    # Tofino files
-    set(STRATUM_TARGET_FILES
-        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_chassis_manager.cc
-        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_chassis_manager.h
-        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.cc
-        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.h
-        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_target.cc
-        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_utils.cc
-        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.cc
-        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.h
-    )
-elseif(DPDK_TARGET)
-    # DPDK files
-    set(STRATUM_TARGET_FILES
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_chassis_manager.cc
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_chassis_manager.h
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.cc
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.h
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_port_config.cc
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_port_config.h
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_target.cc
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_utils.cc
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.cc
-        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.h
-    )
-endif()
-
-add_library(stratum_target_o OBJECT
-    ${STRATUM_TARGET_FILES}
-
-    # TDI files
+add_library(stratum_tdi_common_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_action_profile_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_action_profile_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_counter_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_counter_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_lut_manager.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_lut_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_packetio_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_packetio_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_pipeline_utils.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_pipeline_utils.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_port_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_pre_manager.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_pre_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_action_profile.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_clone_session.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_common.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_counter.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_flags.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_flags.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_helpers.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_helpers.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_sde_interface.h
@@ -278,12 +252,82 @@ add_library(stratum_target_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/utils.h
 )
 
-target_include_directories(stratum_target_o PRIVATE
+if(ES2K_TARGET)
+    target_sources(stratum_tdi_common_o PRIVATE
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_fixed_function_manager.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_fixed_function_manager.h
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_ipsec_manager.cc
+        ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_ipsec_manager.h
+    )
+endif()
+
+target_include_directories(stratum_tdi_common_o PRIVATE
     ${STRATUM_INCLUDES}
     ${SDE_INSTALL_DIR}/include
 )
 
-add_dependencies(stratum_target_o stratum_proto)
+add_dependencies(stratum_tdi_common_o stratum_proto)
+
+########################
+# stratum_tdi_target_o #
+########################
+
+add_library(stratum_tdi_target_o OBJECT)
+
+if(TOFINO_TARGET)
+    # Tofino files
+    target_sources(stratum_tdi_target_o PRIVATE
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_chassis_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_chassis_manager.h
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_hal.h
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_port_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_port_manager.h
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_target.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_sde_utils.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.cc
+        ${STRATUM_TDI_LIB_DIR}/tofino/tofino_switch.h
+    )
+elseif(DPDK_TARGET)
+    # DPDK files
+    target_sources(stratum_tdi_target_o PRIVATE
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_chassis_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_chassis_manager.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_hal.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_port_config.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_port_config.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_port_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_port_manager.h
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_target.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_sde_utils.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.cc
+        ${STRATUM_TDI_LIB_DIR}/dpdk/dpdk_switch.h
+    )
+elseif(ES2K_TARGET)
+    # ES2K files
+    target_sources(stratum_tdi_target_o PRIVATE
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_chassis_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_chassis_manager.h
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_hal.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_hal.h
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_node.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_node.h
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_port_manager.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_port_manager.h
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_sde_target.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_sde_utils.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_switch.cc
+        ${STRATUM_TDI_LIB_DIR}/es2k/es2k_switch.h
+    )
+endif()
+
+target_include_directories(stratum_tdi_target_o PRIVATE
+    ${STRATUM_INCLUDES}
+    ${SDE_INSTALL_DIR}/include
+)
+
+add_dependencies(stratum_tdi_target_o stratum_proto)
 
 ##################
 # stratum_main_o #
@@ -291,23 +335,27 @@ add_dependencies(stratum_target_o stratum_proto)
 
 set(STRATUM_TDI_BIN_DIR ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi)
 
+add_library(stratum_main_o OBJECT)
+
 if(TOFINO_TARGET)
     # Tofino files
-    set(STRATUM_MAIN_FILES
+    target_sources(stratum_main_o PRIVATE
         ${STRATUM_TDI_BIN_DIR}/tofino/tofino_main.cc
-        ${STRATUM_TDI_BIN_DIR}/tofino/tofino_main.h
+        ${STRATUM_TDI_BIN_DIR}/main.h
     )
 elseif(DPDK_TARGET)
     # DPDK files
-    set(STRATUM_MAIN_FILES
+    target_sources(stratum_main_o PRIVATE
         ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.cc
-        ${STRATUM_TDI_BIN_DIR}/dpdk/dpdk_main.h
+        ${STRATUM_TDI_BIN_DIR}/main.h
+    )
+elseif(ES2K_TARGET)
+    # ES2K files
+    target_sources(stratum_main_o PRIVATE
+        ${STRATUM_TDI_BIN_DIR}/es2k/es2k_main.cc
+        ${STRATUM_TDI_BIN_DIR}/main.h
     )
 endif()
-
-add_library(stratum_main_o OBJECT
-    ${STRATUM_MAIN_FILES}
-)
 
 target_include_directories(stratum_main_o PRIVATE
     ${STRATUM_INCLUDES}
@@ -316,132 +364,108 @@ target_include_directories(stratum_main_o PRIVATE
 
 add_dependencies(stratum_main_o stratum_proto gnmi_proto)
 
+#######################
+# add_stratum_objects #
+#######################
+
+function(add_stratum_objects _TGT)
+    target_sources(${_TGT} PRIVATE
+        $<TARGET_OBJECTS:stratum_glue_o>
+        $<TARGET_OBJECTS:stratum_lib_o>
+        $<TARGET_OBJECTS:stratum_hal_lib_common_o>
+        $<TARGET_OBJECTS:stratum_hal_lib_phal_o>
+        $<TARGET_OBJECTS:stratum_hal_lib_p4_o>
+        $<TARGET_OBJECTS:stratum_yang_parse_tree_o>
+        $<TARGET_OBJECTS:stratum_tdi_common_o>
+        $<TARGET_OBJECTS:stratum_tdi_target_o>
+        $<TARGET_OBJECTS:stratum_main_o>
+    )
+endfunction(add_stratum_objects)
+
+#########################
+# add_stratum_libraries #
+#########################
+
+# Abseil libraries
+function(add_stratum_abseil_libs _TGT)
+    target_link_libraries(${_TGT} PUBLIC
+        absl::strings
+        absl::synchronization
+        absl::graphcycles_internal
+        absl::stacktrace
+        absl::symbolize
+        absl::malloc_internal
+        absl::debugging_internal
+        absl::demangle_internal
+        absl::time
+        absl::strings_internal
+        absl::throw_delegate
+        absl::base
+        absl::spinlock_wait
+        absl::int128
+        absl::raw_logging_internal
+        absl::log_severity
+        absl::civil_time
+        absl::time_zone
+        absl::status
+        absl::cord
+        absl::exponential_biased
+        absl::str_format_internal
+        absl::hash
+        absl::raw_hash_set
+        absl::city
+        absl::bad_optional_access
+        absl::bad_variant_access
+    )
+endfunction()
+
+# Google libraries
+function(add_stratum_google_libs _TGT)
+    target_link_libraries(${_TGT} PUBLIC
+        glog
+        gflags
+        grpc
+        protobuf
+        grpc++
+    )
+endfunction()
+
+# Protobuf libraries
+function(add_stratum_proto_libs _TGT)
+    target_link_libraries(${_TGT} PUBLIC
+        openconfig_proto
+        stratum_proto
+        gnmi_proto
+        grpc_proto
+        p4runtime_proto
+    )
+endfunction()
+
+function(add_stratum_libraries _TGT)
+    add_stratum_abseil_libs(${_TGT})
+    add_stratum_google_libs(${_TGT})
+    add_stratum_proto_libs(${_TGT})
+    target_link_libraries(${_TGT} PUBLIC pthread)
+endfunction()
+
 #####################
 # libstratum_static #
 #####################
 
-add_library(stratum_static STATIC
-    $<TARGET_OBJECTS:stratum_glue_o>
-    $<TARGET_OBJECTS:stratum_lib_o>
-    $<TARGET_OBJECTS:stratum_hal_lib_common_o>
-    $<TARGET_OBJECTS:stratum_hal_lib_phal_o>
-    $<TARGET_OBJECTS:stratum_hal_lib_p4_o>
-    $<TARGET_OBJECTS:stratum_hal_lib_yang_o>
-    $<TARGET_OBJECTS:stratum_target_o>
-    $<TARGET_OBJECTS:stratum_main_o>
-)
+add_library(stratum_static STATIC)
+add_stratum_objects(stratum_static)
+add_stratum_libraries(stratum_static)
 
-target_link_libraries(stratum_static PUBLIC
-    absl::strings absl::synchronization absl::graphcycles_internal
-    absl::stacktrace absl::symbolize absl::malloc_internal
-    absl::debugging_internal absl::demangle_internal absl::time
-    absl::strings_internal absl::throw_delegate
-    absl::base absl::spinlock_wait absl::int128 absl::raw_logging_internal
-    absl::log_severity absl::civil_time absl::civil_time absl::time_zone
-    absl::status absl::cord absl::exponential_biased absl::str_format_internal
-    absl::hash absl::raw_hash_set absl::city absl::bad_optional_access
-    absl::bad_variant_access
-)
+#####################
+# libstratum_shared #
+#####################
 
-target_link_libraries(stratum_static PUBLIC glog gflags grpc protobuf grpc++)
-target_link_libraries(stratum_static PUBLIC pthread)
+add_library(stratum_shared SHARED)
+add_stratum_objects(stratum_shared)
+add_stratum_libraries(stratum_shared)
 
-target_link_libraries(stratum_static PUBLIC
-    openconfig_proto
-    stratum_proto
-    gnmi_proto
-    grpc_proto
-    p4runtime_proto
-)
+#######################
+# configuration files #
+#######################
 
-target_link_libraries(stratum_static PUBLIC pthread)
-
-# tdi
-find_library(LIBTDI tdi ${SDE_INSTALL_DIR}/lib)
-if(NOT LIBTDI)
-    message(FATAL_ERROR "Cannot find library: tdi")
-endif()
-
-add_library(tdi SHARED IMPORTED)
-set_property(TARGET tdi PROPERTY IMPORTED_LOCATION ${LIBTDI})
-
-# tdi_json_parser
-find_library(LIBTDI_JSON_PARSER tdi_json_parser ${SDE_INSTALL_DIR}/lib)
-if(NOT LIBTDI_JSON_PARSER)
-    message(FATAL_ERROR "Cannot find library: tdi_json_parser")
-endif()
-
-add_library(tdi_json_parser SHARED IMPORTED)
-set_property(TARGET tdi_json_parser
-             PROPERTY IMPORTED_LOCATION ${LIBTDI_JSON_PARSER})
-
-# target_sys
-find_library(LIBTARGET_SYS target_sys ${SDE_INSTALL_DIR}/lib)
-if(NOT LIBTARGET_SYS)
-    message(FATAL_ERROR "Cannot find library: target_sys")
-endif()
-
-add_library(target_sys SHARED IMPORTED)
-set_property(TARGET target_sys PROPERTY IMPORTED_LOCATION ${LIBTARGET_SYS})
-
-if(TOFINO_TARGET)
-    # Tofino driver
-    find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
-    if(NOT LIBDRIVER)
-        message(FATAL_ERROR "Cannot find library: driver")
-    endif()
-
-    add_library(driver SHARED IMPORTED)
-    set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
-
-    target_link_libraries(stratum_static PUBLIC
-        driver
-        tdi
-        tdi_json_parser
-        target_sys
-    )
-elseif(DPDK_TARGET)
-    # DPDK driver
-    find_library(LIBDRIVER driver ${SDE_INSTALL_DIR}/lib)
-    if(NOT LIBDRIVER)
-        message(FATAL_ERROR "Cannot find library: driver")
-    endif()
-
-    add_library(driver SHARED IMPORTED)
-    set_property(TARGET driver PROPERTY IMPORTED_LOCATION ${LIBDRIVER})
-
-    # bf_switchd_lib
-    find_library(LIBBF_SWITCHD bf_switchd_lib ${SDE_INSTALL_DIR}/lib)
-    if(NOT LIBBF_SWITCHD)
-        message(FATAL_ERROR "Cannot find library: bf_switchd_lib")
-    endif()
-
-    add_library(bf_switchd_lib SHARED IMPORTED)
-    set_property(TARGET bf_switchd_lib
-                 PROPERTY IMPORTED_LOCATION ${LIBBF_SWITCHD})
-
-    # target_utils
-    find_library(LIBTARGET_UTILS target_utils ${SDE_INSTALL_DIR}/lib)
-    if(NOT LIBTARGET_UTILS)
-        message(FATAL_ERROR "Cannot find library: target_utils")
-    endif()
-
-    add_library(target_utils SHARED IMPORTED)
-    set_property(TARGET target_utils
-                 PROPERTY IMPORTED_LOCATION ${LIBTARGET_UTILS})
-
-    target_link_libraries(stratum_static PUBLIC
-        driver
-        bf_switchd_lib
-        tdi
-        tdi_json_parser
-        target_utils
-        target_sys
-    )
-
-    target_link_directories(stratum_static PUBLIC
-        ${SDE_INSTALL}/lib
-        ${DPDK_LIBRARY_DIRS})
-
-    target_link_options(stratum_static PUBLIC ${DPDK_LD_FLAGS} ${DPDK_LDFLAGS_OTHER})
-endif()
+add_subdirectory(config)
