@@ -107,6 +107,8 @@ add_library(stratum_hal_lib_common_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/p4_service.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/p4_service.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/server_writer_wrapper.h
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/target_options.cc
+    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/target_options.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/utils.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/utils.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/common/writer_interface.h
