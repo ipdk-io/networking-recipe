@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - unit_test
   pull_request:
     branches:
       - main
@@ -46,6 +47,8 @@ jobs:
               cd ${GITHUB_WORKSPACE} && sudo sh cmake-3.20.2-linux-x86_64.sh --prefix=/opt/rh/cmake --skip-license
               sudo ln -s /opt/rh/cmake/bin/cmake /usr/local/bin/cmake
               cmake --version
+              sudo apt install bazel-4.2.3
+              bazel version
 
       - name: 'Checkout Networking Recipe'
         uses: actions/checkout@v3
@@ -81,7 +84,20 @@ jobs:
              export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
              source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
              ./make-all.sh --target=dpdk
-
+             
+      - name: 'Run OVS unit tests'
+        run: |
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs
+             mkdir test && cd test
+             ../configure 
+             make -j6 V=0
+             make check TESTSUITEFLAGS=-j8 || true
+             
+      - name: 'Run Stratum unit tests'
+        run: |
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum
+             bazel test //stratum/hal/lib/p4:all
+    
   py_bandit_test:
      timeout-minutes: 10
      runs-on: ubuntu-20.04
