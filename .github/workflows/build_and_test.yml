@@ -33,7 +33,7 @@ jobs:
         working-directory: ./p4sde/tools/setup
         run: |
               sudo apt update -y
-              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev libatomic1 libnl-route-3-dev -y
+              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev libatomic1 libnl-route-3-dev curl -y
               pip3 install distro
               python3 install_dep.py
               cmake --version
@@ -47,8 +47,6 @@ jobs:
               cd ${GITHUB_WORKSPACE} && sudo sh cmake-3.20.2-linux-x86_64.sh --prefix=/opt/rh/cmake --skip-license
               sudo ln -s /opt/rh/cmake/bin/cmake /usr/local/bin/cmake
               cmake --version
-              sudo apt install bazel-4.2.3
-              bazel version
 
       - name: 'Checkout Networking Recipe'
         uses: actions/checkout@v3
@@ -95,7 +93,12 @@ jobs:
              
       - name: 'Run Stratum unit tests'
         run: |
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum
+             cd /tmp
+             curl -o bazel-4.2.3-installer-linux-x86_64.sh https://github.com/bazelbuild/bazel/releases/download/4.2.3/bazel-4.2.3-installer-linux-x86_64.sh
+             chmod +x bazel-4.2.3-installer-linux-x86_64.sh
+             ./bazel-4.2.3-installer-linux-x86_64.sh --user
+             export PATH="$PATH:$HOME/bin"
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum          
              bazel test //stratum/hal/lib/p4:all
     
   py_bandit_test:
