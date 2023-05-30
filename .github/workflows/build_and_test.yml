@@ -83,14 +83,6 @@ jobs:
              source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
              ./make-all.sh --target=dpdk
              
-      - name: 'Run OVS unit tests'
-        run: |
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs
-             mkdir test && cd test
-             ../configure 
-             make -j6 V=0
-             make check TESTSUITEFLAGS=-j8 || true
-             
       - name: 'Run Stratum unit tests'
         run: |
              cd /tmp
@@ -100,6 +92,56 @@ jobs:
              export PATH="$PATH:$HOME/bin"
              cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum          
              bazel test //stratum/hal/lib/p4:all
+  
+  run_ovs_unittests:
+    timeout-minutes: 30
+    runs-on: ubuntu-20.04
+    steps:
+      - name: 'Checkout p4-dpdk repo'
+        uses: actions/checkout@v3
+        with:
+          repository: p4lang/p4-dpdk-target
+          submodules: 'recursive'
+          path: p4sde
+
+      - name: 'Install dependencies'
+        working-directory: ./p4sde/tools/setup
+        run: |
+              sudo apt update -y
+              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev libatomic1 libnl-route-3-dev curl -y
+              pip3 install distro
+              python3 install_dep.py
+              cmake --version
+              sudo apt-get purge cmake
+              sudo rm -rf /usr/local/bin/cmake || true
+              sudo rm -rf ~/.local/bin/cmake || true
+              # removing cmake 3.25 and reinstalling 3.20, as build is failing with cmake 3.25
+              wget https://cmake.org/files/v3.20/cmake-3.20.2-linux-x86_64.sh -O ${GITHUB_WORKSPACE}/cmake-3.20.2-linux-x86_64.sh
+              chmod a+x ${GITHUB_WORKSPACE}/cmake-3.20.2-linux-x86_64.sh
+              sudo mkdir -p /opt/rh/cmake
+              cd ${GITHUB_WORKSPACE} && sudo sh cmake-3.20.2-linux-x86_64.sh --prefix=/opt/rh/cmake --skip-license
+              sudo ln -s /opt/rh/cmake/bin/cmake /usr/local/bin/cmake
+              cmake --version
+
+      - name: 'Checkout Networking Recipe'
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          path: ipdk.recipe
+          
+      - name: 'Run OVS unit tests'
+        run: |
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs
+             mkdir test && cd test
+             ../configure 
+             make -j6 V=0
+             make check TESTSUITEFLAGS=-j8 || true
+             
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v2
+        with:
+          name: ovs-ut-result
+          path: ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs/test/tests/testsuite.log       
     
   py_bandit_test:
      timeout-minutes: 10
