@@ -132,6 +132,7 @@ jobs:
       - name: 'Run OVS unit tests'
         run: |
              cd ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs
+             ./boot.sh
              mkdir test && cd test
              ../configure 
              make -j6 V=0
