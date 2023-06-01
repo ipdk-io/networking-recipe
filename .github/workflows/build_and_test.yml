@@ -140,6 +140,7 @@ jobs:
       - name: 'List log files'
         run: | 
              cd ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs/test/tests
+             pwd
              ls -ltr | grep *.log
              
       - name: Upload artifact for deployment job
