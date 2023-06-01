@@ -139,7 +139,8 @@ jobs:
              make check TESTSUITEFLAGS=-j10 || true
       - name: 'List log files'
         run: | 
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs/test/tests
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs/
+             cd test/tests
              pwd
              ls -ltr | grep *.log
              
