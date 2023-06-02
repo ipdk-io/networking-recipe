@@ -86,7 +86,7 @@ unset(_target_action)
 # Feature toggles #
 ###################
 
-option(SET_RPATH    "Set RPATH in libraries and executables" OFF)
+option(SET_RPATH    "Set RPATH in libraries and executables" ON)
 
 option(WITH_KRNLMON "Enable Kernel Monitor support" ON)
 option(WITH_OVSP4RT "Enable OVS support" ON)

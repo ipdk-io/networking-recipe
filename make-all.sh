@@ -19,7 +19,6 @@ _HOST_DIR=${HOST_INSTALL}
 _JOBS=8
 _OVS_DIR="${OVS_INSTALL:-ovs/install}"
 _PREFIX="install"
-_RPATH=OFF
 _SDE_DIR=${SDE_INSTALL}
 _TGT_TYPE="DPDK"
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
@@ -52,6 +51,8 @@ print_help() {
     echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
     echo "  --no-krnlmon         Exclude Kernel Monitor"
     echo "  --no-ovs             Exclude OVS support"
+    echo "  --no-rpath           Disable RPATH support"
+    echo "  --rpath              Enable RPATH support"
     echo "  --target=TARGET      Target to build (dpdk|es2k|tofino) [${_TGT_TYPE}]"
     echo ""
     echo "Configurations:"
@@ -171,28 +172,12 @@ while true ; do
     -P|--prefix)
         _PREFIX=$2
         shift 2 ;;
-    --rpath)
-        _RPATH=ON
-        shift 1 ;;
     -S|--sde)
         _SDE_DIR=$2
         shift 2 ;;
     -T|--toolchain)
         _TOOLFILE=$2
         shift 2 ;;
-    # Configurations
-    --debug)
-        _BLD_TYPE="Debug"
-        shift ;;
-    --minsize)
-        _BLD_TYPE="MinSizeRel"
-        shift ;;
-    --reldeb)
-        _BLD_TYPE="RelWithDebInfo"
-        shift ;;
-    --release)
-        _BLD_TYPE="Release"
-        shift ;;
     # Options
     --coverage)
         _COVERAGE="-DTEST_COVERAGE=ON"
@@ -223,6 +208,19 @@ while true ; do
         # convert to uppercase
         _TGT_TYPE=${2^^}
         shift 2 ;;
+    # Configurations
+    --debug)
+        _BLD_TYPE="Debug"
+        shift ;;
+    --minsize)
+        _BLD_TYPE="MinSizeRel"
+        shift ;;
+    --reldeb)
+        _BLD_TYPE="RelWithDebInfo"
+        shift ;;
+    --release)
+        _BLD_TYPE="Release"
+        shift ;;
     --)
         shift
         break ;;

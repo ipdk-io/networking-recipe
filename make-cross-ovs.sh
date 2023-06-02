@@ -31,7 +31,7 @@ _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 # Displays help text
 print_help() {
     echo ""
-    echo "Build and install Open vSwitch"
+    echo "Build and install OVS for ES2K"
     echo ""
     echo "Options:"
     echo "  --build=DIR      -B  Build directory path [${_BLD_DIR}]"
