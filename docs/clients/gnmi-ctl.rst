@@ -1,5 +1,18 @@
-gnmi-ctl executable
--------------------
+..
+      Copyright 2021-2023 Intel Corporation
+      SPDX-License-Identifier: Apache-2.0
+
+      Convention for heading levels in documentation:
+
+      =======  Heading 0 (reserved for the title in a document)
+      -------  Heading 1
+      ~~~~~~~  Heading 2
+      +++++++  Heading 3
+      '''''''  Heading 4
+
+=====================
+gnmi-ctl Client Guide
+=====================
 
 gnmi-ctl is a gRPC-based C++ network management interface client to handle port configurations and program fixed functions in the P4 pipeline. This client connects to the Config monitoring service running as part of Stratum and integrated as part of infrap4d. This utility is built as part of networking recipe and is available under ``install/bin/``.
 
