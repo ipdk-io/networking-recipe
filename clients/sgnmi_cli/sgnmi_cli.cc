@@ -65,30 +65,45 @@ namespace gnmi {
 namespace {
 
 const char kUsage[] =
-    R"USAGE(usage: gnmi_cli [--help] [Options] {get,set,cap,del,sub-onchange,sub-sample} path
+    R"USAGE(usage: sgnmi_cli [--help] [Options] COMMAND PATH
 
-Basic gNMI CLI
+Secure gNMI CLI
 
 positional arguments:
-  {get,set,cap,del,sub-onchange,sub-sample}         gNMI command
-  path                                              gNMI path
+  COMMAND                  gNMI command
+  PATH                     gNMI path
 
 optional arguments:
   --grpc_addr GRPC_ADDR    gNMI server address
-  --bool_val BOOL_VAL      [SetRequest only] Set boolean value
-  --int_val INT_VAL        [SetRequest only] Set int value (64-bit)
-  --uint_val UINT_VAL      [SetRequest only] Set uint value (64-bit)
-  --string_val STRING_VAL  [SetRequest only] Set string value
-  --float_val FLOAT_VAL    [SetRequest only] Set float value
-  --proto_bytes BYTES_VAL  [SetRequest only] Set proto_bytes value
-  --bytes_val_file FILE    [SetRequest only] A file to be sent as bytes value
-  --interval INTERVAL      [Sample subscribe only] Sample subscribe poll interval in ms
-  --replace                [SetRequest only] Use replace instead of update
-  --get-type               [GetRequest only] Use specific data type for get request (ALL,CONFIG,STATE,OPERATIONAL)
   --ca-cert                CA certificate
   --client-cert            gRPC Client certificate
   --client-key             gRPC Client key
   --grpc_use_insecure_mode Insecure mode (default: false)
+
+[get request only]
+  --get-type TYPE          Use specific data type for get request
+                           (ALL,CONFIG,STATE,OPERATIONAL)
+
+[set request only]
+  --bool_val BOOL_VAL      Set boolean value
+  --int_val INT_VAL        Set int value (64-bit)
+  --uint_val UINT_VAL      Set uint value (64-bit)
+  --string_val STRING_VAL  Set string value
+  --float_val FLOAT_VAL    Set float value
+  --proto_bytes BYTES_VAL  Set proto_bytes value
+  --bytes_val_file FILE    File to be sent as bytes value
+  --replace                Replace instead of updating
+
+[sample subscribe only]
+  --interval INTERVAL      Sample subscribe poll interval in ms
+
+commands:
+  get                      Get Request
+  set                      Set Request
+  cap                      Capability Request
+  del                      Delete Request
+  sub-onchange             Subscribe On Change Request
+  sub-sample               Subscribe Sampled Request
 )USAGE";
 
 // Pipe file descriptors used to transfer signals from the handler to the cancel
