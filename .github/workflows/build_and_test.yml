@@ -92,7 +92,8 @@ jobs:
              export PATH="$PATH:$HOME/bin"
              cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum
              export DPDK_INSTALL=${GITHUB_WORKSPACE}/install
-             bazel test //stratum/hal/lib/tdi/dpdk --define target=dpdk
+             echo "DPDK" > ${GITHUB_WORKSPACE}/install/share/TARGET
+             xargs -a ${GITHUB_WORKSPACE}/ipdk.recipe/.github/starter-set.txt bazel test --define target=dpdk
              
       - name: 'Record Stratum Results'
         uses: dorny/test-reporter@v1
@@ -100,8 +101,14 @@ jobs:
           artifact: test-results                                  # artifact name
           name: Stratum Tests                                     # Name of the check run which will be created
           path: '**/stratum/stratum/bazel-testlogs/**/test.xml'   # Path to test results (inside artifact .zip)
-          reporter: jest-junit                                    # Format of test results       
-  
+          reporter: jest-junit                                    # Format of test results
+
+      - name: 'Run Krnlmon Unit tests'
+        run: |
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe/build
+             ctest
+             more Testing/Temporary/LastTest.log
+
   run_ovs_unittests:
     timeout-minutes: 30
     runs-on: ubuntu-20.04
