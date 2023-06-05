@@ -145,7 +145,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ovs-ut-result
-          path: ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs/test/tests/testsuite.log       
+          path: ipdk.recipe/ovs/ovs/test/tests/testsuite.log       
     
   py_bandit_test:
      timeout-minutes: 10
