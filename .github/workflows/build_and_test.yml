@@ -90,8 +90,17 @@ jobs:
              chmod +x bazel-4.2.3-installer-linux-x86_64.sh
              ./bazel-4.2.3-installer-linux-x86_64.sh --user
              export PATH="$PATH:$HOME/bin"
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum          
-             bazel test //stratum/hal/lib/p4:all
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum
+             export DPDK_INSTALL=${GITHUB_WORKSPACE}/install
+             bazel test //stratum/hal/lib/tdi/dpdk --define target=dpdk
+             
+      - name: 'Record Stratum Results'
+        uses: dorny/test-reporter@v1
+        with:
+          artifact: test-results                                  # artifact name
+          name: Stratum Tests                                     # Name of the check run which will be created
+          path: '**/stratum/stratum/bazel-testlogs/**/test.xml'   # Path to test results (inside artifact .zip)
+          reporter: jest-junit                                    # Format of test results       
   
   run_ovs_unittests:
     timeout-minutes: 30
