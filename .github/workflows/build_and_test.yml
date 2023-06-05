@@ -137,6 +137,8 @@ jobs:
              ../configure 
              make -j6 V=0
              make check TESTSUITEFLAGS=-j10 || true
+             cd tests
+             pwd
              tree L 3 .
              
       - name: Upload artifact for deployment job
