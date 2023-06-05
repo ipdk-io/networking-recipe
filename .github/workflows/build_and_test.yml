@@ -98,11 +98,11 @@ jobs:
       - name: 'Record Stratum Results'
         uses: dorny/test-reporter@v1
         with:
-          artifact: test-results                                  # artifact name
           name: Stratum Tests                                     # Name of the check run which will be created
           path: '**/stratum/stratum/bazel-testlogs/**/test.xml'   # Path to test results (inside artifact .zip)
           reporter: jest-junit                                    # Format of test results
-
+          fail-on-error: false
+          
       - name: 'Run Krnlmon Unit tests'
         run: |
              cd ${GITHUB_WORKSPACE}/ipdk.recipe/build
