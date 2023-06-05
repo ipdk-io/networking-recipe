@@ -33,7 +33,7 @@ jobs:
         working-directory: ./p4sde/tools/setup
         run: |
               sudo apt update -y
-              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev libatomic1 libnl-route-3-dev curl tree -y
+              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev git libatomic1 libnl-route-3-dev curl tree -y
               pip3 install distro
               python3 install_dep.py
               cmake --version
@@ -54,35 +54,6 @@ jobs:
           submodules: 'recursive'
           path: ipdk.recipe
 
-      - name: 'Compile P4 dpdk target'
-        run: |
-             export SDE=${GITHUB_WORKSPACE}
-             mkdir install deps
-             export SDE_INSTALL=${GITHUB_WORKSPACE}/install
-             cd ${GITHUB_WORKSPACE}/p4sde
-             ./autogen.sh
-             ./configure --prefix=$SDE_INSTALL
-             make -j6
-             make install
-
-      - name: 'Build,Configure and Execute infrap4d dependencies'
-        run: |
-             cmake --version
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe
-             export IPDK_RECIPE=`pwd`
-             cd $IPDK_RECIPE/setup
-             cmake -B build -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/deps
-             cmake --build build -j6
-
-      - name: 'Execute dpdk target build'
-        run: |
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe
-             export IPDK_RECIPE=${GITHUB_WORKSPACE}/ipdk.recipe
-             export SDE_INSTALL=${GITHUB_WORKSPACE}/install
-             export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
-             source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
-             ./make-all.sh --target=dpdk
-             
       - name: 'Run Stratum unit tests'
         run: |
              cd /tmp
@@ -91,16 +62,14 @@ jobs:
              ./bazel-4.2.3-installer-linux-x86_64.sh --user
              export PATH="$PATH:$HOME/bin"
              cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum
-             export DPDK_INSTALL=${GITHUB_WORKSPACE}/install
-             echo "DPDK" > ${GITHUB_WORKSPACE}/install/share/TARGET
-             xargs -a ${GITHUB_WORKSPACE}/ipdk.recipe/.github/starter-set.txt bazel test --define target=dpdk
+             bazel test //stratum/hal/lib/p4:all
              
       - name: 'Record Stratum Results'
         uses: dorny/test-reporter@v1
         with:
           name: Stratum Tests                                     # Name of the check run which will be created
           path: '**/stratum/stratum/bazel-testlogs/**/test.xml'   # Path to test results (inside artifact .zip)
-          reporter: jest-junit                                    # Format of test results
+          reporter: java-junit                                    # Format of test results
           fail-on-error: false
           
       - name: 'Run Krnlmon Unit tests'
