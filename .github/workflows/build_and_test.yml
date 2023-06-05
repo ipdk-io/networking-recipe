@@ -33,7 +33,7 @@ jobs:
         working-directory: ./p4sde/tools/setup
         run: |
               sudo apt update -y
-              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev libatomic1 libnl-route-3-dev curl -y
+              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev libatomic1 libnl-route-3-dev curl tree -y
               pip3 install distro
               python3 install_dep.py
               cmake --version
@@ -137,12 +137,7 @@ jobs:
              ../configure 
              make -j6 V=0
              make check TESTSUITEFLAGS=-j10 || true
-      - name: 'List log files'
-        run: | 
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe/ovs/ovs/
-             cd test/tests
-             pwd
-             ls -ltr | grep *.log
+             tree L 3 .
              
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
