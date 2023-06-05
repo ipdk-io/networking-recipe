@@ -5,6 +5,19 @@
 This is an update (code drop) to incorporate changes made to support
 the Intel IPU E2100.
 
+## Breaking Changes
+
+- The `make-all.sh` helper script has been rewritten and its options have
+  changed. The new script is not backward compatible with the old script.
+  See [make-all script](#make-all-script) for details.
+
+- `infrap4d` now defaults to secure (TLS) mode, which requires that you
+  provide a certificate or override secure mode on startup. See
+  [Security improvements](#security-improvements) for more information.
+
+- P4 Control Plane currently uses a modified fork of the `p4runtime` repository.
+  See [P4runtime fork](#p4runtime-fork) for more information.
+
 ## What's Changed
 
 ### Highlights
@@ -54,7 +67,7 @@ Setup changes:
 - Add `make-cross-deps.sh` and `make-host-deps.sh` helper scripts to assist
   with building host and cross-compiled dependencies
 
-### make-all.sh
+### make-all script
 
 The `make-all.sh` helper script has been rewritten to be more consistent
 and provide better control over the underlying build.
@@ -181,7 +194,7 @@ renamed.
 ## Coming Attractions
 
 - Rename 'ES2K' to a more generic label
-  - Will effect file, directory, and class names
+  - Will affect file, directory, and class names
 - Add Stratum and Kernel Monitor unit tests
-- Add documentation
+- Add/revise documentation
 - Update Stratum to a more recent version
