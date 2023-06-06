@@ -6,6 +6,8 @@
 
 include(FindProtobuf)
 
+option(INSTALL_PROTO_FILES "Install .proto files" OFF)
+
 #############################
 # Find Protobuf executables #
 #############################
