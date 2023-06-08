@@ -903,20 +903,50 @@ def parse_match_key_ternary(matchkey):
     return match_keys, priority
 
 
-def parse_action(action):
+def parse_action(action, helper):
     """
     Accepted input types for action values are
     IP - String, Hex or Decimal
     MAC - String, Hex or Decimal
     Other - Hex Or Decimal
     """
-
     act_fields = action.split('(')
     action_name = act_fields[0]
     if (len(act_fields) > 1):
 
         params = act_fields[1].split(')')[0]
         act_data = params.split(',')
+
+        # One limitation with this client code is, user should pass all the
+        # action params associated with an action. Especially in case of lookup
+        # entries, we will have more params. Example mirroring.p4 program has
+        # around 45 params. Even though user is not going to program all
+        # params, current code expects user to program all 45 params.
+        # To avoid this, a logic is added where user can pass comma seperated
+        # <action_param_name>=<action_param_value>, this code will loop through
+        # available params and add values accordingly. Params which are not
+        # specified by user will default to 0.
+        #
+        # Existing command:
+        # action=my_control.mir_prof_action(0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,1,1,
+        #                                   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        #                                   0,0,0,0,0,0,0,0,0)
+        #
+        # Command after the change:
+        # action=my_control.mir_prof_action(port_id=1,mode=0,port_dest_type=0,
+        #                                   dest_id=1,func_valid=1,store_vsi=1)
+        if act_data[0].find('=') != -1:
+            act_values = act_data
+            for av in helper.p4info.actions:
+                pre = av.preamble
+                if pre.name == action_name:
+                    act_data = ['0']*len(av.params)
+                    for p in av.params:
+                        for act in act_values:
+                            act_info = act.split('=')
+                            if p.name == act_info[0]:
+                                act_data[p.id-1]=act_info[1]
+
         act_data = [encodeIPv4_base10(a) if matchesIPv4(a) else
             (int.from_bytes(encodeIPv6(a), "big") if matchesIPv6(a) else
             (int.from_bytes(encodeMac(a), "big") if matchesMac(a) else
@@ -941,22 +971,22 @@ def parse_vlut_data(data):
         prof_fields= ['']
     return prof_fields
 
-def parse_flow(flow):
+def parse_flow(flow, helper):
     tmp = flow.split(",action=")
     mk = tmp[0]
     act = tmp[1]
 
     match_keys = parse_match_key(mk)
-    action_name, act_data = parse_action(act)
+    action_name, act_data = parse_action(act, helper)
     return match_keys, action_name, act_data
 
-def parse_flow_ternary(flow):
+def parse_flow_ternary(flow, helper):
     tmp = flow.split(",action=")
     mk = tmp[0]
     act = tmp[1]
 
     match_keys, priority = parse_match_key_ternary(mk)
-    action_name, act_data = parse_action(act)
+    action_name, act_data = parse_action(act, helper)
     return match_keys, priority, action_name, act_data
 
 def parse_vlut_flow_ternary(flow):
@@ -1037,6 +1067,13 @@ def p4ctl_add_entry(client, bridge, tbl_name, flow):
     priority_val = None
     grp_id = 0
     mem_id = 0
+
+    p4info = client.get_p4info()
+    if not p4info:
+        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
+
+    helper = P4InfoHelper(p4info)
+
     if (flow.find("group_id") != -1 or flow.find("member_id") != -1):
         # For TableAction when we use type as action_profile_member_id or
         # action_profile_group_id, p4rt-ctl expects either group_id or
@@ -1045,18 +1082,12 @@ def p4ctl_add_entry(client, bridge, tbl_name, flow):
         match_keys, action, action_data, grp_id, mem_id = parse_flow_as(flow)
     elif (flow.find("priority") != -1):
         # For match_type ternary, we expect priority to be programmed by user.
-        match_keys, priority_val, action, action_data = parse_flow_ternary(flow)
+        match_keys, priority_val, action, action_data = parse_flow_ternary(flow, helper)
     else:
         # For TableAction when we use type as Action, p4rt-ctl expects flow to
         # have an 'action=' configured. In this parse_flow, we use 'action=' as
         # a delimiter.
-        match_keys, action, action_data = parse_flow(flow)
-
-    p4info = client.get_p4info()
-    if not p4info:
-        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
-
-    helper = P4InfoHelper(p4info)
+        match_keys, action, action_data = parse_flow(flow, helper)
 
     te = helper.buildTableEntry(
         table_name=tbl_name,
@@ -1088,6 +1119,13 @@ def p4ctl_mod_entry(client, bridge, tbl_name, flow):
     priority_val = None
     grp_id = 0
     mem_id = 0
+
+    p4info = client.get_p4info()
+    if not p4info:
+        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
+
+    helper = P4InfoHelper(p4info)
+
     if (flow.find("group_id") != -1 or flow.find("member_id") != -1):
         # For TableAction when we use type as action_profile_member_id or
         # action_profile_group_id, p4rt-ctl expects either group_id or
@@ -1096,18 +1134,12 @@ def p4ctl_mod_entry(client, bridge, tbl_name, flow):
         match_keys, action, action_data, grp_id, mem_id = parse_flow_as(flow)
     elif (flow.find("priority") != -1):
         # For match_type ternary, we expect priority to be programmed by user.
-        match_keys, priority_val, action, action_data = parse_flow_ternary(flow)
+        match_keys, priority_val, action, action_data = parse_flow_ternary(flow, helper)
     else:
         # For TableAction when we use type as Action, p4rt-ctl expects flow to
         # have an 'action=' configured. In this parse_flow, we use 'action=' as
         # a delimiter.
-        match_keys, action, action_data = parse_flow(flow)
-
-    p4info = client.get_p4info()
-    if not p4info:
-        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
-
-    helper = P4InfoHelper(p4info)
+        match_keys, action, action_data = parse_flow(flow, helper)
 
     te = helper.buildTableEntry(
         table_name=tbl_name,
