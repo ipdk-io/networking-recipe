@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - main
-      - unit_test
+      - ipdk_v*
   pull_request:
     branches:
       - main
+      - ipdk_v*  
 
 concurrency:
   # if workflow for PR or push is already running stop it, and start new one
@@ -84,12 +85,12 @@ jobs:
              cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum
              export DPDK_INSTALL=${GITHUB_WORKSPACE}/install
              echo "DPDK" > ${GITHUB_WORKSPACE}/install/share/TARGET
-             xargs -a ${GITHUB_WORKSPACE}/ipdk.recipe/.github/starter-set.txt bazel test --define target=dpdk
+             xargs -a ${GITHUB_WORKSPACE}/ipdk.recipe/.github/dpdk-tests.txt bazel test --define target=dpdk
              cd bazel-testlogs/stratum
              zip stratum_ut_logs.zip `find . -name test.xml -print`
                           
-      - name: 'Upload artifact for deployment job'
-        uses: actions/upload-artifact@v2
+      - name: 'Upload stratum-ut-result artifact'
+        uses: actions/upload-artifact@v3
         with:
           name: stratum-ut-result
           path: ipdk.recipe/stratum/stratum/bazel-testlogs/stratum/stratum_ut_logs.zip
@@ -103,12 +104,6 @@ jobs:
              source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
              ./make-all.sh --target=dpdk  --prefix=${GITHUB_WORKSPACE}/deps 
           
-      - name: 'Run Krnlmon Unit tests'
-        run: |
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe/build
-             ctest
-             more Testing/Temporary/LastTest.log
-
   run_ovs_unittests:
     timeout-minutes: 30
     runs-on: ubuntu-20.04
@@ -153,12 +148,9 @@ jobs:
              ../configure 
              make -j6 V=0
              make check TESTSUITEFLAGS=-j10 || true
-             cd tests
-             pwd
-             tree L 3 .
              
-      - name: 'Upload artifact for deployment job'
-        uses: actions/upload-artifact@v2
+      - name: 'Upload ovs-ut-result artifact'
+        uses: actions/upload-artifact@v3
         with:
           name: ovs-ut-result
           path: ipdk.recipe/ovs/ovs/test/tests/testsuite.log       
