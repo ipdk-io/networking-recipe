@@ -83,6 +83,21 @@ sudo ./scripts/es2k/set_hugepages.sh
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
+#### Modify the conf file
+
+Update `/usr/share/stratum/es2k/es2k_skip_p4.conf` with CPF BDF as per your setup.
+User can get CPF BDF by running `lspci | grep 1453`
+Note: max vport you can pass here from [0-6] "eal-args": "--lcores=1-2 -a <cpf_bdf>,vport=[0-1] -- -i --rxq=1 --txq=1 --hairpinq=1 --hairpin-mode=0x0"
+
+Eg. "eal-args": "--lcores=1-2 -a 00:01.6,vport=[0-1] -- -i --rxq=1 --txq=1 --hairpinq=1 --hairpin-mode=0x0"
+
+We give options to each process to request numbers of configure queues before starting the process
+
+Admin must set cfgqs-idx between 0-15. See the latest es2k_skip_p4.conf for the exact syntax.
+If you want 16 cfgqs, use "cfgqs-idx": "0-15". Specify the range as a string. Index numbers from 0 to 15 are supported.
+In multi process environment, user should plan and split the queues between primary and secondary processes and specify
+the range with cfgqs-idx parameter. Total number of queues split between processes should not exceed 16.
+
 #### Run the infrap4d daemon
 
 ```bash
