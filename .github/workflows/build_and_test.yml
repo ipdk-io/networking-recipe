@@ -33,7 +33,7 @@ jobs:
         working-directory: ./p4sde/tools/setup
         run: |
               sudo apt update -y
-              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev git libatomic1 libnl-route-3-dev curl tree -y
+              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev git zip libatomic1 libnl-route-3-dev curl tree -y
               pip3 install distro
               python3 install_dep.py
               cmake --version
@@ -94,12 +94,15 @@ jobs:
              export DPDK_INSTALL=${GITHUB_WORKSPACE}/install
              echo "DPDK" > ${GITHUB_WORKSPACE}/install/share/TARGET
              xargs -a ${GITHUB_WORKSPACE}/ipdk.recipe/.github/starter-set.txt bazel test --define target=dpdk
+             cd bazel-testlogs/stratum
+             zip stratum_ut_logs.zip `find . -name test.xml -print`
+             
              
       - name: 'Upload artifact for deployment job'
         uses: actions/upload-artifact@v2
         with:
           name: stratum-ut-result
-          path: ipdk.recipe/stratum/stratum/bazel-testlogs/**/test.xml
+          path: ipdk.recipe/stratum/stratum/bazel-testlogs/stratum/stratum_ut_logs.zip
           
       - name: 'Run Krnlmon Unit tests'
         run: |
@@ -155,7 +158,7 @@ jobs:
              pwd
              tree L 3 .
              
-      - name: Upload artifact for deployment job
+      - name: 'Upload artifact for deployment job'
         uses: actions/upload-artifact@v2
         with:
           name: ovs-ut-result
