@@ -72,16 +72,7 @@ jobs:
              export IPDK_RECIPE=`pwd`
              cd $IPDK_RECIPE/setup
              cmake -B build -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/deps
-             cmake --build build -j6
-
-      - name: 'Execute dpdk target build'
-        run: |
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe
-             export IPDK_RECIPE=${GITHUB_WORKSPACE}/ipdk.recipe
-             export SDE_INSTALL=${GITHUB_WORKSPACE}/install
-             export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
-             source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
-             ./make-all.sh --target=dpdk    
+             cmake --build build -j6   
 
       - name: 'Run Stratum unit tests'
         run: |
@@ -96,13 +87,21 @@ jobs:
              xargs -a ${GITHUB_WORKSPACE}/ipdk.recipe/.github/starter-set.txt bazel test --define target=dpdk
              cd bazel-testlogs/stratum
              zip stratum_ut_logs.zip `find . -name test.xml -print`
-             
-             
+                          
       - name: 'Upload artifact for deployment job'
         uses: actions/upload-artifact@v2
         with:
           name: stratum-ut-result
           path: ipdk.recipe/stratum/stratum/bazel-testlogs/stratum/stratum_ut_logs.zip
+          
+      - name: 'Execute dpdk target build'
+        run: |
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe
+             export IPDK_RECIPE=${GITHUB_WORKSPACE}/ipdk.recipe
+             export SDE_INSTALL=${GITHUB_WORKSPACE}/install
+             export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
+             source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+             ./make-all.sh --target=dpdk  --prefix=${GITHUB_WORKSPACE}/deps 
           
       - name: 'Run Krnlmon Unit tests'
         run: |
