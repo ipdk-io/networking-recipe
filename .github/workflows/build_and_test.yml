@@ -53,6 +53,35 @@ jobs:
         with:
           submodules: 'recursive'
           path: ipdk.recipe
+          
+      - name: 'Compile P4 dpdk target'
+        run: |
+             export SDE=${GITHUB_WORKSPACE}
+             mkdir install deps
+             export SDE_INSTALL=${GITHUB_WORKSPACE}/install
+             cd ${GITHUB_WORKSPACE}/p4sde
+             ./autogen.sh
+             ./configure --prefix=$SDE_INSTALL
+             make -j6
+             make install
+
+      - name: 'Build,Configure and Execute infrap4d dependencies'
+        run: |
+             cmake --version
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe
+             export IPDK_RECIPE=`pwd`
+             cd $IPDK_RECIPE/setup
+             cmake -B build -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/deps
+             cmake --build build -j6
+
+      - name: 'Execute dpdk target build'
+        run: |
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe
+             export IPDK_RECIPE=${GITHUB_WORKSPACE}/ipdk.recipe
+             export SDE_INSTALL=${GITHUB_WORKSPACE}/install
+             export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
+             source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+             ./make-all.sh --target=dpdk    
 
       - name: 'Run Stratum unit tests'
         run: |
@@ -62,13 +91,15 @@ jobs:
              ./bazel-4.2.3-installer-linux-x86_64.sh --user
              export PATH="$PATH:$HOME/bin"
              cd ${GITHUB_WORKSPACE}/ipdk.recipe/stratum/stratum
-             bazel test //stratum/hal/lib/p4:all
+             export DPDK_INSTALL=${GITHUB_WORKSPACE}/install
+             echo "DPDK" > ${GITHUB_WORKSPACE}/install/share/TARGET
+             xargs -a ${GITHUB_WORKSPACE}/ipdk.recipe/.github/starter-set.txt bazel test --define target=dpdk
              
-      - name: 'Record Stratum Results'
-        uses: mikepenz/action-junit-report@v3
-        if: success() || failure()
+      - name: 'Upload artifact for deployment job'
+        uses: actions/upload-artifact@v2
         with:
-          report_paths: '**/stratum/stratum/bazel-testlogs/**/test.xml'
+          name: stratum-ut-result
+          path: ipdk.recipe/stratum/stratum/bazel-testlogs/**/test.xml
           
       - name: 'Run Krnlmon Unit tests'
         run: |
