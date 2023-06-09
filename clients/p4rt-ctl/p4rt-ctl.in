@@ -81,6 +81,12 @@ def usage():
     print(USAGE)
     sys.exit(0)
 
+def valid_ip(address):
+    try:
+        socket.inet_aton(address)
+        return True
+    except:
+        return False
 
 class P4RuntimeErrorFormatException(Exception):
     def __init__(self, message):
@@ -652,6 +658,7 @@ class P4RuntimeClient:
                  election_id=(1, 0)):
         self.device_id = device_id
         self.election_id = election_id
+        grpc_addr = str(grpc_server_addr)
 
         root_ca_file_path = '/usr/share/stratum/certs/ca.crt'
         client_key_file_path = '/usr/share/stratum/certs/client.key'
@@ -1760,24 +1767,38 @@ def validate_args(argv, command, expected_nr):
         raise Exception("p4rt-ctl: '{}' command requires at least {} "
                         "arguments".format(command, expected_nr))
 
+# Global variable
+grpc_server_addr = ""
 
 def main():
+    global grpc_server_addr
     if len(sys.argv) < 2:
         print("p4rt-ctl: missing command name; use --help for help")
         sys.exit(1)
     parser = argparse.ArgumentParser(usage=USAGE)
-    parser.add_argument('command', help='Subcommand to run')
-
-    args = parser.parse_args(sys.argv[1:2])
-    if args.command not in all_commands.keys():
+    parser.add_argument('-g', '--grpc_addr', required=False, type=str, help="P4Runtime gRPC server address, format : <server IP>:<port>")
+    parser.add_argument('command', nargs='*', help='Subcommand to run')
+    args = parser.parse_args()
+    if args.grpc_addr is None:
+        grpc_server_addr = 'localhost:9559'
+    else:
+        ip_addr = args.grpc_addr.split(":");
+        if valid_ip(ip_addr[0]):
+            grpc_server_addr = str(args.grpc_addr)
+        else:
+            print("Invalid IP address for GRPC server ")
+            system.exit(1)
+    if args.command[0] not in all_commands.keys():
         usage()
+
 
     try:
         # use dispatch pattern to invoke method with same name
         # but first validate number of arguments
-        validate_args(sys.argv, command=args.command,
-                      expected_nr=all_commands[args.command][1])
-        all_commands[args.command][0](*sys.argv[2:])
+        validate_args(sys.argv, command=args.command[0],
+                      expected_nr=all_commands[args.command[0]][1])
+        all_commands[args.command[0]][0](*args.command[1:])
+
     except Exception as e:
         print("Error:", str(e))
         sys.exit(1)
