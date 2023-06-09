@@ -1767,6 +1767,7 @@ def validate_args(argv, command, expected_nr):
         raise Exception("p4rt-ctl: '{}' command requires at least {} "
                         "arguments".format(command, expected_nr))
 
+# Global variable
 grpc_server_addr = ""
 
 def main():
