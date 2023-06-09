@@ -80,8 +80,8 @@ print_cmake_params() {
     echo ""
     echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
-    [ -n "${_CMAKE_STAGING_PREFIX}" ] && echo "${_CMAKE_STAGING_PREFIX:2}"
-    [ -n "${_CMAKE_TOOLCHAIN_FILE}" ] && echo "${_CMAKE_TOOLCHAIN_FILE:2}"
+    [ -n "${_STAGING_PREFIX}" ] && echo "${_STAGING_PREFIX:2}"
+    [ -n "${_TOOLCHAIN_FILE}" ] && echo "${_TOOLCHAIN_FILE:2}"
     echo "DEPEND_INSTALL_DIR=${_DEPS_DIR}"
     [ -n "${_HOST_DEPEND_DIR}" ] && echo "${_HOST_DEPEND_DIR:2}"
     echo "OVS_INSTALL_DIR=${_OVS_DIR}"
@@ -103,7 +103,7 @@ config_ovs() {
     cmake -S ovs -B ${_OVS_BLD} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
         -DCMAKE_INSTALL_PREFIX=${_OVS_DIR} \
-        ${_CMAKE_TOOLCHAIN_FILE} \
+        ${_TOOLCHAIN_FILE} \
         -DP4OVS=ON
 }
 
@@ -123,8 +123,8 @@ config_recipe() {
     cmake -S . -B ${_BLD_DIR} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
         -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
-        ${_CMAKE_STAGING_PREFIX} \
-        ${_CMAKE_TOOLCHAIN_FILE} \
+        ${_STAGING_PREFIX} \
+        ${_TOOLCHAIN_FILE} \
         -DDEPEND_INSTALL_DIR=${_DEPS_DIR} \
         ${_HOST_DEPEND_DIR} \
         -DOVS_INSTALL_DIR=${_OVS_DIR} \
@@ -155,7 +155,7 @@ LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
 LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs
 LONGOPTS=${LONGOPTS},coverage,rpath,no-rpath
 
-GETOPTS=`getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
+GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 eval set -- "${GETOPTS}"
 
 # Process command-line options.
@@ -230,7 +230,7 @@ while true ; do
         shift
         break ;;
     *)
-        echo "Internal error!"
+        echo "Invalid parameter: $1"
         exit 1 ;;
     esac
 done
@@ -245,7 +245,7 @@ if [ -z "${_SDE_DIR}" ]; then
 fi
 
 if [ -n "${_STAGING}" ]; then
-    _CMAKE_STAGING_PREFIX=-DCMAKE_STAGING_PREFIX=${_STAGING}
+    _STAGING_PREFIX=-DCMAKE_STAGING_PREFIX=${_STAGING}
 fi
 
 # --host and --toolfile are only used when cross-compiling
@@ -254,7 +254,7 @@ if [ -n "${_HOST_DIR}" ]; then
 fi
 
 if [ -n "${_TOOLFILE}" ]; then
-    _CMAKE_TOOLCHAIN_FILE=-DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}
+    _TOOLCHAIN_FILE=-DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}
 fi
 
 _SET_RPATH=-DSET_RPATH=${_RPATH}

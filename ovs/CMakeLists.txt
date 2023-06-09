@@ -140,6 +140,10 @@ if(CMAKE_TOOLCHAIN_FILE AND NOT CMAKE_TOOLCHAIN_FILE STREQUAL "")
    # print_crosscompile_variables()
 endif()
 
+if(CMAKE_STAGING_PREFIX AND NOT CMAKE_STAGING_PREFIX STREQUAL "")
+    set(DESTDIR DESTDIR=${CMAKE_STAGING_PREFIX})
+endif()
+
 ######################
 # Build Open vSwitch #
 ######################
@@ -173,5 +177,5 @@ ExternalProject_Add(ovs
     # on ovs, so CMake won't continue until the ovs build completes.
     $(MAKE)
   INSTALL_COMMAND
-    ${CMAKE_MAKE_PROGRAM} install
+    ${CMAKE_MAKE_PROGRAM} install ${DESTDIR}
 )

@@ -38,6 +38,7 @@ print_help() {
     echo "  --dry-run        -n  Display cmake parameters and exit"
     echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
     echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
+    echo "  --staging=DIR        Staging directory prefix [${_STAGING}]"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
     echo "* '//' at the beginning of the directory path will be replaced"
@@ -51,9 +52,9 @@ print_help() {
 
 # Parse options
 SHORTOPTS=B:P:T:hj:n
-LONGOPTS=build:,dry-run,help,jobs:,prefix:,toolchain:
+LONGOPTS=build:,dry-run,help,jobs:,prefix:,staging:,toolchain:
 
-eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
+eval set -- $(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 
 while true ; do
     case "$1" in
@@ -72,6 +73,9 @@ while true ; do
     -P|--prefix)
         _PREFIX=$2
         shift 2 ;;
+    --staging)
+        _STAGING=$2
+        shift 2 ;;
     -T|--toolchain)
         _TOOLFILE=$2
         shift 2 ;;
@@ -84,6 +88,10 @@ while true ; do
     esac
 done
 
+if [ -n "${_STAGING}" ]; then
+    _STAGING_PREFIX=-DCMAKE_STAGING_PREFIX=${_STAGING}
+fi
+
 # Substitute ${_SYSROOT}/ for '//' prefix
 [ "${_PREFIX:0:2}" = "//" ] && _PREFIX=${_SYSROOT}/${_PREFIX:2}
 
@@ -91,6 +99,7 @@ if [ "${_DRY_RUN}" = "true" ]; then
     echo ""
     echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
+    [ -n "${_STAGING_PREFIX}" ] && echo "${_STAGING_PREFIX:2}"
     echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
     echo "JOBS=${_JOBS}"
     echo ""
@@ -102,6 +111,7 @@ rm -fr ${_BLD_DIR}
 cmake -S ovs -B ${_BLD_DIR} \
     -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
     -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
+    ${_STAGING_PREFIX} \
     -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE} \
     -DP4OVS=TRUE
 
