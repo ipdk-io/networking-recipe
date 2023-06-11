@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-cmake_minimum_required(VERSION 3.5)
+# Version 3.15 is the baseline for P4 Control Plane.
+cmake_minimum_required(VERSION 3.15)
 
 # CMAKE_BUILD_TYPE must be set before the first project() command.
 set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
