@@ -52,39 +52,7 @@ file(MAKE_DIRECTORY ${PB_OUT_DIR})
 # Target selection options #
 ############################
 
-option(DPDK_TARGET      "Build for DPDK target" OFF)
-option(TOFINO_TARGET    "Build for Tofino target" OFF)
-option(ES2K_TARGET      "Build for ES2K target" OFF)
-
-# Translate target option to TARGETFLAG string.
-# - Use precedence to deal with multiple selections.
-# - Ensure that individual target options are consistent
-#   so we can use them to control the build.
-# - Default to DPDK_TARGET.
-set(_target_action "Building")
-set(_default_target "DPDK_TARGET")
-if(TOFINO_TARGET)
-    set(TARGETFLAG TOFINO_TARGET)
-    set(DPDK_TARGET OFF)
-    set(ES2K_TARGET OFF)
-elseif(DPDK_TARGET)
-    set(TARGETFLAG DPDK_TARGET)
-    set(ES2K_TARGET OFF)
-    set(TOFINO_TARGET OFF)
-elseif(ES2K_TARGET)
-    set(TARGETFLAG ES2K_TARGET)
-    set(DPDK_TARGET OFF)
-    set(TOFINO_TARGET OFF)
-else()
-    set(TARGETFLAG ${_default_target})
-    set(${_default_target} ON)
-    set(_target_action "Defaulting to")
-endif()
-
-message(NOTICE "${_target_action} ${TARGETFLAG}")
-
-unset(_default_target)
-unset(_target_action)
+include(cmake/select_tdi_target.cmake)
 
 ###################
 # Feature toggles #
