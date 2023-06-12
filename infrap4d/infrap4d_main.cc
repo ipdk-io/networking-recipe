@@ -11,7 +11,7 @@ extern "C"  {
 #include "daemon/daemon.h"
 }
 
-DEFINE_bool(detach, true, "Run infrap4d in attached mode");
+DEFINE_bool(detach, true, "Run infrap4d in detached mode");
 DEFINE_bool(disable_krnlmon, false, "Run infrap4d without krnlmon support");
 
 int main(int argc, char* argv[]) {
