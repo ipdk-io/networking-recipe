@@ -51,7 +51,7 @@ COMMON_NAME=localhost ./generate-certs.sh
 ```
 
 * Copy the generated ca.crt, stratum.crt, and stratum.key to the server
-  running infraP4D
+  running infrap4d
 * Copy the generated ca.crt, client.crt, and client.key to the gRPC client
   machine
 
@@ -100,7 +100,7 @@ More info on these values can be found on [this gRPC library documentation page]
 
 Ports can be opened in insecure mode if needed. This is controlled
 by a flag that needs to be enabled at runtime. Change the
-`grpc_open_insecure_ports` value to `true` to allow insecure communication
+`grpc_open_insecure_mode` value to `true` to allow insecure communication
 Also, make sure `certs` directory is removed from the default location mentioned
 above.
 
