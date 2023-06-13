@@ -13,24 +13,11 @@ that you use secure ports in production systems.
 
 ### Secure-by-default (TLS-mode)
 
-P4CP is launched only with gRPC ports open secured via TLS certificates.
+infrap4d is launched with gRPC ports secured via TLS certificates.
 The port numbers are:
 
-* 9339 - an IANA-registered port for gNMI and gNOI
+* 9339 - an IANA-registered port for gNMI
 * 9559 - an IANA-registered port for P4RT
-
-### Generating TLS certificates and installing with script
-
-A script is available to generate and install the certificates in order to
-establish gRPC secure-mode communication. This setup script uses
-preconfigured options and uses OpenSSL to generate the certificate and key files.
-
-To run the script, which generates certificate and key files and installs to
-a default location:
-
-```bash
-$IPDK_RECIPE/scripts/security/setup_certs_tls_mode.sh
-```
 
 ### Generating TLS certificates and installing manually
 
@@ -52,7 +39,7 @@ All certificates are in PEM format.
 
 To generate the TLS certificates:
 
-* Review the files to verify if configuration settings are as-desired
+* Review the files `ca.conf` and `grpc-client.conf`, to verify that the configuration settings are as desired
 * Run the generate-certs.sh script with following command:
 
 ```bash
@@ -64,7 +51,7 @@ COMMON_NAME=localhost ./generate-certs.sh
 ```
 
 * Copy the generated ca.crt, stratum.crt, and stratum.key to the server
-  running InfraP4D
+  running infrap4d
 * Copy the generated ca.crt, client.crt, and client.key to the gRPC client
   machine
 
@@ -96,8 +83,8 @@ $IPDK_RECIPE/install/sbin/infrap4d \
 ### Client certificate verification
 
 infrap4d requires connecting gRPC clients to send a valid certificate
-that can be verified. A flag is available to tune the level
-of security required. The available values are:
+that can be verified. A flag is available to tune the level of security required.
+The available values are:
 
 ```text
 NO_REQUEST_CLIENT_CERT
@@ -113,11 +100,11 @@ More info on these values can be found on [this gRPC library documentation page]
 
 Ports can be opened in insecure mode if needed. This is controlled
 by a flag that needs to be enabled at runtime. Change the
-`grpc_open_insecure_ports` value to `true` to open insecure ports.
+`grpc_open_insecure_mode` value to `true` to allow insecure communication
 Also, make sure `certs` directory is removed from the default location mentioned
 above.
 
-To launch infrap4d with insecure ports 9339 and 9559 open:
+To launch infrap4d in insecure mode:
 
 ```bash
 $IPDK_RECIPE/install/sbin/infrap4d  -grpc_open_insecure_mode=true
@@ -132,18 +119,23 @@ by the ca.crt (can copy the generated files from the server if client is not
 on the same system as server).
 
 ### P4RT client
-
-The p4rt-ctl (P4RT client) will default to communicate via secure mode
-(port 9559). If certificates are not available, the P4RT client will attempt a
+The P4Runtime Control client will default to communicating in secure mode using
+port 9559. If certificates are not available, the P4RT client will attempt a
 connection using insecure client credentials as a fallback mechanism. Note that
-the communication may fail if infrap4d runs in secure mode only.
+the communication will fail if only infrap4d runs in secure mode. Both server and
+client must specify insecure mode for this to work.
 
 ### gNMI client
+gnmi-ctl (the gNMI client for DPDK) and sgnmi_cli (the secure gNMI client) issue requests to port 9339.
+If infrap4d is started in insecure mode, a flag must be specified so the client also runs in insecure mode.
 
-The gnmi-ctl or sgnmi_cli (gNMI clients) requests should be directed to port 9339.
-If infrap4d is enabled to run in insecure mode, a flag is available on client side
-to use insecure mode.
-
+For DPDK,
 ```bash
-$IPDK_RECIPE/install//bin/gnmi-ctl set <COMMAND>   -grpc_use_insecure_mode=true
+$IPDK_RECIPE/install/bin/gnmi-ctl set <COMMAND> -grpc_use_insecure_mode=true
 ```
+
+FOR Intel IPU E2100,
+```bash
+$IPDK_RECIPE/install/bin/sgnmi_cli set <COMMAND> -grpc_use_insecure_mode=true
+```
+
