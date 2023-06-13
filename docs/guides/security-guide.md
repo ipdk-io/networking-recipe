@@ -39,7 +39,7 @@ All certificates are in PEM format.
 
 To generate the TLS certificates:
 
-* Review the files `ca.conf` and `grpc-client.conf` to verify if configuration settings are as-desired
+* Review the files `ca.conf` and `grpc-client.conf` to verify that configuration settings are as desired
 * Run the generate-certs.sh script with following command:
 
 ```bash
@@ -119,17 +119,15 @@ by the ca.crt (can copy the generated files from the server if client is not
 on the same system as server).
 
 ### P4RT client
-The p4rt-ctl (P4RT client) will default to communicate via secure mode using
+The P4Runtime Control client will default to communicate via secure mode using
 port 9559. If certificates are not available, the P4RT client will attempt a
 connection using insecure client credentials as a fallback mechanism. Note that
-the communication may fail if infrap4d runs in secure mode only. Both server and
-client should specify insecure mode for this to work.
+the communication will fail if infrap4d runs in secure mode only. Both server and
+client must specify insecure mode for this to work.
 
 ### gNMI client
-
-The gnmi-ctl(gNMI client for DPDK) or sgnmi_cli (gNMI client for Intel IPU E2100) requests
-are directed to port 9339. If infrap4d is run in insecure mode, a flag is available on client side
-to use insecure mode.
+gnmi-ctl (the gNMI client for DPDK) and sgnmi_cli (the secure gNMI client) issue requests to port 9339.
+If infrap4d is started in insecure mode, a flag must be specified so the client also runs in insecure mode.
 
 For DPDK,
 ```bash
