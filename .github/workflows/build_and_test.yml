@@ -102,7 +102,7 @@ jobs:
              export SDE_INSTALL=${GITHUB_WORKSPACE}/install
              export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
              source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
-             ./make-all.sh --target=dpdk  --prefix=${GITHUB_WORKSPACE}/deps 
+             ./make-all.sh --target=dpdk  --prefix=${GITHUB_WORKSPACE}/dpdk-target 
           
   py_bandit_test:
      timeout-minutes: 10
