@@ -46,6 +46,17 @@ set(HOST_DEPEND_DIR "" CACHE PATH "Host dependencies install directory")
 
 set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
+
+set(NW_RECIPE_SOURCE_DIR "${CMAKE_SOURCE_DIR}" CACHE PATH
+    "Networking recipe source directory")
+
+set(NW_RECIPE_INSTALL_DIR "ENV{P4CP_INSTALL}" CACHE PATH
+    "Networking recuoe install directory")
+
+if(NW_RECIPE_INSTALL_DIR STREQUAL "")
+    message(FATAL_ERROR "NW_RECIPE_INSTALL_DIR not defined, set P4CP_INSTALL \
+	        environment variable")
+endif()
 file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
 ############################
@@ -250,3 +261,9 @@ add_subdirectory(clients)
 if(WITH_OVSP4RT)
     add_subdirectory(ovs-p4rt)
 endif()
+
+#######################
+# configuration files #
+#######################
+
+add_subdirectory(config)
