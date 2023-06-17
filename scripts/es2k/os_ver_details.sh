@@ -1,9 +1,16 @@
-#!/bin/bash
 #Copyright (C) 2021-2022 Intel Corporation
 #SPDX-License-Identifier: Apache-2.0
 
+#
+# Defines get_os_ver_details() and get_num_cores() functions
+# for use by other bash scripts.
+#
+# Source this file, don't run it.
+#
+
 set -e
 
+# Returns distribution name and version.
 get_os_ver_details()
 {
   if [ -f /etc/os-release ]; then
@@ -36,10 +43,10 @@ get_os_ver_details()
 }
 
 #
-# NOTE: We set NUM_THREADS to NUM_CORES / 4 to ensure the build process doesn't overrun
-#       the amount of memory on the build host. It's not an exact science, but it helps
-#       prevent the OOM process from killing compilers and causing issues with the
-#       build.
+# NOTE: We set NUM_THREADS to (NUM_CORES / 4) to ensure that the build process
+# doesn't exceed the amount of memory on the build host. It's not an exact
+# science, but it helps prevent the Out of Memory (OOM) manager from killing
+# compilers and causing issues with builds.
 #
 get_num_cores()
 {
