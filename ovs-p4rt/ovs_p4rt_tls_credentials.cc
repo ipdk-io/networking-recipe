@@ -4,12 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "ovs_p4rt_tls_credentials.h"
-#include <string>
-#include <iostream>
 
 #include <sys/stat.h>
 
-namespace ovs_p4rt_cpp {
+#include <iostream>
+#include <string>
+
+namespace ovs_p4rt {
 
 using ::grpc::experimental::FileWatcherCertificateProvider;
 using ::grpc::experimental::TlsChannelCredentialsOptions;
@@ -17,7 +18,7 @@ using ::grpc::experimental::TlsChannelCredentialsOptions;
 bool IsRegularFile(const std::string& filename) {
   struct stat buf;
   int rc = lstat(filename.c_str(), &buf);
-  return (rc==0 && S_ISREG(buf.st_mode));
+  return (rc == 0 && S_ISREG(buf.st_mode));
 }
 
 std::shared_ptr<::grpc::ChannelCredentials> GenerateClientCredentials() {
@@ -25,20 +26,19 @@ std::shared_ptr<::grpc::ChannelCredentials> GenerateClientCredentials() {
   // If files are not present or not accesible, load insecure credentials
   std::shared_ptr<::grpc::ChannelCredentials> client_credentials_;
 
-  if (IsRegularFile(ca_cert_file) &&
-      IsRegularFile(client_cert_file) &&
+  if (IsRegularFile(ca_cert_file) && IsRegularFile(client_cert_file) &&
       IsRegularFile(client_key_file)) {
-        auto certificate_provider =
-              std::make_shared<FileWatcherCertificateProvider>(
-                  client_key_file, client_cert_file, ca_cert_file,
-                  kFileRefreshIntervalSeconds);
-        auto tls_opts = std::make_shared<TlsChannelCredentialsOptions>();
-        tls_opts->set_certificate_provider(certificate_provider);
-        tls_opts->watch_root_certs();
-        if (!ca_cert_file.empty() && !client_key_file.empty()) {
-          tls_opts->watch_identity_key_cert_pairs();
-        }
-        client_credentials_ = ::grpc::experimental::TlsCredentials(*tls_opts);
+    auto certificate_provider =
+        std::make_shared<FileWatcherCertificateProvider>(
+            client_key_file, client_cert_file, ca_cert_file,
+            kFileRefreshIntervalSeconds);
+    auto tls_opts = std::make_shared<TlsChannelCredentialsOptions>();
+    tls_opts->set_certificate_provider(certificate_provider);
+    tls_opts->watch_root_certs();
+    if (!ca_cert_file.empty() && !client_key_file.empty()) {
+      tls_opts->watch_identity_key_cert_pairs();
+    }
+    client_credentials_ = ::grpc::experimental::TlsCredentials(*tls_opts);
   } else {
     client_credentials_ = ::grpc::InsecureChannelCredentials();
     printf("Using insecure client credentials!\n");
@@ -46,4 +46,4 @@ std::shared_ptr<::grpc::ChannelCredentials> GenerateClientCredentials() {
   return client_credentials_;
 }
 
-}  // namespace ovs_p4rt_cpp
+}  // namespace ovs_p4rt
