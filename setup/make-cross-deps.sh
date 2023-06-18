@@ -52,7 +52,7 @@ print_help() {
     echo "  --sudo               Use sudo when installing (Default: false)"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
-    echo "* '//' at the beginning of a directory path will be replaced"
+    echo "* '//' at the beginning of the directory path will be replaced"
     echo "  with the sysroot directory path."
     echo ""
     echo "Environment variables:"
