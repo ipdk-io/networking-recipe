@@ -91,6 +91,27 @@ services that are available for a p4runtime client.
 For information on security and enabling TLS on gRPC ports, refer to
 guides/security-guide.md
 
+.. code-block:: text
+
+   Usage: p4rt-ctl [OPTIONS] COMMAND [ARG...]
+
+   positional arguments:
+     command               Subcommand to run
+
+   optional arguments:
+     -h, --help            show this help message and exit
+     -g, --grpc_addr       GRPC_ADDR P4Runtime gRPC server address, format : <server IP>:<port>
+
+Details about the isupported option (``-g`` GRPC_ADDR)
+------------------------------------------------------
+This is an optional parameter. The default value is 127.0.0.1:9559. If the P4Runtime server
+is not running locally, you can specify the address using this option.
+
+For example, if the server is listening on ``5.5.5.5:9559``, the command to set the pipeline will be:
+ ``p4rt-ctl -g 5.5.5.5:9559 set-pipe sample.pb.bin p4Info.txt``
+
+Details about the supported commands
+------------------------------------
 1. Set a forwarding pipeline::
 
     $ p4rt-ctl set-pipe SWITCH PROGRAM P4INFO
