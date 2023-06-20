@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.15)
 # CMAKE_BUILD_TYPE must be set before the first project() command.
 set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
 
-project(networking-recipe VERSION 23.01 LANGUAGES C CXX)
+project(networking-recipe VERSION 23.07 LANGUAGES C CXX)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -30,11 +30,8 @@ cmake_print_variables(CMAKE_STAGING_PREFIX)
 set(DEPEND_INSTALL_DIR "$ENV{DEPEND_INSTALL}" CACHE PATH
     "Dependencies install directory")
 
-set(OVS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH
+set(OVS_INSTALL_DIR "$ENV{OVS_INSTALL}" CACHE PATH
     "OVS install directory")
-
-set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
-    "OVS source directory")
 
 set(SDE_INSTALL_DIR "$ENV{SDE_INSTALL}" CACHE PATH
     "SDE install directory")
@@ -178,6 +175,13 @@ elseif(ES2K_TARGET)
     include(es2k-driver)
 elseif(TOFINO_TARGET)
     include(tofino-driver)
+endif()
+
+if(WITH_OVSP4RT)
+    if(OVS_INSTALL_DIR STREQUAL "")
+        message(FATAL_ERROR "OVS_INSTALL_DIR not defined!")
+    endif()
+    find_package(OVS)
 endif()
 
 ########################
