@@ -39,6 +39,12 @@ set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
 set(SDE_INSTALL_DIR "$ENV{SDE_INSTALL}" CACHE PATH
     "SDE install directory")
 
+if(SDE_INSTALL_DIR STREQUAL "")
+    message(FATAL_ERROR "SDE_INSTALL_DIR (SDE_INSTALL) not defined!")
+elseif(DEPEND_INSTALL_DIR STREQUAL "")
+    message(FATAL_ERROR "DEPEND_INSTALL_DIR (DEPEND_INSTALL) not defined!")
+endif()
+
 set(HOST_DEPEND_DIR "" CACHE PATH "Host dependencies install directory")
 
 set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
