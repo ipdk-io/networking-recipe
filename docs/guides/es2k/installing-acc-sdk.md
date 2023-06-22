@@ -1,4 +1,4 @@
-# Installing the AARCH64 SDK
+# Installing the ACC SDK
 
 ## Overview
 
@@ -17,7 +17,7 @@ The SDK includes the following:
 
 ## Obtain the ACC-RL SDK
 
-You wukk need to obtain the software packages for the Intel&reg; IPU E2100
+You will need to obtain the software packages for the Intel&reg; IPU E2100
 from the manufacturer.
 
 The ACC-RL SDK package is a tarball whose name ends in `acc-rl-sdk`, such
@@ -43,6 +43,12 @@ Each time you wish to use the SDK in a new shell session, you need to source the
  $ . /home/peabody/acc-sdk/environment-setup-aarch64-intel-linux-gnu
 $ popd
 ```
+
+**Note:** The `environment-setup-aarch64-intel-linux-gnu` and
+`CrossCompile.cmake` files are used to build the SDK.
+
+We recommend using different control files to build P4 Control Plane. See
+[Cross-Compiling for ACC](cross-compiling-for-acc.md) for more information.
 
 ## Key Components
 
