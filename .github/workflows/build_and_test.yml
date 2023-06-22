@@ -73,9 +73,9 @@ jobs:
              export IPDK_RECIPE=`pwd`
              cd $IPDK_RECIPE/setup
              cmake -B build -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/deps
-             cmake --build build -j6   
+             cmake --build build -j6
 
-      - name: 'Run Stratum unit tests'
+      - name: 'Install bazel and run Stratum unit tests'
         run: |
              cd /tmp
              curl -o bazel-4.2.3-installer-linux-x86_64.sh https://github.com/bazelbuild/bazel/releases/download/4.2.3/bazel-4.2.3-installer-linux-x86_64.sh
