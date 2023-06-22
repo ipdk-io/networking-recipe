@@ -6,10 +6,12 @@
 
 ## 1. Overview
 
-This document explains how to install Intel® IPU E2100 P4 Compiler `p4c-pna-xxp`and Intel® Configurable Pipeline Tool `cpt` to build P4 artifacts.
+This document explains how to install Intel® IPU E2100 P4 Compiler
+`p4c-pna-xxp`and Intel® Configurable Pipeline Tool `cpt` to build P4 artifacts.
 
 ## 2. Install compiler and tools
-Install the `cpt`, `p4c` and `p4-sde` using prebuilt RPMs available as part of release package on Fedora 37 x86_64 server.
+Install the `cpt`, `p4c` and `p4-sde` using prebuilt RPMs available as part of
+release package on Fedora 37 x86_64 server.
 
   ```bash
   # Extract RPMs from the tarball
@@ -22,7 +24,8 @@ Install the `cpt`, `p4c` and `p4-sde` using prebuilt RPMs available as part of r
   dnf localinstall p4-sde*.rpm --allowerasing
   
   ```
-  - Note: Default location for installed packages is `/usr/bin` and these rpms are not relocatable
+  - Note: Default location for installed packages is under `/usr` and these rpms
+are not relocatable
 
 - After installing the RPMs, confirm the version of the cpt and p4c-pna-xxp.
 
@@ -39,7 +42,8 @@ Install the `cpt`, `p4c` and `p4-sde` using prebuilt RPMs available as part of r
   Version 3.0.70.7
   ```
 
-  Note: If you see boost lib version mismatch while running p4c-pna-xxp, install that boost from source tar ball to fix the problem.
+  Note: If you see boost lib version mismatch while running p4c-pna-xxp, install
+that boost from source tar ball to fix the problem.
   ```bash
   p4c-pna-xxp --version
   p4c-pna-xxp: error while loading shared libraries: \
@@ -47,7 +51,7 @@ Install the `cpt`, `p4c` and `p4-sde` using prebuilt RPMs available as part of r
   No such file or directory
   ```
 
-  - Before compiling boost_1_69_0, make sure your server has Development Tools installed.
+  - Before compiling boost_1_69_0, ensure Development Tools are installed.
    ```bash
    wget https://boostorg.jfrog.io/artifactory/main/release/1.69.0/source/boost_1_69_0.tar.gz
    tar -xf boost_1_69_0.tar.gz
@@ -58,8 +62,10 @@ Install the `cpt`, `p4c` and `p4-sde` using prebuilt RPMs available as part of r
    ```
 
 ## 3. Generate P4 artifacts
-Use the `p4c-pna-xxp` and `cpt` tools installed to create artifacts. See below example for more details for simple_l3_l4_pna.p4.
-Note: More p4 files and corresponding README's are available under `/usr/share/mev_reference_p4_files/`.
+Use the `p4c-pna-xxp` and `cpt` tools installed to create artifacts.
+See below example for more details for simple_l3_l4_pna.p4.
+Note: More p4 files and corresponding README's are available under
+`/usr/share/mev_reference_p4_files/`.
 
     ```bash
     [root@host ~]# ls -l /usr/share/mev_reference_p4_files/
@@ -72,7 +78,8 @@ Note: More p4 files and corresponding README's are available under `/usr/share/m
     drwxr-xr-x. 2 root root 4096 Jun  8 03:21 simple_l2_mod_demo
     drwxr-xr-x. 2 root root 4096 Jun  8 03:21 simple_l3_l4_pna
     ```
-Note: Each P4 program has a README file with instructions to configure Intel IPU pipeline.
+Note: Each P4 program has a README file with instructions to configure Intel
+IPU pipeline.
 
 - Command to generate artifacts
 ```bash
@@ -87,7 +94,8 @@ p4c-pna-xxp -I/usr/lib -I/usr/share/p4c/p4include -I/usr/share/p4c/idpf-lib \
             --context $OUTPUT_DIR/simple_l3_l4_pna.context.json \
             --bfrt $OUTPUT_DIR/simple_l3_l4_pna.bf-rt.json
 ```
-Note: The above commands will generate three files (simple_l3_l4_pna.p4info.txt, simple_l3_l4_pna.bf-rt.json, and simple_l3_l4_pna.context.json)
+Note: The above commands will generate three files (simple_l3_l4_pna.p4info.txt,
+simple_l3_l4_pna.bf-rt.json, and simple_l3_l4_pna.context.json)
 
 - Generate .pkg file using P4 artifacts
 ```bash
