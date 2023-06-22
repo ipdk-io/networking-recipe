@@ -44,12 +44,6 @@ Each time you wish to use the SDK in a new shell session, you need to source the
 $ popd
 ```
 
-**Note:** The `environment-setup-aarch64-intel-linux-gnu` and
-`CrossCompile.cmake` files are used to build the SDK.
-
-We recommend using different control files to build P4 Control Plane. See
-[Cross-Compiling for ACC](cross-compiling-for-acc.md) for more information.
-
 ## Key Components
 
 ### Layout
