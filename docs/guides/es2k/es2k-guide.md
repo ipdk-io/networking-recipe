@@ -42,7 +42,7 @@ config.
 - export SDE_INSTALL=`absolute path for p4 sde install built in previous step`
 
 ```bash
-source ./scripts/es2k/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL 
+source ./scripts/es2k/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
 ```
 
 #### Compile the recipe
@@ -58,6 +58,8 @@ option to make-all.sh. The following examples assume default `install`
 directory for the executables. If not, user will need to specify the
 appropriate path instead of ./install.
 
-### Run Infrap4d
+### Running Infrap4d
 
-See [Run Infrap4d guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/run-infrap4d.md) for step by step guide to run infrap4d on ACC on Intel IPU E2100
+See [Running Infrap4d](https://github.com/ipdk-io/networking-recipe/blob/main/\
+docs/guides/es2k/running-infrap4d.md) for step by step guide to run infrap4d on
+ACC on Intel IPU E2100
