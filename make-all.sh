@@ -43,10 +43,11 @@ print_help() {
     echo "  --ovs=DIR        -O  OVS install directory [${_OVS_DIR}]"
     echo "  --prefix=DIR     -P  Install directory prefix [${_PREFIX}]"
     echo "  --sde=DIR        -S  SDE install directory [${_SDE_DIR}]"
+    echo "  --staging=DIR        Staging directory prefix [${_STAGING}]"
     echo "  --toolchain=FILE -T  CMake toolchain file [${_TOOLFILE}]"
     echo ""
     echo "Options:"
-    echo "  --coverage           Measure unit test code coverage"
+    echo "  --coverage           Instrument build to measure code coverage"
     echo "  --dry-run        -n  Display cmake parameter values and exit"
     echo "  --help           -h  Display this help text"
     echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
@@ -79,6 +80,7 @@ print_cmake_params() {
     echo ""
     echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
+    [ -n "${_CMAKE_STAGING_PREFIX}" ] && echo "${_CMAKE_STAGING_PREFIX:2}"
     [ -n "${_CMAKE_TOOLCHAIN_FILE}" ] && echo "${_CMAKE_TOOLCHAIN_FILE:2}"
     echo "DEPEND_INSTALL_DIR=${_DEPS_DIR}"
     [ -n "${_HOST_DEPEND_DIR}" ] && echo "${_HOST_DEPEND_DIR:2}"
@@ -121,6 +123,7 @@ config_recipe() {
     cmake -S . -B ${_BLD_DIR} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
         -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
+        ${_CMAKE_STAGING_PREFIX} \
         ${_CMAKE_TOOLCHAIN_FILE} \
         -DDEPEND_INSTALL_DIR=${_DEPS_DIR} \
         ${_HOST_DEPEND_DIR} \
@@ -147,7 +150,7 @@ build_recipe() {
 SHORTOPTS=D:H:O:P:S:T:
 SHORTOPTS=${SHORTOPTS}hj:n
 
-LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,target:,toolchain:
+LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,staging:,target:,toolchain:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
 LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs
 LONGOPTS=${LONGOPTS},coverage,rpath,no-rpath
@@ -171,11 +174,11 @@ while true ; do
     -P|--prefix)
         _PREFIX=$2
         shift 2 ;;
-    --rpath)
-        _RPATH=ON
-        shift 1 ;;
     -S|--sde)
         _SDE_DIR=$2
+        shift 2 ;;
+    --staging)
+        _STAGING=$2
         shift 2 ;;
     -T|--toolchain)
         _TOOLFILE=$2
@@ -239,6 +242,10 @@ done
 if [ -z "${_SDE_DIR}" ]; then
     echo "ERROR: SDE_INSTALL not defined!"
     exit 1
+fi
+
+if [ -n "${_STAGING}" ]; then
+    _CMAKE_STAGING_PREFIX=-DCMAKE_STAGING_PREFIX=${_STAGING}
 fi
 
 # --host and --toolfile are only used when cross-compiling

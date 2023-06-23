@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-cmake_minimum_required(VERSION 3.5)
+# Version 3.15 is the baseline for P4 Control Plane.
+cmake_minimum_required(VERSION 3.15)
 
 # CMAKE_BUILD_TYPE must be set before the first project() command.
 set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
@@ -37,6 +38,12 @@ set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
 
 set(SDE_INSTALL_DIR "$ENV{SDE_INSTALL}" CACHE PATH
     "SDE install directory")
+
+if(SDE_INSTALL_DIR STREQUAL "")
+    message(FATAL_ERROR "SDE_INSTALL_DIR (SDE_INSTALL) not defined!")
+elseif(DEPEND_INSTALL_DIR STREQUAL "")
+    message(FATAL_ERROR "DEPEND_INSTALL_DIR (DEPEND_INSTALL) not defined!")
+endif()
 
 set(HOST_DEPEND_DIR "" CACHE PATH "Host dependencies install directory")
 

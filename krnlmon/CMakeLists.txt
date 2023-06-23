@@ -4,8 +4,6 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-cmake_minimum_required(VERSION 3.15)
-
 # Path to SAI source directory (for krnlmon)
 set(SAI_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/SAI" CACHE PATH
     "Path to SAI source directory")

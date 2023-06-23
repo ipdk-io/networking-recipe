@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-cmake_minimum_required(VERSION 3.12)
+# Version 3.15 is the baseline for P4 Control Plane.
+cmake_minimum_required(VERSION 3.15)
 
 project(stratum)
 

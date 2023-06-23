@@ -28,7 +28,7 @@ _BLD_DIR=build
 _CFG_ONLY=false
 _DRY_RUN=false
 _PREFIX=./host-deps
-_NJOBS=6
+_NJOBS=8
 _SCOPE=minimal
 
 print_help() {
@@ -38,7 +38,7 @@ print_help() {
     echo "Options:"
     echo "  --build=DIR     -B  Build directory path (Default: ${_BLD_DIR})"
     echo "  --config            Only perform configuration step (Default: ${_CFG_ONLY})"
-    echo "  --cxx=VERSION   -C  CXX_STANDARD to build dependencies Default: empty)"
+    echo "  --cxx=VERSION       CXX_STANDARD to build dependencies (Default: empty)"
     echo "  --dry-run       -n  Display cmake parameters and exit (Default: false)"
     echo "  --force         -f  Specify -f when patching (Default: false)"
     echo "  --full              Build all dependency libraries (Default: ${_SCOPE})"
@@ -51,15 +51,15 @@ print_help() {
 }
 
 # Parse options
-SHORTOPTS=BPfhj:n
-LONGOPTS=build:,config,cxx:,dry-run,force,full,help,jobs:,minimal,no-download,prefix:,sudo
+SHORTOPTS=B:P:fhj:n
+LONGOPTS=build:,cxx:,jobs:,prefix:
+LONGOPTS=${LONGOPTS},config,dry-run,force,full,help,minimal,no-download,sudo
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
 while true ; do
     case "$1" in
     -B|--build)
-        echo "Build directory: $2"
         _BLD_DIR=$2
         shift 2 ;;
     --config)
@@ -112,7 +112,7 @@ fi
 
 if [ "${_DRY_RUN}" = "true" ]; then
     echo ""
-    echo "Configure options:"
+    echo "Config options:"
     echo "  CMAKE_INSTALL_PREFIX=${_PREFIX}"
     [ -n "${_CXX_STANDARD_OPTION}" ] && echo "  ${_CXX_STANDARD_OPTION:2}"
     [ -n "${_DOWNLOAD}" ] && echo "  ${_DOWNLOAD:2}"
