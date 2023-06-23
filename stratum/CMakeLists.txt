@@ -217,8 +217,6 @@ add_library(stratum_tdi_common_o OBJECT
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_counter_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_id_mapper.h
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_lut_manager.cc
-    ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_lut_manager.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.cc
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_node.h
     ${STRATUM_SOURCE_DIR}/stratum/hal/lib/tdi/tdi_packetio_manager.cc
