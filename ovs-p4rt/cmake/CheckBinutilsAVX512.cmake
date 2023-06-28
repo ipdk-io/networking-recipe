@@ -1,6 +1,6 @@
 # p4ovs/cmake/CheckBinUtilsAVX512.cmake
 #
-# Copyright (c) 2022 Intel Corporation
+# Copyright 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 # Checks for a known issue with AVX512 in binutils.
@@ -8,7 +8,7 @@
 # Adapted from the OVS_CHECK_BINUTILS_AVX512 macro in OvS.
 #
 function(check_binutils_avx512 STATUS_VAR)
-    set(status_var FALSE)
+    set(status_var 0)
 
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
         set(objfile "${CMAKE_BINARY_DIR}/check_avx512.o")
@@ -45,7 +45,7 @@ function(check_binutils_avx512 STATUS_VAR)
 
         # Result code will be zero if grep found a match.
         if(${result_value} STREQUAL "0")
-            set(status_var TRUE)
+            set(status_var 1)
         endif()
 
         file(REMOVE ${objfile})
