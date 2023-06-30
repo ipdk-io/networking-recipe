@@ -106,16 +106,17 @@ jobs:
 
       - name: 'Run Krnlmon Unit Test for DPDK Target'
         run: |
-             cd ${GITHUB_WORKSPACE}/ipdk.recipe/build
-             ctest
-             more Testing/Temporary/LastTest.log
-             zip krnlmon_ut_logs.zip Testing/Temporary/LastTest.log
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe
+             cmake -B build -DDPDK_TARGET=on -DWITH_OVSP4RT=off
+             cmake --build build -j4 --target krnlmon-test
+             more build/Testing/Temporary/LastTest.log
+             zip krnlmon_ut_logs.zip build/Testing/Temporary/LastTest.log
 
       - name: 'Upload krnlmon-ut-result artifact'
         uses: actions/upload-artifact@v3
         with:
           name: stratum-ut-result
-          path: ipdk.recipe/build/krnlmon_ut_logs.zip
+          path: ipdk.recipe/krnlmon_ut_logs.zip
 
   py_bandit_test:
      timeout-minutes: 10
