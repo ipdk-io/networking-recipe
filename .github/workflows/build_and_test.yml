@@ -102,8 +102,21 @@ jobs:
              export SDE_INSTALL=${GITHUB_WORKSPACE}/install
              export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
              source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
-             ./make-all.sh --target=dpdk  --prefix=${GITHUB_WORKSPACE}/dpdk-target 
-          
+             ./make-all.sh --target=dpdk  --prefix=${GITHUB_WORKSPACE}/dpdk-target
+
+      - name: 'Run Krnlmon Unit Test for DPDK Target'
+        run: |
+             cd ${GITHUB_WORKSPACE}/ipdk.recipe/build
+             ctest
+             more Testing/Temporary/LastTest.log
+             zip krnlmon_ut_logs.zip Testing/Temporary/LastTest.log
+
+      - name: 'Upload krnlmon-ut-result artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: stratum-ut-result
+          path: ipdk.recipe/build/krnlmon_ut_logs.zip
+
   py_bandit_test:
      timeout-minutes: 10
      runs-on: ubuntu-20.04
