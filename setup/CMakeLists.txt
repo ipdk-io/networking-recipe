@@ -14,11 +14,11 @@ include(CMakePrintHelpers)
 include(GNUInstallDirs)
 
 # Define git repository tags and urls.
-include(deps.cmake)
+include(cmake/deps.cmake)
 
 # Define default CXX standard
 if(NOT CMAKE_CROSSCOMPILING)
-  include(cxx_standard.cmake)
+  include(cmake/cxx_standard.cmake)
 endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.24 AND
@@ -227,7 +227,7 @@ endif()
 # Protobuf compiler plugins to the relative paths of the library
 # directories.
 set(GRPC_INSTALL_RPATH $ORIGIN/../lib64:$ORIGIN/../lib)
-configure_file(grpc.patch.in ${CMAKE_SOURCE_DIR}/grpc.patch @ONLY)
+configure_file(cmake/grpc.patch.in ${CMAKE_SOURCE_DIR}/grpc.patch @ONLY)
 
 if(CMAKE_CROSSCOMPILING)
   # If we're cross-compiling for the target system, don't build the
