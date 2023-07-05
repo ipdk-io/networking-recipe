@@ -2,17 +2,19 @@
 
 ## Overview
 
-The AARCH64 Software Development Kit (SDK) allows you to use an X86 host
-computer to build P4 Control Plane for use on the ARM Compute Complex
-(ACC) of the Intel&reg; IPU E2100.
+The ACC Software Development Kit (SDK) allows you to use an x86 host
+computer to build P4 Control Plane for the ARM Compute Complex (ACC) of the
+Intel&reg; IPU E2100.
+
+## Contents
 
 The SDK includes the following:
 
-1. GCC C/C++ toolchain. Runs on an X86-64 Linux host and generates binary
-   executables and libraries for an aarch64 target platform.
+1. GCC C/C++ toolchain. Runs on an x86-64 Linux host and generates binary
+   executables and libraries for an AArch64 processor running Rocky Linux.
 2. Target directory tree (sysroot). Provides header files and binaries
-   (libraries and executables) for the aarch64 target platform.
-3. ES2K P4SDE. Contains binaries and header files specific to the
+   (libraries and executables) for the target system.
+3. ES2K P4SDE. Contains header files and binaries specific to the
    Intel&reg; IPU E2100.
 
 ## Obtain the ACC-RL SDK
