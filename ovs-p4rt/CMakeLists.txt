@@ -43,6 +43,8 @@ unset(_save_CMAKE_PREFIX_PATH)
 find_library(LIBVSWITCHD vswitchd REQUIRED)
 find_library(LIBTESTCONTROLLER testcontroller REQUIRED)
 
+find_package(Unbound)
+
 # libunwind appears to be missing in the ACC build
 # include it conditionally
 find_library(LIBUNWIND unwind)
@@ -103,6 +105,10 @@ target_link_libraries(ovs-vswitchd
         rt m pthread
 )
 
+if(TARGET unbound)
+    target_link_libraries(ovs-vswitchd PUBLIC unbound)
+endif()
+
 set_install_rpath(ovs-vswitchd ${EXEC_ELEMENT} ${DEP_ELEMENT})
 
 target_link_libraries(ovs-vswitchd PUBLIC
@@ -146,6 +152,10 @@ target_link_libraries(ovs-testcontroller
         rt
         ${UNWIND}
 )
+
+if(TARGET unbound)
+    target_link_libraries(ovs-testcontroller PUBLIC unbound)
+endif()
 
 target_link_libraries(ovs-testcontroller PUBLIC
     absl::strings
