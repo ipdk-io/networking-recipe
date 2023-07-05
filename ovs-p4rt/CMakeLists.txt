@@ -85,6 +85,8 @@ add_executable(ovs-vswitchd
     $<TARGET_OBJECTS:ovs_sidecar_o>
 )
 
+set_install_rpath(ovs-vswitchd ${EXEC_ELEMENT} ${DEP_ELEMENT})
+
 target_link_libraries(ovs-vswitchd
     PRIVATE
         -Wl,--whole-archive
@@ -97,8 +99,6 @@ target_link_libraries(ovs-vswitchd
         atomic
         rt m pthread
 )
-
-set_install_rpath(ovs-vswitchd ${EXEC_ELEMENT} ${DEP_ELEMENT})
 
 if(TARGET unbound)
     target_link_libraries(ovs-vswitchd PUBLIC unbound)
@@ -148,13 +148,12 @@ target_link_libraries(ovs-testcontroller
         rt
 )
 
-<<<<<<< HEAD
 if(TARGET unbound)
     target_link_libraries(ovs-testcontroller PUBLIC unbound)
-=======
+endif()
+
 if(TARGET unwind)
     target_link_libraries(ovs-testcontroller PUBLIC unwind)
->>>>>>> Use find_package() to locate unwind module
 endif()
 
 target_link_libraries(ovs-testcontroller PUBLIC

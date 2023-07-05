@@ -9,7 +9,10 @@
 #-----------------------------------------------------------------------
 find_package(PkgConfig)
 
-pkg_check_modules(UNBOUND QUIET libunbound)
+pkg_check_modules(UNBOUND libunbound)
+if(NOT UNBOUND_FOUND)
+    return()
+endif()
 
 #-----------------------------------------------------------------------
 # Find libraries and include directories.

@@ -9,7 +9,10 @@
 #-----------------------------------------------------------------------
 find_package(PkgConfig)
 
-pkg_check_modules(UNWIND QUIET libunwind)
+pkg_check_modules(UNWIND libunwind)
+if(NOT UNWIND_FOUND)
+    return()
+endif()
 
 #-----------------------------------------------------------------------
 # Find libraries and include directories.
