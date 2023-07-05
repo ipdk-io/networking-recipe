@@ -44,13 +44,7 @@ find_library(LIBVSWITCHD vswitchd REQUIRED)
 find_library(LIBTESTCONTROLLER testcontroller REQUIRED)
 
 find_package(Unbound)
-
-# libunwind appears to be missing in the ACC build
-# include it conditionally
-find_library(LIBUNWIND unwind)
-if(LIBUNWIND)
-    set(UNWIND unwind)
-endif()
+find_package(Unwind)
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
@@ -91,6 +85,8 @@ add_executable(ovs-vswitchd
     $<TARGET_OBJECTS:ovs_sidecar_o>
 )
 
+set_install_rpath(ovs-vswitchd ${EXEC_ELEMENT} ${DEP_ELEMENT})
+
 target_link_libraries(ovs-vswitchd
     PRIVATE
         -Wl,--whole-archive
@@ -101,7 +97,6 @@ target_link_libraries(ovs-vswitchd
         ${SFLOW_LINK_LIBRARIES}
     PUBLIC
         atomic
-        ${UNWIND}
         rt m pthread
 )
 
@@ -109,7 +104,9 @@ if(TARGET unbound)
     target_link_libraries(ovs-vswitchd PUBLIC unbound)
 endif()
 
-set_install_rpath(ovs-vswitchd ${EXEC_ELEMENT} ${DEP_ELEMENT})
+if(TARGET unwind)
+    target_link_libraries(ovs-vswitchd PUBLIC unwind)
+endif()
 
 target_link_libraries(ovs-vswitchd PUBLIC
     absl::strings
@@ -119,7 +116,6 @@ target_link_libraries(ovs-vswitchd PUBLIC
 )
 
 target_link_libraries(ovs-vswitchd PUBLIC stratum_static)
-#add_dependencies(ovs-vswitchd stratum_static)
 
 target_link_libraries(ovs-vswitchd PUBLIC
     stratum_proto
@@ -150,11 +146,14 @@ target_link_libraries(ovs-testcontroller
     PUBLIC
         atomic
         rt
-        ${UNWIND}
 )
 
 if(TARGET unbound)
     target_link_libraries(ovs-testcontroller PUBLIC unbound)
+endif()
+
+if(TARGET unwind)
+    target_link_libraries(ovs-testcontroller PUBLIC unwind)
 endif()
 
 target_link_libraries(ovs-testcontroller PUBLIC
