@@ -65,7 +65,7 @@ print_help() {
 # Parse command line #
 ######################
 
-SHORTOPTS=B:H:P:T:hj:n
+SHORTOPTS=B:H:P:T:fhj:n
 LONGOPTS=build:,cxx:,hostdeps:,jobs:,prefix:,toolchain:
 LONGOPTS=${LONGOPTS},dry-run,force,help,no-download,sudo
 
