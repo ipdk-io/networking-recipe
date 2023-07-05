@@ -32,7 +32,7 @@ if(UNWIND_VERSION)
 endif()
 
 #-----------------------------------------------------------------------
-# Handle REQUIRED and QUIETLY arguments
+# Handle REQUIRED and QUIET arguments
 #-----------------------------------------------------------------------
 find_package_handle_standard_args(UNWIND
     REQUIRED_VARS
