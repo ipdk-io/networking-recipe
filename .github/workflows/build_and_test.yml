@@ -104,7 +104,7 @@ jobs:
              source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
              ./make-all.sh --target=dpdk  --prefix=${GITHUB_WORKSPACE}/dpdk-target
 
-      - name: 'Run Krnlmon Unit Test for DPDK Target'
+      - name: 'Run Krnlmon Unit Tests for DPDK Target'
         run: |
              cd ${GITHUB_WORKSPACE}/ipdk.recipe
              cmake -B build -DDPDK_TARGET=on -DWITH_OVSP4RT=off
