@@ -3,9 +3,12 @@
 
 # Updated to gRPC v1.54.2
 
-# Patch the gRPC build script to set the RUNPATH of the installed
-# Protobuf compiler plugins to the relative paths of the library
-# directories.
+# 1) Patch the gRPC build script to set the RUNPATH of the installed
+#    Protobuf compiler plugins to the relative paths of the library
+#    directories.
+# 2) Fix a bug in the v1.54.2 build script by suppressing installation of
+#    gRPCPluginTargets if gRPC_BUILD_CODEGEN is FALSE. We can't export
+#    the plugin targets if we haven't built them.
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index b67b7aafae..18d837e301 100644
 --- a/CMakeLists.txt
@@ -30,3 +33,20 @@ index b67b7aafae..18d837e301 100644
  target_compile_features(grpc_python_plugin PUBLIC cxx_std_14)
  target_include_directories(grpc_python_plugin
    PRIVATE
+@@ -25968,10 +25974,12 @@ if(gRPC_INSTALL)
+     DESTINATION ${gRPC_INSTALL_CMAKEDIR}
+     NAMESPACE gRPC::
+   )
+-  install(EXPORT gRPCPluginTargets
+-    DESTINATION ${gRPC_INSTALL_CMAKEDIR}
+-    NAMESPACE gRPC::
+-  )
++  if(gRPC_BUILD_CODEGEN)
++    install(EXPORT gRPCPluginTargets
++      DESTINATION ${gRPC_INSTALL_CMAKEDIR}
++      NAMESPACE gRPC::
++    )
++  endif()
+ endif()
+
+ include(CMakePackageConfigHelpers)
