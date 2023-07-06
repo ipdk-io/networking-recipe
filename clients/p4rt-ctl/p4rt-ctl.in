@@ -1686,7 +1686,7 @@ def _format_dce(ce):
 @with_client
 def p4ctl_get_direct_counter_entry(client, bridge, cnt_tbl_name, flow):
     """
-    get-direct-counter-entry SWITCH COUNTER_TABLE READ_COUNTER_FLOW
+    get-direct-counter SWITCH COUNTER_TABLE READ_COUNTER_FLOW
     Example 1: // return direct counter stats for matching key
         p4rt-ctl get-direct-counter br0 my_control.e_fwd
                     "hdrs.mac[vmeta.common.depth].da="0x000000000275",
@@ -1695,24 +1695,25 @@ def p4ctl_get_direct_counter_entry(client, bridge, cnt_tbl_name, flow):
     p4info = client.get_p4info()
     if not p4info:
         raise Exception("cannot retrieve P4Info from device {}".format(bridge))
+
     key = parse_match_key(flow)
     helper = P4InfoHelper(p4info)
     entity = p4runtime_pb2.Entity()
     ce = entity.direct_counter_entry
     if ce is None:
         raise Exception("Cannot find direct_counter_entry field in entity")
+
     te = helper.buildTableEntry(
          table_name=cnt_tbl_name,
          match_fields=key
      )
+
     ce.table_entry.CopyFrom(te)
     entity.direct_counter_entry.table_entry.CopyFrom(te)
     for response in client.read_one(entity):
         for entry in response.entities:
             if entity.direct_counter_entry.table_entry.table_id == ce.table_entry.table_id:
                 print(_format_dce(entry.direct_counter_entry))
-
-
 
 def validate_counter_name_and_id(p4info, cnt_tbl_name, ctr_id):
     for iter in p4info.counters:
