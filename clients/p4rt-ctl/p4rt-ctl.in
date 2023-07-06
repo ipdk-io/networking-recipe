@@ -74,6 +74,7 @@ for P4Runtime switches:
   get-action-profile-group SWITCH PROFILE FLOW  prints group entries
 
   get-counter SWITCH CTR_TBL CTR_FLOW   gets indirect counter table entry
+  get-direct-counter SWITCH CTR_TBL CTR_FLOW   gets direct counter table entry
   reset-counter SWITCH CTR_TBL CTR_FLOW resets counter table entry
 """
 
@@ -1677,6 +1678,43 @@ def parse_rcflow(flow):
 
     return counter_id, index
 
+def _format_dce(ce):
+    output_buffer = 'table_id={}'.format(ce.table_entry.table_id)
+    output_buffer += ', counter_data=(bytes={},packets={})'.format(ce.data.byte_count, ce.data.packet_count)
+    return output_buffer
+
+@with_client
+def p4ctl_get_direct_counter_entry(client, bridge, cnt_tbl_name, flow):
+    """
+    get-direct-counter SWITCH COUNTER_TABLE READ_COUNTER_FLOW
+    Example 1: // return direct counter stats for matching key
+        p4rt-ctl get-direct-counter br0 my_control.e_fwd
+                    "hdrs.mac[vmeta.common.depth].da="0x000000000275",
+                    hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9b1""
+    """
+    p4info = client.get_p4info()
+    if not p4info:
+        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
+
+    key = parse_match_key(flow)
+    helper = P4InfoHelper(p4info)
+    entity = p4runtime_pb2.Entity()
+    ce = entity.direct_counter_entry
+    if ce is None:
+        raise Exception("Cannot find direct_counter_entry field in entity")
+
+    te = helper.buildTableEntry(
+         table_name=cnt_tbl_name,
+         match_fields=key
+     )
+
+    ce.table_entry.CopyFrom(te)
+    entity.direct_counter_entry.table_entry.CopyFrom(te)
+    for response in client.read_one(entity):
+        for entry in response.entities:
+            if entity.direct_counter_entry.table_entry.table_id == ce.table_entry.table_id:
+                print(_format_dce(entry.direct_counter_entry))
+
 def validate_counter_name_and_id(p4info, cnt_tbl_name, ctr_id):
     for iter in p4info.counters:
         if iter.preamble.name == cnt_tbl_name:
@@ -1790,6 +1828,7 @@ all_commands = {
     "get-action-profile-member": (p4ctl_get_member, 3),
     "get-action-profile-group": (p4ctl_get_group, 3),
     "get-counter" : (p4ctl_get_counter_entry, 2),
+    "get-direct-counter" : (p4ctl_get_direct_counter_entry, 2),
     "reset-counter" : (p4ctl_reset_counter_entry, 2)
 }
 
