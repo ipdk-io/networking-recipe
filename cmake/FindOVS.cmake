@@ -8,7 +8,7 @@
 # Use pkg-config to search for the modules.
 #-----------------------------------------------------------------------
 find_package(PkgConfig)
-pkg_check_modules(PC_OVS QUIET libopenvswitch)
+pkg_check_modules(PC_OVS libopenvswitch)
 
 #-----------------------------------------------------------------------
 # Find libraries and include directories.
@@ -24,17 +24,17 @@ find_library(OVS_LIBRARY
 )
 
 find_library(OFPROTO_LIBRARY
-    names ofproto
+    NAMES ofproto
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
 
 find_library(OVSDB_LIBRARY
-    names ovsdb
+    NAMES ovsdb
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
 
 find_library(SFLOW_LIBRARY
-    names sflow
+    NAMES sflow
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
 

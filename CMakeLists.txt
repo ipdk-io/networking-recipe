@@ -179,7 +179,7 @@ endif()
 
 if(WITH_OVSP4RT)
     if(OVS_INSTALL_DIR STREQUAL "")
-        message(FATAL_ERROR "OVS_INSTALL_DIR not defined!")
+        message(FATAL_ERROR "OVS_INSTALL_DIR (OVS_INSTALL) not defined!")
     endif()
     find_package(OVS)
 endif()
