@@ -89,8 +89,8 @@ if(TARGET unbound)
     target_link_libraries(ovs-vswitchd PUBLIC unbound)
 endif()
 
-if(TARGET unwind)
-    target_link_libraries(ovs-vswitchd PUBLIC unwind)
+if(TARGET unwind::unwind)
+    target_link_libraries(ovs-vswitchd PUBLIC unwind::unwind)
 endif()
 
 target_link_libraries(ovs-vswitchd PUBLIC
@@ -137,8 +137,8 @@ if(TARGET unbound)
     target_link_libraries(ovs-testcontroller PUBLIC unbound)
 endif()
 
-if(TARGET unwind)
-    target_link_libraries(ovs-testcontroller PUBLIC unwind)
+if(TARGET unwind::unwind)
+    target_link_libraries(ovs-testcontroller PUBLIC unwind::unwind)
 endif()
 
 target_link_libraries(ovs-testcontroller PUBLIC
