@@ -118,6 +118,7 @@ The compiler will generate the following files:
 - simple_l3_l4_pna.p4info.txt
 - simple_l3_l4_pna.bf-rt.json
 - simple_l3_l4_pna.context.json
+- simple_l3_l4_pna.s
 
 These files are called _P4 artifacts_.
 
