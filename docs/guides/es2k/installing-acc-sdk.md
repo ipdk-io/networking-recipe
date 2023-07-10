@@ -1,12 +1,10 @@
 # Installing the ACC SDK
 
-## Overview
-
 The ACC Software Development Kit (SDK) allows you to use an x86 host
 computer to build P4 Control Plane for the ARM Compute Complex (ACC) of the
 Intel&reg; IPU E2100.
 
-## Contents
+## 1. Contents
 
 The SDK includes the following:
 
@@ -17,7 +15,7 @@ The SDK includes the following:
 3. ES2K P4SDE. Contains header files and binaries specific to the
    Intel&reg; IPU E2100.
 
-## Obtain the ACC-RL SDK
+## 2. Obtain the ACC-RL SDK
 
 You will need to obtain the software packages for the Intel&reg; IPU E2100
 from the manufacturer.
@@ -25,13 +23,13 @@ from the manufacturer.
 The ACC-RL SDK package is a tarball whose name ends in `acc-rl-sdk`, such
 as `mev-hw-b0-ci-ts.release.3921-acc-rl-sdk.tgz`.
 
-## Choose an Install Location
+## 3. Choose an Install Location
 
 You will need to choose a location for the SDK on your development computer.
 The examples in this document assume you are logged in as user `peabody` and
 that you plan to install the SDK in your home directory.
 
-## Unpack the ACC-RL SDK
+## 4. Unpack the ACC-RL SDK
 
 ```bash
 $ tar xzf mev-hw-b0-ci-ts.release.3921-acc-rl-sdk.tgz
@@ -46,9 +44,9 @@ Each time you wish to use the SDK in a new shell session, you need to source the
 $ popd
 ```
 
-## Key Components
+## 5. Key Components
 
-### Layout
+### 5.1 Layout
 
 The  ACC-RL SDK is laid out as follows:
 
@@ -65,11 +63,11 @@ acc-sdk/
 `-- environment-setup-aarch64-intel-linux-gnu
 ```
 
-### Toolchain
+### 5.2 Toolchain
 
 The cross-compiler suite is in the `aarch64-intel-linux-gnu/bin` directory.
 
-### Sysroot
+### 5.3 Sysroot
 
 The `sysroot` directory is in the inner `aarch64-intel-linux-gnu` directory:
 
@@ -83,7 +81,7 @@ aarch64-intel-linux-gnu/aarch64-intel-linux-gnu/
 └── sysroot
 ```
 
-### P4SDE
+### 5.4 P4SDE
 
 The ES2K P4SDE is in the `sysroot/opt/p4` directory:
 
