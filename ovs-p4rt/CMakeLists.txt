@@ -28,21 +28,6 @@ check_binutils_avx512(HAVE_LD_AVX512_GOOD)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
                "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
-# Update pkg-config search path.
-set(_save_CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})
-list(PREPEND CMAKE_PREFIX_PATH ${OVS_INSTALL_DIR})
-set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
-
-pkg_check_modules(LIBOVS REQUIRED libopenvswitch)
-pkg_check_modules(OFPROTO REQUIRED libofproto)
-pkg_check_modules(SFLOW REQUIRED libsflow)
-
-set(CMAKE_PREFIX_PATH ${_save_CMAKE_PREFIX_PATH})
-unset(_save_CMAKE_PREFIX_PATH)
-
-find_library(LIBVSWITCHD vswitchd REQUIRED)
-find_library(LIBTESTCONTROLLER testcontroller REQUIRED)
-
 find_package(Unbound)
 find_package(Unwind)
 
@@ -90,11 +75,11 @@ set_install_rpath(ovs-vswitchd ${EXEC_ELEMENT} ${DEP_ELEMENT})
 target_link_libraries(ovs-vswitchd
     PRIVATE
         -Wl,--whole-archive
-        ${LIBVSWITCHD}
+        ovs::vswitchd
         -Wl,--no-whole-archive
-        ${OFPROTO_LINK_LIBRARIES}
-        ${LIBOVS_LINK_LIBRARIES}
-        ${SFLOW_LINK_LIBRARIES}
+        ovs::ofproto
+        ovs::openvswitch
+        ovs::sflow
     PUBLIC
         atomic
         rt m pthread
@@ -137,12 +122,12 @@ set_install_rpath(ovs-testcontroller ${EXEC_ELEMENT} ${DEP_ELEMENT})
 target_link_libraries(ovs-testcontroller
     PRIVATE
         -Wl,--whole-archive
-        ${LIBTESTCONTROLLER}
+        ovs::testcontroller
         -Wl,--no-whole-archive
-        ${OFPROTO_LINK_LIBRARIES}
-        ${LIBOVS_LINK_LIBRARIES}
-        ${SFLOW_LINK_LIBRARIES}
-        ${LIBVSWITCHD}
+        ovs::ofproto
+        ovs::openvswitch
+        ovs::sflow
+        ovs::vswitchd
     PUBLIC
         atomic
         rt
