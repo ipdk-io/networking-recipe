@@ -20,7 +20,7 @@ set(GLOG_GIT_URL https://github.com/google/glog.git)
 set(GLOG_GIT_TAG a8e0007e96ff96145022c488e367da10f835c75d) # v0.6.0-rc1
 
 set(GRPC_GIT_URL https://github.com/google/grpc.git)
-set(GRPC_GIT_TAG 90ccf24d22b6fc909a1021ebd89fd8c838467d26) # v1.50.1
+set(GRPC_GIT_TAG 8871dab19b4ab5389e28474d25cfeea61283265c) # v1.54.2
 
 set(GTEST_GIT_URL https://github.com/google/googletest.git)
 set(GTEST_GIT_TAG release-1.11.0)
