@@ -163,6 +163,9 @@ jobs:
       - name: 'Run Krnlmon Unit Tests for DPDK Target'
         run: |
              cd ${GITHUB_WORKSPACE}/ipdk.recipe
+             export IPDK_RECIPE=${GITHUB_WORKSPACE}/ipdk.recipe
+             export SDE_INSTALL=${GITHUB_WORKSPACE}/install
+             export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
              cmake -B build -DDPDK_TARGET=on -DWITH_OVSP4RT=off
              cmake --build build -j4 --target krnlmon-test || true
              more build/Testing/Temporary/LastTest.log
