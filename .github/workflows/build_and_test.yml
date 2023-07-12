@@ -34,7 +34,7 @@ jobs:
         working-directory: ./p4sde/tools/setup
         run: |
               sudo apt update -y
-              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev git zip libatomic1 libnl-route-3-dev curl tree -y
+              sudo apt install  python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev git zip libatomic1 libnl-route-3-dev curl tree -y
               pip3 install distro
               python3 install_dep.py
               cmake --version
@@ -119,7 +119,7 @@ jobs:
         working-directory: ./p4sde/tools/setup
         run: |
               sudo apt update -y
-              sudo apt install python python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev git zip libatomic1 libnl-route-3-dev curl tree -y
+              sudo apt install python3-setuptools python3-pip python3-wheel python3-cffi sudo libssl-dev git zip libatomic1 libnl-route-3-dev curl tree -y
               pip3 install distro
               python3 install_dep.py
               cmake --version
