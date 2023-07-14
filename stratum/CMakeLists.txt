@@ -424,6 +424,7 @@ function(add_stratum_google_libs _TGT)
     target_link_libraries(${_TGT} PUBLIC
         glog
         gflags
+	gpr
         grpc
         protobuf
         grpc++
