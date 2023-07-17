@@ -52,7 +52,7 @@ file(MAKE_DIRECTORY ${PB_OUT_DIR})
 # Target selection options #
 ############################
 
-include(cmake/select_tdi_target.cmake)
+include(SelectTdiTarget)
 
 ###################
 # Feature toggles #
