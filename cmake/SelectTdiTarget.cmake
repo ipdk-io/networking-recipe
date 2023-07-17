@@ -53,31 +53,25 @@ function(_check_legacy_target_option typename TARGETVAR)
         message(NOTICE "${varname} option is deprecated; use TDI_TARGET=${typename} instead.")
         set(${TARGETVAR} ${typename} PARENT_SCOPE)
     endif()
+    # Eradicate legacy target variable.
+    # We will define a new variable later.
     unset(${varname} PARENT_SCOPE)
     unset(${varname} CACHE)
 endfunction()
 
 #-----------------------------------------------------------------------
 # Checks for the legacy DPDK_TARGET, ES2K_TARGET, and TOFINO_TARGET
-# options.
+# Boolean options.
 #-----------------------------------------------------------------------
 function(_get_legacy_target_option TARGETVAR)
     set(legacy_targets)
 
-    _check_legacy_target_option(DPDK target_name)
-    if(target_name)
-        list(APPEND legacy_targets ${target_name})
-    endif()
-
-    _check_legacy_target_option(ES2K target_name)
-    if(target_name)
-        list(APPEND legacy_targets ${target_name})
-    endif()
-
-    _check_legacy_target_option(TOFINO target_name)
-    if(target_name)
-        list(APPEND legacy_targets ${target_name})
-    endif()
+    foreach(name DPDK ES2K TOFINO)
+        _check_legacy_target_option(${name} target_name)
+        if(DEFINED target_name)
+            list(APPEND legacy_targets ${target_name})
+        endif()
+    endforeach()
 
     list(LENGTH legacy_targets num_targets)
 
@@ -134,17 +128,17 @@ function(_select_tdi_target_type)
 
     set(target_flag "${target_type}_TARGET")
 
-    # Set cache variables
+    # Set cache variables.
     set(TARGETFLAG "${target_flag}" CACHE STRING "TDI target conditional" FORCE)
     set(TARGETTYPE "${target_type}" CACHE STRING "TDI target type" FORCE)
 
     message(NOTICE "${target_action} ${target_flag}")
 endfunction()
 
-# Set TARGETFLAG and TARGETTYPE
+# Set TARGETFLAG and TARGETTYPE.
 _select_tdi_target_type()
 
-# Define/enable target variable (e.g. DPDK_TARGET)
+# Enable target variable (e.g. DPDK_TARGET).
 set(${TARGETFLAG} ON)
 
 unset(_default_tdi_target)
