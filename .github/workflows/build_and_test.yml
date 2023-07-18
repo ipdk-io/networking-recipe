@@ -168,7 +168,7 @@ jobs:
              export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
              cmake -B build -DDPDK_TARGET=on -DWITH_OVSP4RT=off
              cmake --build build -j4 --target krnlmon-test || true
-             more build/Testing/Temporary/LastTest.log
+             cat build/Testing/Temporary/LastTest.log
              zip krnlmon_ut_logs.zip build/Testing/Temporary/LastTest.log
 
       - name: 'Upload krnlmon-ut-result artifact'
