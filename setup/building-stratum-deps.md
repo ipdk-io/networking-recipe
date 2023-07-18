@@ -6,22 +6,22 @@ be built and installed on the system.
 
 This document explains how to build and install the Stratum dependencies.
 
-> Note: For the Intel IPU E2100, see
+> Note: For the Intel&reg; IPU E2100, see
 [Building Stratum Dependencies for ES2K](building-stratum-deps-es2k.md).
 
 ## 1 Prerequisites
 
 ### 1.1 CMake
 
-`cmake 3.15` or above must be installed.
+CMake 3.15 or above must be installed.
 
-Avoid versions 3.24.x and 3.25.x. They have an issue that causes the Protobuf
-build to fail.
+Avoid versions 3.24 and 3.25. There is an issue in cmake that causes the
+Protobuf build to fail. This problem was fixed in version 3.26.
 
 ### 1.2 OpenSSL
 
-`OpenSSL 1.1` must be installed. The Stratum dependencies use OpenSSL instead
-of building and installing BoringSSL.
+OpenSSL 1.1 must be installed. P4 Control Plane uses OpenSSL instead of
+BoringSSL.
 
 ## 2 Source Code
 
@@ -103,7 +103,7 @@ They may be upper or lower case.
 
 ### 6.1 Non-root build
 
-To build and install as a nonprivileged user:
+To build and install as a non-privileged user:
 
 ```bash
 cd setup
@@ -119,7 +119,7 @@ This is called an "out-of-source" build.
 
 ### 6.2 Non-root build to system directory
 
-To build as a nonprivileged user and use `sudo` to install the libraries to
+To build as a non-privileged user and use `sudo` to install the libraries to
 a system directory:
 
 ```bash
@@ -157,9 +157,9 @@ cmake -B build -DON_DEMAND=yes -DCMAKE_INSTALL_PREFIX=~/hostdeps
 cmake --build build -j6 --target grpc
 ```
 
-The repositories for grpc and its dependencies will be downloaded, built, and
-installed in `home/<username>/hostdeps`. The build will be done in parallel,
-using six threads.
+The necessary components will be downloaded, built, and installed in
+`/home/<username>/hostdeps`. The build will be done in parallel, using
+six threads.
 
 ### 6.5 Clean build
 
