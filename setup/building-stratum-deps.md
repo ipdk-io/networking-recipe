@@ -93,11 +93,13 @@ The CMake build script supports the following configuration options.
 | `DOWNLOAD` | Boolean | Whether to download the source repositories. (Default: TRUE)
 | `FORCE_PATCH` | Boolean | Whether to specify the force (`-f`) option when patching a downloaded repository. (Default: FALSE) |
 | `ON_DEMAND` | Boolean | Whether to build only the specified target(s). If this option is FALSE, all targets will be built. (Default: FALSE) |
-| `USE_LDCONFIG` | Boolean | Whether to use `ldconfig` to update the loader cache after installing a module. Only valid if `USE_SUDO` is enabled. (Default: FALSE) |
+| `USE_LDCONFIG` | Boolean | Whether to use `ldconfig` to update the loader cache[1] after installing a module. Only valid if `USE_SUDO` is enabled. (Default: FALSE) |
 | `USE_SUDO` | Boolean | Whether to use `sudo` to install each module. (Default: FALSE) |
 
 Boolean values are (`TRUE`, `YES`, `ON`) and (`FALSE`, `NO`, `OFF`).
 They may be upper or lower case.
+
+[1] See the `ldconfig` man page for more information.
 
 ## 6 Examples
 
