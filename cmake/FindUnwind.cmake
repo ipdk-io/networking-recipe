@@ -1,59 +1,69 @@
-# FindUnwind.cmake - Find libunwind package.
+# google/glog/cmake/FindUnwind.cmake
 #
-# Copyright 2023 Intel Corporation
-# SPDX-License-Identifier: Apache 2.0
+# Copyright (c) 2008, Google Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# https://github.com/google/glog/blob/master/COPYING
 #
 
-#-----------------------------------------------------------------------
-# Use pkg-config to search for the module.
-#-----------------------------------------------------------------------
-find_package(PkgConfig)
+# Try to find libunwind
+# Once done, this will define:
+#
+#  Unwind_FOUND - system has libunwind
+#  unwind::unwind - cmake target for libunwind
 
-pkg_check_modules(UNWIND libunwind)
-if(NOT UNWIND_FOUND)
-    return()
-endif()
+include (FindPackageHandleStandardArgs)
 
-#-----------------------------------------------------------------------
-# Find libraries and include directories.
-#-----------------------------------------------------------------------
-find_path(UNWIND_INCLUDE_DIR
-    NAMES "unwind.h"
-    PATHS ${UNWIND_INCLUDE_DIRS}
+find_path (Unwind_INCLUDE_DIR NAMES unwind.h libunwind.h DOC "unwind include directory")
+find_library (Unwind_LIBRARY NAMES unwind DOC "unwind library")
+
+mark_as_advanced (Unwind_INCLUDE_DIR Unwind_LIBRARY)
+
+# Extract version information
+if (Unwind_LIBRARY)
+  set (_Unwind_VERSION_HEADER ${Unwind_INCLUDE_DIR}/libunwind-common.h)
+
+  if (EXISTS ${_Unwind_VERSION_HEADER})
+    file (READ ${_Unwind_VERSION_HEADER} _Unwind_VERSION_CONTENTS)
+
+    string (REGEX REPLACE ".*#define UNW_VERSION_MAJOR[ \t]+([0-9]+).*" "\\1"
+      Unwind_VERSION_MAJOR "${_Unwind_VERSION_CONTENTS}")
+    string (REGEX REPLACE ".*#define UNW_VERSION_MINOR[ \t]+([0-9]+).*" "\\1"
+      Unwind_VERSION_MINOR "${_Unwind_VERSION_CONTENTS}")
+    string (REGEX REPLACE ".*#define UNW_VERSION_EXTRA[ \t]+([0-9]+).*" "\\1"
+      Unwind_VERSION_PATCH "${_Unwind_VERSION_CONTENTS}")
+
+    set (Unwind_VERSION ${Unwind_VERSION_MAJOR}.${Unwind_VERSION_MINOR})
+
+    if (CMAKE_MATCH_0)
+      # Third version component may be empty
+      set (Unwind_VERSION ${Unwind_VERSION}.${Unwind_VERSION_PATCH})
+      set (Unwind_VERSION_COMPONENTS 3)
+    else (CMAKE_MATCH_0)
+      set (Unwind_VERSION_COMPONENTS 2)
+    endif (CMAKE_MATCH_0)
+  endif (EXISTS ${_Unwind_VERSION_HEADER})
+endif (Unwind_LIBRARY)
+
+# handle the QUIETLY and REQUIRED arguments and set Unwind_FOUND to TRUE
+# if all listed variables are TRUE
+find_package_handle_standard_args (Unwind
+  REQUIRED_VARS Unwind_INCLUDE_DIR Unwind_LIBRARY
+  VERSION_VAR Unwind_VERSION
 )
 
-find_library(UNWIND_LIBRARY
-    NAMES unwind
-    PATHS ${UNWIND_LIBRARY_DIRS}
-)
+if (Unwind_FOUND)
+  if (NOT TARGET unwind::unwind)
+    add_library (unwind::unwind INTERFACE IMPORTED)
 
-#-----------------------------------------------------------------------
-# Get version number
-#-----------------------------------------------------------------------
-if(UNWIND_VERSION)
-    set(UNWIND_VERSION ${UNWIND_VERSION} CACHE STRING "libunwind version")
-endif()
-
-#-----------------------------------------------------------------------
-# Handle REQUIRED and QUIET arguments
-#-----------------------------------------------------------------------
-find_package_handle_standard_args(UNWIND
-    REQUIRED_VARS
-        UNWIND_LIBRARY
-        UNWIND_INCLUDE_DIR
-    VERSION_VAR
-        UNWIND_VERSION
-)
-
-mark_as_advanced(UNWIND_INCLUDE_DIR UNWIND_LIBRARY UNWIND_VERSION)
-
-#-----------------------------------------------------------------------
-# Define library target
-#-----------------------------------------------------------------------
-add_library(unwind UNKNOWN IMPORTED)
-
-set_target_properties(unwind PROPERTIES
-    IMPORTED_LOCATION ${UNWIND_LIBRARY}
-    INTERFACE_INCLUDE_DIRECTORIES ${UNWIND_INCLUDE_DIR}
-    IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-)
+    set_property (TARGET unwind::unwind PROPERTY
+      INTERFACE_INCLUDE_DIRECTORIES ${Unwind_INCLUDE_DIR}
+    )
+    set_property (TARGET unwind::unwind PROPERTY
+      INTERFACE_LINK_LIBRARIES ${Unwind_LIBRARY}
+    )
+    set_property (TARGET unwind::unwind PROPERTY
+      IMPORTED_CONFIGURATIONS RELEASE
+    )
+  endif (NOT TARGET unwind::unwind)
+endif (Unwind_FOUND)

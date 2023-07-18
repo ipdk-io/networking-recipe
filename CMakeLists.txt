@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.15)
 # CMAKE_BUILD_TYPE must be set before the first project() command.
 set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
 
-project(networking-recipe VERSION 23.01 LANGUAGES C CXX)
+project(networking-recipe VERSION 23.07 LANGUAGES C CXX)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -30,11 +30,8 @@ cmake_print_variables(CMAKE_STAGING_PREFIX)
 set(DEPEND_INSTALL_DIR "$ENV{DEPEND_INSTALL}" CACHE PATH
     "Dependencies install directory")
 
-set(OVS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH
+set(OVS_INSTALL_DIR "$ENV{OVS_INSTALL}" CACHE PATH
     "OVS install directory")
-
-set(OVS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/ovs/ovs" CACHE PATH
-    "OVS source directory")
 
 set(SDE_INSTALL_DIR "$ENV{SDE_INSTALL}" CACHE PATH
     "SDE install directory")
@@ -55,39 +52,7 @@ file(MAKE_DIRECTORY ${PB_OUT_DIR})
 # Target selection options #
 ############################
 
-option(DPDK_TARGET      "Build for DPDK target" OFF)
-option(TOFINO_TARGET    "Build for Tofino target" OFF)
-option(ES2K_TARGET      "Build for ES2K target" OFF)
-
-# Translate target option to TARGETFLAG string.
-# - Use precedence to deal with multiple selections.
-# - Ensure that individual target options are consistent
-#   so we can use them to control the build.
-# - Default to DPDK_TARGET.
-set(_target_action "Building")
-set(_default_target "DPDK_TARGET")
-if(TOFINO_TARGET)
-    set(TARGETFLAG TOFINO_TARGET)
-    set(DPDK_TARGET OFF)
-    set(ES2K_TARGET OFF)
-elseif(DPDK_TARGET)
-    set(TARGETFLAG DPDK_TARGET)
-    set(ES2K_TARGET OFF)
-    set(TOFINO_TARGET OFF)
-elseif(ES2K_TARGET)
-    set(TARGETFLAG ES2K_TARGET)
-    set(DPDK_TARGET OFF)
-    set(TOFINO_TARGET OFF)
-else()
-    set(TARGETFLAG ${_default_target})
-    set(${_default_target} ON)
-    set(_target_action "Defaulting to")
-endif()
-
-message(NOTICE "${_target_action} ${TARGETFLAG}")
-
-unset(_default_target)
-unset(_target_action)
+include(SelectTdiTarget)
 
 ###################
 # Feature toggles #
@@ -178,6 +143,13 @@ elseif(ES2K_TARGET)
     include(es2k-driver)
 elseif(TOFINO_TARGET)
     include(tofino-driver)
+endif()
+
+if(WITH_OVSP4RT)
+    if(OVS_INSTALL_DIR STREQUAL "")
+        message(FATAL_ERROR "OVS_INSTALL_DIR (OVS_INSTALL) not defined!")
+    endif()
+    find_package(OVS)
 endif()
 
 ########################

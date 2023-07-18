@@ -1,32 +1,52 @@
-# Copyright 2022 Intel Corporation
+# Copyright 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Patch the gRPC build script to set the RUNPATH of the installed
-# Protobuf compiler plugins to the relative paths of the library
-# directories.
+# Updated to gRPC v1.54.2
+
+# 1) Patch the gRPC build script to set the RUNPATH of the installed
+#    Protobuf compiler plugins to the relative paths of the library
+#    directories.
+# 2) Fix a bug in the v1.54.2 build script by suppressing installation of
+#    gRPCPluginTargets if gRPC_BUILD_CODEGEN is FALSE. We can't export
+#    the plugin targets if we haven't built them.
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 824886600..5ba8f9384 100644
+index b67b7aafae..18d837e301 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -11173,6 +11173,10 @@ add_executable(grpc_cpp_plugin
+@@ -12248,6 +12248,9 @@ if(gRPC_BUILD_CODEGEN AND gRPC_BUILD_GRPC_CPP_PLUGIN)
+ add_executable(grpc_cpp_plugin
    src/compiler/cpp_plugin.cc
  )
- 
 +set_target_properties(grpc_cpp_plugin
 +  PROPERTIES INSTALL_RPATH @GRPC_INSTALL_RPATH@
 +)
-+
+ target_compile_features(grpc_cpp_plugin PUBLIC cxx_std_14)
  target_include_directories(grpc_cpp_plugin
    PRIVATE
-     ${CMAKE_CURRENT_SOURCE_DIR}
-@@ -11368,6 +11372,10 @@ add_executable(grpc_python_plugin
+@@ -12507,6 +12510,9 @@ if(gRPC_BUILD_CODEGEN AND gRPC_BUILD_GRPC_PYTHON_PLUGIN)
+ add_executable(grpc_python_plugin
    src/compiler/python_plugin.cc
  )
- 
 +set_target_properties(grpc_python_plugin
 +  PROPERTIES INSTALL_RPATH @GRPC_INSTALL_RPATH@
 +)
-+
+ target_compile_features(grpc_python_plugin PUBLIC cxx_std_14)
  target_include_directories(grpc_python_plugin
    PRIVATE
-     ${CMAKE_CURRENT_SOURCE_DIR}
+@@ -25968,10 +25974,12 @@ if(gRPC_INSTALL)
+     DESTINATION ${gRPC_INSTALL_CMAKEDIR}
+     NAMESPACE gRPC::
+   )
+-  install(EXPORT gRPCPluginTargets
+-    DESTINATION ${gRPC_INSTALL_CMAKEDIR}
+-    NAMESPACE gRPC::
+-  )
++  if(gRPC_BUILD_CODEGEN)
++    install(EXPORT gRPCPluginTargets
++      DESTINATION ${gRPC_INSTALL_CMAKEDIR}
++      NAMESPACE gRPC::
++    )
++  endif()
+ endif()
+
+ include(CMakePackageConfigHelpers)
