@@ -6,6 +6,9 @@ be built and installed on the system.
 
 This document explains how to build and install the Stratum dependencies.
 
+> Note: For the Intel IPU E2100, see
+[Building Stratum Dependencies for ES2K](building-stratum-deps-es2k.md).
+
 ## 1 Prerequisites
 
 ### 1.1 CMake
@@ -27,10 +30,8 @@ on GitHub, or as a source package.
 
 ### 2.1 GitHub Repository
 
-The build script for the Stratum dependencies is part of the networking-recipe
-superproject.
-
-To get the build script, clone the IPDK networking-recipe:
+The Stratum dependencies can be built using a script that is part of the
+IPDK networking-recipe. To clone the repository:
 
 ```bash
 git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
@@ -48,7 +49,7 @@ The build script for the stratum dependencies is in the `setup` directory.
 You may receive the source code for the Stratum dependencies in the form of
 an RPM file, a Debian file, or a tarball.
 
-Use the appropriate command to unpack the source files.
+If this is case, use the appropriate command to unpack the source files.
 
 ## 3 Install Location
 
@@ -69,11 +70,11 @@ need to log in as `root` or run from an account that has `sudo` privilege.
 ## 4 Downloaded Source vs. Source Package
 
 By default, the cmake build script downloads the source code for each module
-and then builds it.
+and then builds and installs it.
 
 If you are working from a source distribution, or if the source files have
-already been downloaded by a previous build, you can override the download
-stage by specifying:
+were downloaded by a previous build, you can override the download stage by
+specifying:
 
 ```cmake
   -DDOWNLOAD=no -DFORCE_PATCH=yes
