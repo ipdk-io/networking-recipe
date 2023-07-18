@@ -6,7 +6,7 @@ be built and installed on the system.
 
 This document explains how to build and install the Stratum dependencies.
 
-> Note: For the Intel&reg; IPU E2100, see
+> **Note**: For the Intel&reg; IPU E2100, see
 [Building Stratum Dependencies for ES2K](building-stratum-deps-es2k.md).
 
 ## 1 Prerequisites
@@ -82,13 +82,13 @@ specifying:
 
 when you configure the cmake build.
 
-## 5 Build Options
+## 5 CMake Build Options
 
 The CMake build script supports the following configuration options.
 
 | Option | Type | Description |
 | ------ | ---- | ----------- |
-| `CMAKE_INSTALL_PREFIX` | Path | Directory in which dependencies should be installed. |
+| `CMAKE_INSTALL_PREFIX` | Path | Directory in which the dependencies should be installed. |
 | `CXX_STANDARD` | Number | C++ standard (11, 14, 17, etc.) the compiler should apply. (Default: not specified) |
 | `DOWNLOAD` | Boolean | Whether to download the source repositories. (Default: TRUE)
 | `FORCE_PATCH` | Boolean | Whether to specify the force (`-f`) option when patching a downloaded repository. (Default: FALSE) |
