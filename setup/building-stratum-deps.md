@@ -72,8 +72,8 @@ need to log in as `root` or run from an account that has `sudo` privilege.
 By default, the cmake build script downloads the source code for each module
 and then builds and installs it.
 
-If you are working from a source distribution, or if the source files have
-were downloaded by a previous build, you can override the download stage by
+If you are working from a source distribution, or if the source files were
+downloaded by a previous build, you can override the download stage by
 specifying:
 
 ```cmake
