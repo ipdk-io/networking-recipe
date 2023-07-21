@@ -3,57 +3,49 @@
 This document explains how to build the Stratum dependencies for the
 ARM Compute Complex (ACC) of the Intel&reg; IPU E2100.
 
-> **Note**: If you are building P4 Control Plane to run on an x86 host
-core of the E2100, follow the directions in
-[Building the Stratum Dependencies](building-stratum-deps.md) and
-specify `ES2K`` as the TDI target type.
+> **Note**: To build the dependencies for a different target, see
+[Building the Stratum Dependencies](building-stratum-deps.md).
 
 ## 1. Introduction
 
 Stratum is the component of `infrap4d` that implements the P4Runtime and gNMI
-(OpenConfig) services. It requires that a number of third-party libraries
-be built and installed on the system.
+(OpenConfig) services. It requires a number of third-party libraries, which
+this package provides.
 
-You will need to build two versions of the dependency libraries:
+You will need to build two versions of the libraries:
 
-- The **Host** libraries, which run on the build system and the x86
-  cores of the E2100. They also provide tools that are used during the
-  build process.
+- The **Host** libraries, which run on the build system. They provide
+  tools that are used to build P4 Control Plane.
 
-- The **Target** libraries, which run on the ACC. The P4 Control Plane is
+- The **Target** libraries, which run on the ACC. P4 Control Plane is
   compiled and linked against these libraries.
 
-The Host and Target libraries versions must match, to ensure compatibility
-between client applications and `infrap4d`.
+The Host and Target libraries must be the same version.
 
-## 2. Setup
+## 2. Preparing the System
 
-There are several things you need to take care of on your development
-system before you can build.
+There are several things to do before you can build the dependencies.
 
-### 2.1 CMake
+- Install CMake 3.15 or above.
 
-CMake 3.15 or above must be installed.
+  Avoid versions 3.24 and 3.25. They cause the build to fail. This issue was
+  fixed in CMake 3.26.
 
-Avoid versions 3.24 and 3.25. There is an issue in cmake that causes the
-Protobuf build to fail. The issue was fixed in version 3.26.
+- Install OpenSSL 1.1.
 
-### 2.2 OpenSSL
+  Note that P4 Control Plane is not compatible with BoringSSL.
 
-OpenSSL 1.1 must be installed. P4 Control Plane uses OpenSSL instead of
-BoringSSL.
+- Install the ACC SDK.
 
-### 2.3 ACC SDK
+  See [Installing the ACC SDK](../docs/guides/es2k/installing-acc-sdk.md)
+  for directions.
 
-Install the ACC SDK on your system. See
-[Installing the ACC SDK](../docs/guides/es2k/installing-acc-sdk.md) for
-instructions. You will be using the Toolchain and Sysroot directories
-to build the Target dependencies.
+## 3. Getting the Source Code
 
-## 3. Source Code
+The script to build the Stratum dependencies is in the IPDK networking-recipe
+repository.
 
-Download the Open-Source IPDK networking-recipe from GitHub. To clone the
-repository:
+To clone the repository:
 
 ```bash
 git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
@@ -66,121 +58,110 @@ You may substitute your own local directory name for `ipdk.recipe`.
 
 The build script for the Stratum dependencies is in the `setup` directory.
 
-## 4. Host Dependencies
+The `setup` directory does not include the source code for the dependencies.
+This will be downloaded by the build script.
 
-### 4.1 Host install location
+## 4. Building the Host Dependencies
 
-You will need to decide where on your system you would like to install the
-Host dependencies. This location (the "install prefix") must be specified
-when you configure the build.
+First, decide where to install the Host dependencies. This location (the
+"install prefix") must be specified when you configure the build.
 
 It is recommended that you *not* install the Host dependencies in `/usr` or
-`/usr/local`. You will find it easier to update or rebuild the libraries
-if components that are updated at different times are kept separate from
-one another.
+`/usr/local`. It will be easier to rebuild or update the dependencies if
+their libraries are separate from other libraries.
 
-The `CMAKE_INSTALL_PREFIX` option is used to specify the directory in which
-the Host dependencies should be installed.
+The `setup` directory includes a helper script (`make-host-deps.sh`) that
+can be used to build the Host dependencies.
 
-If you plan *do* install the Host dependencies in a system directory, you will
-need to log in as `root` or run from an account that has `sudo` privilege.
+Use the `--help` or `-h` option to see a list of the parameters the
+helper script supports.
 
-The distribution includes a helper script (`make-host-deps.sh`) that can be
-used to build the Host dependencies.
+The script normally does a minimal build, containing just the components
+needed for cross-compilation. Specify the `--full` parameter if you want
+to build all the libraries.
 
-### 4.2 Example: non-root build
+Note that the Host and Target build environments are mutually incompatible.
+You must ensure that the [target build environment variables](#5-defining-the-target-build-environment)
+are undefined before you run the build script.
+
+### User build
 
 To install the dependencies in a user directory:
 
 ```bash
-./make-host-deps.sh --prefix=~/hostdeps
+./make-host-deps.sh --prefix=PREFIX
 ```
 
-The source files will be download and built, and the results of the build
-will be installed in `/home/peabody/hostdeps`.
+PREFIX might something like `~/hostdeps`.
 
-### 4.3 Example: root build
+The source files will be downloaded and built, and the results will be
+installed in the specified directory.
+
+### System build
+
+To install the Host dependencies in a system directory, log in as `root`
+or build from an account that has `sudo` privilege.
 
 ```bash
-./make-host-deps.sh --prefix=/opt/p4cp/x86deps --sudo
+./make-host-deps.sh --prefix=PREFIX --sudo
 ```
 
-The `--sudo` parameter may be omitted if you are logged in as `root`.
+PREFIX might be something like `/opt/ipdk/x86deps`.
 
-### 4.4 Example: complete build
+The script only uses `sudo` when installing libraries. Omit the parameter
+if you are running as `root`.
 
-By default, the helper script does a *minimal* build, consisting only of
-the components that are needed to support cross-compilation. Specify the
-`--full` parameter if you would like to build all the components.
+## 5. Defining the Target Build Environment
+
+In order to cross-compile for the ACC, you will need to define a number
+of environment variables. This is typically done by putting the bash
+commands in a text file (e.g. `es2k-setup.env`) and using the `source`
+or `.` command to execute it. We recommend removing execute permission
+from the file (`chmod a-x setup.env`) to remind yourself to source it,
+not run it.
+
+For example:
 
 ```bash
-./make-host-deps.sh --prefix=$HOME/hostdeps --full
+ACC_SDK=<acc-sdk-directory>
+P4CPBASE=<recipe-directory>
+export CMAKE_TOOLCHAIN_FILE=$P4CPBASE/cmake/aarch64-toolchain.cmake
+AARCH64=$ACC_SDK/aarch64-intel-linux-gnu
+SYSROOT=$AARCH64/aarch64-intel-linux-gnu/sysroot
+export SDKTARGETSYSROOT=$SYSROOT
+export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
+export PKG_CONFIG_PATH=$SYSROOT/usr/lib64/pkgconfig:$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/share/pkgconfig
+[ -z "$ES2K_SAVE_PATH" ] && export ES2K_SAVE_PATH=$PATH
+export PATH=$AARCH64/bin:$ES2K_SAVE_PATH
 ```
 
-### 4.5 make-host-deps.sh
+In the listing above,
 
-The helper script supports the following options:
+- `ACC_SDK` is the install path of the ACC-RL SDK (for example,
+  `$(realpath $HOME/p4cp-dev/acc_sdk)`).
+- `P4CPBASE` is the path to the local networking-recipe directory
+  (for example, `$(realpath $HOME/p4cp-dev/ipdk.recipe)`).
 
-```text
-peabody@wabac:~/recipe/setup$ ./make-host-deps.sh -h
+From these paths, the setup script derives:
 
-Build host dependency libraries
+- `AARCH64` - the path to the directory containing the AArch64
+  cross-compiler suite.
+- `SYSROOT` - the path to the sysroot directory, which contains AArch64
+  header files and binaries.
 
-Options:
-  --build=DIR     -B  Build directory path (Default: build)
-  --config            Only perform configuration step (Default: false)
-  --cxx=VERSION       CXX_STANDARD to build dependencies (Default: empty)
-  --dry-run       -n  Display cmake parameters and exit (Default: false)
-  --force         -f  Specify -f when patching (Default: false)
-  --full              Build all dependency libraries (Default: minimal)
-  --jobs=NJOBS    -j  Number of build threads (Default: 8)
-  --minimal           Build required host dependencies only (Default: minimal)
-  --no-download       Do not download repositories (Default: false)
-  --prefix=DIR    -P  Install directory path (Default: ./host-deps)
-  --sudo              Use sudo when installing (Default: false)
-```
+The setup script exports the following variables, which are used by CMake
+and the helper script:
 
-## 5. Target Dependencies
+- `SDKTARGETSYSROOT` - path to the sysroot directory.
+- `CMAKE_TOOLCHAIN_FILE` - path to the CMake toolchain file.
+- `PKG_CONFIG_PATH` - search path for `pkg-config` to use when looking for
+  packages on the target system.
+- `PKG_CONFIG_SYSROOT_DIR` - path to the sysroot directory, for use by
+  `pkg-config`.
 
-### 5.1 Target install location
+The setup script also add the directory containing the cross-compiler
+excutables to the system `PATH`.
 
-under construction
+## 6. Building the Target Dependencies
 
-### 5.2 Cross-compilation
-
-under construction
-
-### 5.3 Example: sysroot build
-
-```bash
-./make-cross-deps.sh --host=/opt/x86deps --prefix=//opt/p4cp/deps
-```
-
-### 5.4 make-cross-deps.sh
-
-The helper script supports the following options:
-
-```text
-peabody@wabac:~/recipe/setup$ ./make-cross-deps.sh -h
-
-Build target dependency libraries
-
-Options:
-  --build=DIR      -B  Build directory path [build]
-  --cxx=VERSION        CXX_STANDARD to build dependencies (Default: empty)
-  --dry-run        -n  Display cmake parameters and exit
-  --force          -f  Specify -f when patching (Default: false)
-  --host=DIR       -H  Host dependencies directory []
-  --jobs=NJOBS     -j  Number of build threads (Default: 8)
-  --no-download        Do not download repositories (Default: false)
-  --prefix=DIR*    -P  Install directory prefix [//opt/deps]
-  --sudo               Use sudo when installing (Default: false)
-  --toolchain=FILE -T  CMake toolchain file
-
-* '//' at the beginning of the directory path will be replaced
-  with the sysroot directory path.
-
-Environment variables:
-  CMAKE_TOOLCHAIN_FILE - Default toolchain file
-  SDKTARGETSYSROOT - sysroot directory
-```
+Almost there...
