@@ -5,7 +5,7 @@ ARM Compute Complex (ACC) of the Intel&reg; IPU E2100.
 
 > **Note**: If you are building P4 Control Plane to run on an x86 host
 core of the E2100, follow the directions in
-[Building the Stratum Dependencies](../building-stratum-deps.md) and
+[Building the Stratum Dependencies](building-stratum-deps.md) and
 specify `ES2K`` as the TDI target type.
 
 ## 1. Introduction
