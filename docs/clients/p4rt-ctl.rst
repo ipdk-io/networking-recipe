@@ -319,7 +319,61 @@ Details about the supported commands
     ``COUNTER_FLOW``: Refers to the counter ID (generated ID by p4c, refer to bfrt.json file)
     and the counter table index. Format "counter_id=<number>,index=<number>"
 
-16. Get flow dump entries ::
+
+16. Add a rule for direct counter into the forwarding pipeline::
+
+    $ p4rt-ctl add-entry SWITCH TABLE FLOW
+    $ Example::
+    [Ingress/Rx]
+    p4rt-ctl add-entry br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000461",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3",action=my_control.ddcount_and_send_rx(17)"
+
+    [Egress/Tx]
+    p4rt-ctl add-entry br0 my_control.e_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000461",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3",action=my_control.ddcount_and_send(1)"
+
+  .. note::
+
+    ``SWITCH``: Refers to the bridge name, which maps to device name
+    internally.
+    ``TABLE``: Refers to table_name present in p4info.txt file.
+    ``FLOW``: Refers to parameters for a the above mentioned TABLE
+    match_filed_key=value action=action_name(value)
+
+17. Delete a rule for direct counter from the forwarding pipeline::
+
+    $ p4rt-ctl del-entry SWITCH TABLE KEY
+    $ Example:
+    [Ingress/Rx]
+    p4rt-ctl del-entry br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000461",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3""
+
+    [Egress/Tx]
+    p4rt-ctl del-entry br0 my_control.e_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000461",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3""
+
+  .. note::
+
+    ``SWITCH``: Refers to the bridge name, which maps to device name
+    internally.
+    ``TABLE``: Refers to table_name present in p4info.txt file.
+    ``KEY``: Refers to match_filed_key parameter of the above mentioned
+    TABLE match_filed_key=value
+
+18. Get direct counter entry value ::
+
+    $ p4rt-ctl get-direct-counter SWITCH TABLE KEY
+    $ Example:
+    [Egress/Tx]
+    p4rt-ctl get-direct-counter br0 my_control.e_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000461",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3""
+    [Ingress/Rx]
+    p4rt-ctl get-direct-counter br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000461",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3""
+
+  .. note::
+
+    ``SWITCH``: Refers to the bridge name, which maps to device name
+    internally.
+    ``TABLE``: Refers to table_name present in p4info.txt file.
+    ``KEY``: Refers to match_filed_key parameter of the above mentioned
+    TABLE match_filed_key=value
+
+19. Get flow dump entries ::
 
     $ p4rt-ctl dump-entries SWITCH [TABLE]
     $ Example: p4rt-ctl dump-entries br0
