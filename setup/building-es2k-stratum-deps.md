@@ -31,19 +31,19 @@ between client applications and `infrap4d`.
 There are several things you need to take care of on your development
 system before you can build.
 
-### CMake
+### 2.1 CMake
 
 CMake 3.15 or above must be installed.
 
 Avoid versions 3.24 and 3.25. There is an issue in cmake that causes the
 Protobuf build to fail. The issue was fixed in version 3.26.
 
-### OpenSSL
+### 2.2 OpenSSL
 
 OpenSSL 1.1 must be installed. P4 Control Plane uses OpenSSL instead of
 BoringSSL.
 
-### ACC SDK
+### 2.3 ACC SDK
 
 Install the ACC SDK on your system. See
 [Installing the ACC SDK](../docs/guides/es2k/installing-acc-sdk.md) for
@@ -68,7 +68,7 @@ The build script for the Stratum dependencies is in the `setup` directory.
 
 ## 4. Host Dependencies
 
-### Host install location
+### 4.1 Host install location
 
 You will need to decide where on your system you would like to install the
 Host dependencies. This location (the "install prefix") must be specified
@@ -88,7 +88,7 @@ need to log in as `root` or run from an account that has `sudo` privilege.
 The distribution includes a helper script (`make-host-deps.sh`) that can be
 used to build the Host dependencies.
 
-### Example: non-root build
+### 4.2 Example: non-root build
 
 To install the dependencies in a user directory:
 
@@ -99,7 +99,7 @@ To install the dependencies in a user directory:
 The source files will be download and built, and the results of the build
 will be installed in `/home/peabody/hostdeps`.
 
-### Example: root build
+### 4.3 Example: root build
 
 ```bash
 ./make-host-deps.sh --prefix=/opt/p4cp/x86deps --sudo
@@ -107,7 +107,7 @@ will be installed in `/home/peabody/hostdeps`.
 
 The `--sudo` parameter may be omitted if you are logged in as `root`.
 
-### Example: complete build
+### 4.4 Example: complete build
 
 By default, the helper script does a *minimal* build, consisting only of
 the components that are needed to support cross-compilation. Specify the
@@ -117,7 +117,7 @@ the components that are needed to support cross-compilation. Specify the
 ./make-host-deps.sh --prefix=$HOME/hostdeps --full
 ```
 
-### make-host-deps.sh
+### 4.5 make-host-deps.sh
 
 The helper script supports the following options:
 
@@ -140,23 +140,23 @@ Options:
   --sudo              Use sudo when installing (Default: false)
 ```
 
-## 4. Target Dependencies
+## 5. Target Dependencies
 
-### Target install location
-
-under construction
-
-### Cross-compilation
+### 5.1 Target install location
 
 under construction
 
-### Example: sysroot build
+### 5.2 Cross-compilation
+
+under construction
+
+### 5.3 Example: sysroot build
 
 ```bash
 ./make-cross-deps.sh --host=/opt/x86deps --prefix=//opt/p4cp/deps
 ```
 
-### make-cross-deps.sh
+### 5.4 make-cross-deps.sh
 
 The helper script supports the following options:
 
