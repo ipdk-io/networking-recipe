@@ -27,6 +27,9 @@ if(gRPC AND TARGET(gRPC::grpc_cpp_plugin))
 else()
     find_program(GRPC_CPP_PLUGIN "grpc_cpp_plugin" REQUIRED
         NO_CMAKE_FIND_ROOT_PATH)
+    if(NOT GRPC_CPP_PLUGIN)
+        message(FATAL_ERROR "grpc_cpp_plugin not found")
+    endif()
 endif()
 
 cmake_print_variables(PROTOBUF_PROTOC_EXECUTABLE)
