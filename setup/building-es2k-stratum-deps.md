@@ -8,9 +8,9 @@ ARM Compute Complex (ACC) of the Intel&reg; IPU E2100.
 
 ## 1. Introduction
 
-Stratum is the component of `infrap4d` that implements the P4Runtime and gNMI
-(OpenConfig) services. It requires a number of third-party libraries, which
-this package provides.
+Stratum is the component of P4 Control Plane that implements the P4Runtime
+and gNMI (OpenConfig) services. It requires a number of third-party
+libraries, which this package provides.
 
 You will need to build two versions of the libraries:
 
@@ -26,16 +26,15 @@ The Host and Target libraries must be the same version.
 
 There are several things to do before you can build the dependencies.
 
-- Install CMake 3.15 or above.
+- Install CMake 3.15 or above
 
-  Avoid versions 3.24 and 3.25. They cause the build to fail. This issue was
-  fixed in CMake 3.26.
+  Avoid versions 3.24 and 3.25. They cause the dependencies build to fail.
 
-- Install OpenSSL 1.1.
+- Install OpenSSL 1.1
 
   Note that P4 Control Plane is not compatible with BoringSSL.
 
-- Install the ACC SDK.
+- Install the ACC SDK
 
   See [Installing the ACC SDK](../docs/guides/es2k/installing-acc-sdk.md)
   for directions.
@@ -58,8 +57,8 @@ You may substitute your own local directory name for `ipdk.recipe`.
 
 The build script for the Stratum dependencies is in the `setup` directory.
 
-The `setup` directory does not include the source code for the dependencies.
-This will be downloaded by the build script.
+TThe source code for the dependencies is not part of the distribution.
+It is downloaded by the build script.
 
 ## 4. Building the Host Dependencies
 
@@ -68,16 +67,15 @@ First, decide where to install the Host dependencies. This location (the
 
 It is recommended that you *not* install the Host dependencies in `/usr` or
 `/usr/local`. It will be easier to rebuild or update the dependencies if
-their libraries are separate from other libraries.
+their libraries are mingled with other libraries.
 
 The `setup` directory includes a helper script (`make-host-deps.sh`) that
 can be used to build the Host dependencies.
 
-- Use the `--help` or `-h` option to see a list of the parameters the
-  helper script supports.
+- The `--help` (`-h`) option lists the parameters the helper script supports.
 
-- Use the `--dry-run` or `-n` option to see the parameter values that will
-  be passed to CMake. (No other action will be taken.)
+- The `--dry-run` (`-n`) option displays the parameter values without
+  running CMake.
 
 The script normally does a minimal build, containing just the components
 needed for cross-compilation. Specify the `--full` parameter if you want
@@ -85,11 +83,11 @@ to build all the libraries.
 
 > Note that the Host and Target build environments are mutually incompatible.
   You must ensure that the [target build environment variables](#5-defining-the-target-build-environment)
-  are undefined before you run the build script.
+  are undefined before you build the Host dependencies.
 
 ### User build
 
-To install the dependencies in a user directory
+To install the dependencies in a user directory:
 
 ```bash
 ./make-host-deps.sh --prefix=PREFIX
@@ -140,9 +138,9 @@ export PATH=$AARCH64/bin:$ES2K_SAVE_PATH
 In the listing above, you will need to provide values for these variables:
 
 - `ACC_SDK` - install path of the ACC-RL SDK (for example,
-  `$(realpath $HOME/p4cp-dev/acc_sdk)`)
-- `P4CPBASE` - path to the local networking-recipe directory
-  (for example, `$(realpath $HOME/p4cp-dev/ipdk.recipe)`)
+  `$HOME/p4cp-dev/acc_sdk`)
+- `P4CPBASE` - path to the local networking-recipe directory (for example,
+  `$HOME/p4cp-dev/ipdk.recipe`)
 
 From these paths, the setup script derives:
 
@@ -150,6 +148,8 @@ From these paths, the setup script derives:
   cross-compiler suite
 - `SYSROOT` - path to the sysroot directory, which contains AArch64
   header files and binaries
+
+These directories are part of the ACC SDK.
 
 The setup script exports the following variables, which are used by CMake
 and the helper script:
@@ -170,10 +170,10 @@ executables to the system `PATH`.
   the SDK's setup file when building the Stratum dependencies and P4
   Control Plane.
 
-  The SDK setup file is intended for use with Autotools. It makes extensive
-  use of variables that have a blanket effect on the behavior of the tools
-  the build uses. These definitions may interfere with the CMake build in
-  subtle and unpredictable ways.
+  The SDK setup file is intended for use with Autotools. It defines a
+  considerable number of environment variables, which have a blanket
+  effect on the behavior of the build tools. These definitions may
+  interfere with the CMake build in non-obvious ways.
 
   The SDK also provides its own CMake toolchain file. We recommend using
   the toolchain file that is provided as part of the networking recipe,
@@ -183,21 +183,20 @@ executables to the system `PATH`.
 ## 6. Building the Target Dependencies
 
 You will need to pick an install location for the target dependencies.
-This will typically be in the `sysroot` directory structure -- for example,
-under `sysroot/opt`. This will become the root-level `/opt` directory when
-the file structure is transferred to the E2100 file system.
+This will typically be under the sysroot directory structure. For
+example, the `opt` subdirectory will become the root-level `/opt`
+directory when the file structure is copied to the E2100 file system.
 
 The `setup` directory includes a helper script (`make-cross-deps.sh`) that
 can be used to build the Target dependencies.
 
-- Use the `--help` or `-h` option to see a list of the parameters the
-  helper script supports.
+- The `--help` (`-h`) option lists the parameters the helper script supports.
 
-- Use the `--dry-run` or `-n` option to see the parameter values that will
-  be passed to CMake. (No other action will be taken.)
+- The `--dry-run` (`-n`) option displays the parameter values without
+  running CMake.
 
 You will need to provide the helper script with the path to the Host
-dependencies as well as the install prefix.
+dependencies (`--host`) as well as the install prefix (`--prefix`).
 
 ### Target build
 
@@ -224,6 +223,5 @@ Now run the build script:
 `PREFIX` is the install prefix for the Target dependencies. Here, you might
 specify something like `//opt/ipdk/deps`.
 
-`//` at the beginning of the prefix directory path is a shortcut provided by
-the helper script. It will be replaced by the sysroot directory path.
-You can use the `-n` option to review the parameter values.
+The `//` at the beginning of the prefix path is a shortcut provided by
+the helper script. It will be replaced with the sysroot directory path.
