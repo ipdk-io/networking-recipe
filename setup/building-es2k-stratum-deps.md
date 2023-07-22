@@ -73,20 +73,23 @@ their libraries are separate from other libraries.
 The `setup` directory includes a helper script (`make-host-deps.sh`) that
 can be used to build the Host dependencies.
 
-Use the `--help` or `-h` option to see a list of the parameters the
-helper script supports.
+- Use the `--help` or `-h` option to see a list of the parameters the
+  helper script supports.
+
+- Use the `--dry-run` or `-n` option to see the parameter values that will
+  be passed to CMake. (No other action will be taken.)
 
 The script normally does a minimal build, containing just the components
 needed for cross-compilation. Specify the `--full` parameter if you want
 to build all the libraries.
 
-Note that the Host and Target build environments are mutually incompatible.
-You must ensure that the [target build environment variables](#5-defining-the-target-build-environment)
-are undefined before you run the build script.
+> Note that the Host and Target build environments are mutually incompatible.
+  You must ensure that the [target build environment variables](#5-defining-the-target-build-environment)
+  are undefined before you run the build script.
 
 ### User build
 
-To install the dependencies in a user directory:
+To install the dependencies in a user directory
 
 ```bash
 ./make-host-deps.sh --prefix=PREFIX
@@ -115,10 +118,9 @@ if you are running as `root`.
 
 In order to cross-compile for the ACC, you will need to define a number
 of environment variables. This is typically done by putting the bash
-commands in a text file (e.g. `es2k-setup.env`) and using the `source`
-or `.` command to execute it. We recommend removing execute permission
-from the file (`chmod a-x setup.env`) to remind yourself to source it,
-not run it.
+commands in a file (e.g. `es2k-setup.env`) and using the `source` command
+to execute it. We recommend removing execute permission from the file
+(`chmod a-x setup.env`) to remind yourself to source it, not run it.
 
 For example:
 
@@ -135,33 +137,94 @@ export PKG_CONFIG_PATH=$SYSROOT/usr/lib64/pkgconfig:$SYSROOT/usr/lib/pkgconfig:$
 export PATH=$AARCH64/bin:$ES2K_SAVE_PATH
 ```
 
-In the listing above,
+In the listing above, you will need to provide values for these variables:
 
-- `ACC_SDK` is the install path of the ACC-RL SDK (for example,
-  `$(realpath $HOME/p4cp-dev/acc_sdk)`).
-- `P4CPBASE` is the path to the local networking-recipe directory
-  (for example, `$(realpath $HOME/p4cp-dev/ipdk.recipe)`).
+- `ACC_SDK` - install path of the ACC-RL SDK (for example,
+  `$(realpath $HOME/p4cp-dev/acc_sdk)`)
+- `P4CPBASE` - path to the local networking-recipe directory
+  (for example, `$(realpath $HOME/p4cp-dev/ipdk.recipe)`)
 
 From these paths, the setup script derives:
 
-- `AARCH64` - the path to the directory containing the AArch64
-  cross-compiler suite.
-- `SYSROOT` - the path to the sysroot directory, which contains AArch64
-  header files and binaries.
+- `AARCH64` - path to the directory containing the AArch64
+  cross-compiler suite
+- `SYSROOT` - path to the sysroot directory, which contains AArch64
+  header files and binaries
 
 The setup script exports the following variables, which are used by CMake
 and the helper script:
 
-- `SDKTARGETSYSROOT` - path to the sysroot directory.
-- `CMAKE_TOOLCHAIN_FILE` - path to the CMake toolchain file.
+- `SDKTARGETSYSROOT` - path to the sysroot directory
+- `CMAKE_TOOLCHAIN_FILE` - path to the CMake toolchain file
 - `PKG_CONFIG_PATH` - search path for `pkg-config` to use when looking for
-  packages on the target system.
+  packages on the target system
 - `PKG_CONFIG_SYSROOT_DIR` - path to the sysroot directory, for use by
-  `pkg-config`.
+  `pkg-config`
 
-The setup script also add the directory containing the cross-compiler
-excutables to the system `PATH`.
+The setup script also adds the directory containing the cross-compiler
+executables to the system `PATH`.
+
+> Note: The ACC-RL SDK includes a setup file
+  (`environment-setup-aarch64-intel-linux-gnu`) that performs the same
+  function as is described here. We strongly recommend that you *not* use
+  the SDK's setup file when building the Stratum dependencies and P4
+  Control Plane.
+
+  The SDK setup file is intended for use with Autotools. It makes extensive
+  use of variables that have a blanket effect on the behavior of the tools
+  the build uses. These definitions may interfere with the CMake build in
+  subtle and unpredictable ways.
+
+  The SDK also provides its own CMake toolchain file. We recommend using
+  the toolchain file that is provided as part of the networking recipe,
+  not the SDK's toolchain file, when building the Stratum dependencies
+  and P4 Control Plane.
 
 ## 6. Building the Target Dependencies
 
-Almost there...
+You will need to pick an install location for the target dependencies.
+This will typically be in the `sysroot` directory structure -- for example,
+under `sysroot/opt`. This will become the root-level `/opt` directory when
+the file structure is transferred to the E2100 file system.
+
+The `setup` directory includes a helper script (`make-cross-deps.sh`) that
+can be used to build the Target dependencies.
+
+- Use the `--help` or `-h` option to see a list of the parameters the
+  helper script supports.
+
+- Use the `--dry-run` or `-n` option to see the parameter values that will
+  be passed to CMake. (No other action will be taken.)
+
+You will need to provide the helper script with the path to the Host
+dependencies as well as the install prefix.
+
+### Target build
+
+Source the file that the defines the [target build environment variables]
+(#5-defining-the-target-build-environment).
+
+```bash
+source es2k-setup.env
+```
+
+Remove the `build` directory from the previous build.
+
+```bash
+rm -fr build
+```
+
+Now run the build script:
+
+```bash
+./make-cross-deps.sh --host=HOSTDEPS --prefix=PREFIX
+```
+
+`HOSTDEPS` is the path to the Host dependencies, e.g., `~/p4cp-dev/hostdeps`.
+
+`PREFIX` is the install prefix for the Target dependencies. Here, you might
+specify something like `//opt/ipdk/deps`.
+
+`//` at the beginning of the prefix directory path is a shortcut provided by
+the helper script. It will be replaced by the sysroot directory path.
+You can use the `-n` option to review the parameter values.
