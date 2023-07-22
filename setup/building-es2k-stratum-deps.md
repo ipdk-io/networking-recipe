@@ -201,8 +201,7 @@ dependencies as well as the install prefix.
 
 ### Target build
 
-Source the file that the defines the [target build environment variables]
-(#5-defining-the-target-build-environment).
+Source the file that the defines the [target build environment variables](#5-defining-the-target-build-environment).
 
 ```bash
 source es2k-setup.env
