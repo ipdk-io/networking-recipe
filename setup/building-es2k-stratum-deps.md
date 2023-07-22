@@ -72,16 +72,16 @@ their libraries are mingled with other libraries.
 The `setup` directory includes a helper script (`make-host-deps.sh`) that
 can be used to build the Host dependencies.
 
-- The `--help` (`-h`) option lists the parameters the helper script supports.
+- The `--help` (`-h`) option lists the parameters the helper script supports
 
 - The `--dry-run` (`-n`) option displays the parameter values without
-  running CMake.
+  running CMake
 
 The script normally does a minimal build, containing just the components
 needed for cross-compilation. Specify the `--full` parameter if you want
 to build all the libraries.
 
-> Note that the Host and Target build environments are mutually incompatible.
+> **Note:** The Host and Target build environments are mutually incompatible.
   You must ensure that the [target build environment variables](#5-defining-the-target-build-environment)
   are undefined before you build the Host dependencies.
 
@@ -166,7 +166,7 @@ executables to the system `PATH`.
 
 > **Note:** The ACC-RL SDK includes its own setup file
 > (`environment-setup-aarch64-intel-linux-gnu`). We strongly recommend
-> that you *not* use this setup file when building the Stratum dependencies
+> that you *not* use this file when building the Stratum dependencies
 > or P4 Control Plane.
 >
 > The SDK setup file is intended for use with GNU Autotools. Some of
@@ -184,10 +184,10 @@ directory when the file structure is copied to the E2100 file system.
 The `setup` directory includes a helper script (`make-cross-deps.sh`) that
 can be used to build the Target dependencies.
 
-- The `--help` (`-h`) option lists the parameters the helper script supports.
+- The `--help` (`-h`) option lists the parameters the helper script supports
 
 - The `--dry-run` (`-n`) option displays the parameter values without
-  running CMake.
+  running CMake
 
 You will need to provide the helper script with the path to the Host
 dependencies (`--host`) as well as the install prefix (`--prefix`).
