@@ -164,21 +164,15 @@ and the helper script:
 The setup script also adds the directory containing the cross-compiler
 executables to the system `PATH`.
 
-> Note: The ACC-RL SDK includes a setup file
-  (`environment-setup-aarch64-intel-linux-gnu`) that performs the same
-  function as is described here. We strongly recommend that you *not* use
-  the SDK's setup file when building the Stratum dependencies and P4
-  Control Plane.
-
-  The SDK setup file is intended for use with Autotools. It defines a
-  considerable number of environment variables, which have a blanket
-  effect on the behavior of the build tools. These definitions may
-  interfere with the CMake build in non-obvious ways.
-
-  The SDK also provides its own CMake toolchain file. We recommend using
-  the toolchain file that is provided as part of the networking recipe,
-  not the SDK's toolchain file, when building the Stratum dependencies
-  and P4 Control Plane.
+> **Note:** The ACC-RL SDK includes its own setup file
+> (`environment-setup-aarch64-intel-linux-gnu`). We strongly recommend
+> that you *not* use this setup file when building the Stratum dependencies
+> or P4 Control Plane.
+>
+> The SDK setup file is intended for use with GNU Autotools. Some of
+> the environment variables it defines affect the behavior of the C and
+> C++ compilers and the linker. These definitions may interfere with the
+> CMake build in non-obvious ways.
 
 ## 6. Building the Target Dependencies
 
