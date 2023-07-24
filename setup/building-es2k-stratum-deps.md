@@ -57,7 +57,7 @@ You may substitute your own local directory name for `ipdk.recipe`.
 
 The build script for the Stratum dependencies is in the `setup` directory.
 
-TThe source code for the dependencies is not part of the distribution.
+The source code for the dependencies is not part of the distribution.
 It is downloaded by the build script.
 
 ## 4. Building the Host Dependencies
