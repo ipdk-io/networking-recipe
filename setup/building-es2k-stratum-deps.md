@@ -67,7 +67,7 @@ First, decide where to install the Host dependencies. This location (the
 
 It is recommended that you *not* install the Host dependencies in `/usr` or
 `/usr/local`. It will be easier to rebuild or update the dependencies if
-their libraries not are mingled with other libraries.
+their libraries are not mingled with other libraries.
 
 The `setup` directory includes a helper script (`make-host-deps.sh`) that
 can be used to build the Host dependencies.
