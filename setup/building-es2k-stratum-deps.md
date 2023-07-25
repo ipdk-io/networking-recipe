@@ -123,14 +123,19 @@ to execute it. We recommend removing execute permission from the file
 For example:
 
 ```bash
+# Set by user. Used internally.
 ACC_SDK=<acc-sdk-directory>
 P4CPBASE=<recipe-directory>
-export CMAKE_TOOLCHAIN_FILE=$P4CPBASE/cmake/aarch64-toolchain.cmake
+
+# Used internally.
 AARCH64=$ACC_SDK/aarch64-intel-linux-gnu
 SYSROOT=$AARCH64/aarch64-intel-linux-gnu/sysroot
+
+# Used externally for build.
 export SDKTARGETSYSROOT=$SYSROOT
 export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
 export PKG_CONFIG_PATH=$SYSROOT/usr/lib64/pkgconfig:$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/share/pkgconfig
+export CMAKE_TOOLCHAIN_FILE=$P4CPBASE/cmake/aarch64-toolchain.cmake
 [ -z "$ES2K_SAVE_PATH" ] && export ES2K_SAVE_PATH=$PATH
 export PATH=$AARCH64/bin:$ES2K_SAVE_PATH
 ```
