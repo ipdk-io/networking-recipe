@@ -98,11 +98,9 @@ jobs:
       - name: 'Execute dpdk target build'
         run: |
              cd ${GITHUB_WORKSPACE}/ipdk.recipe
-             export IPDK_RECIPE=${GITHUB_WORKSPACE}/ipdk.recipe
              export SDE_INSTALL=${GITHUB_WORKSPACE}/install
              export DEPEND_INSTALL=${GITHUB_WORKSPACE}/deps
-             source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
-             ./make-all.sh --target=dpdk  --prefix=${GITHUB_WORKSPACE}/dpdk-target
+             ./make-all.sh --target=dpdk --prefix=${GITHUB_WORKSPACE}/dpdk-target
 
   build_and_krnlmon_ut_dpdk_target:
     timeout-minutes: 60

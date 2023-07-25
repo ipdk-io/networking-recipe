@@ -45,7 +45,9 @@ config.
 - export SDE_INSTALL=`absolute path for p4 sde install built in previous step`
 
 ```bash
-source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL 
+cd $IPDK_RECIPE
+mkdir install
+export P4CP_INSTALL=`pwd`/install
 ```
 
 #### Compile the recipe
@@ -69,8 +71,8 @@ appropriate path instead of `./install`.
 copying files to system directories.
 
 ```bash
-source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
-sudo ./scripts/dpdk/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
+source $P4CP_INSTALL/sbin/setup_env.sh $P4CP_INSTALL $SDE_INSTALL $DEPEND_INSTALL
+sudo $P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 ```
 
 #### Set hugepages required for DPDK
@@ -78,7 +80,7 @@ sudo ./scripts/dpdk/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
 Run the hugepages script.
 
 ```bash
-sudo ./scripts/dpdk/set_hugepages.sh
+sudo $P4CP_INSTALL/sbin/set_hugepages.sh
 ```
 
 #### Export all environment variables to sudo user
@@ -94,8 +96,7 @@ a specific directory. For information on running infrap4d in insecure mode, or s
 certificates, see the [security_guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/security-guide.md) document.
 
 ```bash
-cd $IPDK_RECIPE
-sudo ./install/sbin/infrap4d
+sudo $P4CP_INSTALL/sbin/infrap4d
 ```
 
  By default, infrap4d runs in detached mode. If you want to run
@@ -111,8 +112,8 @@ Open a new terminal to set the pipeline and try the sample P4 program.
 Set up the environment and export all environment variables to sudo user.
 
 ```bash
-source ./scripts/dpdk/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
-./scripts/dpdk/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
+source $P4CP_INSTALL/sbin/setup_env.sh $P4CP_INSTALL $SDE_INSTALL $DEPEND_INSTALL
+$P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
@@ -169,7 +170,7 @@ and context.json).
   Generate binary executable using tdi-pipeline builder command below:
 
 ```bash
-./install/bin/tdi_pipeline_builder \
+$P4CP_INSTALL/bin/tdi_pipeline_builder \
     --p4c_conf_file=$OUTPUT_DIR/simple_l3.conf \
     --bf_pipeline_config_binary_file=$OUTPUT_DIR/simple_l3.pb.bin
 ```
@@ -177,14 +178,14 @@ and context.json).
 #### Set forwarding pipeline
 
 ```bash
-sudo ./install/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3.pb.bin $OUTPUT_DIR/p4Info.txt
+sudo $P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3.pb.bin $OUTPUT_DIR/p4Info.txt
 ```
 
 #### Configure forwarding rules
 
 ```bash
-sudo  ./install/bin/p4rt-ctl add-entry br0 ingress.ipv4_host "hdr.ipv4.dst_addr=1.1.1.1,action=ingress.send(0)"
-sudo  ./install/bin/p4rt-ctl add-entry br0 ingress.ipv4_host "hdr.ipv4.dst_addr=2.2.2.2,action=ingress.send(1)"
+sudo  $P4CP_INSTALL/bin/p4rt-ctl add-entry br0 ingress.ipv4_host "hdr.ipv4.dst_addr=1.1.1.1,action=ingress.send(0)"
+sudo  $P4CP_INSTALL/bin/p4rt-ctl add-entry br0 ingress.ipv4_host "hdr.ipv4.dst_addr=2.2.2.2,action=ingress.send(1)"
 ```
 
  *Note*: See [p4rt-ctl Readme](https://github.com/ipdk-io/networking-recipe/blob/main/docs/p4rt-ctl.rst) for more information on p4rt-ctl utility.

@@ -42,7 +42,9 @@ config.
 - export SDE_INSTALL=`absolute path for p4 sde install built in previous step`
 
 ```bash
-source ./scripts/es2k/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL 
+cd $IPDK_RECIPE
+mkdir install
+export P4CP_INSTALL=`pwd`/install
 ```
 
 #### Compile the recipe
@@ -66,7 +68,8 @@ appropriate path instead of ./install.
 we are creating directories and copying config file at system level.
 
 ```bash
-sudo ./scripts/es2k/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
+source $P4CP_INSTALL/sbin/setup_env.sh $P4CP_INSTALL $SDE_INSTALL $DEPEND_INSTALL
+sudo $P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 ```
 
 #### Set hugepages required for ES2K
@@ -74,7 +77,7 @@ sudo ./scripts/es2k/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
 Run the hugepages script.
 
 ```bash
-sudo ./scripts/es2k/set_hugepages.sh
+sudo $P4CP_INSTALL/sbin/set_hugepages.sh
 ```
 
 #### Export all environment variables to sudo user
@@ -102,7 +105,7 @@ the range with cfgqs-idx parameter. Total number of queues split between process
 
 ```bash
 cd $IPDK_RECIPE
-sudo ./install/sbin/infrap4d
+sudo $P4CP_INSTALL/sbin/infrap4d
 ```
 
 *Note*: By default, infrap4d runs in detached mode. If you want to run in
@@ -118,8 +121,8 @@ Open a new terminal to set the pipeline and try the sample P4 program.
 Set up the environment and export all environment variables to sudo user.
 
 ```bash
-source ./scripts/es2k/setup_env.sh $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
-./scripts/es2k/copy_config_files.sh $IPDK_RECIPE $SDE_INSTALL
+source $P4CP_INSTALL/sbin/setup_env.sh $P4CP_INSTALL $SDE_INSTALL $DEPEND_INSTALL
+$P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
@@ -175,7 +178,7 @@ touch tofino.bin
   Generate binary executable using the TDI pipeline builder command below:
 
 ```bash
-./install/bin/tdi_pipeline_builder \
+$P4CP_INSTALL/bin/tdi_pipeline_builder \
     --p4c_conf_file=$OUTPUT_DIR/simple_l3_l4_pna.conf \
     --bf_pipeline_config_binary_file=$OUTPUT_DIR/simple_l3_l4_pna.pb.bin
 ```
@@ -183,7 +186,7 @@ touch tofino.bin
 #### Set forwarding pipeline
 
 ```bash
-sudo ./install/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3_l4_pna.pb.bin $OUTPUT_DIR/simple_l3_l4_pna.p4info.txt
+sudo $P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3_l4_pna.pb.bin $OUTPUT_DIR/simple_l3_l4_pna.p4info.txt
 ```
 
 #### Configure forwarding rule to receive traffic
@@ -192,7 +195,7 @@ Add a forwarding rule to receive traffic on VSI-1 (base offset 16 + VSI ID 1) \
 when the key matches.
 
 ```bash
-sudo  ./install/bin/p4rt-ctl add-entry br0 MainControlImpl.l3_l4_match_rx \
+sudo  $P4CP_INSTALL/bin/p4rt-ctl add-entry br0 MainControlImpl.l3_l4_match_rx \
     "hdrs.ipv4[vmeta.common.depth].protocol=0x11,vmeta.common.port_id=0,istd.direction=0,
     hdrs.ipv4[vmeta.common.depth].src_ip="192.168.1.10",hdrs.ipv4[vmeta.common.depth].dst_ip="192.168.1.20",
     hdrs.udp[vmeta.common.depth].sport=1000,hdrs.udp[vmeta.common.depth].dport=2000,action=MainControlImpl.send(17)"
