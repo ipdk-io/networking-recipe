@@ -134,7 +134,7 @@ Each CLI format should be in line with the YANG parser available in server which
    re-adding and re-deleting the hotplug port is supported from qemu version
    6.1.0
 
-5) Set atrributes for link ports::
+5) Set attributes for link ports::
 
     $ gnmi-ctl set PARAMS
     $ Example:
@@ -287,7 +287,7 @@ Limitations/Note
     ``PSA architecture`` P4 compiler uses and emits the PIPELINE name defined by the user in the program.
                          Currently it supports only ingress pipelines.
 
-    This pipeline name is referred in below three places and consumed by infrap4d to program the target.
+    This pipeline name is referred to in three places below and consumed by infrap4d to program the target.
     ``p4_pipeline_name`` in /usr/share/stratum/dpdk/dpdk_skip_p4.conf file.
     ``p4_pipeline_name`` in conf file used in tdi_pipeline_builder to generate pb.bin.
     ``pipeline-name`` parameter in gnmi-ctl, while configuring the PORT
