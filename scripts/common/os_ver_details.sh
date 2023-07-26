@@ -1,6 +1,6 @@
 #!/bin/bash
-#Copyright (C) 2021-2022 Intel Corporation
-#SPDX-License-Identifier: Apache-2.0
+# Copyright (C) 2021-2023 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
 
 set -e
 
@@ -36,11 +36,12 @@ get_os_ver_details()
 }
 
 #
-# NOTE: We set NUM_THREADS to NUM_CORES / 4 to ensure the build process doesn't overrun
-#       the amount of memory on the build host. It's not an exact science, but it helps
-#       prevent the OOM process from killing compilers and causing issues with the
-#       build.
+# NOTE: We set NUM_THREADS to (NUM_CORES / 4) to ensure that the build process
+# doesn't exceed the amount of memory on the build host. It's not an exact
+# science, but it helps prevent the Out of Memory (OOM) manager from killing
+# compilers and causing issues with builds.
 #
+
 get_num_cores()
 {
    # First check if NUM_CORES and NUM_THREADS are already set, and exit if so.

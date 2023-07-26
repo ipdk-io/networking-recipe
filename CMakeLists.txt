@@ -243,10 +243,11 @@ if(WITH_KRNLMON)
     add_subdirectory(krnlmon)
 endif()
 
-add_subdirectory(stratum)
-add_subdirectory(infrap4d)
-add_subdirectory(clients)
-
 if(WITH_OVSP4RT)
     add_subdirectory(ovs-p4rt)
 endif()
+
+add_subdirectory(stratum)
+add_subdirectory(infrap4d)
+add_subdirectory(clients)
+add_subdirectory(scripts)

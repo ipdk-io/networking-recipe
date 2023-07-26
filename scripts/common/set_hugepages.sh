@@ -1,8 +1,9 @@
 #!/bin/bash
-#Copyright (C) 2021 Intel Corporation
-#SPDX-License-Identifier: Apache-2.0
+# Copyright (C) 2021 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
 
 #...Setting Hugepages...#
+echo "Setting hugepages"
 mkdir -p /mnt/huge
 if [ "$(mount | grep hugetlbfs)" == "" ]
 then
