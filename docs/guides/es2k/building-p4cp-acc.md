@@ -19,7 +19,7 @@ There are several things to do before you can build P4 Control Plane.
 
   See [Installing the ACC SDK](installing-acc-sdk.md) for instructions.
 
-## Install Stratum Dependencies
+## Install the Stratum Dependencies
 
 See [Building Stratum Dependencies for the ACC](../../../setup/building-es2k-stratum-deps.md)
 for instructions.
@@ -27,7 +27,7 @@ for instructions.
 You will need the Host depencies, Target dependencies, and Build environment
 setup file, in order to cross-compile P4 Control Plane for the ACC.
 
-## Fetch Source Code
+## Fetch the Source Code
 
 If you have not already done so, you will need to get a copy of the IPDK
 networking-recipe repository and its submodules:
@@ -48,13 +48,16 @@ First, change to the source directory:
 cd ipdk.recipe
 ```
 
-If you have not already done so, source the file that the defines the
+If you have not already done so, source the file that defines the
 [target build environment variables](../../../setup/building-es2k-stratum-deps.md#5-defining-the-target-build-environment).
 For example:
 
 ```bash
-source setup/es2k-setup.env
+source SETUPFILE
 ```
+
+where `SETUPFILE` is the path to the file you created when you built the
+Stratum dependencies (for example, `setup/es2k-setup.env`).
 
 ### Building OVS
 
@@ -76,6 +79,10 @@ Options:
 The `//` at the beginning of the prefix path is a shortcut provided by
 the helper script. It will be replaced with the sysroot directory path.
 
+To do a clean build, issue the command `rm -fr ovs/build` before running
+`make-cross-ovs.sh`. You may also want to remove the installation
+directory from the previous build.
+
 ### Configuring P4 Control Plane
 
 The distribution includes a helper script (`config-cross-deps.sh`) that
@@ -93,7 +100,7 @@ directory under `/opt/ipdk/p4cp`:
     --prefix=//opt/ipdk/p4cp
 ```
 
-The options are:
+Options:
 
 - `--host=HOST` - path to the Host dependencies
 - `--deps=DEPS` - path to the Target dependencies
@@ -103,6 +110,10 @@ The options are:
 
 The `//` at the beginning of the prefix path is a shortcut provided by
 the helper script. It will be replaced with the sysroot directory path.
+
+To do a clean build, issue the command `rm -fr build` before running
+`config-cross-recipe.sh`. You may also want to remove the installation
+directory from the previous build.
 
 ### Building P4 Control Plane
 
