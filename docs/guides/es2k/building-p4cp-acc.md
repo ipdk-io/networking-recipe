@@ -29,7 +29,7 @@ setup file, in order to cross-compile P4 Control Plane for the ACC.
 
 ## Fetch Source Code
 
-If you have not already done so, you will to get a copy of the IPDK
+If you have not already done so, you will need to get a copy of the IPDK
 networking-recipe repository and its submodules:
 
 ```bash
@@ -40,15 +40,28 @@ You may substitute your own local directory name for `ipdk.recipe`.
 
 ## Build with OVS
 
+### Setup
+
+First, change to the source directory:
+
+```bash
+cd ipdk.recipe
+```
+
+If you have not already done so, source the file that the defines the
+[target build environment variables](../../../setup/building-es2k-stratum-deps.md#5-defining-the-target-build-environment).
+For example:
+
+```bash
+source setup/es2k-setup.env
+```
+
 ### Building OVS
 
 The distribution includes a helper script (`make-cross-ovs.sh`) that can be
 used to build OVS for P4 Control Plane.
 
-- The `--help` (`-h`) option lists the parameters the helper script supports
-
-- The `--dry-run` (`-n`) option displays the parameter values without
-  running CMake
+> The `--help` (`-h`) option lists the parameters the helper script supports.
 
 To build OVS and install it in the sysroot directory under `/opt/ipdk/ovs`:
 
@@ -56,17 +69,22 @@ To build OVS and install it in the sysroot directory under `/opt/ipdk/ovs`:
 ./make-cross-ovs.sh --prefix=//opt/ipdk/ovs
 ```
 
+Options:
+
+* `--prefix=PREFIX` - where to install OVS
+
+The `//` at the beginning of the prefix path is a shortcut provided by
+the helper script. It will be replaced with the sysroot directory path.
+
 ### Configuring P4 Control Plane
 
 The distribution includes a helper script (`config-cross-deps.sh`) that
 can be used to configure CMake to build P4 Control Plane.
 
-- The `--help` (`-h`) option lists the parameters the helper script supports
+> The `--help` (`-h`) option lists the parameters the helper script supports.
 
-- The `--dry-run` (`-n`) option displays the parameter values without
-  running CMake
-
-To configure P4 Control Plane to build with OVS:
+To configure CMake to build P4 Control Plane and install it in the sysroot
+directory under `/opt/ipdk/p4cp`:
 
 ```bash
 ./config-cross-recipe.sh \
@@ -75,9 +93,20 @@ To configure P4 Control Plane to build with OVS:
     --prefix=//opt/ipdk/p4cp
 ```
 
+The options are:
+
+- `--host=HOST` - path to the Host dependencies
+- `--deps=DEPS` - path to the Target dependencies
+- `--ovs=OVS` - path to the OVS installation
+- `--sde=SDE` - path to the SDE installation
+- `--prefix=PREFIX` - where to install P4 control plane
+
+The `//` at the beginning of the prefix path is a shortcut provided by
+the helper script. It will be replaced with the sysroot directory path.
+
 ### Building P4 Control Plane
 
-The final step is to use CMake to perform the build:
+Now use CMake to build and install P4 Control Plane:
 
 ```bash
 cmake --build build -j8 --target install
@@ -85,8 +114,7 @@ cmake --build build -j8 --target install
 
 ## Build without OVS
 
-To build without OVS, skip the OVS build step and specify the `--no-ovs`
-option when you configure the P4 Control Plane build:
+To configure CMake to build P4 Control Plane without OVS:
 
 ```bash
 ./config-cross-recipe.sh \
@@ -95,7 +123,9 @@ option when you configure the P4 Control Plane build:
     --prefix=//opt/ipdk/p4cp
 ```
 
-Now use CMake to perform the build:
+The `--no-ovs` option excludes OVS support.
+
+Now perform the build:
 
 ```bash
 cmake --build build -j8 --target install
