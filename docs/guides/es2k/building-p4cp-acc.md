@@ -125,19 +125,28 @@ cmake --build build -j8 --target install
 
 ## Build without OVS
 
-To configure CMake to build P4 Control Plane without OVS:
+To build P4 Control Plane without OVS:
 
 ```bash
 ./scripts/es2k/config-cross-recipe.sh \
     --host=../hostdeps --deps=//opt/ipdk/deps \
     --no-ovs --sde=//opt/p4/p4sde \
     --prefix=//opt/ipdk/p4cp
+
+cmake --build build -j8 --target install
 ```
 
 The `--no-ovs` option excludes OVS support.
 
-Now perform the build:
+## Build with Stratum Only
+
+To build P4 Control Plane without OVS or the Kernel Monitor:
 
 ```bash
+./scripts/es2k/config-cross-recipe.sh \
+    --host=../hostdeps --deps=//opt/ipdk/deps \
+    --no-ovs --no-krnlmon --sde=//opt/p4/p4sde \
+    --prefix=//opt/ipdk/p4cp
+
 cmake --build build -j8 --target install
 ```
