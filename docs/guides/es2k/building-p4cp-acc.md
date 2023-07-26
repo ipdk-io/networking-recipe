@@ -66,7 +66,7 @@ used to build OVS for P4 Control Plane.
 To build OVS and install it in the sysroot directory under `/opt/ipdk/ovs`:
 
 ```bash
-./make-cross-ovs.sh --prefix=//opt/ipdk/ovs
+./scripts/es2k/make-cross-ovs.sh --prefix=//opt/ipdk/ovs
 ```
 
 Options:
@@ -87,7 +87,7 @@ To configure CMake to build P4 Control Plane and install it in the sysroot
 directory under `/opt/ipdk/p4cp`:
 
 ```bash
-./config-cross-recipe.sh \
+./scripts/es2k/config-cross-recipe.sh \
     --host=../hostdeps --deps=//opt/ipdk/deps \
     --ovs=//opt/ipdk/ovs --sde=//opt/p4/p4sde \
     --prefix=//opt/ipdk/p4cp
@@ -117,7 +117,7 @@ cmake --build build -j8 --target install
 To configure CMake to build P4 Control Plane without OVS:
 
 ```bash
-./config-cross-recipe.sh \
+./scripts/es2k/config-cross-recipe.sh \
     --host=../hostdeps --deps=//opt/ipdk/deps \
     --no-ovs --sde=//opt/p4/p4sde \
     --prefix=//opt/ipdk/p4cp
