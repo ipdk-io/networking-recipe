@@ -71,7 +71,7 @@ To build OVS and install it in the sysroot directory under `/opt/ipdk/ovs`:
 
 Options:
 
-* `--prefix=PREFIX` - where to install OVS
+- `--prefix=PREFIX` - where to install OVS
 
 The `//` at the beginning of the prefix path is a shortcut provided by
 the helper script. It will be replaced with the sysroot directory path.
