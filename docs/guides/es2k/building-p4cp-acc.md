@@ -38,9 +38,7 @@ git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.reci
 
 You may substitute your own local directory name for `ipdk.recipe`.
 
-## Build with OVS
-
-### Setup
+## Define the Environment
 
 First, change to the source directory:
 
@@ -48,7 +46,7 @@ First, change to the source directory:
 cd ipdk.recipe
 ```
 
-If you have not already done so, source the file that defines the
+Source the file that defines the
 [target build environment variables](../../../setup/building-es2k-stratum-deps.md#5-defining-the-target-build-environment).
 For example:
 
@@ -58,6 +56,8 @@ source SETUPFILE
 
 where `SETUPFILE` is the path to the file you created when you built the
 Stratum dependencies (for example, `setup/es2k-setup.env`).
+
+## Build with OVS
 
 ### Building OVS
 
