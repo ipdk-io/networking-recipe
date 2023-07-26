@@ -21,7 +21,7 @@ There are several things to do before you can build P4 Control Plane.
 
 ## Install the Stratum Dependencies
 
-See [Building Stratum Dependencies for the ACC](../../../setup/building-es2k-stratum-deps.md)
+See [Building Stratum Dependencies for the ACC](/setup/building-es2k-stratum-deps.md)
 for instructions.
 
 You will need the Host dependencies, Target dependencies, and Build environment
@@ -47,7 +47,7 @@ cd ipdk.recipe
 ```
 
 Source the file that defines the
-[target build environment variables](../../../setup/building-es2k-stratum-deps.md#5-defining-the-target-build-environment).
+[target build environment variables](/setup/building-es2k-stratum-deps.md#5-defining-the-target-build-environment).
 For example:
 
 ```bash
