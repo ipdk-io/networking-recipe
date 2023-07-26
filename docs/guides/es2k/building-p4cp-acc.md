@@ -24,7 +24,7 @@ There are several things to do before you can build P4 Control Plane.
 See [Building Stratum Dependencies for the ACC](../../../setup/building-es2k-stratum-deps.md)
 for instructions.
 
-You will need the Host depencies, Target dependencies, and Build environment
+You will need the Host dependencies, Target dependencies, and Build environment
 setup file, in order to cross-compile P4 Control Plane for the ACC.
 
 ## Fetch the Source Code
