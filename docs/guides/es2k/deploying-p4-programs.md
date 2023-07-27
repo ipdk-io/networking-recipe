@@ -41,6 +41,10 @@ lrwxrwxrwx 1 root root      25 Jun  8  2023 default_pkg.pkg -> e2100-default-1.0
 root@mev-imc:/etc/dpcp/package# cp simple_l3_l4_pna.pkg default_pkg.pkg
 ```
 
+If COMMS channel support is required, follow
+[Enable COMMS channel](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/enabling-comms-channel.md)
+before proceeding to next step.
+
 ### 2.3 Start the IMC
 
 Run the IMC start-up script.
@@ -49,7 +53,7 @@ Run the IMC start-up script.
 root@mev-imc:~# /etc/init.d/run_default_init_app
 ```
 
-By default, `cpf_host` parameter in `/etc/dpcp/cp_init.cfg` is set to 4 which
+By default, `cpf_host` parameter in `/etc/dpcp/cfg/cp_init.cfg` is set to 4 which
 enables ACC. If the start-up script is executed successfully, ACC comes up with a
 statically assigned IP address `192.168.0.2` to the eth0 network interface.
 You can access ACC from IMC over an SSH session using this IP address.
