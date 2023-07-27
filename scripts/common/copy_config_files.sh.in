@@ -40,5 +40,6 @@ sudo cp ${SOURCE_DIR}/ca.conf ${TARGET_DIR}/
 sudo cp ${SOURCE_DIR}/grpc-client.conf ${TARGET_DIR}/
 sudo cp ${P4CP_INSTALL}/sbin/generate-certs.sh ${TARGET_DIR}/
 
+sudo mkdir /usr/share/target_sys/
 sudo cp $SDE_INSTALL/share/target_sys/zlog-cfg /usr/share/target_sys/
 set +e
