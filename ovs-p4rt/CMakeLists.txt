@@ -85,6 +85,10 @@ target_link_libraries(ovs-vswitchd
         rt m pthread
 )
 
+if(TARGET ovs::avx512)
+    target_link_libraries(ovs-vswitchd PUBLIC ovs::avx512)
+endif()
+
 if(TARGET unbound)
     target_link_libraries(ovs-vswitchd PUBLIC unbound)
 endif()
@@ -132,6 +136,10 @@ target_link_libraries(ovs-testcontroller
         atomic
         rt
 )
+
+if(TARGET ovs::avx512)
+    target_link_libraries(ovs-testcontroller PUBLIC ovs::avx512)
+endif()
 
 if(TARGET unbound)
     target_link_libraries(ovs-testcontroller PUBLIC unbound)

@@ -23,6 +23,11 @@ find_library(OVS_LIBRARY
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
 
+find_library(OVS_LIBAVX512
+    NAMES openvswitchavx512
+    PATHS ${PC_OVS_LIBRARY_DIRS}
+)
+
 find_library(OFPROTO_LIBRARY
     NAMES ofproto
     PATHS ${PC_OVS_LIBRARY_DIRS}
@@ -125,6 +130,15 @@ if(LIBTESTCONTROLLER)
     add_library(ovs::testcontroller UNKNOWN IMPORTED)
     set_target_properties(ovs::testcontroller PROPERTIES
         IMPORTED_LOCATION ${LIBTESTCONTROLLER}
+        INTERFACE_INCLUDE_DIRECTORIES ${OVS_INCLUDE_DIR}
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+    )
+endif()
+
+if(OVS_LIBAVX512)
+    add_library(ovs::avx512 UNKNOWN IMPORTED)
+    set_target_properties(ovs::avx512 PROPERTIES
+        IMPORTED_LOCATION ${OVS_LIBAVX512}
         INTERFACE_INCLUDE_DIRECTORIES ${OVS_INCLUDE_DIR}
         IMPORTED_LINK_INTERFACE_LANGUAGES "C"
     )
