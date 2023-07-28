@@ -237,7 +237,7 @@ Below configuration assumes
 - Underlay IDPF netdev has a VSI value 10
 
 ```
-p4rt-ctl add-lut-entry br0 linux_networking_control.ecmp_lpm_root_lut "user_meta.cmeta.bit32_zeros=0/255.255.255.255,priority=1,data:ipv4_table_lpm_root=0"
+p4rt-ctl add-entry br0 linux_networking_control.ecmp_lpm_root_lut "user_meta.cmeta.bit32_zeros=4/255.255.255.255,priority=2,action=linux_networking_control.ecmp_lpm_root_lut_action(0)"
 
 nmcli device set <IDPF netdev for VSI 10> managed no
 ifconfig <IDPF netdev for VSI 10> 40.1.1.1/24 up
