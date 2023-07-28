@@ -46,7 +46,7 @@ else
 fi
 
 # Update P4CP libraries
-export LD_LIBRARY_PATH=${P4CP_INSTALL}/install/lib:${P4CP_INSTALL}/install/lib64:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=${P4CP_INSTALL}/lib:${P4CP_INSTALL}/lib64:${LD_LIBRARY_PATH}
 export PATH=${P4CP_INSTALL}/bin:${P4CP_INSTALL}/sbin:$PATH
 
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
