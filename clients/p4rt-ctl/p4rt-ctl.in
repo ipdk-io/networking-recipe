@@ -573,35 +573,6 @@ class P4InfoHelper(object):
 
         return table_entry
 
-    def buildExternEntry(self,
-                        table_name,
-                        match_fields=None,
-                        default_action=False,
-                        profile_params=None,
-                        priority=None):
-        one_match_type_is_ternary = False
-        extern_entry = p4runtime_pb2.ExternEntry()
-        if priority is  None:
-            extern_entry.extern_type_id = p4info_pb2.P4Ids.MATCH_VALUE_LOOKUP_TABLE
-        else:
-            extern_entry.extern_type_id = p4info_pb2.P4Ids.TERNARY_MATCH_LOOKUP_TABLE
-        mvlut_entry = p4runtime_pb2.MvlutEntry()
-        mvlut_entry.mvlut_id = self.get_vlut_table_id(table_name)
-
-        if match_fields:
-            mvlut_entry.match.extend([
-                self.get_vlut_match_field_pb(table_name, match_field_name, value)
-                for match_field_name, value in match_fields.items()
-            ])
-
-        param= mvlut_entry.param
-        if profile_params and profile_params != ['']:
-            param.params.extend([
-                self.get_vlut_param_pb(table_name, field_name, value)
-                for field_name, value in profile_params.items()
-            ])
-        extern_entry.entry.Pack(mvlut_entry)
-        return extern_entry
 
     def buildActionProfileMember(self,
                         table_name,
@@ -1252,73 +1223,6 @@ def p4ctl_del_entry(client, bridge, tbl_name, match_key):
 
     client.write_update(update)
 
-@with_client
-def p4ctl_add_lut_entry(client, bridge, tbl_name, flow):
-    """
-    add-lut-entry SWITCH TABLE MATCH_KEY PROFILE_DATA
-    Example:
-        ovs-p4ctl add-lut-entry br0 pipe.mirror_tbl
-                   prof_id=1,hash=12345,mask=0xff
-    """
-    priority_val = None
-    if (flow.find("priority") != -1):
-        # For match_type ternary, we expect priority to be programmed by user.
-        match_keys, priority_val, prof_data = parse_vlut_flow_ternary(flow)
-    else:
-        # For TableData, ovs-p4ctl expects flow to have 'data:' configured.
-        # In this parse_flow, we use 'data:' as a delimiter.
-        match_keys, prof_data = parse_vlut_flow(flow)
-    p4info = client.get_p4info()
-    if not p4info:
-        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
-
-    helper = P4InfoHelper(p4info)
-
-    ee = helper.buildExternEntry(
-        table_name=tbl_name,
-        match_fields=match_keys,
-        priority=priority_val,
-        profile_params=prof_data
-    )
-
-    update = p4runtime_pb2.Update()
-    update.type = p4runtime_pb2.Update.INSERT
-    update.entity.extern_entry.CopyFrom(ee)
-
-    client.write_update(update)
-
-
-@with_client
-def p4ctl_del_lut_entry(client, bridge, tbl_name, match_key):
-    """
-    del-lut-entry SWITCH TABLE MATCH_KEY
-    Example:
-        ovs-p4ctl del-lut-entry br0 pipe.mirror_tbl
-                   prof_id=1
-    """
-    priority = None
-    if (match_key.find("priority") != -1):
-        # For match_type ternary, we expect priority to be sent by user.
-        key, priority = parse_match_key_ternary(match_key)
-    else:
-        key = parse_match_key(match_key)
-    p4info = client.get_p4info()
-    if not p4info:
-        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
-
-    helper = P4InfoHelper(p4info)
-
-    ee = helper.buildExternEntry(
-        table_name=tbl_name,
-        match_fields=key,
-        priority=priority
-    )
-
-    update = p4runtime_pb2.Update()
-    update.type = p4runtime_pb2.Update.DELETE
-    update.entity.extern_entry.CopyFrom(ee)
-
-    client.write_update(update)
 
 def _format_entry(p4info_helper, table_entry):
     tbl_name = p4info_helper.get_name('tables', table_entry.table_id)
