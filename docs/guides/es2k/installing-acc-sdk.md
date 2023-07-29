@@ -4,7 +4,7 @@ The ACC Software Development Kit (SDK) allows you to use an x86 host
 computer to build P4 Control Plane for the ARM Compute Complex (ACC) of the
 Intel&reg; IPU E2100.
 
-## SDK Contents
+## SDK contents
 
 The ACC SDK includes the following:
 
@@ -20,7 +20,7 @@ from the manufacturer.
 The ACC-RL SDK package is a tarball whose name ends in `acc-rl-sdk`, such
 as `mev-hw-b0-ci-ts.release.3921-acc-rl-sdk.tgz`.
 
-## Choose an Install Location
+## Choose an install location
 
 You will need to choose a location for the SDK on your development computer.
 The examples in this document assume you are logged in as user `peabody` and
@@ -41,9 +41,9 @@ Each time you wish to use the SDK in a new shell session, you need to source the
 $ popd
 ```
 
-## Key Components
+## Key components
 
-### SDK Layout
+### SDK layout
 
 The  ACC-RL SDK is laid out as follows:
 
@@ -60,14 +60,14 @@ acc-sdk/
 `-- environment-setup-aarch64-intel-linux-gnu
 ```
 
-### GCC Toolchain
+### GCC toolchain
 
 The GCC C/C++ toolchain executes on an x86-64 Linux host and generates binary
 executables and libraries for an AArch64 processor running Rocky Linux.
 
 The cross-compiler suite is in the `aarch64-intel-linux-gnu/bin` directory.
 
-### Target Sysroot
+### Target sysroot
 
 The Target directory tree (sysroot) provides header files and binaries
 (libraries and executables) for the target system.
