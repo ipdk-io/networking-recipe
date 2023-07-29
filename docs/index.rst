@@ -17,12 +17,12 @@ P4 Control Plane User Guide
 
 .. toctree::
    :maxdepth: 1
-   :caption: Build
+   :caption: ACC Build
 
    guides/es2k/installing-acc-sdk
-   setup/building-stratum-deps
-   setup/building-es2k-stratum-deps
-   guides/es2k/building-p4cp-acc
+   guides/es2k/defining-acc-environment
+   guides/es2k/building-acc-stratum-deps
+   guides/es2k/building-acc-p4cp
 
 .. toctree::
    :maxdepth: 1
@@ -44,8 +44,8 @@ P4 Control Plane User Guide
    :maxdepth: 1
    :caption: Security
 
-   guides/installing-tls-certificates
    guides/security-guide
+   guides/installing-tls-certificates
 
 .. toctree::
    :maxdepth: 1
