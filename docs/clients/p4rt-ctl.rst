@@ -115,7 +115,7 @@ Arguments
   For example, if the server is listening on 5.5.5.5:9559, the command to
   set the pipeline will be
 
-  .. code-block:: text
+  .. code-block:: bash
 
      p4rt-ctl -g 5.5.5.5:9559 set-pipe sample.pb.bin p4Info.txt
 
@@ -129,7 +129,7 @@ Set forwarding pipeline
 
    p4rt-ctl set-pipe SWITCH PROGRAM P4INFO
 
-Example::
+Example:
 
 .. code-block:: bash
 
