@@ -393,6 +393,7 @@ key name for whose value need to be fetched. Each get can take only **one** key.
 It fetches the value for the previously configured KEY.
 
 .. note::
+
    Port stats can be retrieved for the ports that are created through GNMI CLI.
    These ports can be of type LINK/VHOST/TAP type. PORT0, net_vhost0, and TAP0
    corresponds to the name used when creating the ports using GNMI CLI.
