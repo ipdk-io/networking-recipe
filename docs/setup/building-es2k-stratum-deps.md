@@ -1,1 +1,0 @@
-../../setup/building-es2k-stratum-deps.md
