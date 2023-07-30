@@ -1,6 +1,6 @@
 # Running Infrap4d on Intel IPU E2100
 
-- [1 Extract P4 libraries from tarball](#1-extract-P4-libraries-from-tarball)
+- [1 Extract P4 libraries from tarball](#1-extract-p4-libraries-from-tarball)
 - [2 Set up the environment](#2-set-up-the-environment)
 - [3 Install TLS Certificates](#3-install-tls-certificates)
 - [4 Generate Forwarding Pipeline Binary](#4-generate-forwarding-pipeline-binary)
@@ -11,7 +11,7 @@
 - [7 Configure Forwarding Rule](#7-configure-forwarding-rule)
 - [8 Send Test Traffic](#8-send-test-traffic)
 
-This document explains how to install and run the Infrap4d
+This document explains how to install and run `infrap4d`
 on Intel IPU E2100 hardware. It is assumed that you have followed the
 [Deploying P4 programs guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/deploying-p4-programs.md)
 to install the P4 package on FXP during IMC boot-up.
@@ -57,7 +57,7 @@ sudo $P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 
 ## 3. Install TLS Certificates
 
-See [Install TLS Certificates](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/install-tls-certificates.md)
+See [Installing TLS Certificates](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/installing-tls-certificates.md)
 for step by step guide for generating and installing TLS certificates
 
 ## 4. Generate Forwarding Pipeline Binary
