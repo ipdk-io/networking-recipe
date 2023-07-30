@@ -1,19 +1,9 @@
-# Security Guide for P4 Control Plane
-
-- [1. Overview](#1-overview)
-- [2. Certificate management](#2-certificate-management)
-   - [2.1 Running in secure mode](#21-running-in-secure-mode)
-      - [2.1.1 Requirements for gRPC server](#211-requirements-for-grpc-server)
-      - [2.1.2 Requirements for gRPC clients](#212-requirements-for-grpc-clients)
-      - [2.1.3 Generate and install TLS certificates](#213-generate-and-install-tls-certificates)
-   - [2.2 Running in insecure mode](#22-running-in-insecure-mode)
-
-## 1. Overview
+# Security Guide
 
 This document provides information about secure and insecure
 modes for networking recipe and certificate management.
 
-## 2. Certificate Management
+## TLS Certificates
 
 The gRPC ports are secured using TLS certificates. A script and reference
 configuration files are available to assist in generating certificates and
@@ -28,21 +18,24 @@ confirmation but may not provide sufficient security for production systems.
 It is highly recommended to use well-known CAs, and generate certificates at
 multiple depth levels in order to conform to higher security standards.
 
-### 2.1 Running in secure mode
+See [Working with TLS Certificates](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/install-tls-certificates.md)
+for step by step guide to generate and install TLS certificates
 
-#### 2.1.1 Requirements for gRPC server
+## Running in secure mode
+
+### Server requirements
 
 The IPDK Networking Recipe uses a secure-by-default model. If you wish to
 open insecure ports, you must do so explicitly. It is strongly recommended
 that you use secure ports in production systems.
 
-infrap4d is launched with following gRPC ports secured via TLS certificates.
+infrap4d is launched with the gRPC ports secured by TLS certificates.
 The port numbers are:
 
 - 9339 - an IANA-registered port for gNMI
 - 9559 - an IANA-registered port for P4RT
 
-#### 2.1.2 Requirements for gRPC clients
+### Client requirements
 
 Under default conditions, the gRPC clients will require the TLS certificates
 to establish communication with infrap4d. The clients will need to use the
@@ -63,12 +56,7 @@ must specify insecure mode for this to work.
     gnmi-ctl (the gNMI client for DPDK) and sgnmi_cli (the secure gNMI client)
 issue requests to port 9339.
 
-#### 2.1.3 Generate and install TLS certificates
-
-See [Install TLS Certificates](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/install-tls-certificates.md)
-for step by step guide to generate and install TLS certificates
-
-### 2.2 Running in insecure mode
+## Running in insecure mode
 
 To launch infrap4d in insecure mode:
 
@@ -82,12 +70,12 @@ For DPDK target:
 
 ```bash
 $IPDK_RECIPE/install/bin/gnmi-ctl set <COMMAND> \
--grpc_use_insecure_mode=true
+    -grpc_use_insecure_mode=true
 ```
 
 For Intel IPU E2100 target:
 
 ```bash
 $IPDK_RECIPE/install/bin/sgnmi_cli set <COMMAND> \
--grpc_use_insecure_mode=true
+    -grpc_use_insecure_mode=true
 ```
