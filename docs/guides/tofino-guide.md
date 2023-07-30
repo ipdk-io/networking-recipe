@@ -1,4 +1,4 @@
-# Tofino Setup Guide for P4 Control Plane
+# Tofino Setup Guide
 
 ## Overview
 
