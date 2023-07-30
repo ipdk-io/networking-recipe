@@ -46,8 +46,8 @@ above places to the ingress pipeline name specified in the p4 file.
 To avoid this handcrafting, we recommend using the ingress pipeline name as
 "pipe" for all PSA programs.
 
-Using tdi_pipeline_builder
---------------------------
+tdi_pipeline_builder
+--------------------
 
 tdi_pipeline_builder is an executable generated when P4 Control Plane is
 built. It is used to generate a protobuf-based bin file. This pb.bin
@@ -75,8 +75,8 @@ For example,
    of sample.conf
 
 
-Using p4rt-ctl
---------------
+p4rt-ctl
+--------
 
 ``p4rt-ctl`` is an executable generated when P4 Control Plane is built. It
 connects to the P4Runtime server in ``infrap4d`` via gRPC for
@@ -119,8 +119,8 @@ Arguments
 
      p4rt-ctl -g 5.5.5.5:9559 set-pipe sample.pb.bin p4Info.txt
 
-p4rt-ctl commands
------------------
+Using p4rt-ctl
+--------------
 
 Set forwarding pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~
