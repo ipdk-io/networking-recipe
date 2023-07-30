@@ -39,7 +39,7 @@ For YangParseTreePaths, we refactored `yang_parse_tree_paths.cc`
 (originally \~4100 lines, increasing to \~5600 lines in P4-OVS) into
 multiple, smaller source files, separating out sections of code that
 had been heavily modified. We then created alternate versions for DPDK.
-See [Refactoring YangParseTreePaths](../stratum/stratum/stratum/docs/refactoring_yang_parse_tree_paths.md)
+See [Refactoring YangParseTreePaths](https://github.com/ipdk-io/stratum-dev/blob/split-arch/stratum/docs/refactoring_yang_parse_tree_paths.md)
 for details.
 
 This restructuring allowed us to port DPDK code from P4-OVS with minimal
