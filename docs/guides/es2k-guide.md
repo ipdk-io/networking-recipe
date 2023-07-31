@@ -1,4 +1,4 @@
-# ES2K Setup Guide for P4 Control Plane
+# ES2K Setup Guide
 
 ## Overview
 
@@ -169,7 +169,7 @@ p4c-pna-xxp -I/usr/lib -I/usr/share/p4c/p4include -I/usr/share/p4c/idpf-lib \
 
 - Create a dummy tofino.bin file, which is needed by tdi_pipeline_builder.
 
-```bask
+```bash
 touch tofino.bin
 ```
 

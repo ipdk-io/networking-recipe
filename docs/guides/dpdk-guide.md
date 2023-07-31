@@ -1,4 +1,4 @@
-# DPDK Setup Guide for P4 Control Plane
+# DPDK Setup Guide
 
 ## Overview
 
