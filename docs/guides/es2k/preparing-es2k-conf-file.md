@@ -5,9 +5,34 @@ configuration file for your P4 program.
 
 In this case, we will be modifying it for the `simple_l3_l4_pna` sample program.
 
-## Template File
+> **Notes:**
+> 1. Should we mention that the user has the option of saving the
+> edited file under a different name and using the `-es2k_infrap4d_cfg`
+> command-line option to tell `infrap4d` to load it instead of the default
+> file?
+> 2. `es2k_skip_p4` is an indication (carried over from Tofino) of what
+> kind of configuration this is. Is "skip_p4" really the best name? Wouldn't
+> a better name for the standard config file be `esk2_infrap4d.conf`? The
+> idea is for the customer to use the template to create a program-specific
+> configuration file from a template and save it under a name that reflects
+> the program it runs, then either specify the program-specific config file
+> on the `infrap4d` command line or copy it to `es2k_infrap4d.conf`.
+>
+> It appears to me that we've made things confusing by not thinking about
+> the customer here.
+
+## Sample File
 
 /usr/share/stratum/es2k/es2k_skip_p4.conf
+
+> **Suggestions:**
+> 1. Replace *all* parameter values to be customized with uppercase placeholders
+     (e.g. `PCIE-BDF`).
+> 2. Change ABSOLUTE-PATH to FULL-PATH.
+> 3. Better still, shorten the placeholder names by omitting the
+     ABSOLUTE-PATH-TO- prefix entirely (CONTEXT-JSON-FILE, JSON-FILES-PATH).
+     The shorter names are easier to read and understand, and they alphabetize
+     better.
 
 ```json
 {
@@ -54,6 +79,11 @@ In this case, we will be modifying it for the `simple_l3_l4_pna` sample program.
 ```
 
 ## Parameters
+
+> **Suggestions:**
+> 1. Use placeholders (`PCIE-BDF`) instead of parameter names (`pcie-bdf`)
+     as headings.
+> 2. List parameters in alphabetical order.
 
 Handcraft the configuration file `/usr/share/stratum/es2k/es2k_skip_p4.conf`
 with the following parameters:
@@ -116,20 +146,34 @@ Specify the name of the P4 program. For simple_l3_l4_pna, replace
 Specify the name of P4 pipeline. For simple_l3_l4_pna, replace
 `P4-PIPELINE-NAME` with `main`.
 
-### `bfrt-config`, `context`, `config` and `path`
+### `bfrt-config`
 
-Specify the absolute paths for the files. For simple_l3_l4_pna sample program:
+Specify the full path to the `bfrt.json` file.
 
-* Replace `ABSOLUTE-PATH-TO-BFRT-JSON-FILE` with
+Replace `ABSOLUTE-PATH-TO-BFRT-JSON-FILE` with
 `/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/simple_l3_l4_pna.bf-rt.json`.
 
-* Replace `ABSOLUTE-PATH-TO-CONTEXT-JSON-FILE` with.
-`/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/simple_l3_l4_pna.context.json`
+### `context`
 
-* Replace `ABSOLUTE-PATH-TO-TOFINO-BIN-FILE` with
+Specify the full path to the `context.json` file.
+
+Replace `ABSOLUTE-PATH-TO-CONTEXT-JSON-FILE` with.
+`/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/simple_l3_l4_pna.context.json`.
+
+### `config`
+
+Specify the full path to the `tofino.bin` file.
+
+Replace `ABSOLUTE-PATH-TO-TOFINO-BIN-FILE` with
 `/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/tofino.bin`.
 
-* Replace `ABSOLUTE-PATH-FOR-JSON-FILES` with
+### `path`
+
+Specify the full path to the directory containing the json files.
+
+> **Question:** *which* json files?
+
+Replace `ABSOLUTE-PATH-FOR-JSON-FILES` with
 `/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna`.
 
 ## Finished Result
