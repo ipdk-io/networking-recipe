@@ -11,9 +11,9 @@ P4 Control Plane User Guide
    :maxdepth: 1
    :caption: Setup
 
-   guides/dpdk-guide
-   guides/es2k-guide
-   guides/tofino-guide
+   guides/setup/dpdk-setup-guide
+   guides/setup/es2k-setup-guide
+   guides/setup/tofino-setup-guide
 
 .. toctree::
    :maxdepth: 1
