@@ -117,6 +117,6 @@ build, and use a particular target.
 
 | Target | Instructions |
 | ------ | ------------ |
-| dpdk   | [DPDK Setup Guide](docs/guides/dpdk-guide.md) |
-| es2k   | [ES2K Setup Guide](docs/guides/es2k-guide.md) |
-| tofino | [Tofino Setup Guide](docs/guides/tofino-guide.md) |
+| dpdk   | [DPDK Setup Guide](docs/guides/setup/dpdk-setup-guide.md) |
+| es2k   | [ES2K Setup Guide](docs/guides/setup/es2k-setup-guide.md) |
+| tofino | [Tofino Setup Guide](docs/guides/setup/tofino-setup-guide.md) |
