@@ -143,7 +143,7 @@ certificate be provided. This can be overridden on startup by specifying
 See the [security guide](../guides/security-guide.md) for more information.
 
 `sgnmi_cli` is a gNMI client tool that defaults to secure mode. See the
-[sgnmi_cli guide](../clients/sgnmi_cli.rst) for more information.
+[sgnmi_cli guide](../clients/sgnmi_cli.md) for more information.
 
 ## Component Changes
 
