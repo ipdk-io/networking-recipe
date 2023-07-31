@@ -1,4 +1,4 @@
-# Building Stratum Dependencies for the ES2K ACC
+# Building Stratum Dependencies for the ACC
 
 This document explains how to build the Stratum dependencies for the
 ARM Compute Complex (ACC) of the Intel&reg; IPU E2100.
@@ -36,8 +36,7 @@ There are several things to do before you can build the dependencies.
 
 - Install the ACC SDK
 
-  See [Installing the ACC SDK](../docs/guides/es2k/installing-acc-sdk.md)
-  for directions.
+  See [Installing the ACC SDK](installing-acc-sdk.md) for directions.
 
 ## 3. Getting the Source Code
 
@@ -60,7 +59,12 @@ The build script for the Stratum dependencies is in the `setup` directory.
 The source code for the dependencies is not part of the distribution.
 It is downloaded by the build script.
 
-## 4. Building the Host Dependencies
+## 4. Defining the Build Environment
+
+See [Defining the ACC Build Environment](defining-acc-environment.md)
+for directions on creating the environment setup file.
+
+## 5. Building the Host Dependencies
 
 First, decide where to install the Host dependencies. This location (the
 "install prefix") must be specified when you configure the build.
@@ -82,7 +86,7 @@ needed for cross-compilation. Specify the `--full` parameter if you want
 to build all the libraries.
 
 > **Note:** The Host and Target build environments are mutually incompatible.
-  You must ensure that the [target build environment variables](#5-defining-the-target-build-environment)
+  You must ensure that the [target build environment variables](defining-acc-environment.md)
   are undefined before you build the Host dependencies.
 
 ### User build
@@ -112,73 +116,6 @@ PREFIX might be something like `/opt/ipdk/x86deps`.
 The script only uses `sudo` when installing libraries. Omit the parameter
 if you are running as `root`.
 
-## 5. Defining the Target Build Environment
-
-In order to cross-compile for the ACC, you will need to define a number
-of environment variables. This is typically done by putting the bash
-commands in a file (e.g. `es2k-setup.env`) and using the `source` command
-to execute it. We recommend removing execute permission from the file
-(`chmod a-x setup.env`) to remind yourself to source it, not run it.
-
-For example:
-
-```bash
-# Set by user. Used internally.
-ACC_SDK=<acc-sdk-directory>
-P4CPBASE=<recipe-directory>
-
-# Used internally.
-AARCH64=$ACC_SDK/aarch64-intel-linux-gnu
-SYSROOT=$AARCH64/aarch64-intel-linux-gnu/sysroot
-
-# Used externally for build.
-export SDKTARGETSYSROOT=$SYSROOT
-export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
-export PKG_CONFIG_PATH=$SYSROOT/usr/lib64/pkgconfig:$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/share/pkgconfig
-export CMAKE_TOOLCHAIN_FILE=$P4CPBASE/cmake/aarch64-toolchain.cmake
-[ -z "$ES2K_SAVE_PATH" ] && export ES2K_SAVE_PATH=$PATH
-export PATH=$AARCH64/bin:$ES2K_SAVE_PATH
-```
-
-In the listing above, you will need to provide values for these variables:
-
-- `ACC_SDK` - install path of the ACC-RL SDK (for example,
-  `$HOME/p4cp-dev/acc_sdk`)
-- `P4CPBASE` - path to the local networking-recipe directory (for example,
-  `$HOME/p4cp-dev/ipdk.recipe`)
-
-From these paths, the setup script derives:
-
-- `AARCH64` - path to the directory containing the AArch64
-  cross-compiler suite
-- `SYSROOT` - path to the sysroot directory, which contains AArch64
-  header files and binaries
-
-These directories are part of the ACC SDK.
-
-The setup script exports the following variables, which are used by CMake
-and the helper script:
-
-- `SDKTARGETSYSROOT` - path to the sysroot directory
-- `CMAKE_TOOLCHAIN_FILE` - path to the CMake toolchain file
-- `PKG_CONFIG_PATH` - search path for `pkg-config` to use when looking for
-  packages on the target system
-- `PKG_CONFIG_SYSROOT_DIR` - path to the sysroot directory, for use by
-  `pkg-config`
-
-The setup script also adds the directory containing the cross-compiler
-executables to the system `PATH`.
-
-> **Note:** The ACC-RL SDK includes its own setup file
-> (`environment-setup-aarch64-intel-linux-gnu`). We strongly recommend
-> that you *not* use this file when building the Stratum dependencies
-> or P4 Control Plane.
->
-> The SDK setup file is intended for use with GNU Autotools. Some of
-> the environment variables it defines affect the behavior of the C and
-> C++ compilers and the linker. These definitions may interfere with the
-> CMake build in non-obvious ways.
-
 ## 6. Building the Target Dependencies
 
 You will need to pick an install location for the target dependencies.
@@ -199,7 +136,7 @@ dependencies (`--host`) as well as the install prefix (`--prefix`).
 
 ### Target build
 
-Source the file that the defines the [target build environment variables](#5-defining-the-target-build-environment).
+Source the file that the defines the [target build environment variables](defining-acc-environment.md).
 
 ```bash
 source es2k-setup.env

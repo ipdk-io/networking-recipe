@@ -76,7 +76,7 @@ If you are working from a source distribution, or if the source files were
 downloaded by a previous build, you can override the download stage by
 specifying:
 
-```cmake
+```text
   -DDOWNLOAD=no -DFORCE_PATCH=yes
 ```  
 
