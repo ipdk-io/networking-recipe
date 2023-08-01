@@ -97,7 +97,7 @@ Not that `bsp-path` is not required for tofino-model.
 
 ```bash
 cd $IPDK_RECIPE
-./make-all.sh --deps=/usr/local/ --sde=$SDE_INSTALL --target=tofino
+./make-all.sh --target=tofino --deps=/usr/local
 ```
 
 ## Run
