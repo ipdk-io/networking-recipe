@@ -98,19 +98,28 @@ provides instructions on how to configure the IPU pipeline.
 ## 4. Compiling a P4 Program
 
 Use `p4c-pna-xxp` to compile a P4 program. We will be using one of the reference
-programs mentioned above.
+programs mentioned above. When P4 program includes ternary or exact MatchValueLookup
+tables, we need to pass `--no-pedantic` option to the `p4c-pna-xxp` executable.
 
 ```bash
 # Set environment variables
 export LD_LIBRARY_PATH=/usr/lib:/usr/lib64:/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
 export OUTPUT_DIR=/usr/share/mev_reference_p4_files/simple_l3_l4_pna
 
-# Compile p4 program
+# Command to compile: When P4 program does not include any ternary or exact MatchValueLookup table.
 p4c-pna-xxp -I/usr/lib -I/usr/share/p4c/p4include -I/usr/share/p4c/idpf-lib \
             $OUTPUT_DIR/simple_l3_l4_pna.p4 -o $OUTPUT_DIR/simple_l3_l4_pna.s \
             --p4runtime-files $OUTPUT_DIR/simple_l3_l4_pna.p4info.txt \
             --context $OUTPUT_DIR/simple_l3_l4_pna.context.json \
             --bfrt $OUTPUT_DIR/simple_l3_l4_pna.bf-rt.json
+
+# Command to compile: When P4 program includes ternary or exact MatchValueLookup table.
+p4c-pna-xxp -I/usr/lib -I/usr/share/p4c/p4include -I/usr/share/p4c/idpf-lib \
+            $OUTPUT_DIR/simple_l3_l4_pna.p4 -o $OUTPUT_DIR/simple_l3_l4_pna.s \
+            --p4runtime-files $OUTPUT_DIR/simple_l3_l4_pna.p4info.txt \
+            --context $OUTPUT_DIR/simple_l3_l4_pna.context.json \
+            --bfrt $OUTPUT_DIR/simple_l3_l4_pna.bf-rt.json \
+            --no-pedantic
 ```
 
 The compiler will generate the following files:
