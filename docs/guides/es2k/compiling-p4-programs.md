@@ -19,7 +19,7 @@ from RPMs in the release tarball.
   cd host/packages/x86_64/
 
   # Install RPMs on server
-  dnf localinstall cpt*.rpm --allowerasing
+  rpm -i cpt-<version>-ci.ts.release.<xxxx>.ehb0.5.15.fc37.x86_64.rpm
   dnf localinstall p4c*.rpm --allowerasing
   dnf localinstall p4-sde*.rpm --allowerasing
   ```
@@ -127,7 +127,7 @@ These files are called _P4 artifacts_.
 Use `cpt` to prepare the P4 artifacts for deployment:
 
 ```bash
-cpt --npic --device idpf --format csr --pbd  -o simple_l3_l4_pna.pkg \
+cpt --npic --format csr --pbd  -o simple_l3_l4_pna.pkg \
     cpt_ver.s simple_l3_l4_pna.s
 ```
 
