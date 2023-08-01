@@ -93,7 +93,7 @@ alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SD
 
 By default, infrap4d runs in secure mode and expects certificates to be available in
 a specific directory. For information on running infrap4d in insecure mode, or steps to generate TLS
-certificates, see the [security_guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/security-guide.md) document.
+certificates, see the [security guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/security-guide.md).
 
 ```bash
 sudo $P4CP_INSTALL/sbin/infrap4d
@@ -126,7 +126,7 @@ ifconfig TAP0 up
 ifconfig TAP1 up
 ```
 
- *Note*: See [gnmi-ctl Readme](https://github.com/ipdk-io/networking-recipe/blob/main/docs/dpdk/gnmi-ctl.rst)
+ *Note*: See [gnmi-ctl client guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/clients/gnmi-ctl.rst)
  for more information on the gnmi-ctl utility.
 
 #### Create P4 artifacts
@@ -188,7 +188,7 @@ sudo  $P4CP_INSTALL/bin/p4rt-ctl add-entry br0 ingress.ipv4_host "hdr.ipv4.dst_a
 sudo  $P4CP_INSTALL/bin/p4rt-ctl add-entry br0 ingress.ipv4_host "hdr.ipv4.dst_addr=2.2.2.2,action=ingress.send(1)"
 ```
 
- *Note*: See [p4rt-ctl Readme](https://github.com/ipdk-io/networking-recipe/blob/main/docs/p4rt-ctl.rst) for more information on p4rt-ctl utility.
+ *Note*: See [p4rt-ctl client guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/clients/p4rt-ctl.rst) for more information on p4rt-ctl utility.
 
 #### Test traffic between TAP0 and TAP1
 
