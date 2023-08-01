@@ -10,7 +10,7 @@ configuration files are available to assist in generating certificates and
 keys using OpenSSL. You may use other tools if you wish.
 
 The [reference files](https://github.com/ipdk-io/stratum-dev/tree/split-arch/tools/tls)
-uses a simple PKI where a self-signed key and certificate.
+use a simple PKI where a self-signed key and certificate.
 The root level Certificate Authority (CA) is used to generate server-side
 key and cert files, and client-side key and cert files. This results in a
 1-depth level certificate chain, which will suffice for validation and
@@ -18,7 +18,7 @@ confirmation but may not provide sufficient security for production systems.
 It is highly recommended to use well-known CAs, and generate certificates at
 multiple depth levels in order to conform to higher security standards.
 
-See [Working with TLS Certificates](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/install-tls-certificates.md)
+See [Working with TLS Certificates](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/installing-tls-certificates.md)
 for step by step guide to generate and install TLS certificates
 
 ## Running in secure mode
