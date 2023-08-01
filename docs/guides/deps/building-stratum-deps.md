@@ -7,7 +7,7 @@ be built and installed on the system.
 This document explains how to build and install the Stratum dependencies.
 
 > **Note**: For the Intel&reg; IPU E2100, see
-[Building Stratum Dependencies for the ES2K ACC](building-es2k-stratum-deps.md).
+[Building Stratum Dependencies for the ES2K ACC](building-acc-stratum-deps.md).
 
 ## 1 Prerequisites
 

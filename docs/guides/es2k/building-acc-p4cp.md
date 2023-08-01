@@ -21,7 +21,7 @@ There are several things to do before you can build P4 Control Plane.
 
 ## Install the Stratum Dependencies
 
-See [Building Stratum Dependencies for the ACC](building-acc-stratum-deps.md)
+See [Building Stratum Dependencies for the ACC](/guides/deps/building-acc-stratum-deps.md)
 for instructions.
 
 You will need the Host dependencies, Target dependencies, and Build environment

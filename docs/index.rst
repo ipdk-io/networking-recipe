@@ -9,7 +9,7 @@ P4 Control Plane User Guide
 
 .. toctree::
    :maxdepth: 1
-   :caption: Setup
+   :caption: Setup Guides
 
    guides/setup/dpdk-setup-guide
    guides/setup/es2k-setup-guide
@@ -17,11 +17,17 @@ P4 Control Plane User Guide
 
 .. toctree::
    :maxdepth: 1
+   :caption: Stratum Dependencies
+
+   guides/deps/building-stratum-deps
+   guides/deps/building-acc-stratum-deps
+
+.. toctree::
+   :maxdepth: 1
    :caption: ACC Build
 
    guides/es2k/installing-acc-sdk
    guides/es2k/defining-acc-environment
-   guides/es2k/building-acc-stratum-deps
    guides/es2k/building-acc-p4cp
 
 .. toctree::

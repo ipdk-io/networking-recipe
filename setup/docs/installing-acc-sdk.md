@@ -1,1 +1,0 @@
-../../docs/guides/es2k/installing-acc-sdk.md

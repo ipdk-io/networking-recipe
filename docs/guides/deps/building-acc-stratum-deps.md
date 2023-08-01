@@ -36,7 +36,7 @@ There are several things to do before you can build the dependencies.
 
 - Install the ACC SDK
 
-  See [Installing the ACC SDK](installing-acc-sdk.md) for directions.
+  See [Installing the ACC SDK](/guides/es2k/installing-acc-sdk.md) for directions.
 
 ## 3. Getting the Source Code
 
@@ -61,7 +61,7 @@ It is downloaded by the build script.
 
 ## 4. Defining the Build Environment
 
-See [Defining the ACC Build Environment](defining-acc-environment.md)
+See [Defining the ACC Build Environment](/guides/es2k/defining-acc-environment.md)
 for directions on creating the environment setup file.
 
 ## 5. Building the Host Dependencies
@@ -86,7 +86,7 @@ needed for cross-compilation. Specify the `--full` parameter if you want
 to build all the libraries.
 
 > **Note:** The Host and Target build environments are mutually incompatible.
-  You must ensure that the [target build environment variables](defining-acc-environment.md)
+  You must ensure that the [target build environment variables](/guides/es2k/defining-acc-environment.md)
   are undefined before you build the Host dependencies.
 
 ### User build
@@ -136,7 +136,7 @@ dependencies (`--host`) as well as the install prefix (`--prefix`).
 
 ### Target build
 
-Source the file that the defines the [target build environment variables](defining-acc-environment.md).
+Source the file that the defines the [target build environment variables](/guides/es2k/defining-acc-environment.md).
 
 ```bash
 source es2k-setup.env

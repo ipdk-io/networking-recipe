@@ -1,1 +1,0 @@
-../../../setup/docs/building-acc-stratum-deps.md

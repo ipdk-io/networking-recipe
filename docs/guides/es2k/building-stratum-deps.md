@@ -1,1 +1,0 @@
-../../../setup/docs/building-stratum-deps.md
