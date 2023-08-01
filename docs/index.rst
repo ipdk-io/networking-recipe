@@ -35,6 +35,7 @@ P4 Control Plane User Guide
    :caption: ES2K P4 Programs
 
    guides/es2k/compiling-p4-programs
+   guides/es2k/enabling-comm-channel
    guides/es2k/deploying-p4-programs
    guides/es2k/running-infrap4d
 
