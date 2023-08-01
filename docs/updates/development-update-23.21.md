@@ -140,10 +140,10 @@ The P4Runtime and gNMI ports are opened with TLS enabled, and require that a
 certificate be provided. This can be overridden on startup by specifying
 `-grpc_open_insecure_mode=true` on the `infrap4d` command line.
 
-See the [security guide](../guides/security-guide.md) for more information.
+See the [security guide](/guides/security/security-guide.md) for more information.
 
 `sgnmi_cli` is a gNMI client tool that defaults to secure mode. See the
-[sgnmi_cli guide](../clients/sgnmi_cli.md) for more information.
+[sgnmi_cli guide](/clients/sgnmi_cli.md) for more information.
 
 ## Component Changes
 
@@ -184,7 +184,7 @@ The `docs` directory has been reorganized and a number of files have been
 renamed.
 
 - Documentation for the command-line clients is in the `clients` subdirectory.
-- The target-specific setup guides and the [security guide](../guides/security-guide.md)
+- The target-specific setup guides and the [security guide](/guides/security/security-guide.md)
   are in the `guides` subdirectory.
 
 ## Security Fixes

@@ -50,8 +50,8 @@ P4 Control Plane User Guide
    :maxdepth: 1
    :caption: Security
 
-   guides/security-guide
-   guides/installing-tls-certificates
+   guides/security/security-guide
+   guides/security/using-certificates
 
 .. toctree::
    :maxdepth: 1
