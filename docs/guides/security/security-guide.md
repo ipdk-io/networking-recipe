@@ -18,7 +18,7 @@ confirmation but may not provide sufficient security for production systems.
 It is highly recommended to use well-known CAs, and generate certificates at
 multiple depth levels in order to conform to higher security standards.
 
-See [Working with TLS Certificates](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/installing-tls-certificates.md)
+See [Using TLS Certificates](/guides/security/using-tls-certificates.md)
 for step by step guide to generate and install TLS certificates
 
 ## Running in secure mode

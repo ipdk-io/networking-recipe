@@ -1,4 +1,4 @@
-# Building Stratum Dependencies for the ACC
+# Building Dependencies for the ACC
 
 This document explains how to build the Stratum dependencies for the
 ARM Compute Complex (ACC) of the Intel&reg; IPU E2100.

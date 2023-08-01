@@ -201,8 +201,8 @@ sudo  $P4CP_INSTALL/bin/p4rt-ctl add-entry br0 MainControlImpl.l3_l4_match_rx \
     hdrs.udp[vmeta.common.depth].sport=1000,hdrs.udp[vmeta.common.depth].dport=2000,action=MainControlImpl.send(17)"
 ```
 
- *Note*: See [p4rt-ctl client guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/clients/p4rt-ctl.rst) for more information
- on the `p4rt-ctl` utility.
+See the [p4rt-ctl client guide](/clients/p4rt-ctl.rst) for more information
+on the `p4rt-ctl` utility.
 
 #### Test traffic from link partner to E2100
 

@@ -93,7 +93,7 @@ alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SD
 
 By default, infrap4d runs in secure mode and expects certificates to be available in
 a specific directory. For information on running infrap4d in insecure mode, or steps to generate TLS
-certificates, see the [security guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/security-guide.md).
+certificates, see the [security guide](/guides/security/security-guide.md).
 
 ```bash
 sudo $P4CP_INSTALL/sbin/infrap4d
@@ -126,7 +126,7 @@ ifconfig TAP0 up
 ifconfig TAP1 up
 ```
 
- *Note*: See [gnmi-ctl client guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/clients/gnmi-ctl.rst)
+ *Note*: See [gnmi-ctl client guide](/clients/gnmi-ctl.rst)
  for more information on the gnmi-ctl utility.
 
 #### Create P4 artifacts
@@ -159,7 +159,7 @@ p4c-dpdk --arch pna --target dpdk \
     -o $OUTPUT_DIR/pipe/simple_l3.spec $OUTPUT_DIR/simple_l3.p4
 ```
 
-*Note*: The above commands will generate three files (p4Info.txt, bf-rt.json,
+The above commands will generate three files (p4Info.txt, bf-rt.json,
 and context.json).
 
 - Modify simple_l3.conf file to provide correct paths for bfrt-config, context,
@@ -188,7 +188,8 @@ sudo  $P4CP_INSTALL/bin/p4rt-ctl add-entry br0 ingress.ipv4_host "hdr.ipv4.dst_a
 sudo  $P4CP_INSTALL/bin/p4rt-ctl add-entry br0 ingress.ipv4_host "hdr.ipv4.dst_addr=2.2.2.2,action=ingress.send(1)"
 ```
 
- *Note*: See [p4rt-ctl client guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/clients/p4rt-ctl.rst) for more information on p4rt-ctl utility.
+See [p4rt-ctl client guide](/clients/p4rt-ctl.rst) for more information on
+the p4rt-ctl utility.
 
 #### Test traffic between TAP0 and TAP1
 

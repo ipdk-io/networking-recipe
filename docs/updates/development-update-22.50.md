@@ -97,11 +97,10 @@ libraries.
 
 ## Documentation Updates
 
-- The [p4rt-ctl](https://github.com/ipdk-io/networking-recipe/blob/main/docs/p4rt-ctl.rst#known-issues)
-and [gnmi-ctl](https://github.com/ipdk-io/networking-recipe/blob/main/docs/dpdk/gnmi-ctl.rst#limitationsnote)
+- The [p4rt-ctl](/clients/p4rt-ctl) and [gnmi-ctl](/clients/gnmi-ctl)
 guides have been updated with lists of known issues.
 
-- The [IPDK DPDK guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/ipdk-dpdk.md)
+- The [DPDK setup guide](/guides/setup/dpdk-setup-guide.md)
 has been extensively revised.
 
 ## Security Fixes
