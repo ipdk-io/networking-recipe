@@ -253,6 +253,8 @@ add_custom_target(userguide
     ${USERGUIDE_PREFIX}
 )
 
+message(STATUS "User guide will be written to ${USERGUIDE_PREFIX}")
+
 ##################
 # Subdirectories #
 ##################
