@@ -251,9 +251,9 @@ add_custom_target(userguide
     ${SPHINX_BUILD}
     ${CMAKE_CURRENT_SOURCE_DIR}/docs
     ${USERGUIDE_PREFIX}
+    COMMENT "Generating user guide to ${USERGUIDE_PREFIX}"
 )
 
-message(STATUS "User guide will be written to ${USERGUIDE_PREFIX}")
 
 ##################
 # Subdirectories #
