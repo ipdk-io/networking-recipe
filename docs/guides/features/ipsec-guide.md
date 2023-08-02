@@ -8,7 +8,7 @@ planes burdening compute instances. Further details are available on the
 [IPDK Inline Acceleration - IPsec](https://ipdk.io/documentation/Recipes/InlineIPsec/)
 page.
 
-This document is intended to be used in conjunction with the
+This feature works in conjunction with the
 [IPsec Recipe](https://github.com/ipdk-io/ipsec-recipe), which provides
 strongSwan plugin code to configure and program control messages into the
 target.
@@ -19,13 +19,15 @@ The IPsec offload feature is only supported on the Intel&reg; IPU E2100 target.
 
 The `infrap4d` process provides the gRPC server-side support for P4RT and
 gNMI messages. strongSwan acts as the gRPC client in this context.
-Alternatively, you can use other clients that implement the IKE stack. The
-client communicates using P4RT to program Security Policy Database (SPD) and
+You can also use other clients that implement the IKE stack. The
+client uses P4RT to program the Security Policy Database (SPD), and it
 uses gNMI to configure Security Association Database (SAD) entries, which
 includes encryption keys, re-keying etc.
 
 The [openconfig-ipsec-offload](https://github.com/ipdk-io/openconfig-public/blob/master/release/models/ipsec/openconfig-ipsec-offload.yang)
 YANG model is used to configure IPsec offload.
+
+## Enabling IPsec
 
 Follow the sequence of steps listed below to enable IPsec functionality.
 
@@ -65,7 +67,7 @@ to generate crypto P4 artifacts for programming the pipelines.
 
 Follow the instructions in the [strongSwan documentation](https://docs.strongswan.org/docs/5.9/index.html)
 to configure host for the use-case selected. This includes details such as
-certificate location, IPs, lifetime thresholds etc.
+certificate location, IPs, lifetime thresholds, etc.
 
 ### Start IPsec
 
@@ -81,7 +83,7 @@ This section provides detailed information on OpenConfig model and gNMI
 messages with the expected format. The strongSwan plugin has the following
 details encoded. This is only provided for clarity and information purposes.
 
-### The Config SAD message
+### Config SAD message
 
 The P4 Control Plane provides SET and DELETE API calls service to the 
 IPsec-offload [Config SAD message](https://github.com/ipdk-io/openconfig-public/blob/master/release/models/ipsec/openconfig-ipsec-offload.yang#L39-L185)
@@ -118,15 +120,16 @@ sa_soft_lifetime {
 }
 ```
 
-### The Fetch SPI message
+### Fetch SPI message
 
-The P4 Control Plane supports a GET gNMI call to retrieve the
+The GET gNMI call is used to retrieve the
 [SPI value](https://github.com/ipdk-io/openconfig-public/blob/master/release/models/ipsec/openconfig-ipsec-offload.yang#L292)
 at `/ipsec-offload/ipsec-spi/rx-spi`.
 
-### The Key Expiry Notification message
+### Key Expiry Notification message
 
-The P4 Control Plane supports a [gRPC Notification message](https://github.com/ipdk-io/openconfig-public/blob/master/release/models/ipsec/openconfig-ipsec-offload.yang#L308) at `/ipsec-offload`. This is used as a signal to trigger the
+The [gRPC Notification message](https://github.com/ipdk-io/openconfig-public/blob/master/release/models/ipsec/openconfig-ipsec-offload.yang#L308)
+at `/ipsec-offload` is used as a signal to trigger the
 re-keying mechanism in IKE protocol.
 
 A gNMI subscription stream is opened from the gNMI client listening to these
