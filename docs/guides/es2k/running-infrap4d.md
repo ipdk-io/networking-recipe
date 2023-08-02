@@ -2,7 +2,7 @@
 
 This document explains how to install and run `infrap4d`
 on Intel IPU E2100 hardware. It is assumed that you have followed the
-[Deploying P4 programs guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/deploying-p4-programs.md)
+[Deploying P4 programs guide](/guides/es2k/deploying-p4-programs.md)
 to install the P4 package on FXP during IMC boot-up.
 
 ## 1. Extract P4 libraries from tarball
@@ -46,7 +46,7 @@ sudo $P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 
 ## 3. Install TLS certificates
 
-See [Install TLS Certificates](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/install-tls-certificates.md)
+See [Using TLS Certificates](/guides/security/using-tls-certificates.md)
 for step by step guide for generating and installing TLS certificates
 
 ## 4. Generate forwarding pipeline binary
@@ -62,13 +62,13 @@ touch tofino.bin
 ### Copy P4 artifacts to ACC
 
 Copy `bfrt.json`, `context.json`, `p4info.txt` to the ACC. See
-[Compiling P4 programs](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/compiling-p4-programs.md)
+[Compiling P4 programs](/guides/es2k/compiling-p4-programs.md)
 for instructions on generating these files.
 
 ### Prepare configuration file
 
-Handcraft the configuration file `/usr/share/stratum/es2k/es2k_skip_p4.conf` with
-following parameters:
+Handcraft the configuration file `/usr/share/stratum/es2k/es2k_skip_p4.conf`
+with the following parameters:
 
 - `pcie_bdf`
 
@@ -249,8 +249,8 @@ hdrs.udp[vmeta.common.depth].dport=2000,\
 action=MainControlImpl.send(17)"
 ```
 
-Note: See [p4rt-ctl Readme](https://github.com/ipdk-io/networking-recipe/blob/main/docs/clients/p4rt-ctl.rst)
-for more information on the `p4rt-ctl` utility.
+See the [p4rt-ctl client guide](/clients/p4rt-ctl.rst) for more information
+on the `p4rt-ctl` utility.
 
 ## 8. Send test traffic
 

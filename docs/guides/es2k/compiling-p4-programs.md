@@ -131,5 +131,5 @@ cpt --npic --format csr --pbd  -o simple_l3_l4_pna.pkg \
     cpt_ver.s simple_l3_l4_pna.s
 ```
 
-Please see [Deploying P4 Programs](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/deploying-p4-programs.md)
+Please see [Deploying P4 Programs](/guides/es2k/deploying-p4-programs.md)
 for details about deployment.

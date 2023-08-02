@@ -2,12 +2,12 @@
 
 ## 1. Overview
 
-This document explains how to deploy the P4 artifacts on hardware flexible
-pipeline (FXP).
+This section explains how to deploy a P4 program on the hardware Flexible
+Pipeline (FXP).
 
-Note: This document assumes that you have followed
-[Compiling P4 programs guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/compiling-p4-programs.md)
-to compile and generate artifacts required for deployment.
+It is assumed that that you have already
+[Compiled the P4 Program](/guides/es2k/compiling-p4-programs.md)
+to generate the P4 artifacts required for deployment.
 
 ## 2. Deploying on Hardware Flexible Pipeline (FXP)
 
@@ -41,9 +41,9 @@ lrwxrwxrwx 1 root root      25 Jun  8  2023 default_pkg.pkg -> e2100-default-1.0
 root@mev-imc:/etc/dpcp/package# cp simple_l3_l4_pna.pkg default_pkg.pkg
 ```
 
-If COMMS channel support is required, follow
-[Enable COMMS channel](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/enabling-comms-channel.md)
-before proceeding to next step.
+If Communication Channel support is required,
+[Enable the Communication Channel](/guides/es2k/enabling-comm-channel.md)
+before proceeding to the next step.
 
 ### 2.3 Start the IMC
 
@@ -58,4 +58,4 @@ enables ACC. If the start-up script is executed successfully, ACC comes up with 
 statically assigned IP address `192.168.0.2` to the eth0 network interface.
 You can access ACC from IMC over an SSH session using this IP address.
 
-To start infrap4d on ACC, follow [ES2K Running Infrap4d guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/running-infrap4d.md)
+You are now ready to [Start Infrap4d](/guides/es2k/running-infrap4d.md).

@@ -1,1 +1,0 @@
-../../docs/guides/es2k/defining-acc-environment.md

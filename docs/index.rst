@@ -9,7 +9,7 @@ P4 Control Plane User Guide
 
 .. toctree::
    :maxdepth: 1
-   :caption: Setup
+   :caption: Setup Guides
 
    guides/setup/dpdk-setup-guide
    guides/setup/es2k-setup-guide
@@ -17,11 +17,12 @@ P4 Control Plane User Guide
 
 .. toctree::
    :maxdepth: 1
-   :caption: ACC Build
+   :caption: Building
 
+   guides/deps/building-stratum-deps
+   guides/deps/building-acc-stratum-deps
    guides/es2k/installing-acc-sdk
    guides/es2k/defining-acc-environment
-   guides/es2k/building-acc-stratum-deps
    guides/es2k/building-acc-p4cp
 
 .. toctree::
@@ -29,6 +30,7 @@ P4 Control Plane User Guide
    :caption: ES2K P4 Programs
 
    guides/es2k/compiling-p4-programs
+   guides/es2k/enabling-comm-channel
    guides/es2k/deploying-p4-programs
    guides/es2k/running-infrap4d
 
@@ -50,8 +52,8 @@ P4 Control Plane User Guide
    :maxdepth: 1
    :caption: Security
 
-   guides/security-guide
-   guides/installing-tls-certificates
+   guides/security/security-guide
+   guides/security/using-tls-certificates
 
 .. toctree::
    :maxdepth: 1

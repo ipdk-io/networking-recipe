@@ -20,7 +20,7 @@ The tool may be run in insecure mode by specifying `--grpc_use_insecure_mode=tru
 on the command line. `infrap4d` must be started in insecure mode for this to
 work.
 
-For more information, see the [Security Guide](../guides/security-guide.md).
+For more information, see the [Security Guide](/guides/security/security-guide.md).
 
 ## Usage
 

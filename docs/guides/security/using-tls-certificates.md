@@ -1,7 +1,7 @@
-# Working with TLS Certificates
+# Using TLS Certificates
 
-This document provides information about generating and installing TLS certificates
-for running infrap4d in secure mode.
+This document provides information about generating and installing TLS
+certificates for running infrap4d in secure mode.
 
 ## Generating certificates
 
@@ -61,5 +61,5 @@ $P4CP_INSTALL/sbin/infrap4d \
 Note: Client certificates must be installed in `/usr/share/stratum/certs`.
 
 For more details about available options with respect to running infrap4d and
-clients in insecure mode and default behavior, see
-[security_guide](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/security-guide.md)
+clients in insecure mode and default behavior, see the
+[security_guide](security-guide.md).
