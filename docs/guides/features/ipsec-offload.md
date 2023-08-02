@@ -20,7 +20,7 @@ The IPsec offload feature is only supported on the Intel&reg; IPU E2100 target.
 The `infrap4d` process provides the gRPC server-side support for P4RT and
 gNMI messages. strongSwan acts as the gRPC client in this context.
 You can also use other clients that implement the IKE stack. The
-client uses P4RT to program the Security Policy Database (SPD), and it
+client uses P4Runtime to program the Security Policy Database (SPD), and it
 uses gNMI to configure Security Association Database (SAD) entries, which
 includes encryption keys, re-keying etc.
 
@@ -31,15 +31,22 @@ YANG model is used to configure IPsec offload.
 
 Follow the sequence of steps listed below to enable IPsec functionality.
 
-### Load crypto package
+### Compile P4 program
+
+Compile the ipsec-offload program according to the instructions in
+[Compiling P4 programs](/guides/es2k/compiling-p4-programs.md)
+to generate crypto P4 artifacts for programming the pipelines.
+
+### Load IPsec P4 package
 
 Follow the instructions in [Deploying P4 programs](/guides/es2k/deploying-p4-programs.md)
-to load the hardware FXP pipeline with the crypto package.
+to load the hardware FXP pipeline with the IPsec package.
 
 ### Configure and run infrap4d
 
-The OpenConfig portion of IPsec Offload functionality is enabled by using fixed
-functions configuration. Follow the instructions in [Running infrap4d](/guides/es2k/running-infrap4d.md)
+To be able to program Security Association Database (SAD) entries using gNMI,
+enable fixed function support in infrap4d. Follow the instructions in
+[Running infrap4d](/guides/es2k/running-infrap4d.md)
 to prepare system with generated TDI.json and context.json file references.
 
 The /usr/share/stratum/es2k/es2k_skip_p4.conf file must include the fixed
@@ -55,13 +62,7 @@ function configuration reference.
 ],
 ```
 
-With this configuration updated, you can start infrap4d.
-
-### Compile P4 program
-
-Compile the ipsec-offload program according to the instructions in
-[Compiling P4 programs](/guides/es2k/compiling-p4-programs.md)
-to generate crypto P4 artifacts for programming the pipelines.
+Update this configuration before starting `infrap4d`.
 
 ### Configure strongSwan
 
@@ -81,11 +82,11 @@ between local and peer system.
 
 This section provides detailed information on OpenConfig model and gNMI
 messages with the expected format. The strongSwan plugin has the following
-details encoded. This is only provided for clarity and information purposes.
+details encoded.
 
 ### Config SAD message
 
-The P4 Control Plane provides SET and DELETE API calls service to the 
+The P4 Control Plane provides SET and DELETE service to the 
 IPsec-offload [Config SAD message](https://github.com/ipdk-io/openconfig-public/blob/master/release/models/ipsec/openconfig-ipsec-offload.yang#L39-L185)
 at `/ipsec-offload/sad/sad-entry[offload-id=x][direction=y]/config`.
 
