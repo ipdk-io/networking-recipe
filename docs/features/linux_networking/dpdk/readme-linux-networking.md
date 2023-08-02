@@ -22,15 +22,15 @@
 1. [Overview](#overview)
 2. [Topology](#topology)
 3. [Create P4 artifacts](#create_p4_artifacts)
-3. [Limitations](#limitations)
-4. [Steps to create topology](#steps)
+4. [Limitations](#limitations)
+5. [Steps to create topology](#steps)
 
 ## Overview <a name="overview"></a>
-This README describes a step by step procedure to run Linux networking scenario with ECMP enabled for underlay connectivity.
+This README describes a step by step procedure to run Linux networking scenario
 
 ## Topology <a name="topology"></a>
 <p align="center">
-  <img alt="Linux Networking Topology With ECMP" src="topology_linux_networking_with_ecmp.PNG">
+  <img alt="Linux Networking Topology" src="topology-linux-networking.PNG">
 </p>
 
 
@@ -38,17 +38,16 @@ This README describes a step by step procedure to run Linux networking scenario 
   * VHOST ports, TAP ports, Physical LINK ports are created by GNMI CLI and LINK port is binded to the DPDK target
   * VLAN 1, VLAN 2, .... VLAN N created using Linux commands and are on top a TAP port. These VLAN ports should be equal to number of VM's that are spawned.
   * br-int, VxLAN0 ports are created using ovs-vsctl command provided by the networking recipe and all the VLAN ports are attached to br-int using ovs-vsctl command.
-  * TEP port is of type dummy, created using ip utility command and this port is used as the VxLAN tunnel termination port.
 
-System under test will have above topology running the networking recipe. Link Partner can have either the networking recipe or legacy OVS or kernel VxLAN. Both the Physical ports from System under test and Link Partner should be connected back to back. Note the limitations below before setting up the topology.
+System under test will have above topology running the networking recipe. Link Partner can have either the networking recipe or legacy OVS or kernel VxLAN. Note the limitations below before setting up the topology.
 
 ## Create P4 artifacts <a name="create_p4_artifacts"></a>
 - Install p4c compiler from p4lang/p4c(<https://github.com/p4lang/p4c>) repository and follow the readme for procedure
 - Set the environment variable OUTPUT_DIR to the location where artifacts should be generated and where p4 files are available
-  eg. export OUTPUT_DIR=/root/ovs/p4proto/p4src/linux_networking/
+  eg. export OUTPUT_DIR=$IPDK_RECIPE/p4src/linux_networking/
 - Generate the artifacts using p4c-dpdk installed in previous step using command below:
 ```
-  p4c-dpdk --arch pna --target dpdk --p4runtime-files $OUTPUT_DIR/p4Info.txt --bf-rt-schema $OUTPUT_DIR/bf-rt.json --context $OUTPUT_DIR/context.json -o $OUTPUT_DIR/linux_networking.spec linux_networking.p4
+  p4c-dpdk --arch pna --target dpdk --p4runtime-files $OUTPUT_DIR/p4Info.txt --bf-rt-schema $OUTPUT_DIR/bf-rt.json --context $OUTPUT_DIR/context.json -o $OUTPUT_DIR/linux_networking.spec $OUTPUT_DIR/linux_networking.p4
 ```
 - Modify sample lnw.conf file available in $IPDK_RECIPE/p4src/linux_networking/ to specify absolute path of the artifacts (json and spec files)
 - Generate binary execuatble using tdi-pipeline builder command below:
@@ -57,10 +56,9 @@ tdi_pipeline_builder --p4c_conf_file=lnw.conf --bf_pipeline_config_binary_file=l
 ```
 
 ## Limitations <a name="limitations"></a>
-Current SAI implementation for the networking recipe has following limitations:
+Current SAI enablement for the networking recipe has following limitations:
 - Always all VHOST user ports need to be configured first and only then TAP ports/physical ports
-- VM's Spawned on top of VHOST user ports should be UP and running, interfaces with in VM should be brought up before loading the "forwarding pipeline" (limitation by target)
-- TAP port created for the corresponding link port should be created using "gnmi-ctl control port creation for the link port"
+- TAP port created for the corresponding link port should be created using "gnmi-ctl control port creation got the link port"
 eg: gnmi-ctl set "device:physical-device,name:PORT0,pipeline-name:pipe,mempool-name:MEMPOOL0,control-port:TAP1,mtu:1500,pci-bdf:0000:18:00.0,packet-dir=network,port-type:link"
 - All VLAN interfaces created on top of TAP ports, should always be in lowercase format "vlan+vlan_id"
 Ex: vlan1, vlan2, vlan3 …. vlan4094
@@ -68,10 +66,9 @@ Ex: vlan1, vlan2, vlan3 …. vlan4094
 - VxLAN destination port should always be standard port. i.e., 4789. (limitation by p4 parser)
 - Only VNI 0 is supported.
 - We are not supporting any ofproto rules which would not allow for FDB learning on OVS.
-- Make sure underlay connectivity for both the nexthops is established before configuring multipath to reach the link partner. When using FRR, the routing protocol will establish underlay connectivity and redistribute routes.
-
 
 ## Steps to create the topology <a name="steps"></a>
+ *Note*: gnmi-ctl and p4rt-ctl utility used in below steps can be found under $IPDK_RECIPE/install/bin and should be run with `sudo`
 #### 1. Bind the physical port (Port 0 and Port 1) to user-space IO driver:
 * Load uio and vfio-pci driver
 ```
@@ -90,7 +87,6 @@ Ex: vlan1, vlan2, vlan3 …. vlan4094
     alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"
     sudo $IPDK_RECIPE/install/bin/infrap4d
 ```
-
 #### 3. Create two VHOST user ports:
 ```
     gnmi-ctl set "device:virtual-device,name:net_vhost0,host-name:host1,device-type:VIRTIO_NET,queues:1,socket-path:/tmp/vhost-user-0,packet-dir:host,port-type:LINK"
@@ -121,63 +117,66 @@ Note:
     ip addr add 99.0.0.2/24 dev eth0
     ip link set dev eth0 up
 ```
-#### 7. Configure tunnel termination port of type dummy
-```
+#### 7. Bring up the TAP and or dummy interfaces
+  - 7.1 Option 1: Use one of the TAP ports as tunnel termination and assign IP address to the TAP port.
+  ```
+    ip link set dev TAP0 up
+    ip addr add 40.1.1.1/24 dev TAP1
+    ip link set dev TAP1 up
+    ip link set dev TAP2 up
+    ip link set dev TAP3 up
+  ```
+  - 7.2 Option 2: Create a dummy port and use it for tunnel termination. Route to reach dummy port will be statically configured on peer or this route will be re-distributed to the peer via routing protocols available from FRR.
+  ```
     ip link add dev TEP1 type dummy
-```
-#### 8. Bring up the TAP and dummy interfaces
-```
+
     ip link set dev TAP0 up
     ip link set dev TAP1 up
     ip link set dev TAP2 up
     ip link set dev TAP3 up
     ip link set dev TEP1 up
-```
+  ```
 
-#### 9. Set the pipeline
+#### 8. Set the pipeline
 ```
     p4rt-ctl set-pipe br0 lnw.pb.bin p4Info.txt
 ```
 
-#### 10. Start and run ovs-vswitchd server and ovsdb-server
+#### 9. Start and run ovs-vswitchd server and ovsdb-server
 Kill any existing ovs process if running.
 ```
 mkdir -p $IPDK_RECIPE/install/var/run/openvswitch
 rm -rf $IPDK_RECIPE/install/etc/openvswitch/conf.db
 
-sudo $IPDK_RECIPE/install/bin/ovsdb-tool create \
-        $IPDK_RECIPE/install/etc/openvswitch/conf.db \
-        $IPDK_RECIPE/install/share/openvswitch/vswitch.ovsschema
+sudo $IPDK_RECIPE/install/bin/ovsdb-tool create $IPDK_RECIPE/install/etc/openvswitch/conf.db $IPDK_RECIPE/install/share/openvswitch/vswitch.ovsschema
 
 export RUN_OVS=$IPDK_RECIPE/install
 
 sudo $IPDK_RECIPE/install/sbin/ovsdb-server \
-        --remote=punix:$RUN_OVS/var/run/openvswitch/db.sock \
-	      --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
-        --pidfile --detach
+	        --remote=punix:$RUN_OVS/var/run/openvswitch/db.sock \
+	        --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
+                --pidfile --detach
+sudo $IPDK_RECIPE/install/sbin/ovs-vswitchd --detach --no-chdir unix:$RUN_OVS/var/run/openvswitch/db.sock --mlockall --log-file=/tmp/ovs-vswitchd.log
 
-sudo $IPDK_RECIPE/install/sbin/ovs-vswitchd --detach --no-chdir \
-        unix:$RUN_OVS/var/run/openvswitch/db.sock \
-        --mlockall --log-file=/tmp/ovs-vswitchd.log
-
-sudo $IPDK_RECIPE/install/bin/ovs-vsctl --db \
-        unix:$RUN_OVS/var/run/openvswitch/db.sock show
+sudo $IPDK_RECIPE/install/bin/ovs-vsctl --db unix:$RUN_OVS/var/run/openvswitch/db.sock show
 
 sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-br br-int
 ifconfig br-int up
 ```
 
-#### 11. Configure VXLAN port
-   Using one of the TAP ports for tunnel termination.
+#### 10. Configure VXLAN port
+  - 10.1 Option 1: When one of the TAP ports is used for tunnel termination.
+```
+    sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=40.1.1.2 options:dst_port=4789
+```
+  - 10.2 Option 2: When a dummy port is used for tunnel termination. Here remote IP is on a different network, route to reach peer need to be statically configure (refer section 14.1) or learn via FRR (refer section 14.2).
 ```
     sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=30.1.1.1 options:dst_port=4789
 ```
 Note:
     - VXLAN destination port should always be standard port. i.e., 4789. (limitation by p4 parser)
-    - Remote IP is on another network and route to reach this can be configured statically (refer section 14.1) or dynamically learn via routing protocols supported by FRR (refer section 14.2)
 
-
-#### 12. Configure VLAN ports on TAP0 and add them to br-int
+#### 11. Configure VLAN ports on TAP0 and add them to br-int
 ```
     ip link add link TAP0 name vlan1 type vlan id 1
     ip link add link TAP0 name vlan2 type vlan id 2
@@ -189,7 +188,8 @@ Note:
 Note:
      - All VLAN interfaces should be created on top of TAP ports, and should always be in lowercase format "vlan+vlan_id. (Eg: vlan1, vlan2, vlan3 …. vlan4094)
 
-#### 13. Configure rules to push and pop VLAN from vhost 0 and 1 ports to TAP0 port (vhost-user and vlan port mapping)
+
+#### 12. Configure rules to push and pop VLAN from vhost 0 and 1 ports to TAP0 port (vhost-user and vlan port mapping)
 ```
 Note: Port number used in p4rt-ctl commands are target datapath indexes(unique identifier for each port) which can be queried using following commands below. With current SDE implementation, both tdi-portin-id and tdi-portout-id are the same.
 
@@ -226,7 +226,7 @@ Note: Port number used in p4rt-ctl commands are target datapath indexes(unique i
   p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_vlan_pkts_table "istd.input_port=6,local_metadata.vlan_id=2,action=linux_networking_control.pop_vlan_fwd(1)"
   ```
 
-#### 14. Configure rules for control packets coming in and out of physical port
+#### 13. Configure rules for control packets coming in and out of physical port
   - **Rule for: Any rx control packet from phy port0(TDP 2) should be sent it to it corresponding control port TAP1(TDP 3)**
   ```
     p4rt-ctl add-entry br0 linux_networking_control.handle_rx_control_pkts_table "istd.input_port=2,action=linux_networking_control.set_control_dest(3)"
@@ -244,32 +244,27 @@ Note: Port number used in p4rt-ctl commands are target datapath indexes(unique i
     p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table "istd.input_port=5,action=linux_networking_control.set_control_dest(4)"
   ```
 
-#### 15. Configure ECMP for underlay connectivity
-- Rule: To reach link partner multiple paths are configured, packets can be hashed to any port where the nexthop's ARP is learnt
-- Nexthop is selected based on a 5-tuple parameter: source IPv4 address, destination IPv4 address, protocol type, UDP source port and UDP destination port of the overlay packet.
-  - 15.1 Option 1: Configure static routes.
+#### 14. Configure routes only when dummy port is used for tunnel termination.
+  - 14.1 Option 1: Configure static route.
+
     ```
     ip addr add 40.1.1.1/24 dev TEP1
     ip addr add 50.1.1.1/24 dev TAP1
-    ip addr add 60.1.1.1/24 dev TAP2
-    ip route add 30.1.1.1 nexthop via 50.1.1.2 dev TAP1 weight 1 nexthop via 60.1.1.2 dev TAP2 weight 1
+    ip route add 30.1.1.1 nexthop via 50.1.1.2 dev TAP1
     ```
-  - 15.2 Option 2: Learn dynamic routes via FRR (iBGP route distribution)
-    - 15.2.1 Install FRR
+
+  - 14.2 Option 2: Learn dynamic routes via FRR (iBGP route distribution)
+    - 14.2.1 Install FRR
       - Install FRR via default package manager, like "apt install frr" for Ubuntu /"dnf install frr" for Fedora.
       - If not, refer to official FRR documentation available at https://docs.frrouting.org/en/latest/installation.html and install according to your distribution.
-    - 15.2.2 Configure FRR
+    - 14.2.2 Configure FRR
       - Modify /etc/frr/daemons to enable bgpd daemon
       - Restart FRR service. systemctl restart frr
-      - Start VTYSH process, which is a CLI for user configuration.
-      - Set below configuration on the DUT (host1) for Multipath scenario.
+      - Start VTYSH process, which is a CLI provided by FRR for user configurations.
+      - Set below configuration on the DUT (host1) for singlepath scenario.
         ```
         interface TAP1
         ip address 50.1.1.1/24
-        exit
-        !
-        interface TAP2
-        ip address 60.1.1.1/24
         exit
         !
         interface TEP1
@@ -279,22 +274,17 @@ Note: Port number used in p4rt-ctl commands are target datapath indexes(unique i
         router bgp 65000
         bgp router-id 40.1.1.1
         neighbor 50.1.1.2 remote-as 65000
-        neighbor 60.1.1.2 remote-as 65000
         !
         address-family ipv4 unicast
           network 40.1.1.0/24
         exit-address-family
         ```
-      - Once Peer is also configured, we should see neighbors 50.1.1.2 and 60.1.1.2 ARP's are learnt on DUT (host1) and also route learnt on the kernel.
+      - Once Peer is also configured, we should see neighbor 50.1.1.2 is learnt on DUT (host1) and also route learnt on the kernel.
         ```
-        30.1.1.0/24 nhid 72 proto bgp metric 20
-          nexthop via 60.1.1.2 dev TAP2 weight 1
-          nexthop via 50.1.1.2 dev TAP1 weight 1
+        30.1.1.0/24 nhid 54 via 50.1.1.2 dev TAP1 proto bgp metric 20
         ```
 
-#### 16. Test the ping scenarios:
-  - Underlay ping for both ECMP nexthop's
+#### 15. Test the ping scenarios:
   - Ping between VM's on the same host
-  - Underlay ping for VxLAN tunnel termination port
-  - Overlay ping: Ping between VM's on different hosts and validate hashing
-
+  - Underlay ping
+  - Overlay ping: Ping between VM's on different hosts

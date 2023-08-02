@@ -23,7 +23,7 @@
 1. [Overview](#overview)
 2. [Topology](#topology)
 3. [Create P4 artifacts and start Infrap4d process](#create_p4_artifacts_and_start_infrap4d_process)
-4. [Steps to create topology](#steps)
+4. [Steps to create the topology](#steps)
 5. [Limitations](#limitations)
 
 ## Overview <a name="overview"></a>
@@ -33,12 +33,12 @@ This README describes a step-by-step procedure to run the Linux networking scena
 ## Topology <a name="topology"></a>
 
 <p align="center">
-  <img alt="Linux Networking Topology" src="topology_linux_networking.PNG">
+  <img alt="Linux Networking Topology" src="topology-linux-networking-ecmp.PNG">
 </p>
 
 
 * Notes about topology:
-  * Four Kernel netdevs are created by default by loading IDPF driver during ACC bring-up. User can also create more than Four netdevs. For that, we need to modify `acc_apf` parameter under `num_default_vport` in `/etc/dpcp/cfg/cp_init.cfg` on IMC before starting `run_default_init_app`.
+  * Four Kernel netdevs are created by default by loading IDPF driver during ACC bring-up. You can also create more than Four netdevs. For that, we need to modify `acc_apf` parameter under `num_default_vport` in `/etc/dpcp/cfg/cp_init.cfg` on IMC before starting `run_default_init_app`.
   * In `/etc/dpcp/cfg/cp_init.cfg` file also modify default `sem_num_pages` value to the value mentioned in `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking/README_P4_CP_NWS`.
   * vlan1, vlan2, .... vlanN created using Linux commands and are on top of an IDPF Netdev. These VLAN ports should be equal to number of VM's that are spawned.
   * br-int, VxLAN ports are created using ovs-vsctl command provided by the networking recipe and all the vlan ports are attached to br-int using ovs-vsctl command.
@@ -54,7 +54,7 @@ System under test will have above topology running the networking recipe. Link P
 
  *Note*: p4rt-ctl and ovs-vsctl utilities used in below steps can be found under $P4CP_INSTALL/bin
 
-#### 1. Set the forwarding pipeline
+#### Set the forwarding pipeline
 
 Once the application is started, set the forwarding pipeline config using
 P4Runtime Client `p4rt-ctl` set-pipe command
@@ -64,7 +64,7 @@ $P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/linux_networking.pb.bin $OUT
 ```
 Note: Assuming `linux_networking.pb.bin` and `linux_networking.p4info.txt` along with other P4 artifacts are created as per the steps mentioned in previous section.
 
-#### 2. Configure VSI Group and add a netdev
+#### Configure VSI Group and add a netdev
 
 Use one of the IPDF netdevs on ACC to receive all control packets from overlay VM's by assigning to a VSI group. VSI group 3 is dedicated for this configuration, execute below devmem commands on IMC.
 
@@ -81,7 +81,7 @@ devmem 0x20292002a0 64 0xA000050000000008
 
 Note: Here VSI 8 has been used for receiving all control packets and added to VSI group 3. This refers to HOST netdev VSIG 3 as per the topology diagram. Modify this VSI based on your configuration.
 
-#### 3. Create Overlay network
+#### Create Overlay network
 
 Option 1: Create VF's on HOST and spawn VM's on top of those VF's.
 Example to create 4 VF's:  echo 4 > /sys/devices/pci0000:ae/0000:ae:00.0/0000:af:00.0/sriov_numvfs
@@ -111,7 +111,7 @@ ip netns exec VM1 ip addr add 99.0.0.2/24 dev <VF2 port>
 ip netns exec VM1 ifconfig <VF2 port> up
 ```
 
-#### 4. Start OvS as a separate process
+#### Start OvS as a separate process
 
 Legacy OvS is used as a control plane for source MAC learning of overlay VM's. OvS should be started as a seperate process.
 ```
@@ -144,7 +144,7 @@ ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
 ovs-vsctl  show
 ```
 
-#### 5. Create VLAN representers
+#### Create VLAN representers
 
 For each VM that is spawned for overlay network we need to have a port representer. We create VLAN netdevs on top of the IPDF netdev which is assigned to VSI group 3 in step-2 mentioned above.
 
@@ -157,7 +157,7 @@ ifconfig vlan2 up
 Note: Here the assumption is, we have created 2 overlay VM's and creating 2 port representers for those VM's.
 Port representer should always be in the format: `lowercase string 'vlan'+'vlanID'`
 
-#### 6. Create intergation bridge and add ports to the bridge
+#### Create intergation bridge and add ports to the bridge
 
 Create OvS bridge, VxLAN tunnel and assign ports to the bridge.
 ```
@@ -169,11 +169,11 @@ ovs-vsctl add-port br-int vlan2
 ifconfig vlan1 up
 ifconfig vlan2 up
 
-ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=40.1.1.2 options:dst_port=4789
+ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=30.1.1.1 options:remote_ip=40.1.1.1 options:dst_port=4789
 ```
-Note: Here we are creating VxLAN tunnel with VNI 0, user can create any VNI for tunneling.
+Note: Here we are creating VxLAN tunnel with VNI 0, you can create any VNI for tunneling.
 
-#### 7. Configure rules for overlay control packets
+#### Configure rules for overlay control packets
 
 Configure rules to send overlay control packets from a VM to its respective port representers.
 
@@ -184,7 +184,7 @@ Below configuration assumes
 These VSI values can be checked with `/usr/bin/cli_client -q -c` command on IMC. This command provides VSI ID, Vport ID, and corresponding MAC addresses for all
 - IDPF netdevs on ACC
 - VF's on HOST
-- IDPF netdevs on HOST (if IDPF driver loaded by user on HOST)
+- IDPF netdevs on HOST (if IDPF driver loaded by you on HOST)
 - Netdevs on IMC
 ```
 
@@ -213,13 +213,15 @@ These VSI values can be checked with `/usr/bin/cli_client -q -c` command on IMC.
  p4rt-ctl add-entry br0 linux_networking_control.vlan_pop_mod_table "vmeta.common.mod_blob_ptr=2,action=linux_networking_control.vlan_pop"
 ```
 
-#### 8. Configure rules for underlay control packets
+#### Configure rules for underlay control packets
 
 Configure rules to send underlay control packets from IDPF netdev to physical port.
 
 Below configuration assumes
-- Underlay IDPF netdev has a VSI value 10
+- Underlay IDPF netdev has a VSI value 10 for first ECMP member
 - First physical port will have a port ID of 0
+- Underlay IDPF netdev has a VSI value 11 for second ECMP member
+- Second physical port will have a port ID of 1
 
 ```
 # Configuration for control packets between physical port 0 to underlay IDPF netdev VSI-10
@@ -227,28 +229,113 @@ Below configuration assumes
 
 # Configuration for control packets between underlay IDPF netdev VSI-10 to physical port 0
  p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table "vmeta.common.vsi=10,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(0)"
+
+# Configuration for control packets between physical port 1 to underlay IDPF netdev VSI-11
+ p4rt-ctl add-entry br0 linux_networking_control.handle_rx_from_wire_to_ovs_table "vmeta.common.port_id=1,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(27)"
+
+# Configuration for control packets between underlay IDPF netdev VSI-11 to physical port 1
+ p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table "vmeta.common.vsi=11,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(1)"
 ```
 
-#### 10. Underlay configuration
+#### Underlay configuration
 
-Configure underlay IP addresses, and add static routes.
+Create a dummy interface which is used for TEP termination and IDPF netdev for underlay connectivity. 
+
+Option 1: Statically configure underlay ECMP routes to reach link partner (or) \
+Option 2: Use BGP protocol with FRR, for ECMP route redistribution to reach link partner.
 
 Below configuration assumes
-- Underlay IDPF netdev has a VSI value 10
+- Underlay IDPF netdev has a VSI value 10 for first ECMP member
+- Underlay IDPF netdev has a VSI value 11 for second ECMP member
 
 ```
 p4rt-ctl add-entry br0 linux_networking_control.ecmp_lpm_root_lut "user_meta.cmeta.bit32_zeros=4/255.255.255.255,priority=2,action=linux_networking_control.ecmp_lpm_root_lut_action(0)"
 
+ip link add dev TEP0 type dummy
+
 nmcli device set <IDPF netdev for VSI 10> managed no
-ifconfig <IDPF netdev for VSI 10> 40.1.1.1/24 up
-ip route show
-ip route change 40.1.1.0/24 via 40.1.1.2 dev <IDPF netdev for VSI 10>
+nmcli device set <IDPF netdev for VSI 11> managed no
 ```
 
-#### 11. Test the ping scenarios
+Option 1: Static configuration
+```
+ifconfig TEP0 30.1.1.1/24 up
+ifconfig <IDPF netdev for VSI 10> 50.1.1.1/24 up
+ifconfig <IDPF netdev for VSI 11> 60.1.1.1/24 up
+
+ip route add 40.1.1.1 nexthop via 50.1.1.2 dev <IDPF netdev for VSI 10> weight 1 nexthop via 60.1.1.2 dev <IDPF netdev for VSI 11> weight 1
+ip route show
+```
+
+Sample link partner underlay configuration.
+```
+ip link add dev TEP0 type dummy
+ifconfig TEP0 40.1.1.1/24 up
+ifconfig <underlay 1> 50.1.1.2/24 up
+ifconfig <underlay 2> 60.1.1.2/24 up
+
+ip route add 30.1.1.1 nexthop via 50.1.1.1 dev <underlay 1> weight 1 nexthop via 60.1.1.1 dev <underlay 1> weight 1
+ip route show
+
+```
+
+Option 2: FRR running configuration
+```
+# <Install FRR on ACC and enable BGP protocol>  
+# <FRR VTYSH running configuration>
+
+interface TEP0
+ip address 30.1.1.1/24
+exit
+!
+interface <IDPF netdev for VSI 10>
+ip address 50.1.1.1/24
+exit
+!
+interface <IDPF netdev for VSI 11>
+ip address 60.1.1.1/24
+exit
+!
+router bgp 65000
+bgp router-id 30.1.1.1
+neighbor 50.1.1.2 remote-as 65000
+neighbor 60.1.1.2 remote-as 65000
+!
+address-family ipv4 unicast
+  network 30.1.1.0/24
+exit-address-family
+```
+
+Sample link partner FRR VTYSH configuration.
+```
+interface TEP0
+ip address 40.1.1.1/24
+exit
+!
+interface <underlay 1>
+ip address 50.1.1.2/24
+exit
+!
+interface <underlay 2>
+ip address 60.1.1.2/24
+exit
+!
+router bgp 65000
+bgp router-id 40.1.1.1
+neighbor 50.1.1.1 remote-as 65000
+neighbor 60.1.1.1 remote-as 65000
+!
+address-family ipv4 unicast
+  network 40.1.1.0/24
+exit-address-family
+```
+
+#### Test the ping scenarios
 
   - Ping between VM's on the same host
-  - Underlay ping
+  - First Underlay ping
+  - Second Underlay ping
+  - Remote TEP ping
   - Overlay ping: Ping between VM's on different hosts
 
 ## Limitations <a name="limitations"></a>
