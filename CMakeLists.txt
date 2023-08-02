@@ -235,6 +235,24 @@ function(set_install_rpath TARGET)
     endif()
 endfunction()
 
+##############
+# User guide #
+##############
+
+find_program(SPHINX_BUILD "sphinx-build" REQUIRED)
+if(NOT SPHINX_BUILD)
+    message(FATAL_ERROR "sphinx-build not found")
+endif()
+
+set(USERGUIDE_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/userguide" CACHE PATH
+    "User guide install directory")
+
+add_custom_target(userguide
+    ${SPHINX_BUILD}
+    ${CMAKE_CURRENT_SOURCE_DIR}/docs
+    ${USERGUIDE_PREFIX}
+)
+
 ##################
 # Subdirectories #
 ##################

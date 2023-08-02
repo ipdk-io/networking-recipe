@@ -43,7 +43,7 @@ P4 Control Plane User Guide
    clients/sgnmi_cli
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Features
 
    features/ipsec-offload
