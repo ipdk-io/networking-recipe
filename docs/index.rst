@@ -44,7 +44,7 @@ P4 Control Plane User Guide
    :maxdepth: 2
    :caption: Features
 
-   features/ipsec/ipsec-offload
+   features/ipsec-offload
 
 .. toctree::
    :maxdepth: 1
