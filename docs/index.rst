@@ -15,7 +15,7 @@ P4 Control Plane User Guide
    guides/setup/es2k-setup-guide
    guides/setup/tofino-setup-guide
 
-   .. toctree::
+.. toctree::
    :maxdepth: 1
    :caption: Building
 
