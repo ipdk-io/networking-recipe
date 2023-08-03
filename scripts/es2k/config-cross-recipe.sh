@@ -67,12 +67,12 @@ SHORTOPTS=B:D:H:O:P:S:T:hn
 LONGOPTS=build:,deps:,dry-run,help,hostdeps:,ovs:,prefix:,sde:,toolchain:
 LONGOPTS=${LONGOPTS},no-krnlmon,no-ovs,rfs-enable
 
-eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
+# shellcheck disable=SC2046
+eval set -- $(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 
 while true ; do
     case "$1" in
     -B|--build)
-        echo "Build directory: $2"
         _BLD_DIR=$2
         shift 2 ;;
     -D|--deps)
@@ -97,7 +97,6 @@ while true ; do
         _OVS_DIR=$2
         shift 2 ;;
     -P|--prefix)
-        echo "Install prefix: $2"
         _PREFIX=$2
         shift 2 ;;
     -S|--sde)
@@ -141,16 +140,16 @@ if [ "${_DRY_RUN}" = "true" ]; then
     exit 0
 fi
 
-rm -fr ${_BLD_DIR}
+rm -fr "${_BLD_DIR}"
 
-cmake -S . -B ${_BLD_DIR} \
-    -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-    -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
-    -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE} \
-    -DDEPEND_INSTALL_DIR=${_DEPS_DIR} \
-    -DHOST_DEPEND_DIR=${_HOST_DIR} \
-    -DOVS_INSTALL_DIR=${_OVS_DIR} \
-    -DSDE_INSTALL_DIR=${_SDE_DIR} \
-    ${_WITH_KRNLMON} ${_WITH_OVSP4RT} \
+cmake -S . -B "${_BLD_DIR}" \
+    -DCMAKE_BUILD_TYPE="${_BLD_TYPE}" \
+    -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
+    -DCMAKE_TOOLCHAIN_FILE="${_TOOLFILE}" \
+    -DDEPEND_INSTALL_DIR="${_DEPS_DIR}" \
+    -DHOST_DEPEND_DIR="${_HOST_DIR}" \
+    -DOVS_INSTALL_DIR="${_OVS_DIR}" \
+    -DSDE_INSTALL_DIR="${_SDE_DIR}" \
+    "${_WITH_KRNLMON}" "${_WITH_OVSP4RT}" \
     -DSET_RPATH=TRUE \
     -DES2K_TARGET=ON

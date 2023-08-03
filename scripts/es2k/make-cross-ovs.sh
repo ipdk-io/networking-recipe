@@ -53,7 +53,8 @@ print_help() {
 SHORTOPTS=B:P:T:hj:n
 LONGOPTS=build:,dry-run,help,jobs:,prefix:,toolchain:
 
-eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
+# shellcheck disable=SC2046
+eval set -- $(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 
 while true ; do
     case "$1" in
@@ -97,12 +98,12 @@ if [ "${_DRY_RUN}" = "true" ]; then
     exit 0
 fi
 
-rm -fr ${_BLD_DIR}
+rm -fr "${_BLD_DIR}"
 
-cmake -S ovs -B ${_BLD_DIR} \
-    -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-    -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
-    -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE} \
+cmake -S ovs -B "${_BLD_DIR}" \
+    -DCMAKE_BUILD_TYPE="${_BLD_TYPE}" \
+    -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
+    -DCMAKE_TOOLCHAIN_FILE="${_TOOLFILE}" \
     -DP4OVS=TRUE
 
-cmake --build ${_BLD_DIR} -j${_JOBS} -- V=0
+cmake --build "${_BLD_DIR}" "-j${_JOBS}" -- V=0
