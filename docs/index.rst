@@ -1,3 +1,6 @@
+.. Copyright 2023 Intel Corporation
+   SPDX-License-Identifier: Apache-2.0
+
 .. P4 Control Plane documentation master file, created by
    sphinx-quickstart on Fri Jul 28 18:19:43 2023.
    You can adapt this file completely to your liking, but it should at least
@@ -38,15 +41,13 @@ P4 Control Plane User Guide
    :maxdepth: 1
    :caption: Clients
 
-   clients/gnmi-ctl
-   clients/p4rt-ctl
-   clients/sgnmi_cli
+   clients/clients-index
 
 .. toctree::
    :maxdepth: 1
    :caption: Features
 
-   features/ipsec-offload
+   features/features-index
 
 .. toctree::
    :maxdepth: 1
@@ -59,10 +60,4 @@ P4 Control Plane User Guide
    :maxdepth: 1
    :caption: Updates
 
-   updates/development-update-23.21
-   updates/development-update-22.50
-   updates/development-update-22.44
-   updates/changes-from-p4-ovs
-
-
-
+   updates/updates-index
