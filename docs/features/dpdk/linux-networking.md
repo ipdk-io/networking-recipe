@@ -109,8 +109,9 @@ using DPDK-compatible driver")
 ### Export the environment variables and start infrap4d
 
 ```bash
-alias sudo="sudo PATH=$PATH HOME=$HOME LD_LIBRARY_PATH=$LD_LIBRARY_PATH SDE_INSTALL=$SDE_INSTALL
-sudo $IPDK_RECIPE/install/bin/infrap4d"
+alias sudo="sudo PATH=$PATH HOME=$HOME LD_LIBRARY_PATH=$LD_LIBRARY_PATH SDE_INSTALL=$SDE_INSTALL"
+
+sudo $IPDK_RECIPE/install/bin/infrap4d
 ```
 
 ### Create two VHOST user ports
