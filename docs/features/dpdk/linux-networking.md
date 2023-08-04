@@ -27,12 +27,18 @@ VxLAN. Note the [Limitations](#limitations) below before setting up the topology
 
 ## Create P4 artifacts
 
-- Install p4c compiler from p4lang/p4c (<https://github.com/p4lang/p4c>)
-  repository and follow the readme for procedure.
+- Install the [p4c compiler](https://github.com/p4lang/p4c)
+  from the p4lang/p4c repository and follow the instructions in the
+  [readme file](https://github.com/p4lang/p4c/blob/main/README.md).
+
 - Set the environment variable OUTPUT_DIR to the location where artifacts
-  should be generated and where p4 files are available.
-  e.g., `export OUTPUT_DIR=$IPDK_RECIPE/p4src/linux_networking`.
-- Generate the artifacts using p4c-dpdk installed in previous step using command below:
+  should be generated and p4 files are available. For example:
+
+  ```bash
+  export OUTPUT_DIR=$IPDK_RECIPE/p4src/linux_networking
+  ```
+
+- Compile the P4 program using p4c-dpdk:
 
   ```bash
   p4c-dpdk --arch pna --target dpdk \
@@ -43,9 +49,11 @@ VxLAN. Note the [Limitations](#limitations) below before setting up the topology
       $OUTPUT_DIR/linux_networking.p4
   ```
 
-- Modify sample lnw.conf file available in $IPDK_RECIPE/p4src/linux_networking
-  to specify absolute path of the artifacts (json and spec files).
-- Generate binary execuatble using tdi-pipeline builder.
+- Modify the sample configuration file
+  ($IPDK_RECIPE/p4src/linux_networking/dpdk/lnw.conf)
+  to specify the absolute paths of the artifacts (json and spec files).
+
+- Generate binary image using tdi-pipeline builder:
 
   ```bash
   tdi_pipeline_builder --p4c_conf_file=lnw.conf \
@@ -95,7 +103,8 @@ For example:
   ```
 
 PCI-BDF can be obtained using the `lspci` command. Check if device is bound
-correctly using `./dpdk-devbind.py -s`. (Refer to the section "Network devices using DPDK-compatible driver")
+correctly using `./dpdk-devbind.py -s`. (See the section "Network devices
+using DPDK-compatible driver")
 
 ### Export the environment variables and start infrap4d
 
