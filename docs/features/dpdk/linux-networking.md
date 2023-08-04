@@ -27,38 +27,38 @@ VxLAN. Note the [Limitations](#limitations) below before setting up the topology
 
 ## Create P4 artifacts
 
-- Install the [p4c compiler](https://github.com/p4lang/p4c)
-  from the p4lang/p4c repository and follow the instructions in the
-  [readme file](https://github.com/p4lang/p4c/blob/main/README.md).
+1. Install the [p4c compiler](https://github.com/p4lang/p4c)
+   from the p4lang/p4c repository and follow the instructions in the
+   [readme file](https://github.com/p4lang/p4c/blob/main/README.md).
 
-- Set the environment variable OUTPUT_DIR to the location where artifacts
-  should be generated and p4 files are available. For example:
+2. Set the environment variable OUTPUT_DIR to the location where artifacts
+   should be generated and p4 files are available. For example:
 
-  ```bash
-  export OUTPUT_DIR=$IPDK_RECIPE/p4src/linux_networking
-  ```
+   ```bash
+   export OUTPUT_DIR=$IPDK_RECIPE/p4src/linux_networking
+   ```
 
-- Compile the P4 program using p4c-dpdk:
+3. Compile the P4 program using p4c-dpdk:
 
-  ```bash
-  p4c-dpdk --arch pna --target dpdk \
-      --p4runtime-files $OUTPUT_DIR/p4Info.txt \
-      --bf-rt-schema $OUTPUT_DIR/bf-rt.json \
-      --context $OUTPUT_DIR/context.json \
-      -o $OUTPUT_DIR/linux_networking.spec \
-      $OUTPUT_DIR/linux_networking.p4
-  ```
+   ```bash
+   p4c-dpdk --arch pna --target dpdk \
+       --p4runtime-files $OUTPUT_DIR/p4Info.txt \
+       --bf-rt-schema $OUTPUT_DIR/bf-rt.json \
+       --context $OUTPUT_DIR/context.json \
+       -o $OUTPUT_DIR/linux_networking.spec \
+       $OUTPUT_DIR/linux_networking.p4
+   ```
 
-- Modify the sample configuration file
-  ($IPDK_RECIPE/p4src/linux_networking/dpdk/lnw.conf)
-  to specify the absolute paths of the artifacts (json and spec files).
+4. Modify the sample configuration file
+   ($IPDK_RECIPE/p4src/linux_networking/dpdk/lnw.conf)
+   to specify the absolute paths of the artifacts (json and spec files).
 
-- Generate binary image using tdi-pipeline builder:
+5. Generate binary image using tdi-pipeline builder:
 
-  ```bash
-  tdi_pipeline_builder --p4c_conf_file=lnw.conf \
-      --bf_pipeline_config_binary_file=lnw.pb.bin
-  ```
+   ```bash
+   tdi_pipeline_builder --p4c_conf_file=lnw.conf \
+       --bf_pipeline_config_binary_file=lnw.pb.bin
+   ```
 
 ## Limitations
 
@@ -82,31 +82,31 @@ used below can be found in $IPDK_RECIPE/install/bin. The should be run with
 
 ### Bind physical port to IO driver
 
-Load uio and vfio-pci drivers.
+1. Load uio and vfio-pci drivers.
 
-  ```bash
+   ```bash
    modprobe uio
    modprobe vfio-pci
    ```
 
-Bind the devices to DPDK using dpdk-devbind.py script.
+2. Bind the devices to DPDK using dpdk-devbind.py script.
 
-  ```bash
-  cd $SDE_INSTALL/bin
-  ./dpdk-devbind.py --bind=vfio-pci PCI-BDF
-  ```
+   ```bash
+   cd $SDE_INSTALL/bin
+   ./dpdk-devbind.py --bind=vfio-pci PCI-BDF
+   ```
 
-For example:
+   For example:
 
-  ```bash
-  ./dpdk-devbind.py --bind=vfio-pci 0000:18:00.0
-  ```
+   ```bash
+   ./dpdk-devbind.py --bind=vfio-pci 0000:18:00.0
+   ```
 
-PCI-BDF can be obtained using the `lspci` command. Check if device is bound
-correctly using `./dpdk-devbind.py -s`. (See the section "Network devices
-using DPDK-compatible driver")
+   PCI-BDF can be obtained using the `lspci` command. Check if device is bound
+   correctly using `./dpdk-devbind.py -s`. (See the section "Network devices
+   using DPDK-compatible driver")
 
-### Export the environment variables and start infrap4d
+### Start infrap4d
 
 ```bash
 alias sudo="sudo PATH=$PATH HOME=$HOME LD_LIBRARY_PATH=$LD_LIBRARY_PATH SDE_INSTALL=$SDE_INSTALL"
@@ -122,7 +122,7 @@ gnmi-ctl set "device:virtual-device,name:net_vhost0,host-name:host1,device-type:
 gnmi-ctl set "device:virtual-device,name:net_vhost1,host-name:host2,device-type:VIRTIO_NET,queues:1,socket-path:/tmp/vhost-user-1,packet-dir:host,port-type:LINK"
 ```
 
-#### Create two physical link ports with control port
+### Create two physical link ports with control port
 
 ```bash
 gnmi-ctl set "device:physical-device,name:PORT0,control-port:TAP1,pci-bdf:0000:18:00.0,packet-dir:network,port-type:link"
@@ -138,6 +138,7 @@ port attribute is specified.
 
 ```bash
 gnmi-ctl set "device:virtual-device,name:TAP0,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,packet-dir:host,port-type:TAP"
+
 gnmi-ctl set "device:virtual-device,name:TAP3,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,packet-dir:host,port-type:TAP"
 ```
 
@@ -163,7 +164,7 @@ ip addr add 99.0.0.2/24 dev eth0
 ip link set dev eth0 up
 ```
 
-### Bring up TAP or dummy interfaces
+### Bring up interfaces
 
 Option 1: Use one of the TAP ports as tunnel termination and assign IP address
 to the TAP port.
@@ -190,7 +191,7 @@ ip link set dev TAP3 up
 ip link set dev TEP1 up
 ```
 
-### Set the pipeline
+### Set pipeline
 
 ```bash
 p4rt-ctl set-pipe br0 lnw.pb.bin p4Info.txt
@@ -247,10 +248,8 @@ sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- \
     options:remote_ip=30.1.1.1 options:dst_port=4789
 ```
 
-Note:
-
-- VXLAN destination port should always be the standard port (4789).
-  (limitation of p4 parser)
+VXLAN destination port should always be the standard port (4789).
+(limitation of p4 parser)
 
 #### Configure VLAN ports on TAP0 and add them to br-int
 
@@ -263,11 +262,9 @@ ip link set dev vlan1 up
 ip link set dev vlan2 up
 ```
 
-Note:
-
-- All VLAN interfaces should be created on top of TAP ports, and should always
-  be in lowercase format "vlan+vlan_id" (e.g., vlan1, vlan2, vlan3, ...
-  vlan4094).
+All VLAN interfaces should be created on top of TAP ports, and should always
+be in lowercase format "vlan+vlan_id" (e.g., vlan1, vlan2, vlan3, ...
+vlan4094).
 
 ### Configure rules to push/pop VLAN
 
@@ -298,71 +295,75 @@ target datapath indexes will be:
 | TAP0               | 6 |
 | TAP3               | 7 |
 
-Rule: For any tx control packet from VM1 (TDP 0), pipeline should add
-VLAN tag 1 and send it to TAP0 port(TDP 6).
+Rules to configure:
 
-```bash
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
-    "istd.input_port=0,action=linux_networking_control.push_vlan_fwd(6,1)"
-```
+1. For any tx control packet from VM1 (TDP 0), pipeline should add
+   VLAN tag 1 and send it to TAP0 port(TDP 6).
 
-Rule: For any tx control packet from VM2 (TDP 1), pipeline should add a VLAN
-tag 2 and send it to TAP0 port(TDP 6).
+   ```bash
+   p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
+       "istd.input_port=0,action=linux_networking_control.push_vlan_fwd(6,1)"
+   ```
 
-```bash
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
-    "istd.input_port=1,action=linux_networking_control.push_vlan_fwd(6,2)"
-```
+2. For any tx control packet from VM2 (TDP 1), pipeline should add a VLAN
+   tag 2 and send it to TAP0 port(TDP 6).
 
-Rule: For any tx control packet from TAP0 port (TDP 6) with VLAN tag 1, pipeline
-should pop the VLAN tag and send it to VM1 (TDP 0).
+   ```bash
+   p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
+       "istd.input_port=1,action=linux_networking_control.push_vlan_fwd(6,2)"
+   ```
 
-```bash
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_vlan_pkts_table \
-    "istd.input_port=6,local_metadata.vlan_id=1,action=linux_networking_control.pop_vlan_fwd(0)"
-```
+3. For any tx control packet from TAP0 port (TDP 6) with VLAN tag 1, pipeline
+   should pop the VLAN tag and send it to VM1 (TDP 0).
 
-Rule: For any tx control packet from TAP0 port (TDP 6) with VLAN tag 2,
-pipeline should pop the VLAN tag and send it to VM2(TDP 1).
+   ```bash
+   p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_vlan_pkts_table \
+       "istd.input_port=6,local_metadata.vlan_id=1,action=linux_networking_control.pop_vlan_fwd(0)"
+   ```
 
-```bash
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_vlan_pkts_table \
-    "istd.input_port=6,local_metadata.vlan_id=2,action=linux_networking_control.pop_vlan_fwd(1)"
-```
+4. For any tx control packet from TAP0 port (TDP 6) with VLAN tag 2,
+   pipeline should pop the VLAN tag and send it to VM2(TDP 1).
+
+   ```bash
+   p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_vlan_pkts_table \
+       "istd.input_port=6,local_metadata.vlan_id=2,action=linux_networking_control.pop_vlan_fwd(1)"
+   ```
 
 ### Configure rules for control packets coming in and out of physical port
 
-Rule: Any rx control packet from phy port0 (TDP 2) should be sent to
-corresponding control port TAP1 (TDP 3).
+Rules to configure:
 
-```bash
-p4rt-ctl add-entry br0 linux_networking_control.handle_rx_control_pkts_table \
-    "istd.input_port=2,action=linux_networking_control.set_control_dest(3)"
-```
+1. Any rx control packet from phy port0 (TDP 2) should be sent to
+   corresponding control port TAP1 (TDP 3).
 
-Rule: Any rx control packet from phy port1 (TDP 4) should be sent to
-corresponding control port TAP2 (TDP 5).
+   ```bash
+   p4rt-ctl add-entry br0 linux_networking_control.handle_rx_control_pkts_table \
+       "istd.input_port=2,action=linux_networking_control.set_control_dest(3)"
+   ```
 
-```bash
-p4rt-ctl add-entry br0 linux_networking_control.handle_rx_control_pkts_table\
-     "istd.input_port=4,action=linux_networking_control.set_control_dest(5)"
-```
+2. Any rx control packet from phy port1 (TDP 4) should be sent to
+   corresponding control port TAP2 (TDP 5).
 
-Rule: Any tx control packet from control TAP1 port (TDP 3) should be sent to
-corresponding physical port phy port0 (TDP 2).
+   ```bash
+   p4rt-ctl add-entry br0 linux_networking_control.handle_rx_control_pkts_table\
+        "istd.input_port=4,action=linux_networking_control.set_control_dest(5)"
+   ```
 
-```bash
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
-    "istd.input_port=3,action=linux_networking_control.set_control_dest(2)"
-```
+3. Any tx control packet from control TAP1 port (TDP 3) should be sent to
+   corresponding physical port phy port0 (TDP 2).
 
-Rule: Any tx control packet from control TAP2 port (TDP 5) should be sent to
-corresponding physical port phy port1 (TDP 4).
+   ```bash
+   p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
+       "istd.input_port=3,action=linux_networking_control.set_control_dest(2)"
+   ```
 
-```bash
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
-    "istd.input_port=5,action=linux_networking_control.set_control_dest(4)"
-```
+4. Any tx control packet from control TAP2 port (TDP 5) should be sent to
+   corresponding physical port phy port1 (TDP 4).
+
+   ```bash
+   p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
+       "istd.input_port=5,action=linux_networking_control.set_control_dest(4)"
+   ```
 
 ### Configure routes only when dummy port is used for tunnel termination
 
@@ -380,41 +381,44 @@ ip route add 30.1.1.1 nexthop via 50.1.1.2 dev TAP1
 #### Option 2: Learn dynamic routes via FRR <a name="learn-dynamic-routes-via-frr"/>
 <!-- markdownlint-enable MD033 -->
 
-1. Install FRR
-   - Install FRR via default package manager, like `apt install frr` for
-     Ubuntu or `dnf install frr` for Fedora.
-   - If not, see the [official FRR documentation](https://docs.frrouting.org/en/latest/installation.html)
-     and install according to your distribution.
-2. Configure FRR
-   - Modify /etc/frr/daemons to enable bgpd daemon
-   - Restart FRR service. systemctl restart frr
-   - Start VTYSH process, which is a CLI provided by FRR for user configurations.
-   - Set the configuration on the DUT (host1) for single-path scenario.
+Install FRR:
 
-     ```bash
-     interface TAP1
-     ip address 50.1.1.1/24
-     exit
-     !
-     interface TEP1
-     ip address 40.1.1.1/24
-     exit
-     !
-     router bgp 65000
-     bgp router-id 40.1.1.1
-     neighbor 50.1.1.2 remote-as 65000
-     !
-     address-family ipv4 unicast
-       network 40.1.1.0/24
-     exit-address-family
-     ```
+- Install FRR via default package manager, like `apt install frr` for
+  Ubuntu or `dnf install frr` for Fedora.
+- If not, see the [official FRR documentation](https://docs.frrouting.org/en/latest/installation.html)
+  and install according to your distribution.
 
-3. Once Peer is also configured, we should see neighbor 50.1.1.2 is learnt on
-  DUT (host1) and also route learnt on the kernel.
+Configure FRR:
 
-   ```bash
-   30.1.1.0/24 nhid 54 via 50.1.1.2 dev TAP1 proto bgp metric 20
-   ```
+- Modify /etc/frr/daemons to enable bgpd daemon
+- Restart FRR service. systemctl restart frr
+- Start VTYSH process, which is a CLI provided by FRR for user configurations.
+- Set the configuration on the DUT (host1) for single-path scenario.
+
+  ```bash
+  interface TAP1
+  ip address 50.1.1.1/24
+  exit
+  !
+  interface TEP1
+  ip address 40.1.1.1/24
+  exit
+  !
+  router bgp 65000
+  bgp router-id 40.1.1.1
+  neighbor 50.1.1.2 remote-as 65000
+  !
+  address-family ipv4 unicast
+    network 40.1.1.0/24
+  exit-address-family
+  ```
+
+Once Peer is also configured, we should see neighbor 50.1.1.2 is learnt on
+DUT (host1) and also route learnt on the kernel.
+
+```bash
+30.1.1.0/24 nhid 54 via 50.1.1.2 dev TAP1 proto bgp metric 20
+```
 
 ### Test the ping scenarios
 
