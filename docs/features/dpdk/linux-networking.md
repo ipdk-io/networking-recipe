@@ -381,23 +381,23 @@ ip route add 30.1.1.1 nexthop via 50.1.1.2 dev TAP1
    - Start VTYSH process, which is a CLI provided by FRR for user configurations.
    - Set the configuration on the DUT (host1) for single-path scenario.
 
-   ```bash
-   interface TAP1
-   ip address 50.1.1.1/24
-   exit
-   !
-   interface TEP1
-   ip address 40.1.1.1/24
-   exit
-   !
-   router bgp 65000
-   bgp router-id 40.1.1.1
-   neighbor 50.1.1.2 remote-as 65000
-   !
-   address-family ipv4 unicast
-     network 40.1.1.0/24
-   exit-address-family
-   ```
+     ```bash
+     interface TAP1
+     ip address 50.1.1.1/24
+     exit
+     !
+     interface TEP1
+     ip address 40.1.1.1/24
+     exit
+     !
+     router bgp 65000
+     bgp router-id 40.1.1.1
+     neighbor 50.1.1.2 remote-as 65000
+     !
+     address-family ipv4 unicast
+       network 40.1.1.0/24
+     exit-address-family
+     ```
 
 3. Once Peer is also configured, we should see neighbor 50.1.1.2 is learnt on
   DUT (host1) and also route learnt on the kernel.
