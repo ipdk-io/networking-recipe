@@ -77,10 +77,10 @@ Current SAI enablement for the networking recipe has following limitations:
 ## Steps to create the topology
 
 The [gnmi-ctl](/clients/gnmi-ctl) and [p4rt-ctl](/clients/gnmi-ctl) utilities
-used below can be found in $IPDK_RECIPE/install/bin. The should be run with
+used below can be found in $IPDK_RECIPE/install/bin. They should be run with
 `sudo`.
 
-### Bind physical port to IO driver
+## 1) Bind physical port to IO driver
 
 1. Load uio and vfio-pci drivers.
 
@@ -106,7 +106,7 @@ used below can be found in $IPDK_RECIPE/install/bin. The should be run with
    correctly using `./dpdk-devbind.py -s`. (See the section "Network devices
    using DPDK-compatible driver")
 
-### Start infrap4d
+## 2) Start infrap4d
 
 ```bash
 alias sudo="sudo PATH=$PATH HOME=$HOME LD_LIBRARY_PATH=$LD_LIBRARY_PATH SDE_INSTALL=$SDE_INSTALL"
@@ -114,35 +114,37 @@ alias sudo="sudo PATH=$PATH HOME=$HOME LD_LIBRARY_PATH=$LD_LIBRARY_PATH SDE_INST
 sudo $IPDK_RECIPE/install/bin/infrap4d
 ```
 
-### Create two VHOST user ports
+## 3) Create ports
 
-```bash
-gnmi-ctl set "device:virtual-device,name:net_vhost0,host-name:host1,device-type:VIRTIO_NET,queues:1,socket-path:/tmp/vhost-user-0,packet-dir:host,port-type:LINK"
+1. Create two VHOST user ports.
 
-gnmi-ctl set "device:virtual-device,name:net_vhost1,host-name:host2,device-type:VIRTIO_NET,queues:1,socket-path:/tmp/vhost-user-1,packet-dir:host,port-type:LINK"
-```
+   ```bash
+   gnmi-ctl set "device:virtual-device,name:net_vhost0,host-name:host1,device-type:VIRTIO_NET,queues:1,socket-path:/tmp/vhost-user-0,packet-dir:host,port-type:LINK"
 
-### Create two physical link ports with control port
+   gnmi-ctl set "device:virtual-device,name:net_vhost1,host-name:host2,device-type:VIRTIO_NET,queues:1,socket-path:/tmp/vhost-user-1,packet-dir:host,port-type:LINK"
+    ```
 
-```bash
-gnmi-ctl set "device:physical-device,name:PORT0,control-port:TAP1,pci-bdf:0000:18:00.0,packet-dir:network,port-type:link"
+2. Create two physical link ports with control port.
 
-gnmi-ctl set "device:physical-device,name:PORT1,control-port:TAP2,pci-bdf:0000:18:00.1,packet-dir:network,port-type:link"
-```
+   ```bash
+   gnmi-ctl set "device:physical-device,name:PORT0,control-port:TAP1,pci-bdf:0000:18:00.0,packet-dir:network,port-type:link"
 
-Specify the PCI-BDF of the devices bound to user-space in step 1.
-Corresponding control port for physical link port will be created if control
-port attribute is specified.
+   gnmi-ctl set "device:physical-device,name:PORT1,control-port:TAP2,pci-bdf:0000:18:00.1,packet-dir:network,port-type:link"
+   ```
 
-### Create two TAP ports
+   Specify the PCI-BDF of the devices bound to user-space in step 1.
+   Corresponding control port for physical link port will be created if control
+   port attribute is specified.
 
-```bash
-gnmi-ctl set "device:virtual-device,name:TAP0,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,packet-dir:host,port-type:TAP"
+3. Create two TAP ports.
 
-gnmi-ctl set "device:virtual-device,name:TAP3,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,packet-dir:host,port-type:TAP"
-```
+   ```bash
+   gnmi-ctl set "device:virtual-device,name:TAP0,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,packet-dir:host,port-type:TAP"
 
-Note:
+   gnmi-ctl set "device:virtual-device,name:TAP3,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,packet-dir:host,port-type:TAP"
+   ```
+
+Notes:
 
 - Pkt-dir parameter is to specify the direction of traffic. It can take two
   values - host/network. Value 'host' specifies that traffic on this port will
@@ -152,7 +154,7 @@ Note:
   requirements. When counting the number of ports, include control ports
   created along with physical link port (e.g., TAP1 and TAP2).
 
-### Spawn VMs and assign IPs
+## 4) Spawn VMs and assign IPs
 
 Spawn two VMs on the vhost-user ports created in step 3. Start the VM's and
 assign IP addresses.
@@ -164,7 +166,7 @@ ip addr add 99.0.0.2/24 dev eth0
 ip link set dev eth0 up
 ```
 
-### Bring up interfaces
+## 5) Bring up interfaces
 
 Option 1: Use one of the TAP ports as tunnel termination and assign IP address
 to the TAP port.
@@ -191,13 +193,13 @@ ip link set dev TAP3 up
 ip link set dev TEP1 up
 ```
 
-### Set pipeline
+## 6) Set pipeline
 
 ```bash
 p4rt-ctl set-pipe br0 lnw.pb.bin p4Info.txt
 ```
 
-### Start ovs-vswitchd and ovsdb-server
+## 7) Start ovs-vswitchd and ovsdb-server
 
 Kill any existing ovs process if running.
 
@@ -227,7 +229,7 @@ sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-br br-int
 ifconfig br-int up
 ```
 
-### Configure VXLAN port
+## 8) Configure VXLAN port
 
 Option 1: When one of the TAP ports is used for tunnel termination.
 
@@ -240,7 +242,7 @@ sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- \
 Option 2: When a dummy port is used for tunnel termination. Here, remote IP
 is on a different network. Route to reach peer needs to be [statically
 configured](#configure-static-route) or
-[learned via FRR](#learn-dynamic-routes-via-frr).
+[learned via FRR](#learn-dynamic-routes-via-ffr).
 
 ```bash
 sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- \
@@ -251,7 +253,7 @@ sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- \
 VXLAN destination port should always be the standard port (4789).
 (limitation of p4 parser)
 
-#### Configure VLAN ports on TAP0 and add them to br-int
+### 9) Configure VLAN ports on TAP0 and add them to br-int
 
 ```bash
 ip link add link TAP0 name vlan1 type vlan id 1
@@ -266,7 +268,9 @@ All VLAN interfaces should be created on top of TAP ports, and should always
 be in lowercase format "vlan+vlan_id" (e.g., vlan1, vlan2, vlan3, ...
 vlan4094).
 
-### Configure rules to push/pop VLAN
+## 10) Configure rules
+
+### Rules to push/pop VLAN
 
 Configure rules to push and pop VLAN from vhost 0 and 1 ports to TAP0 port
 (vhost-user and vlan port mapping).
@@ -298,7 +302,7 @@ target datapath indexes will be:
 Rules to configure:
 
 1. For any tx control packet from VM1 (TDP 0), pipeline should add
-   VLAN tag 1 and send it to TAP0 port(TDP 6).
+   VLAN tag 1 and send it to TAP0 port (TDP 6).
 
    ```bash
    p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
@@ -306,7 +310,7 @@ Rules to configure:
    ```
 
 2. For any tx control packet from VM2 (TDP 1), pipeline should add a VLAN
-   tag 2 and send it to TAP0 port(TDP 6).
+   tag 2 and send it to TAP0 port (TDP 6).
 
    ```bash
    p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_pkts_table \
@@ -322,16 +326,14 @@ Rules to configure:
    ```
 
 4. For any tx control packet from TAP0 port (TDP 6) with VLAN tag 2,
-   pipeline should pop the VLAN tag and send it to VM2(TDP 1).
+   pipeline should pop the VLAN tag and send it to VM2 (TDP 1).
 
    ```bash
    p4rt-ctl add-entry br0 linux_networking_control.handle_tx_control_vlan_pkts_table \
        "istd.input_port=6,local_metadata.vlan_id=2,action=linux_networking_control.pop_vlan_fwd(1)"
    ```
 
-### Configure rules for control packets coming in and out of physical port
-
-Rules to configure:
+### Rules for control packets coming in and out of physical port
 
 1. Any rx control packet from phy port0 (TDP 2) should be sent to
    corresponding control port TAP1 (TDP 3).
@@ -365,10 +367,12 @@ Rules to configure:
        "istd.input_port=5,action=linux_networking_control.set_control_dest(4)"
    ```
 
-### Configure routes only when dummy port is used for tunnel termination
+## 11) Configure routes
+
+Only needed when dummy port is used for tunnel termination.
 
 <!-- markdownlint-disable MD033 -->
-#### Option 1: Configure static route <a name="configure-static-route"></a>
+### Option 1: Configure static route <a name="configure-static-route"/>
 <!-- markdownlint-enable MD033 -->
 
 ```bash
@@ -378,7 +382,7 @@ ip route add 30.1.1.1 nexthop via 50.1.1.2 dev TAP1
 ```
 
 <!-- markdownlint-disable MD033 -->
-#### Option 2: Learn dynamic routes via FRR <a name="learn-dynamic-routes-via-frr"/>
+### Option 2: Learn dynamic routes via FRR <a name="learn-dynamic-routes-via-ffr"/>
 <!-- markdownlint-enable MD033 -->
 
 Install FRR:
@@ -420,7 +424,7 @@ DUT (host1) and also route learnt on the kernel.
 30.1.1.0/24 nhid 54 via 50.1.1.2 dev TAP1 proto bgp metric 20
 ```
 
-### Test the ping scenarios
+## 12) Test ping scenarios
 
 - Ping between VM's on the same host
 - Underlay ping
