@@ -53,20 +53,19 @@ set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
 file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
-############################
-# Target selection options #
-############################
-
-include(SelectTdiTarget)
-
 ###################
 # Feature toggles #
 ###################
 
 option(SET_RPATH    "Set RPATH in libraries and executables" OFF)
-
 option(WITH_KRNLMON "Enable Kernel Monitor support" ON)
 option(WITH_OVSP4RT "Enable OVS support" ON)
+
+############################
+# Target selection options #
+############################
+
+include(SelectTdiTarget)
 
 if(TOFINO_TARGET)
     set(WITH_KRNLMON OFF)
@@ -75,6 +74,10 @@ endif()
 
 cmake_print_variables(WITH_KRNLMON)
 cmake_print_variables(WITH_OVSP4RT)
+
+if(WITH_OVSP4RT AND OVS_INSTALL_DIR STREQUAL "")
+    message(FATAL_ERROR "OVS_INSTALL_DIR (OVS_INSTALL) not defined!")
+endif()
 
 ###########################
 # Global compiler options #
@@ -140,9 +143,7 @@ cmake_print_variables(CMAKE_PREFIX_PATH)
 # External packages #
 #####################
 
-find_package(absl CONFIG REQUIRED)
-set(GFLAGS_USE_TARGET_NAMESPACE TRUE)
-find_package(gflags CONFIG REQUIRED)
+include(StratumDependencies)
 
 if(DPDK_TARGET)
     include(dpdk-driver)
@@ -153,9 +154,6 @@ elseif(TOFINO_TARGET)
 endif()
 
 if(WITH_OVSP4RT)
-    if(OVS_INSTALL_DIR STREQUAL "")
-        message(FATAL_ERROR "OVS_INSTALL_DIR (OVS_INSTALL) not defined!")
-    endif()
     find_package(OVS)
 endif()
 

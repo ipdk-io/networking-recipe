@@ -85,4 +85,6 @@ add_library(openconfig_proto SHARED
     $<TARGET_OBJECTS:openconfig_goog_bcm_proto_o>
 )
 
+target_link_libraries(openconfig_proto PUBLIC protobuf::libprotobuf)
+
 install(TARGETS openconfig_proto LIBRARY)

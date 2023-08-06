@@ -37,6 +37,7 @@ target_include_directories(gnmi_proto PRIVATE ${PB_OUT_DIR})
 target_link_libraries(gnmi_proto
     PUBLIC
         grpc_proto
+        protobuf::libprotobuf
         absl::hash
         absl::strings
         absl::synchronization

@@ -27,7 +27,7 @@ set(STRATUM_SOURCE_DIR
 mark_as_advanced(STRATUM_SOURCE_DIR)
 
 set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
-    "Path to generated Protobuf files")
+    "Path to directory for generated Protobuf files")
 mark_as_advanced(PB_OUT_DIR)
 file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
