@@ -4,8 +4,6 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-include(FindProtobuf)
-
 option(INSTALL_PROTO_FILES "Install .proto files" OFF)
 
 #############################
@@ -32,7 +30,6 @@ else()
     endif()
 endif()
 
-cmake_print_variables(PROTOBUF_PROTOC_EXECUTABLE)
 cmake_print_variables(GRPC_CPP_PLUGIN)
 
 ##########################
@@ -72,7 +69,7 @@ function(generate_proto_files PROTO_FILES SRC_DIR)
             OUTPUT
                 ${_src} ${_hdr}
             COMMAND
-                ${PROTOBUF_PROTOC_EXECUTABLE}
+                protobuf::protoc
                 --proto_path=${PROTO_IMPORT_PATH}
                 --cpp_out=${PB_OUT_DIR}
                 -I${STRATUM_SOURCE_DIR}
@@ -125,7 +122,7 @@ function(generate_grpc_files PROTO_FILES SRC_DIR)
             OUTPUT
                 ${_src} ${_hdr}
             COMMAND
-                ${PROTOBUF_PROTOC_EXECUTABLE}
+                protobuf::protoc
                 --proto_path=${PROTO_IMPORT_PATH}
                 --grpc_out=${PB_OUT_DIR}
                 --plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN}
@@ -222,7 +219,7 @@ target_include_directories(p4runtime_proto PRIVATE ${PB_OUT_DIR})
 target_link_libraries(p4runtime_proto
     PUBLIC
         grpc_proto
-        absl::synchronization               
+        absl::synchronization
 )
 
 set_install_rpath(p4runtime_proto $ORIGIN ${DEP_ELEMENT})
