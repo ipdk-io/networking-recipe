@@ -26,6 +26,7 @@ _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
 _BLD_DIR=build
 _DRY_RUN=0
+_CFG_ONLY=0
 _OVS_BLD="ovs/build"
 _WITH_OVS=1
 
@@ -47,6 +48,7 @@ print_help() {
     echo "  --toolchain=FILE -T  CMake toolchain file [${_TOOLFILE}]"
     echo ""
     echo "Options:"
+    echo "  --config             Exit after configuring P4 Control Plane"
     echo "  --coverage           Instrument build to measure code coverage"
     echo "  --dry-run        -n  Display cmake parameter values and exit"
     echo "  --help           -h  Display this help text"
@@ -91,6 +93,8 @@ print_cmake_params() {
     [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
     echo "${_SET_RPATH:2}"
     echo "${_TARGET_TYPE:2}"
+    [ ${_CFG_ONLY} != 0 ] && echo "CONFIG_ONLY"
+    [ -n "${_GENERATOR}" ] && echo "${_GENERATOR}"
     echo "JOBS=${_JOBS}"
     echo ""
 }
@@ -121,6 +125,7 @@ build_ovs() {
 
 config_recipe() {
     cmake -S . -B ${_BLD_DIR} \
+        ${_GENERATOR} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
         -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
         ${_STAGING_PREFIX} \
@@ -154,7 +159,7 @@ LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,toolchain:
 LONGOPTS=${LONGOPTS},staging:,target:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
 LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs
-LONGOPTS=${LONGOPTS},coverage,rpath,no-rpath
+LONGOPTS=${LONGOPTS},config,coverage,ninja,rpath,no-rpath
 
 GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 eval set -- "${GETOPTS}"
@@ -198,6 +203,9 @@ while true ; do
         _BLD_TYPE="Release"
         shift ;;
     # Options
+    --config)
+        _CFG_ONLY=1
+        shift 1 ;;
     --coverage)
         _COVERAGE="-DTEST_COVERAGE=ON"
         shift ;;
@@ -210,6 +218,9 @@ while true ; do
     -j|--jobs)
         _JOBS=$2
         shift 2 ;;
+    --ninja)
+        _GENERATOR="-G Ninja"
+        shift 1 ;;
     --no-krnlmon)
         _WITH_KRNLMON=FALSE
         shift ;;
@@ -281,6 +292,8 @@ if [ ${_WITH_OVS} -ne 0 ]; then
     build_ovs
 fi
 
-# Now build the rest of the recipe.
 config_recipe
-build_recipe
+
+if [ ${_CFG_ONLY} -eq 0 ]; then
+    build_recipe
+fi
