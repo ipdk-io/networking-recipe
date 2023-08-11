@@ -12,11 +12,10 @@ P4 Control Plane User Guide
 
 .. toctree::
    :maxdepth: 1
-   :caption: Setup Guides
+   :caption: General
 
-   guides/setup/dpdk-setup-guide
-   guides/setup/es2k-setup-guide
-   guides/setup/tofino-setup-guide
+   overview
+   guides/setup/setup-guides
 
 .. toctree::
    :maxdepth: 1
