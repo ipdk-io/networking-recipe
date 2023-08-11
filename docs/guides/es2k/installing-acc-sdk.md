@@ -43,7 +43,7 @@ $ popd
 
 ## Key components
 
-### SDK layout
+### ACC-RL SDK
 
 The  ACC-RL SDK is laid out as follows:
 

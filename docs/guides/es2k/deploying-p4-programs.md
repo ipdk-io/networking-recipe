@@ -6,7 +6,7 @@ This section explains how to deploy a P4 program on the hardware Flexible
 Pipeline (FXP).
 
 It is assumed that that you have already
-[Compiled the P4 Program](/guides/es2k/compiling-p4-programs.md)
+[compiled the P4 program](compiling-p4-programs.md)
 to generate the P4 artifacts required for deployment.
 
 ## 2. Deploying on Hardware Flexible Pipeline (FXP)
@@ -42,7 +42,7 @@ root@mev-imc:/etc/dpcp/package# cp simple_l3_l4_pna.pkg default_pkg.pkg
 ```
 
 If Communication Channel support is required,
-[Enable the Communication Channel](/guides/es2k/enabling-comm-channel.md)
+[enable the communication channel](enabling-comm-channel.md)
 before proceeding to the next step.
 
 ### 2.3 Start the IMC
@@ -58,4 +58,4 @@ enables ACC. If the start-up script is executed successfully, ACC comes up with 
 statically assigned IP address `192.168.0.2` to the eth0 network interface.
 You can access ACC from IMC over an SSH session using this IP address.
 
-You are now ready to [Start Infrap4d](/guides/es2k/running-infrap4d.md).
+You are now ready to [start infrap4d](running-infrap4d.md).

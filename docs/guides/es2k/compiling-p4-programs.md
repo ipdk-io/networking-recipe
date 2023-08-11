@@ -10,8 +10,8 @@ them to compile a P4 program
 
 ### 2.1 Install RPMs
 
-Install the `cpt`, `p4c-pna-xxp`, and `p4-sde` packages on a Fedora 37 x86_64 server,
-from RPMs in the release tarball.
+Install the `cpt`, `p4c-pna-xxp`, and `p4-sde` packages on a
+Fedora 37 x86_64 server, from RPMs in the release tarball.
 
   ```bash
   # Extract RPMs from the tarball
@@ -131,5 +131,5 @@ cpt --npic --format csr --pbd  -o simple_l3_l4_pna.pkg \
     cpt_ver.s simple_l3_l4_pna.s
 ```
 
-Please see [Deploying P4 Programs](/guides/es2k/deploying-p4-programs.md)
+Please see [Deploying P4 Programs](deploying-p4-programs.md)
 for details about deployment.
