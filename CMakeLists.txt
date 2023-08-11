@@ -12,6 +12,7 @@ project(networking-recipe VERSION 23.07 LANGUAGES C CXX)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 include(CMakePrintHelpers)
+include(CompilerSettings)
 include(CTest)
 include(FindPkgConfig)
 include(GNUInstallDirs)
@@ -79,9 +80,13 @@ if(WITH_OVSP4RT AND OVS_INSTALL_DIR STREQUAL "")
     message(FATAL_ERROR "OVS_INSTALL_DIR (OVS_INSTALL) not defined!")
 endif()
 
-###########################
-# Global compiler options #
-###########################
+############################
+# Global compiler settings #
+############################
+
+add_basic_settings()
+#add_recent_security_settings(${CMAKE_BUILD_TYPE})
+add_legacy_security_settings()
 
 add_compile_options(-D${TARGETFLAG})
 
@@ -92,8 +97,6 @@ if(NOT DEPEND_INSTALL_DIR STREQUAL "")
         link_directories(${DEPEND_INSTALL_DIR}/lib64)
     endif()
 endif()
-
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 ############################
 # find_xxxx() search paths #
