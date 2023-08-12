@@ -37,7 +37,7 @@ if(DPDK_TARGET)
 elseif(ES2K_TARGET)
     add_es2k_target_libraries(infrap4d)
 elseif(TOFINO_TARGET)
-    add_tofino_link_libraries(infrap4d)
+    add_tofino_target_libraries(infrap4d)
 endif()
 
 if(WITH_KRNLMON)
