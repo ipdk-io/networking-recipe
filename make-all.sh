@@ -102,8 +102,8 @@ print_cmake_params() {
 config_ovs() {
     cmake -S ovs -B ${_OVS_BLD} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-        -DCMAKE_INSTALL_PREFIX=${_OVS_DIR} \
-        ${_TOOLCHAIN_FILE} \
+        -DCMAKE_INSTALL_PREFIX="${_OVS_DIR}" \
+        "${_TOOLCHAIN_FILE}" \
         -DP4OVS=ON
 }
 
@@ -122,17 +122,18 @@ build_ovs() {
 config_recipe() {
     cmake -S . -B ${_BLD_DIR} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-        -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
-        ${_STAGING_PREFIX} \
-        ${_TOOLCHAIN_FILE} \
-        -DDEPEND_INSTALL_DIR=${_DEPS_DIR} \
-        ${_HOST_DEPEND_DIR} \
-        -DOVS_INSTALL_DIR=${_OVS_DIR} \
-        -DSDE_INSTALL_DIR=${_SDE_DIR} \
-        ${_WITH_KRNLMON} ${_WITH_OVSP4RT} \
-        ${_COVERAGE} \
-        ${_SET_RPATH} \
-        ${_TARGET_TYPE}
+        -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
+        "${_STAGING_PREFIX}" \
+        "${_TOOLCHAIN_FILE}" \
+        -DDEPEND_INSTALL_DIR="${_DEPS_DIR}" \
+        "${_HOST_DEPEND_DIR}" \
+        -DOVS_INSTALL_DIR="${_OVS_DIR}" \
+        -DSDE_INSTALL_DIR="${_SDE_DIR}" \
+        "${_WITH_KRNLMON}" \
+        "${_WITH_OVSP4RT}" \
+        "${_COVERAGE}" \
+        "${_SET_RPATH}" \
+        "${_TARGET_TYPE}"
 }
 
 ################
@@ -140,7 +141,7 @@ config_recipe() {
 ################
 
 build_recipe() {
-    cmake --build ${_BLD_DIR} -j${_JOBS} --target install
+    cmake --build ${_BLD_DIR} "-j${_JOBS}" --target install
 }
 
 ######################
