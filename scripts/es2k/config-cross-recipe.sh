@@ -184,7 +184,7 @@ cmake -S . -B "${_BLD_DIR}" \
     -DHOST_DEPEND_DIR="${_HOST_DIR}" \
     -DOVS_INSTALL_DIR="${_OVS_DIR}" \
     -DSDE_INSTALL_DIR="${_SDE_DIR}" \
-    "${_WITH_KRNLMON}" \
-    "${_WITH_OVSP4RT}" \
+    ${_WITH_KRNLMON} \
+    ${_WITH_OVSP4RT} \
     -DSET_RPATH=TRUE \
     -DTDI_TARGET=ES2K
