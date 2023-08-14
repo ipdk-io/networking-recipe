@@ -21,14 +21,20 @@ fi
 
 _SYSROOT=${SDKTARGETSYSROOT}
 
-# Default values
+##################
+# Default values #
+##################
+
 _BLD_DIR=ovs/build
 _BLD_TYPE=RelWithDebInfo
 _JOBS=8
 _PREFIX=//opt/ovs
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
-# Displays help text
+##############
+# print_help #
+##############
+
 print_help() {
     echo ""
     echo "Build and install Open vSwitch"
@@ -49,11 +55,31 @@ print_help() {
     echo ""
 }
 
-# Parse options
-SHORTOPTS=B:P:T:hj:n
-LONGOPTS=build:,dry-run,help,jobs:,prefix:,toolchain:
+######################
+# print_cmake_params #
+######################
 
-eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
+print_cmake_params() {
+    echo ""
+    echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
+    echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
+    echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
+    echo "JOBS=${_JOBS}"
+    echo ""
+}
+
+######################
+# Parse command line #
+######################
+
+SHORTOPTS=B:P:T:j:
+SHORTOPTS=${SHORTOPTS}hn
+
+LONGOPTS=build:,jobs:,prefix:,toolchain:
+LONGOPTS=${LONGOPTS},dry-run,help
+
+GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
+eval set -- "${GETOPTS}"
 
 while true ; do
     case "$1" in
@@ -84,25 +110,32 @@ while true ; do
     esac
 done
 
+######################
+# Process parameters #
+######################
+
 # Substitute ${_SYSROOT}/ for '//' prefix
 [ "${_PREFIX:0:2}" = "//" ] && _PREFIX=${_SYSROOT}/${_PREFIX:2}
 
 if [ "${_DRY_RUN}" = "true" ]; then
-    echo ""
-    echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
-    echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
-    echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
-    echo "JOBS=${_JOBS}"
-    echo ""
+    print_cmake_params
     exit 0
 fi
 
-rm -fr ${_BLD_DIR}
+#######################
+# Configure the build #
+#######################
 
-cmake -S ovs -B ${_BLD_DIR} \
+rm -fr "${_BLD_DIR}"
+
+cmake -S ovs -B "${_BLD_DIR}" \
     -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-    -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
-    -DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE} \
+    -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
+    -DCMAKE_TOOLCHAIN_FILE="${_TOOLFILE}" \
     -DP4OVS=TRUE
 
-cmake --build ${_BLD_DIR} -j${_JOBS} -- V=0
+#############
+# Build OVS #
+#############
+
+cmake --build "${_BLD_DIR}" "-j${_JOBS}" -- V=0
