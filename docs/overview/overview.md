@@ -5,17 +5,15 @@ and reduces coupling between its components, making the code easier to maintain
 and more suitable for upstreaming. It moves the P4-specific components of the
 architecture to a separate process called `infrap4d`.
 
-![P4 Control Plane Architecture](/images/p4-control-plane-architecture.png)
+![P4 Control Plane Architecture](p4-control-plane-architecture.png)
 
-## Components
+## Infrap4d
 
-### Infrap4d
-
-Infrap4d integrates Stratum, the Kernel Monitor (krnlmon), Switch Abstraction
+Infrap4d integrates Stratum, Kernel Monitor (krnlmon), Switch Abstraction
 Interface (SAI), Table Driven Interface (TDI), and a P4 target driver into a
 single process (daemon).
 
-![Infrap4d Architecture](/images/infrap4d-architecture.png)
+![Infrap4d Architecture](infrap4d-architecture.png)
 
 ### Kernel monitor (krnlmon)
 

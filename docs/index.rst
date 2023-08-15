@@ -14,7 +14,7 @@ P4 Control Plane User Guide
    :maxdepth: 1
    :caption: General
 
-   overview
+   Overview <overview/overview>
    guides/setup/setup-guides
 
 .. toctree::
