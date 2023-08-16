@@ -29,10 +29,10 @@ get_os_ver_details()
   else
       # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
       OS=$(uname -s)
-      export OS
       VER=$(uname -r)
-      export VER
   fi
+  export OS
+  export VER
 }
 
 #
@@ -67,4 +67,6 @@ get_num_cores()
         NUM_CORES=1
         NUM_THREADS=-j1
     fi
+    export NUM_CORES
+    export NUM_THREADS
 }

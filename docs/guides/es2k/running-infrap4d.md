@@ -2,7 +2,7 @@
 
 This document explains how to install and run `infrap4d`
 on Intel IPU E2100 hardware. It is assumed that you have followed the
-[Deploying P4 programs guide](/guides/es2k/deploying-p4-programs.md)
+[Deploying P4 programs guide](deploying-p4-programs.md)
 to install the P4 package on FXP during IMC boot-up.
 
 ## 1. Extract P4 libraries from tarball
@@ -62,7 +62,7 @@ touch tofino.bin
 ### Copy P4 artifacts to ACC
 
 Copy `bfrt.json`, `context.json`, `p4info.txt` to the ACC. See
-[Compiling P4 programs](/guides/es2k/compiling-p4-programs.md)
+[Compiling P4 programs](compiling-p4-programs.md)
 for instructions on generating these files.
 
 ### Prepare configuration file

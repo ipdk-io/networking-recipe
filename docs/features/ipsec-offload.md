@@ -73,7 +73,7 @@ certificate location, IPs, lifetime thresholds, etc.
 ### Start IPsec
 
 With the strongSwan application configured, starting IPsec
-(see [ipsec-recipe](https://github.com/ipdk-io/ipsec-recipe) for details) will 
+(see [ipsec-recipe](https://github.com/ipdk-io/ipsec-recipe) for details) will
 initiate the pipeline, program the SPD rules as per the P4 program, and
 configure/re-configure SAD entries based on negotiated encryption parameters
 between local and peer system.
@@ -86,7 +86,7 @@ details encoded.
 
 ### Config SAD message
 
-The P4 Control Plane provides SET and DELETE service to the 
+The P4 Control Plane provides SET and DELETE service to the
 IPsec-offload [Config SAD message](https://github.com/ipdk-io/openconfig-public/blob/master/release/models/ipsec/openconfig-ipsec-offload.yang#L39-L185)
 at `/ipsec-offload/sad/sad-entry[offload-id=x][direction=y]/config`.
 
