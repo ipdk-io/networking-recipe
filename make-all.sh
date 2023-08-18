@@ -25,6 +25,7 @@ _TGT_TYPE="DPDK"
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
 _BLD_DIR=build
+_CFG_ONLY=0
 _DRY_RUN=0
 _OVS_BLD="ovs/build"
 _WITH_OVS=1
@@ -47,6 +48,7 @@ print_help() {
     echo "  --toolchain=FILE -T  CMake toolchain file [${_TOOLFILE}]"
     echo ""
     echo "Options:"
+    echo "  --config             Configure without building"
     echo "  --coverage           Instrument build to measure code coverage"
     echo "  --dry-run        -n  Display cmake parameter values and exit"
     echo "  --help           -h  Display this help text"
@@ -91,6 +93,12 @@ print_cmake_params() {
     [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
     echo "${_SET_RPATH:2}"
     echo "${_TARGET_TYPE:2}"
+    if [ ${_CFG_ONLY} -ne 0 ]; then
+        echo ""
+        echo "Configure without building"
+        echo ""
+        return
+    fi
     echo "JOBS=${_JOBS}"
     echo ""
 }
@@ -100,9 +108,10 @@ print_cmake_params() {
 ##############
 
 config_ovs() {
+    # shellcheck disable=SC2086
     cmake -S ovs -B ${_OVS_BLD} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-        -DCMAKE_INSTALL_PREFIX=${_OVS_DIR} \
+        -DCMAKE_INSTALL_PREFIX="${_OVS_DIR}" \
         ${_TOOLCHAIN_FILE} \
         -DP4OVS=ON
 }
@@ -120,15 +129,16 @@ build_ovs() {
 #################
 
 config_recipe() {
+    # shellcheck disable=SC2086
     cmake -S . -B ${_BLD_DIR} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-        -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
+        -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
         ${_STAGING_PREFIX} \
         ${_TOOLCHAIN_FILE} \
-        -DDEPEND_INSTALL_DIR=${_DEPS_DIR} \
+        -DDEPEND_INSTALL_DIR="${_DEPS_DIR}" \
         ${_HOST_DEPEND_DIR} \
-        -DOVS_INSTALL_DIR=${_OVS_DIR} \
-        -DSDE_INSTALL_DIR=${_SDE_DIR} \
+        -DOVS_INSTALL_DIR="${_OVS_DIR}" \
+        -DSDE_INSTALL_DIR="${_SDE_DIR}" \
         ${_WITH_KRNLMON} ${_WITH_OVSP4RT} \
         ${_COVERAGE} \
         ${_SET_RPATH} \
@@ -140,7 +150,7 @@ config_recipe() {
 ################
 
 build_recipe() {
-    cmake --build ${_BLD_DIR} -j${_JOBS} --target install
+    cmake --build ${_BLD_DIR} "-j${_JOBS}" --target install
 }
 
 ######################
@@ -154,7 +164,7 @@ LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,toolchain:
 LONGOPTS=${LONGOPTS},staging:,target:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
 LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs
-LONGOPTS=${LONGOPTS},coverage,rpath,no-rpath
+LONGOPTS=${LONGOPTS},config,coverage,rpath,no-rpath
 
 GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 eval set -- "${GETOPTS}"
@@ -163,25 +173,25 @@ eval set -- "${GETOPTS}"
 while true ; do
     case "$1" in
     # Paths
-    -D|--deps)
+    --deps|-D)
         _DEPS_DIR=$2
         shift 2 ;;
-    -H|--hostdeps)
+    --hostdeps|-H)
         _HOST_DIR=$2
         shift 2 ;;
-    -O|--ovs)
+    --ovs|-O)
         _OVS_DIR=$2
         shift 2 ;;
-    -P|--prefix)
+    --prefix|-P)
         _PREFIX=$2
         shift 2 ;;
-    -S|--sde)
+    --sde|-S)
         _SDE_DIR=$2
         shift 2 ;;
     --staging)
         _STAGING=$2
         shift 2 ;;
-    -T|--toolchain)
+    --toolchain|-T)
         _TOOLFILE=$2
         shift 2 ;;
     # Configurations
@@ -198,16 +208,19 @@ while true ; do
         _BLD_TYPE="Release"
         shift ;;
     # Options
+    --config)
+        _CFG_ONLY=1
+        shift ;;
     --coverage)
         _COVERAGE="-DTEST_COVERAGE=ON"
         shift ;;
-    -n|--dry_run)
+    --dry_run|-n)
         _DRY_RUN=1
         shift ;;
-    -h|--help)
+    --help|-h)
         print_help
         exit 99 ;;
-    -j|--jobs)
+    --jobs|-j)
         _JOBS=$2
         shift 2 ;;
     --no-krnlmon)
@@ -283,4 +296,6 @@ fi
 
 # Now build the rest of the recipe.
 config_recipe
-build_recipe
+if [ ${_CFG_ONLY} -eq 0 ]; then
+    build_recipe
+fi
