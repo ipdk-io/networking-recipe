@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.5)
 
 # Define PYTHON3 variable.
 find_program(PYTHON3 python3)
+mark_as_advanced(PYTHON3)
 if(NOT PYTHON3)
     include(FindPython)
     find_package(Python COMPONENTS Interpreter)

@@ -17,47 +17,56 @@ find_path(OVS_INCLUDE_DIR
     NAMES "openvswitch/version.h"
     PATHS ${PC_OVS_INCLUDE_DIRS}
 )
+mark_as_advanced(OVS_INCLUDE_DIR)
 
 find_library(OVS_LIBRARY
     NAMES openvswitch
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
+mark_as_advanced(OVS_LIBRARY)
 
 find_library(OVS_LIBAVX512
     NAMES openvswitchavx512
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
+mark_as_advanced(OVS_LIBAVX512)
 
 find_library(OFPROTO_LIBRARY
     NAMES ofproto
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
+mark_as_advanced(OFPROTO_LIBRARY)
 
 find_library(OVSDB_LIBRARY
     NAMES ovsdb
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
+mark_as_advanced(OVSDB_LIBRARY)
 
 find_library(SFLOW_LIBRARY
     NAMES sflow
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
+mark_as_advanced(SFLOW_LIBRARY)
 
 find_library(LIBVSWITCHD
     NAMES vswitchd
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
+mark_as_advanced(LIBVSWITCHD)
 
 find_library(LIBTESTCONTROLLER
     NAMES testcontroller
     PATHS ${PC_OVS_LIBRARY_DIRS}
 )
+mark_as_advanced(LIBTESTCONTROLLER)
 
 #-----------------------------------------------------------------------
 # Get version number
 #-----------------------------------------------------------------------
 if(PC_OVS_VERSION)
     set(OVS_VERSION ${PC_OVS_VERSION} CACHE STRING "OVS version")
+    mark_as_advanced(OVS_VERSION)
 elseif(EXISTS "${OVS_INCLUDE_DIR}/openvswitch/version.h")
     # Extract version string from version.h file.
     file(STRINGS
@@ -66,6 +75,7 @@ elseif(EXISTS "${OVS_INCLUDE_DIR}/openvswitch/version.h")
     string(REGEX REPLACE
         "[^0-9.]+([0-9.]+).*" "\\1" OVS_VERSION ${_version_string})
     set(OVS_VERSION ${PC_OVS_VERSION} CACHE STRING "OVS version")
+    mark_as_advanced(OVS_VERSION)
     unset(_version_string)
 endif()
 
@@ -81,10 +91,6 @@ find_package_handle_standard_args(OVS
     VERSION_VAR
         OVS_VERSION
 )
-
-mark_as_advanced(OVS_INCLUDE_DIR)
-mark_as_advanced(OVS_LIBRARY OVSDB_LIBRARY OFPROTO_LIBRARY SFLOW_LIBRARY)
-mark_as_advanced(LIBVSWITCHD LIBTESTCONTROLLER)
 
 #-----------------------------------------------------------------------
 # Define library targets
