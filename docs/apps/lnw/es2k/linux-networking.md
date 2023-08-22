@@ -238,7 +238,7 @@ Below configuration assumes
 
 - Underlay IDPF netdev has a VSI value 10
 
-```baash
+```bash
 p4rt-ctl add-entry br0 linux_networking_control.ecmp_lpm_root_lut "user_meta.cmeta.bit32_zeros=4/255.255.255.255,priority=2,action=linux_networking_control.ecmp_lpm_root_lut_action(0)"
 
 nmcli device set <IDPF netdev for VSI 10> managed no

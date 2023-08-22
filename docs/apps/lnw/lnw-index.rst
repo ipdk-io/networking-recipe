@@ -5,16 +5,20 @@
 Linux Networking
 ================
 
+DPDK
+----
+
 .. toctree::
    :maxdepth: 1
-   :caption: DPDK
 
    dpdk/linux-networking
    dpdk/linux-networking-ecmp
 
+ES2K
+----
+
 .. toctree::
    :maxdepth: 1
-   :caption: ES2K
 
    es2k/linux-networking
    es2k/linux-networking-ipv6

@@ -90,8 +90,9 @@ Ex: vlan1, vlan2, vlan3, ... vlan4094
 
 ## Creating the topology
 
-The `gnmi-ctl` and `p4rt-ctl` utilities used below can be found in the
-$IPDK_RECIPE/install/bin directory. They should be run with `sudo`.
+The [gnmi-ctl](/clients/gnmi-ctl) and [p4rt-ctl](/clients/p4rt-ctl) utilities
+used below can be found in the $IPDK_RECIPE/install/bin directory.
+They should be run with `sudo`.
 
 ### 1. Bind physical port (Port 0 and Port 1) to user-space IO driver
 
@@ -122,7 +123,8 @@ Check if the device is bound correctly using `./dpdk-devbind.py -s`.
 ### 2. Export environment variables and start infrap4d
 
 ```bash
-alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"
+alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
+
 sudo $IPDK_RECIPE/install/bin/infrap4d
 ```
 
