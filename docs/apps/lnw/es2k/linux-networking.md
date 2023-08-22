@@ -111,25 +111,25 @@ Legacy OvS is used as a control plane for source MAC learning of overlay VM's. O
 ```bash
 export RUN_OVS=/tmp
 rm -rf $RUN_OVS/etc/openvswitch
-rm -rf $RUN_OVS/var/run/openvswitch 
+rm -rf $RUN_OVS/var/run/openvswitch
 mkdir -p $RUN_OVS/etc/openvswitch/
 mkdir -p $RUN_OVS/var/run/openvswitch
- 
-ovsdb-tool create $RUN_OVS/etc/openvswitch/conf.db /opt/p4/p4-cp-nws/share/openvswitch/vswitch.ovsschema 
+
+ovsdb-tool create $RUN_OVS/etc/openvswitch/conf.db /opt/p4/p4-cp-nws/share/openvswitch/vswitch.ovsschema
 
 ovsdb-server $RUN_OVS/etc/openvswitch/conf.db \
     --remote=punix:$RUN_OVS/var/run/openvswitch/db.sock \
     --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
     --pidfile=$RUN_OVS/var/run/openvswitch/ovsdb-server.pid \
     --unixctl=$RUN_OVS/var/run/openvswitch/ovsdb-server.ctl \
-    --detach 
+    --detach
 
 ovs-vswitchd --detach \
     --pidfile=$RUN_OVS/var/run/openvswitch/ovs-vswitchd.pid \
     --no-chdir unix:$RUN_OVS/var/run/openvswitch/db.sock \
     --unixctl=$RUN_OVS/var/run/openvswitch/ovs-vswitchd.ctl \
     --mlockall \
-    --log-file=/tmp/ovs-vswitchd.log 
+    --log-file=/tmp/ovs-vswitchd.log
 
 alias ovs-vsctl="ovs-vsctl --db unix:$RUN_OVS/var/run/openvswitch/db.sock"
 ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
@@ -190,7 +190,7 @@ These VSI values can be checked with `/usr/bin/cli_client -q -c` command on IMC.
 
 # Rules for control packets coming from overlay VF(VSI-14), IPU will add a VLAN tag 1 and send to HOST1(VSI-8)
 
- p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table "vmeta.common.vsi=14,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.add_vlan_and_send_to_port(1,24)" 
+ p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table "vmeta.common.vsi=14,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.add_vlan_and_send_to_port(1,24)"
  p4rt-ctl add-entry br0 linux_networking_control.handle_rx_loopback_from_host_to_ovs_table "vmeta.common.vsi=14,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(24)"
  p4rt-ctl add-entry br0 linux_networking_control.vlan_push_mod_table "vmeta.common.mod_blob_ptr=1,action=linux_networking_control.vlan_push(1,0,1)"
 
@@ -230,7 +230,7 @@ Below configuration assumes
  p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table "vmeta.common.vsi=10,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(0)"
 ```
 
-#### Underlay configuration
+### Underlay configuration
 
 Configure underlay IP addresses, and add static routes.
 
@@ -247,7 +247,7 @@ ip route show
 ip route change 40.1.1.0/24 via 40.1.1.2 dev <IDPF netdev for VSI 10>
 ```
 
-#### Test the ping scenarios
+### Test the ping scenarios
 
 - Ping between VM's on the same host
 - Underlay ping
