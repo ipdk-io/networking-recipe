@@ -20,8 +20,6 @@
 
 # Linux Networking for DPDK
 
-## Overview
-
 This document explains how to run Linux networking scenario.
 
 ## Topology
