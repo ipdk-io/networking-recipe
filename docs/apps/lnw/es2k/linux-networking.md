@@ -40,7 +40,7 @@ System under test will have above topology running the networking recipe. Link P
 - Use Linux networking p4 program present in the directory `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking` for this scenario.
 - Refer to [Running Infrap4d on Intel IPU E2100](/guides/es2k/running-infrap4d.md) for compiling `P4 artifacts`, `bringing up ACC` and running `infrap4d` on ACC.
 
-## Steps to create the topology
+## Creating the topology
 
  *Note*: p4rt-ctl and ovs-vsctl utilities used in below steps can be found under $P4CP_INSTALL/bin
 

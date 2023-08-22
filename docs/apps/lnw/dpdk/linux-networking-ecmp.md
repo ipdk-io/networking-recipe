@@ -89,11 +89,11 @@ Ex: vlan1, vlan2, vlan3 …. vlan4094
 
  *Note*: pci_bdf can be obtained using lspci command. Check if device is binded correctly using ./dpdk-devbind.py -s (Refer to the section "Network devices using DPDK-compatible driver")
 
-### 2. Export the environment variables LD_LIBRARY_PATH, IPDK_RECIPE and SDE_INSTALL and start running the infrap4d
+### 2. Export environment variables and start infrap4d
 
 ```bash
-alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"
-sudo $IPDK_RECIPE/install/bin/infrap4d
+alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
+sudo $P4CP_INSTALL/bin/infrap4d
 ```
 
 ### 3. Create two VHOST user ports
@@ -160,28 +160,28 @@ ip link add dev TEP1 type dummy
 Kill any existing ovs process if running.
 
 ```bash
-mkdir -p $IPDK_RECIPE/install/var/run/openvswitch
-rm -rf $IPDK_RECIPE/install/etc/openvswitch/conf.db
+mkdir -p $P4CP_INSTALL/var/run/openvswitch
+rm -rf $P4CP_INSTALL/etc/openvswitch/conf.db
 
-sudo $IPDK_RECIPE/install/bin/ovsdb-tool create \
-    $IPDK_RECIPE/install/etc/openvswitch/conf.db \
-    $IPDK_RECIPE/install/share/openvswitch/vswitch.ovsschema
+sudo $P4CP_INSTALL/bin/ovsdb-tool create \
+    $P4CP_INSTALL/etc/openvswitch/conf.db \
+    $P4CP_INSTALL/share/openvswitch/vswitch.ovsschema
 
-export RUN_OVS=$IPDK_RECIPE/install
+export RUN_OVS=$P4CP_INSTALL
 
-sudo $IPDK_RECIPE/install/sbin/ovsdb-server \
+sudo $P4CP_INSTALL/sbin/ovsdb-server \
     --remote=punix:$RUN_OVS/var/run/openvswitch/db.sock \
     --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
     --pidfile --detach
 
-sudo $IPDK_RECIPE/install/sbin/ovs-vswitchd --detach --no-chdir \
+sudo $P4CP_INSTALL/sbin/ovs-vswitchd --detach --no-chdir \
     unix:$RUN_OVS/var/run/openvswitch/db.sock \
     --mlockall --log-file=/tmp/ovs-vswitchd.log
 
-sudo $IPDK_RECIPE/install/bin/ovs-vsctl --db \
+sudo $P4CP_INSTALL/bin/ovs-vsctl --db \
     unix:$RUN_OVS/var/run/openvswitch/db.sock show
 
-sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-br br-int
+sudo $P4CP_INSTALL/bin/ovs-vsctl add-br br-int
 ifconfig br-int up
 ```
 
@@ -190,7 +190,7 @@ ifconfig br-int up
 Using one of the TAP ports for tunnel termination.
 
 ```bash
-    sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=30.1.1.1 options:dst_port=4789
+    sudo $P4CP_INSTALL/bin/ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=30.1.1.1 options:dst_port=4789
 ```
 
 Note:
@@ -203,8 +203,8 @@ Note:
 ```bash
     ip link add link TAP0 name vlan1 type vlan id 1
     ip link add link TAP0 name vlan2 type vlan id 2
-    sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vlan1
-    sudo $IPDK_RECIPE/install/bin/ovs-vsctl add-port br-int vlan2
+    sudo $P4CP_INSTALL/bin/ovs-vsctl add-port br-int vlan1
+    sudo $P4CP_INSTALL/bin/ovs-vsctl add-port br-int vlan2
     ip link set dev vlan1 up
     ip link set dev vlan2 up
 ```
