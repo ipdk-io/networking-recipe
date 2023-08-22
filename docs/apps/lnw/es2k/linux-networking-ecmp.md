@@ -24,7 +24,7 @@ This document explains how to run the Linux networking scenario on ES2K.
 
 ## Topology
 
-![Linux Networking Topology](lnw-topology.png)
+![Linux Networking Topology](ecmp-topology.png)
 
 Notes about topology:
 
