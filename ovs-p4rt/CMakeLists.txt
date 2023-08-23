@@ -50,6 +50,9 @@ add_library(ovs_sidecar_o OBJECT
     $<TARGET_OBJECTS:ovsp4rt_p4_mapping_o>
 )
 
+# Required for Ninja.
+set_target_properties(ovsp4rt_p4_mapping_o PROPERTIES LINKER_LANGUAGE "C")
+
 target_include_directories(ovs_sidecar_o PRIVATE
     ${OVS_INSTALL_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}
