@@ -1,1 +1,0 @@
-scripts/es2k/config-cross-recipe.sh
