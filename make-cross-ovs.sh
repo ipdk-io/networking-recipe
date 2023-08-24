@@ -1,1 +1,0 @@
-scripts/es2k/make-cross-ovs.sh

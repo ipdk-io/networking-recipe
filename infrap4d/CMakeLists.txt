@@ -9,6 +9,11 @@ add_subdirectory(daemon)
 if(WITH_KRNLMON)
     add_executable(infrap4d infrap4d_main.cc)
     target_include_directories(infrap4d PRIVATE ${KRNLMON_SOURCE_DIR})
+elseif(TOFINO_TARGET)
+    # Tofino does not support the infrap4d interface, so we just
+    # build Stratum and call it infrap4d.
+    add_executable(infrap4d
+        ${STRATUM_SOURCE_DIR}/stratum/hal/bin/tdi/tofino/main.cc)
 else()
     add_executable(infrap4d infrap4d_lite.cc)
 endif()

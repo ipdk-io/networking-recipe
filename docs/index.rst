@@ -29,12 +29,12 @@ P4 Control Plane User Guide
 
 .. toctree::
    :maxdepth: 1
-   :caption: ES2K P4 Programs
+   :caption: P4 Programs
 
    guides/es2k/compiling-p4-programs
-   guides/es2k/enabling-comm-channel
    guides/es2k/deploying-p4-programs
    guides/es2k/running-infrap4d
+   guides/es2k/enabling-comm-channel
 
 .. toctree::
    :maxdepth: 1
@@ -44,9 +44,9 @@ P4 Control Plane User Guide
 
 .. toctree::
    :maxdepth: 1
-   :caption: Features
+   :caption: Applications
 
-   features/features-index
+   apps/apps-index
 
 .. toctree::
    :maxdepth: 1

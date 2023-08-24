@@ -27,6 +27,7 @@ _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 _BLD_DIR=build
 _CFG_ONLY=0
 _DRY_RUN=0
+_CFG_ONLY=0
 _OVS_BLD="ovs/build"
 _WITH_OVS=1
 
@@ -81,6 +82,7 @@ print_help() {
 
 print_cmake_params() {
     echo ""
+    [ -n "${_GENERATOR}" ] && echo "${_GENERATOR}"
     echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     [ -n "${_STAGING_PREFIX}" ] && echo "${_STAGING_PREFIX:2}"
@@ -133,6 +135,7 @@ build_ovs() {
 config_recipe() {
     # shellcheck disable=SC2086
     cmake -S . -B ${_BLD_DIR} \
+        ${_GENERATOR} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
         -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
         ${_STAGING_PREFIX} \
@@ -167,7 +170,7 @@ LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,toolchain:
 LONGOPTS=${LONGOPTS},cxx-std:,staging:,target:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
 LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs
-LONGOPTS=${LONGOPTS},config,coverage,rpath,no-rpath
+LONGOPTS=${LONGOPTS},config,coverage,ninja,rpath,no-rpath
 
 GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 eval set -- "${GETOPTS}"
@@ -229,6 +232,9 @@ while true ; do
     --jobs|-j)
         _NJOBS=$2
         shift 2 ;;
+    --ninja)
+        _GENERATOR="-G Ninja"
+        shift 1 ;;
     --no-krnlmon)
         _WITH_KRNLMON=FALSE
         shift ;;
@@ -289,7 +295,6 @@ if [ ${_WITH_OVS} -ne 0 ]; then
     build_ovs
 fi
 
-# Now build the rest of the recipe.
 config_recipe
 if [ ${_CFG_ONLY} -eq 0 ]; then
     build_recipe
