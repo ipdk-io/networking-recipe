@@ -14,17 +14,21 @@ cmake_minimum_required(VERSION 3.15)
 set(GOOGLEAPIS_SOURCE_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/googleapis" CACHE PATH
     "Path to Google APIs source directory")
+mark_as_advanced(GOOGLEAPIS_SOURCE_DIR)
 
 set(P4RUNTIME_SOURCE_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/p4runtime" CACHE PATH
     "Path to P4Runtime source directory")
+mark_as_advanced(P4RUNTIME_SOURCE_DIR)
 
 set(STRATUM_SOURCE_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/stratum" CACHE PATH
     "Path to Stratum source directory")
+mark_as_advanced(STRATUM_SOURCE_DIR)
 
 set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
+mark_as_advanced(PB_OUT_DIR)
 file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
 set(STRATUM_INCLUDES

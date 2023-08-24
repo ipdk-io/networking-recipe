@@ -131,6 +131,8 @@ function(_select_tdi_target_type)
     # Set cache variables.
     set(TARGETFLAG "${target_flag}" CACHE STRING "TDI target conditional" FORCE)
     set(TARGETTYPE "${target_type}" CACHE STRING "TDI target type" FORCE)
+    mark_as_advanced(TARGETFLAG)
+    mark_as_advanced(TARGETTYPE)
 
     message(NOTICE "${target_action} ${target_flag}")
 endfunction()
