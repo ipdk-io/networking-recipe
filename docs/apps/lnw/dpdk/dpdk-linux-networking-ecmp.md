@@ -24,7 +24,7 @@ This document explains how to run Linux networking with ECMP enabled for underla
 
 ## Topology
 
-![ECMP Toplogy](ecmp-topology.png)
+![ECMP Toplogy](dpdk-ecmp-topology.png)
 
 Notes about topology:
 
