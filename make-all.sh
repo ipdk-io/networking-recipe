@@ -16,7 +16,7 @@ set -e
 _BLD_TYPE="RelWithDebInfo"
 _DEPS_DIR=${DEPEND_INSTALL}
 _HOST_DIR=${HOST_INSTALL}
-_JOBS=8
+_NJOBS=8
 _OVS_DIR="${OVS_INSTALL:-ovs/install}"
 _PREFIX="install"
 _RPATH=OFF
@@ -25,6 +25,7 @@ _TGT_TYPE="DPDK"
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
 _BLD_DIR=build
+_CFG_ONLY=0
 _DRY_RUN=0
 _CFG_ONLY=0
 _OVS_BLD="ovs/build"
@@ -45,14 +46,15 @@ print_help() {
     echo "  --prefix=DIR     -P  Install directory prefix [${_PREFIX}]"
     echo "  --sde=DIR        -S  SDE install directory [${_SDE_DIR}]"
     echo "  --staging=DIR        Staging directory prefix [${_STAGING}]"
-    echo "  --toolchain=FILE -T  CMake toolchain file [${_TOOLFILE}]"
+    echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
     echo "Options:"
-    echo "  --config             Exit after configuring P4 Control Plane"
+    echo "  --config             Configure without building"
     echo "  --coverage           Instrument build to measure code coverage"
+    echo "  --cxx-std=STD        C++ standard (11|14|17) [$_CXX_STD])"
     echo "  --dry-run        -n  Display cmake parameter values and exit"
     echo "  --help           -h  Display this help text"
-    echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
+    echo "  --jobs=NJOBS     -j  Number of build threads [${_NJOBS}]"
     echo "  --no-krnlmon         Exclude Kernel Monitor"
     echo "  --no-ovs             Exclude OVS support"
     echo "  --target=TARGET      Target to build (dpdk|es2k|tofino) [${_TGT_TYPE}]"
@@ -80,10 +82,12 @@ print_help() {
 
 print_cmake_params() {
     echo ""
+    [ -n "${_GENERATOR}" ] && echo "${_GENERATOR}"
     echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     [ -n "${_STAGING_PREFIX}" ] && echo "${_STAGING_PREFIX:2}"
     [ -n "${_TOOLCHAIN_FILE}" ] && echo "${_TOOLCHAIN_FILE:2}"
+    [ -n "${_CXX_STD}" ] && echo "CMAKE_CXX_STANDARD=${_CXX_STD}"
     echo "DEPEND_INSTALL_DIR=${_DEPS_DIR}"
     [ -n "${_HOST_DEPEND_DIR}" ] && echo "${_HOST_DEPEND_DIR:2}"
     echo "OVS_INSTALL_DIR=${_OVS_DIR}"
@@ -93,9 +97,13 @@ print_cmake_params() {
     [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
     echo "${_SET_RPATH:2}"
     echo "${_TARGET_TYPE:2}"
-    [ ${_CFG_ONLY} != 0 ] && echo "CONFIG_ONLY"
-    [ -n "${_GENERATOR}" ] && echo "${_GENERATOR}"
-    echo "JOBS=${_JOBS}"
+    if [ ${_CFG_ONLY} -ne 0 ]; then
+        echo ""
+        echo "Configure without building"
+        echo ""
+        return
+    fi
+    echo "JOBS=${_NJOBS}"
     echo ""
 }
 
@@ -104,9 +112,10 @@ print_cmake_params() {
 ##############
 
 config_ovs() {
+    # shellcheck disable=SC2086
     cmake -S ovs -B ${_OVS_BLD} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-        -DCMAKE_INSTALL_PREFIX=${_OVS_DIR} \
+        -DCMAKE_INSTALL_PREFIX="${_OVS_DIR}" \
         ${_TOOLCHAIN_FILE} \
         -DP4OVS=ON
 }
@@ -124,16 +133,18 @@ build_ovs() {
 #################
 
 config_recipe() {
+    # shellcheck disable=SC2086
     cmake -S . -B ${_BLD_DIR} \
         ${_GENERATOR} \
         -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
-        -DCMAKE_INSTALL_PREFIX=${_PREFIX} \
+        -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
         ${_STAGING_PREFIX} \
         ${_TOOLCHAIN_FILE} \
-        -DDEPEND_INSTALL_DIR=${_DEPS_DIR} \
+        ${_CXX_STANDARD} \
+        -DDEPEND_INSTALL_DIR="${_DEPS_DIR}" \
         ${_HOST_DEPEND_DIR} \
-        -DOVS_INSTALL_DIR=${_OVS_DIR} \
-        -DSDE_INSTALL_DIR=${_SDE_DIR} \
+        -DOVS_INSTALL_DIR="${_OVS_DIR}" \
+        -DSDE_INSTALL_DIR="${_SDE_DIR}" \
         ${_WITH_KRNLMON} ${_WITH_OVSP4RT} \
         ${_COVERAGE} \
         ${_SET_RPATH} \
@@ -145,7 +156,7 @@ config_recipe() {
 ################
 
 build_recipe() {
-    cmake --build ${_BLD_DIR} -j${_JOBS} --target install
+    cmake --build ${_BLD_DIR} "-j${_NJOBS}" --target install
 }
 
 ######################
@@ -156,7 +167,7 @@ SHORTOPTS=D:H:O:P:S:T:
 SHORTOPTS=${SHORTOPTS}hj:n
 
 LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,toolchain:
-LONGOPTS=${LONGOPTS},staging:,target:
+LONGOPTS=${LONGOPTS},cxx-std:,staging:,target:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
 LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs
 LONGOPTS=${LONGOPTS},config,coverage,ninja,rpath,no-rpath
@@ -168,25 +179,25 @@ eval set -- "${GETOPTS}"
 while true ; do
     case "$1" in
     # Paths
-    -D|--deps)
+    --deps|-D)
         _DEPS_DIR=$2
         shift 2 ;;
-    -H|--hostdeps)
+    --hostdeps|-H)
         _HOST_DIR=$2
         shift 2 ;;
-    -O|--ovs)
+    --ovs|-O)
         _OVS_DIR=$2
         shift 2 ;;
-    -P|--prefix)
+    --prefix|-P)
         _PREFIX=$2
         shift 2 ;;
-    -S|--sde)
+    --sde|-S)
         _SDE_DIR=$2
         shift 2 ;;
     --staging)
         _STAGING=$2
         shift 2 ;;
-    -T|--toolchain)
+    --toolchain|-T)
         _TOOLFILE=$2
         shift 2 ;;
     # Configurations
@@ -205,18 +216,21 @@ while true ; do
     # Options
     --config)
         _CFG_ONLY=1
-        shift 1 ;;
+        shift ;;
     --coverage)
         _COVERAGE="-DTEST_COVERAGE=ON"
         shift ;;
-    -n|--dry_run)
+    --cxx-std)
+        _CXX_STD=$2
+        shift 2;;
+    --dry-run|-n)
         _DRY_RUN=1
         shift ;;
-    -h|--help)
+    --help|-h)
         print_help
         exit 99 ;;
-    -j|--jobs)
-        _JOBS=$2
+    --jobs|-j)
+        _NJOBS=$2
         shift 2 ;;
     --ninja)
         _GENERATOR="-G Ninja"
@@ -242,7 +256,7 @@ while true ; do
         shift
         break ;;
     *)
-        echo "Internal error!"
+        echo "Invalid parameter: $1"
         exit 1 ;;
     esac
 done
@@ -256,25 +270,14 @@ if [ -z "${_SDE_DIR}" ]; then
     exit 1
 fi
 
-if [ -n "${_STAGING}" ]; then
-    _STAGING_PREFIX=-DCMAKE_STAGING_PREFIX=${_STAGING}
-fi
-
-# --host and --toolfile are only used when cross-compiling
-if [ -n "${_HOST_DIR}" ]; then
-    _HOST_DEPEND_DIR=-DHOST_DEPEND_DIR=${_HOST_DIR}
-fi
-
-if [ -n "${_TOOLFILE}" ]; then
-    _TOOLCHAIN_FILE=-DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}
-fi
-
-_SET_RPATH=-DSET_RPATH=${_RPATH}
-_TARGET_TYPE=-DTDI_TARGET=${_TGT_TYPE}
-
-# Expand WITH_KRNLMON and WITH_OVSP4RT if not empty
-[ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON=-DWITH_KRNLMON=${_WITH_KRNLMON}
-[ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT=-DWITH_OVSP4RT=${_WITH_OVSP4RT}
+[ -n "${_CXX_STD}" ] && _CXX_STANDARD="-DCMAKE_CXX_STANDARD=${_CXX_STD}"
+[ -n "${_HOST_DIR}" ] && _HOST_DEPEND_DIR="-DHOST_DEPEND_DIR=${_HOST_DIR}"
+[ -n "${_RPATH}" ] && _SET_RPATH="-DSET_RPATH=${_RPATH}"
+[ -n "${_STAGING}" ] && _STAGING_PREFIX="-DCMAKE_STAGING_PREFIX=${_STAGING}"
+[ -n "${_TGT_TYPE}" ] && _TARGET_TYPE="-DTDI_TARGET=${_TGT_TYPE}"
+[ -n "${_TOOLFILE}" ] && _TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
+[ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON="-DWITH_KRNLMON=${_WITH_KRNLMON}"
+[ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT="-DWITH_OVSP4RT=${_WITH_OVSP4RT}"
 
 # Show parameters if this is a dry run
 if [ ${_DRY_RUN} -ne 0 ]; then
@@ -293,7 +296,6 @@ if [ ${_WITH_OVS} -ne 0 ]; then
 fi
 
 config_recipe
-
 if [ ${_CFG_ONLY} -eq 0 ]; then
     build_recipe
 fi
