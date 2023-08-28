@@ -1,6 +1,6 @@
 <!--
 /*
- * Copyright 2023 Intel Corporation.
+ * Copyright (c) 2023 Intel Corporation.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -18,13 +18,13 @@
  */
 - -->
 
-# Linux Networking with IPv6 (ES2K)
+# Linux Networking for ES2K
 
 This document explains how to run the Linux networking scenario on ES2K.
 
 ## Topology
 
-![Linux Networking with IPv6](lnw-topology.png)
+![Linux Networking Topology](es2k-lnw-topology.png)
 
 Notes about topology:
 
@@ -38,11 +38,11 @@ System under test will have above topology running the networking recipe. Link P
 ## Create P4 artifacts and start Infrap4d process
 
 - Use Linux networking p4 program present in the directory `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking` for this scenario.
-- Refer to [Running Infrap4d on Intel IPU E2100](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/running-infrap4d.md) for compiling `P4 artifacts`, `bringing up ACC` and running `infrap4d` on ACC.
+- Refer to [Running Infrap4d on Intel IPU E2100](/guides/es2k/running-infrap4d.md) for compiling `P4 artifacts`, `bringing up ACC` and running `infrap4d` on ACC.
 
 ## Creating the topology
 
-The p4rt-ctl and ovs-vsctl utilities can be found in $P4CP_INSTALL/bin.
+ *Note*: p4rt-ctl and ovs-vsctl utilities used in below steps can be found under $P4CP_INSTALL/bin
 
 ### Set the forwarding pipeline
 
@@ -80,12 +80,12 @@ Example to create 4 VF's:  echo 4 > /sys/devices/pci0000:ae/0000:ae:00.0/0000:af
 ```bash
 # VM1 configuration
 telnet <VM1 IP> <VM1 port>
-ip -6 addr add 9::1/64  dev <Netdev connected to VF1>
+ip addr add 99.0.0.1/24 dev <Netdev connected to VF1>
 ifconfig <Netdev connected to VF> up
 
 # VM2 configuration
 telnet <VM2 IP> <VM2 port>
-ip -6 addr add 9::2/64  <Netdev connected to VF2>
+ip addr add 99.0.0.2/24 dev <Netdev connected to VF2>
 ifconfig <Netdev connected to VF> up
 ```
 
@@ -95,12 +95,12 @@ Move each VF to a network namespace and assign IP addresses
 ```bash
 ip netns add VM0
 ip link set <VF1 port> netns VM0
-ip netns exec VM0 ip -6 addr add 9::1/64 dev <VF1 port>
+ip netns exec VM0 ip addr add 99.0.0.1/24 dev <VF1 port>
 ip netns exec VM0  ifconfig <VF1 port> up
 
 ip netns add VM1
 ip link set <VF2 port> netns VM1
-ip netns exec VM1 ip -6 addr add 9::2/64 dev <VF2 port>
+ip netns exec VM1 ip addr add 99.0.0.2/24 dev <VF2 port>
 ip netns exec VM1 ifconfig <VF2 port> up
 ```
 
@@ -111,25 +111,25 @@ Legacy OvS is used as a control plane for source MAC learning of overlay VM's. O
 ```bash
 export RUN_OVS=/tmp
 rm -rf $RUN_OVS/etc/openvswitch
-rm -rf $RUN_OVS/var/run/openvswitch 
+rm -rf $RUN_OVS/var/run/openvswitch
 mkdir -p $RUN_OVS/etc/openvswitch/
 mkdir -p $RUN_OVS/var/run/openvswitch
- 
-ovsdb-tool create $RUN_OVS/etc/openvswitch/conf.db /opt/p4/p4-cp-nws/share/openvswitch/vswitch.ovsschema 
+
+ovsdb-tool create $RUN_OVS/etc/openvswitch/conf.db /opt/p4/p4-cp-nws/share/openvswitch/vswitch.ovsschema
 
 ovsdb-server $RUN_OVS/etc/openvswitch/conf.db \
     --remote=punix:$RUN_OVS/var/run/openvswitch/db.sock \
     --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
     --pidfile=$RUN_OVS/var/run/openvswitch/ovsdb-server.pid \
     --unixctl=$RUN_OVS/var/run/openvswitch/ovsdb-server.ctl \
-    --detach 
+    --detach
 
 ovs-vswitchd --detach \
     --pidfile=$RUN_OVS/var/run/openvswitch/ovs-vswitchd.pid \
     --no-chdir unix:$RUN_OVS/var/run/openvswitch/db.sock \
     --unixctl=$RUN_OVS/var/run/openvswitch/ovs-vswitchd.ctl \
     --mlockall \
-    --log-file=/tmp/ovs-vswitchd.log 
+    --log-file=/tmp/ovs-vswitchd.log
 
 alias ovs-vsctl="ovs-vsctl --db unix:$RUN_OVS/var/run/openvswitch/db.sock"
 ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
@@ -165,7 +165,7 @@ ovs-vsctl add-port br-int vlan2
 ifconfig vlan1 up
 ifconfig vlan2 up
 
-ovs-vsctl add-port br-int vxlan0 -- set interface vxlan0 type=vxlan options:local_ip=1000:1::1 options:remote_ip=1000:1::2 options:dst_port=4789
+ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan options:local_ip=40.1.1.1 options:remote_ip=40.1.1.2 options:dst_port=4789
 ```
 
 Note: Here we are creating VxLAN tunnel with VNI 0, you can create any VNI for tunneling.
@@ -190,7 +190,7 @@ These VSI values can be checked with `/usr/bin/cli_client -q -c` command on IMC.
 
 # Rules for control packets coming from overlay VF(VSI-14), IPU will add a VLAN tag 1 and send to HOST1(VSI-8)
 
- p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table "vmeta.common.vsi=14,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.add_vlan_and_send_to_port(1,24)" 
+ p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table "vmeta.common.vsi=14,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.add_vlan_and_send_to_port(1,24)"
  p4rt-ctl add-entry br0 linux_networking_control.handle_rx_loopback_from_host_to_ovs_table "vmeta.common.vsi=14,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(24)"
  p4rt-ctl add-entry br0 linux_networking_control.vlan_push_mod_table "vmeta.common.mod_blob_ptr=1,action=linux_networking_control.vlan_push(1,0,1)"
 
@@ -239,20 +239,19 @@ Below configuration assumes
 - Underlay IDPF netdev has a VSI value 10
 
 ```bash
-p4rt-ctl add-entry br0 linux_networking_control.ipv6_lpm_root_lut "user_meta.cmeta.bit32_zeros=0/255.255.255.255,priority=1,action=linux_networking_control.ipv6_lpm_root_lut_action(0)"
+p4rt-ctl add-entry br0 linux_networking_control.ecmp_lpm_root_lut "user_meta.cmeta.bit32_zeros=4/255.255.255.255,priority=2,action=linux_networking_control.ecmp_lpm_root_lut_action(0)"
 
 nmcli device set <IDPF netdev for VSI 10> managed no
-ip -6 addr add 1000:1::1/64 dev <IDPF netdev for VSI 10>
-ip route del 1000:1::/64 dev <IDPF netdev for VSI 10>
-ip route add 1000:1::/64 dev <IDPF netdev for VSI 10>
-ip -6 route change 1000:1::/64 via 1000:1::2 dev <IDPF netdev for VSI 10>
+ifconfig <IDPF netdev for VSI 10> 40.1.1.1/24 up
+ip route show
+ip route change 40.1.1.0/24 via 40.1.1.2 dev <IDPF netdev for VSI 10>
 ```
 
 ### Test the ping scenarios
 
-- Ping6 between VM's on the same host
-- Underlay ping6
-- Overlay ping: Ping6 between VM's on different hosts
+- Ping between VM's on the same host
+- Underlay ping
+- Overlay ping: Ping between VM's on different hosts
 
 ## Limitations
 
@@ -264,4 +263,4 @@ Ex: vlan1, vlan2, vlan3 ... vlan4094.
 - VxLAN destination port should always be standard port. i.e., 4789. (limitation by p4 parser)
 - We do not support any ofproto rules that would prevent FDB learning on OvS.
 - VLAN Tagged packets are not supported.
-- For VxLAN tunneled packets only IPv6-in-IPv6 is supported.
+- For VxLAN tunneled packets only IPv4-in-IPv4 is supported.

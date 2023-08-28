@@ -24,7 +24,7 @@ This document explains how to run Linux networking scenario.
 
 ## Topology
 
-![Linux Networking Topology](lnw-topology.png)
+![Linux Networking Topology](dpdk-lnw-topology.png)
 
 Notes about topology:
 
