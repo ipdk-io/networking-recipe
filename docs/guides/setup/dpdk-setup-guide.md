@@ -29,8 +29,10 @@ pip3 install -r requirements.txt
 git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
 cd ipdk.recipe
 export IPDK_RECIPE=`pwd`
+export DEPEND_INSTALL=<absolute path for installing dependencies>
+export SDE_INSTALL=<absolute path for p4 sde install built in previous step>
 cd $IPDK_RECIPE/setup
-cmake -B build -DCMAKE_INSTALL_PREFIX=<dependency install path> [-DUSE_SUDO=ON]
+cmake -B build -DCMAKE_INSTALL_PREFIX=$DEPEND_INSTALL [-DUSE_SUDO=ON]
 cmake --build build [-j<njobs>]
 ```
 
@@ -38,11 +40,6 @@ cmake --build build [-j<njobs>]
 config.
 
 ### Build Networking Recipe
-
-#### Set environment variables
-
-- export DEPEND_INSTALL=`absolute path for installing dependencies`
-- export SDE_INSTALL=`absolute path for p4 sde install built in previous step`
 
 ```bash
 cd $IPDK_RECIPE
