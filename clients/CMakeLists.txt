@@ -7,3 +7,4 @@
 add_subdirectory(gnmi-ctl)
 add_subdirectory(p4rt-ctl)
 add_subdirectory(sgnmi_cli)
+add_subdirectory(p4rt-ctl-cpp)
