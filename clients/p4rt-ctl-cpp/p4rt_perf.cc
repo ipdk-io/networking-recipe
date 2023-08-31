@@ -11,9 +11,9 @@
  *
  * Command Line Arguments:
  *   -t : Number of threads (optional, default: 1).
- *   -o : Operation type (mandatory). Use 1 for ADD operation and 2 for DEL
- * operation. -n : Number of entries (optional, default: 1,000,000). -p : P4
- * profile (optional, default: SIMPLE_L2_DEMO).
+ *   -o : Operation type (mandatory). 1 is to ADD and 2 to DEL
+ *   -n : Number of entries (optional, default: 1,000,000).
+ *   -p : P4 profile (optional, default: SIMPLE_L2_DEMO).
  *
  * The application evaluates the time taken to perform the specified operation
  * on the defined number of entries within the chosen P4 profile. It supports
