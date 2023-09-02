@@ -106,32 +106,32 @@ eval set -- "${GETOPTS}"
 while true ; do
     case "$1" in
     # Paths
-    -B|--build)
+    --build|-B)
         _BLD_DIR=$2
         shift 2 ;;
-    -D|--deps)
+    --deps|-D)
         _DEPS_DIR=$2
         shift 2 ;;
-    -H|--hostdeps)
+    --hostdeps|-H)
         _HOST_DIR=$2
         shift 2 ;;
-    -O|--ovs)
+    --ovs|-O)
         _OVS_DIR=$2
         shift 2 ;;
-    -P|--prefix)
+    --prefix|-P)
         _PREFIX=$2
         shift 2 ;;
-    -S|--sde)
+    --sde|-S)
         _SDE_DIR=$2
         shift 2 ;;
-    -T|--toolchain)
+    --toolchain|-T)
         _TOOLFILE=$2
         shift 2 ;;
     # Options
-    -n|--dry-run)
+    --dry-run|-n)
         _DRY_RUN=1
         shift 1 ;;
-    -h|--help)
+    --help|-h)
         print_help
         exit 99 ;;
     --no-krnlmon)
@@ -176,7 +176,8 @@ fi
 
 rm -fr "${_BLD_DIR}"
 
-cmake -S . -B "${_BLD_DIR}" \
+ # shellcheck disable=SC2086
+ cmake -S . -B "${_BLD_DIR}" \
     -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
     -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
     -DCMAKE_TOOLCHAIN_FILE="${_TOOLFILE}" \

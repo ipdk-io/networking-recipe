@@ -27,7 +27,8 @@ _SYSROOT=${SDKTARGETSYSROOT}
 
 _BLD_DIR=ovs/build
 _BLD_TYPE=RelWithDebInfo
-_JOBS=8
+_DRY_RUN=0
+_NJOBS=8
 _PREFIX=//opt/ovs
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
@@ -39,12 +40,15 @@ print_help() {
     echo ""
     echo "Build and install Open vSwitch"
     echo ""
-    echo "Options:"
+    echo "Paths:"
     echo "  --build=DIR      -B  Build directory path [${_BLD_DIR}]"
-    echo "  --dry-run        -n  Display cmake parameters and exit"
-    echo "  --jobs=NJOBS     -j  Number of build threads (Default: ${_JOBS})"
     echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
     echo "  --toolchain=FILE -T  CMake toolchain file"
+    echo ""
+    echo "Options:"
+    echo "  --dry-run        -n  Display cmake parameters and exit"
+    echo "  --help           -h  Display this help text"
+    echo "  --jobs=NJOBS     -j  Number of build threads [${_NJOBS}]"
     echo ""
     echo "* '//' at the beginning of the directory path will be replaced"
     echo "  with the sysroot directory path."
@@ -64,7 +68,7 @@ print_cmake_params() {
     echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
-    echo "JOBS=${_JOBS}"
+    echo "JOBS=${_NJOBS}"
     echo ""
 }
 
@@ -83,23 +87,25 @@ eval set -- "${GETOPTS}"
 
 while true ; do
     case "$1" in
-    -B|--build)
+    # Paths
+    --build|-B)
         _BLD_DIR=$2
         shift 2 ;;
-    -n|--dry-run)
-        _DRY_RUN=true
-        shift 1 ;;
-    -h|--help)
-        print_help
-        exit 99 ;;
-    -j|--jobs)
-        _JOBS=$2
-        shift 2 ;;
-    -P|--prefix)
+    --prefix|-P)
         _PREFIX=$2
         shift 2 ;;
-    -T|--toolchain)
+    --toolchain|-T)
         _TOOLFILE=$2
+        shift 2 ;;
+    # Options
+    --dry-run|-n)
+        _DRY_RUN=1
+        shift 1 ;;
+    --help|-h)
+        print_help
+        exit 99 ;;
+    --jobs|-j)
+        _NJOBS=$2
         shift 2 ;;
     --)
         shift
@@ -117,7 +123,8 @@ done
 # Substitute ${_SYSROOT}/ for '//' prefix
 [ "${_PREFIX:0:2}" = "//" ] && _PREFIX=${_SYSROOT}/${_PREFIX:2}
 
-if [ "${_DRY_RUN}" = "true" ]; then
+# Show parameters if this is a dry run
+if [ ${_DRY_RUN} -ne 0 ]; then
     print_cmake_params
     exit 0
 fi
@@ -138,4 +145,4 @@ cmake -S ovs -B "${_BLD_DIR}" \
 # Build OVS #
 #############
 
-cmake --build "${_BLD_DIR}" "-j${_JOBS}" -- V=0
+cmake --build "${_BLD_DIR}" "-j${_NJOBS}" -- V=0
