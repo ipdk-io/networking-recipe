@@ -97,7 +97,8 @@ Options
 -------
 
 ``--coverage``
-  *to be defined*
+  Instrument build to measure unit test code coverage.
+  Sets the ``TEST_COVERAGE`` listfile variable to ``TRUE``.
 
 ``--cxx=STD``
   C++ standard to be used by the compiler (11, 14, 17).
