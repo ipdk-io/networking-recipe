@@ -99,7 +99,7 @@ Options
 
 ``--coverage``
   Instrument build to measure unit test code coverage.
-  Sets the ``TEST_COVERAGE`` listfile variable to ``TRUE``.
+  Sets the ``TEST_COVERAGE`` listfile option to FALSE.
 
 ``--cxx=STD``
   C++ standard to be used by the compiler (11, 14, 17).
@@ -108,20 +108,25 @@ Options
 ``--jobs=NJOBS``, ``-j NJOBS``
   Number of build threads.
   Specifies the value of the ``-j`` CMake option.
-  Defaults to 8.
+  Defaults to 8 threads.
 
 ``--no-build``
   Configures CMake but does not build the dependencies.
 
 ``--no-krnlmon``
   Excludes the Kernel Monitor from the build.
+  Sets the ``WITH_KRNLMON`` listfile option to FALSE.
 
-``no-ovs``
-  Excludes OVS from the build. Suppresses the ovs-p4rt builds.
+``--no-ovs``
+  Excludes OVS from the build.
+  Sets the ``WITH_OVSP4RT`` listfile option to FALSE.
 
-``target=TARGET``
-  Specifies the target (DPDK, ES2K, or Tofino) for which P4 Control
-  Plane should be built. Defaults to ``DPDK`` if unspecified.
+``--target=TARGET``
+  Specifies the target (``dpdk``, ``es2k``, or ``tofino``) for which
+  P4 Control Plane will be built.
+  The target name is case-insensitive.
+  Sets the ``TDI_TARGET`` listfile variable.
+  Defaults to ``DPDK`` if unspecified.
 
 Configurations
 --------------
