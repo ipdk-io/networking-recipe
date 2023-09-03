@@ -16,7 +16,7 @@ Syntax
       [--help|-h]  [--dry-run|-n] \
       [--deps=DEPS | -D DEPS] \
       [--host=HOSTDEPS | -H HOSTDEPS] \
-      [--deps=OVS | -O OVS] \
+      [--ovs=OVS | -O OVS] \
       [--prefix=PREFIX | -P PREFIX] \
       [--sde=SDE | -S SDE] \
       [--toolchain=TOOLFILE | -T TOOLFILE ] \
@@ -24,7 +24,6 @@ Syntax
       [--jobs=NJOBS | -j NJOBS] \
       [--no-build] \
       [--no-krnlmon] [--no-ovs] \
-      [--rpath|--no-rpath] \
       [--target=dpdk|es2k|tofino] \
       [--debug|--minsize|--reldeb|--release]
 
@@ -87,7 +86,7 @@ Paths
   Defaults to the value of the ``SDE_INSTALL`` environment variable.
 
 ``--toolchain=FILE``, ``-T FILE``
-  CMake toolchain file.
+  Path to the CMake toolchain file.
 
   Must be specified when cross-compiling.
   Specifies the value of the ``CMAKE_TOOLCHAIN_FILE`` variable.
