@@ -44,7 +44,7 @@ print_help() {
     echo "  --ovs=DIR        -O  OVS install directory [${_OVS_DIR}]"
     echo "  --prefix=DIR     -P  Install directory prefix [${_PREFIX}]"
     echo "  --sde=DIR        -S  SDE install directory [${_SDE_DIR}]"
-    echo "  --staging=DIR        Staging directory prefix [${_STAGING}]"
+#   echo "  --staging=DIR        Staging directory prefix [${_STAGING}]"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
     echo "Options:"
