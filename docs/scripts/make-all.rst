@@ -43,16 +43,18 @@ Paths
 -----
 
 ``--deps=DEPS``, ``-D DEPS``
-  Directory in which the dependencies for the runtime system are installed.
+  Directory in which the Stratum dependencies for the runtime system
+  are installed.
   
   P4 Control Plane will be linked with these libraries.
-  Use this option instead of ``--host`` if you are compiling for the native
-  (host) system.
+  Use this option instead of ``--host`` if are building for the native
+  system (not cross-compiling).
   Supplies the value of the ``DEPEND_INSTALL_DIR`` listfile variable.
   Defaults to the value of the ``DEPEND_INSTALL`` environment variable.
 
 ``--host=HOST``, ``-H HOST``
-  Directory in which the native (host system) dependencies are installed.
+  Directory in which the Stratum dependencies for the development system
+  are installed.
 
   **Only used when cross-compiling**.
   Used to compile Protobufs to C++ during cross-compilation.
@@ -150,13 +152,13 @@ Environment variables
   Must be defined when cross-compiling.
 
 ``DEPEND_INSTALL``  
-  Directory in which the Stratum dependencies for the target system are
-  installed.
+  Directory in which the Stratum dependencies for the runtime system
+  are installed.
   Supplies the default value of the ``--deps`` option.
 
 ``HOST_INSTALL``
-  Directory in which the Stratum dependencies for the host system are
-  installed.
+  Directory in which the Stratum dependencies for the development system
+  are installed.
   Supplies the default value of the ``--host`` option.
   Only used when cross-compiling.
 
