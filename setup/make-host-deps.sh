@@ -66,7 +66,6 @@ while true ; do
         _BLD_DIR=$2
         shift 2 ;;
     -P|--prefix)
-        echo "Install directory: $2"
         _PREFIX=$2
         shift 2 ;;
     # Options
