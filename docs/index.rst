@@ -26,6 +26,7 @@ P4 Control Plane User Guide
    guides/es2k/installing-acc-sdk
    guides/es2k/defining-acc-environment
    guides/es2k/building-acc-p4cp
+   scripts/helper-scripts
 
 .. toctree::
    :maxdepth: 1
