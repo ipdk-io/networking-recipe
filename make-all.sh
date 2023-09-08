@@ -25,9 +25,8 @@ _TGT_TYPE="DPDK"
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
 
 _BLD_DIR=build
-_CFG_ONLY=0
+_DO_BUILD=1
 _DRY_RUN=0
-_CFG_ONLY=0
 _OVS_BLD="ovs/build"
 _WITH_OVS=1
 
@@ -45,16 +44,16 @@ print_help() {
     echo "  --ovs=DIR        -O  OVS install directory [${_OVS_DIR}]"
     echo "  --prefix=DIR     -P  Install directory prefix [${_PREFIX}]"
     echo "  --sde=DIR        -S  SDE install directory [${_SDE_DIR}]"
-    echo "  --staging=DIR        Staging directory prefix [${_STAGING}]"
+#   echo "  --staging=DIR        Staging directory prefix [${_STAGING}]"
     echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
     echo "Options:"
-    echo "  --config             Configure without building"
     echo "  --coverage           Instrument build to measure code coverage"
     echo "  --cxx-std=STD        C++ standard (11|14|17) [$_CXX_STD])"
     echo "  --dry-run        -n  Display cmake parameter values and exit"
     echo "  --help           -h  Display this help text"
     echo "  --jobs=NJOBS     -j  Number of build threads [${_NJOBS}]"
+    echo "  --no-build           Configure without building"
     echo "  --no-krnlmon         Exclude Kernel Monitor"
     echo "  --no-ovs             Exclude OVS support"
     echo "  --target=TARGET      Target to build (dpdk|es2k|tofino) [${_TGT_TYPE}]"
@@ -97,7 +96,7 @@ print_cmake_params() {
     [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
     echo "${_SET_RPATH:2}"
     echo "${_TARGET_TYPE:2}"
-    if [ ${_CFG_ONLY} -ne 0 ]; then
+    if [ ${_DO_BUILD} -eq 0 ]; then
         echo ""
         echo "Configure without building"
         echo ""
@@ -167,10 +166,11 @@ SHORTOPTS=D:H:O:P:S:T:
 SHORTOPTS=${SHORTOPTS}hj:n
 
 LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,toolchain:
-LONGOPTS=${LONGOPTS},cxx-std:,staging:,target:
+LONGOPTS=${LONGOPTS},cxx-std:,jobs:,staging:,target:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
-LONGOPTS=${LONGOPTS},dry-run,help,jobs:,no-krnlmon,no-ovs
-LONGOPTS=${LONGOPTS},config,coverage,ninja,rpath,no-rpath
+LONGOPTS=${LONGOPTS},dry-run,help
+LONGOPTS=${LONGOPTS},coverage,ninja,rpath
+LONGOPTS=${LONGOPTS},no-build,no-krnlmon,no-ovs,no-rpath
 
 GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 eval set -- "${GETOPTS}"
@@ -214,9 +214,6 @@ while true ; do
         _BLD_TYPE="Release"
         shift ;;
     # Options
-    --config)
-        _CFG_ONLY=1
-        shift ;;
     --coverage)
         _COVERAGE="-DTEST_COVERAGE=ON"
         shift ;;
@@ -235,6 +232,9 @@ while true ; do
     --ninja)
         _GENERATOR="-G Ninja"
         shift 1 ;;
+    --no-build)
+        _DO_BUILD=0
+        shift ;;
     --no-krnlmon)
         _WITH_KRNLMON=FALSE
         shift ;;
@@ -296,6 +296,6 @@ if [ ${_WITH_OVS} -ne 0 ]; then
 fi
 
 config_recipe
-if [ ${_CFG_ONLY} -eq 0 ]; then
+if [ ${_DO_BUILD} -ne 0 ]; then
     build_recipe
 fi

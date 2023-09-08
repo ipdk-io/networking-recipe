@@ -25,7 +25,7 @@ fi
 
 # Default values
 _BLD_DIR=build
-_CFG_ONLY=false
+_DO_BUILD=true
 _DRY_RUN=false
 _PREFIX=./host-deps
 _NJOBS=8
@@ -35,17 +35,19 @@ print_help() {
     echo ""
     echo "Build host dependency libraries"
     echo ""
-    echo "Options:"
+    echo "Paths:"
     echo "  --build=DIR     -B  Build directory path (Default: ${_BLD_DIR})"
-    echo "  --config            Only perform configuration step (Default: ${_CFG_ONLY})"
+    echo "  --prefix=DIR    -P  Install directory path (Default: ${_PREFIX})"
+    echo ""
+    echo "Options:"
     echo "  --cxx=VERSION       CXX_STANDARD to build dependencies (Default: empty)"
     echo "  --dry-run       -n  Display cmake parameters and exit (Default: false)"
     echo "  --force         -f  Specify -f when patching (Default: false)"
     echo "  --full              Build all dependency libraries (Default: ${_SCOPE})"
     echo "  --jobs=NJOBS    -j  Number of build threads (Default: ${_NJOBS})"
     echo "  --minimal           Build required host dependencies only (Default: ${_SCOPE})"
+    echo "  --no-build          Configure without building"
     echo "  --no-download       Do not download repositories (Default: false)"
-    echo "  --prefix=DIR    -P  Install directory path (Default: ${_PREFIX})"
     echo "  --sudo              Use sudo when installing (Default: false)"
     echo ""
 }
@@ -53,18 +55,20 @@ print_help() {
 # Parse options
 SHORTOPTS=B:P:fhj:n
 LONGOPTS=build:,cxx:,jobs:,prefix:
-LONGOPTS=${LONGOPTS},config,dry-run,force,full,help,minimal,no-download,sudo
+LONGOPTS=${LONGOPTS},dry-run,force,full,help,minimal,no-build,no-download,sudo
 
 eval set -- `getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@"`
 
 while true ; do
     case "$1" in
+    # Paths
     -B|--build)
         _BLD_DIR=$2
         shift 2 ;;
-    --config)
-        _CFG_ONLY=true
-        shift ;;
+    -P|--prefix)
+        _PREFIX=$2
+        shift 2 ;;
+    # Options
     --cxx)
         _CXX_STANDARD_OPTION="-DCXX_STANDARD=$2"
         shift 2 ;;
@@ -86,13 +90,12 @@ while true ; do
     --minimal)
         _SCOPE=minimal
         shift ;;
+    --no-build)
+        _DO_BUILD=false
+        shift ;;
     --no-download)
         _DOWNLOAD="-DDOWNLOAD=FALSE"
         shift ;;
-    -P|--prefix)
-        echo "Install directory: $2"
-        _PREFIX=$2
-        shift 2 ;;
     --sudo)
 	_USE_SUDO="-DUSE_SUDO=TRUE"
 	shift ;;
@@ -120,7 +123,7 @@ if [ "${_DRY_RUN}" = "true" ]; then
     [ -n "${_ON_DEMAND}" ] && echo "  ${_ON_DEMAND:2}"
     [ -n "${_USE_SUDO}" ] && echo "  ${_USE_SUDO:2}"
     echo ""
-    if [ "${_CFG_ONLY}" = "true" ]; then
+    if [ "${_DO_BUILD}" = "false" ]; then
         echo "Configure only (${_SCOPE} build)"
     else
         echo "Build options:"
@@ -140,6 +143,6 @@ cmake -S . -B ${_BLD_DIR} \
     ${_CXX_STANDARD_OPTION} \
     ${_ON_DEMAND} ${_DOWNLOAD} ${_FORCE_PATCH} ${_USE_SUDO}
 
-if [ "${_CFG_ONLY}" = "false" ]; then
+if [ "${_DO_BUILD}" = "true" ]; then
     cmake --build ${_BLD_DIR} -j${_NJOBS} ${_TARGET}
 fi
