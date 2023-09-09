@@ -82,7 +82,7 @@ Paths
   building P4 Control Plane.
 
 ``--sde=SDE``, ``-S SDE``
-  Directory in which the SDK for the Intel&reg; E2100 IPU is installed.
+  Directory in which the SDK for the Intel® E2100 IPU is installed.
 
   Supplies the value of the ``SDE_INSTALL_DIR`` listfile variable.
   Defaults to the value of the ``SDE_INSTALL`` environment variable.
@@ -146,6 +146,10 @@ Configurations
 ``--release``
   Build with ``-DCMAKE_BUILD_TYPE=Release``.
   The compiler settings will default to ``-O3 -DNDEBUG``.
+
+If no configuration is specified, the CMake listfile will default to
+``RelWithDebInfo``.
+This will probably be changed to ``Release`` in a future release.
 
 Environment variables
 =====================
