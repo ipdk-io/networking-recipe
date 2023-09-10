@@ -13,7 +13,7 @@ to build and install the software. For example:
 
 .. code-block:: bash
 
-   cmake --build build -j8
+   cmake --build build -j8 --target install
 
 Syntax
 ======
