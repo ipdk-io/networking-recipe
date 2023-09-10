@@ -8,6 +8,13 @@ config-cross-recipe.sh
 Helper script to configure CMake to cross-compile P4 Control Plane
 for the Arm Compute Complex (ACC).
 
+After running this script, you will need to issue a separate command
+to build and install the software. For example:
+
+.. code-block:: bash
+
+   cmake --build build -j8
+
 Syntax
 ======
 
