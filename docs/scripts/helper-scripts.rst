@@ -9,3 +9,4 @@ Helper Scripts
    :maxdepth: 1
 
    make-all
+   config-cross-recipe
