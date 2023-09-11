@@ -8,6 +8,17 @@ make-cross-ovs.sh
 Helper script to cross-compile and install Open vSwitch for the Arm Compute
 Complex (ACC) of the Intel® IPU E2100.
 
+Build flow
+==========
+
+Building and installing OVS is the first step in building P4 Control Plane
+for the IPU E2100.
+
+.. image:: make-cross-ovs-flow.png
+
+Once OVS is built, you can use the ``config-cross-recipe.sh`` script to
+configure the next stage of the build, and the ``cmake`` command to compete it.
+
 Syntax
 ======
 
