@@ -10,8 +10,8 @@ Helper script to build and install the P4 Control Plane software.
 Build flow
 ==========
 
-The script builds and installs Open vSwitch (OVS), and then builds and
-installs the rest of P4 Control Plane.
+The ``make-all.sh`` script builds and installs Open vSwitch (OVS), and then
+builds and installs the rest of P4 Control Plane.
 
 .. image:: make-all-build-flow.png
 
@@ -53,7 +53,7 @@ Paths
 ``--deps=DEPS``, ``-D DEPS``
   Directory in which the Stratum dependencies for the runtime system
   are installed.
-  
+
   P4 Control Plane will be linked with these libraries.
   Use this option instead of ``--host`` if are building for the native
   system (not cross-compiling).
@@ -143,7 +143,7 @@ Configurations
   Build with ``-DCMAKE_BUILD_TYPE=Debug``.
   The compiler settings will default to ``-g``.
 
-``--minsize``  
+``--minsize``
   Build with ``-DCMAKE_BUILD_TYPE=MinSizeRel``.
   The compiler settings will default to ``-Os -DNDEBUG``.
 
@@ -168,7 +168,7 @@ Environment variables
   May be overridden by ``--toolchain=TOOLFILE``.
   Must be defined when cross-compiling.
 
-``DEPEND_INSTALL``  
+``DEPEND_INSTALL``
   Directory in which the Stratum dependencies for the runtime system
   are installed.
   Supplies the default value of the ``--deps`` option.
