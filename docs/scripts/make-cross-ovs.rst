@@ -38,8 +38,8 @@ Paths
 
 ``--build=BLDDIR``, ``-B BLDDIR``
   Directory that CMake will use to perform the build.
-
   Will be created if it does not exist.
+
   Specifies the value of the ``-B`` CMake option.
   Can be used to create separate build directories for native and
   cross-compiled builds.
@@ -47,7 +47,7 @@ Paths
 
 ``--prefix=PREFIX``, ``-P PREFIX`` *(see note)*
   Directory in which OVS will be installed.
-  The directory will be created if it does not exist.
+  Will be created if it does not exist.
 
   Specifies the value of the ``CMAKE_INSTALL_PREFIX`` variable when
   building P4 Control Plane.
