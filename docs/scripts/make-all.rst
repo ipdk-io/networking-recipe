@@ -7,6 +7,14 @@ make-all.sh
 
 Helper script to build and install the P4 Control Plane software.
 
+Build flow
+==========
+
+The script builds and installs Open vSwitch (OVS), and then builds and
+installs the rest of P4 Control Plane.
+
+.. image:: make-all-build-flow.png
+
 Syntax
 ======
 
@@ -74,15 +82,15 @@ Paths
 
 ``--prefix=PREFIX``, ``-P PREFIX``
   Directory in which P4 Control Plane will be installed.
-
   The directory will be created if it does not exist.
+
   May be the same as the ``--ovs`` option, in which case OVS and
   P4 Control Plane will be installed to the same directory tree.
   Specifies the value of the ``CMAKE_INSTALL_PREFIX`` variable when
   building P4 Control Plane.
 
 ``--sde=SDE``, ``-S SDE``
-  Directory in which the SDK for the Intel® E2100 IPU is installed.
+  Directory in which the SDK for the P4 target is installed.
 
   Supplies the value of the ``SDE_INSTALL_DIR`` listfile variable.
   Defaults to the value of the ``SDE_INSTALL`` environment variable.
