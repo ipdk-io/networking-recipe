@@ -8,6 +8,14 @@ config-cross-recipe.sh
 Helper script to configure CMake to cross-compile P4 Control Plane
 for the Arm Compute Complex (ACC).
 
+Build flow
+==========
+
+The ``config-cross-recipe.sh`` script is run after ``make-cross-ovs.sh``,
+to configure the remainder of the P4 Control Plane build.
+
+.. image:: config-cross-recipe-flow.png
+
 After running this script, you will need to issue a separate command
 to build and install the software. For example:
 
@@ -50,8 +58,8 @@ Paths
 
 ``--build=BLDDIR``, ``-B BLDDIR``
   Directory that CMake will use to perform the build.
-
   Will be created if it does not exist.
+
   Specifies the value of the ``-B`` CMake option.
   Can be used to create separate build directories for native and
   cross-compiled builds.
@@ -60,7 +68,7 @@ Paths
 ``--deps=DEPS``, ``-D DEPS`` *(see note)*
   Directory in which the Stratum dependencies for the runtime system
   are installed.
-  
+
   P4 Control Plane will be linked with these libraries.
   Supplies the value of the ``DEPEND_INSTALL_DIR`` listfile variable.
   Defaults to the value of the ``DEPEND_INSTALL`` environment variable,
@@ -91,8 +99,8 @@ Paths
 
 ``--prefix=PREFIX``, ``-P PREFIX`` *(see note)*
   Directory in which P4 Control Plane will be installed.
+  Will be created if it does not exist.
 
-  The directory will be created if it does not exist.
   May be the same as the ``--ovs`` option, in which case OVS and
   P4 Control Plane will be installed to the same directory tree.
   Specifies the value of the ``CMAKE_INSTALL_PREFIX`` variable when
@@ -105,7 +113,7 @@ Paths
   Defaults to the value of the ``SDE_INSTALL`` environment variable,
   if defined.
   Otherwise, defaults to ``//opt/p4sde``.
-  
+
 ``--toolchain=FILE``, ``-T FILE``
   Path to the CMake toolchain file.
 
@@ -139,7 +147,7 @@ Environment variables
   May be overridden by ``--toolchain=TOOLFILE``.
   Must be defined.
 
-``DEPEND_INSTALL``  
+``DEPEND_INSTALL``
   Directory in which the Stratum dependencies for the runtime system
   are installed.
   Supplies the default value of the ``--deps`` option.
@@ -148,7 +156,7 @@ Environment variables
   Directory in which the Stratum dependencies for the development system
   are installed.
   Supplies the default value of the ``--host`` option.
-  
+
 ``OVS_INSTALL``
   Directory in which Open vSwitch is installed.
   Supplies the default value of the ``--ovs`` option.
