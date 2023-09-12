@@ -8,16 +8,16 @@ certificates for running infrap4d in secure mode.
 Note: Here target name can be `dpdk` or `es2k`.
 
 Review the files `ca.conf` and `grpc-client.conf` available under
-`/usr/share/stratum/<target_name>` to verify that the configuration settings are
+`/usr/share/stratum/` to verify that the configuration settings are
 as desired.
 
-Run the `generate-certs.sh` available under `/usr/share/stratum/<target_name>`.
+Run the `generate-certs.sh` available under `/usr/share/stratum/`.
 
 Note: Here `IP` is the IP address of gRPC server.
 For example, `IP` can be `127.0.0.1`, `5.5.5.5` or `localhost`.
 
 ```bash
-cd /usr/share/stratum/<target_name>/
+cd /usr/share/stratum/
 
 COMMON_NAME=<IP> ./generate-certs.sh
 ```
