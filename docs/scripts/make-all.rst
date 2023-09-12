@@ -155,9 +155,8 @@ Configurations
   Build with ``-DCMAKE_BUILD_TYPE=Release``.
   The compiler settings will default to ``-O3 -DNDEBUG``.
 
-If no configuration is specified, the CMake listfile will default to
+If no configuration is specified, the CMake listfile currently defaults to
 ``RelWithDebInfo``.
-This will probably be changed to ``Release`` in a future release.
 
 Environment variables
 =====================
