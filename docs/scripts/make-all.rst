@@ -7,6 +7,14 @@ make-all.sh
 
 Helper script to build and install the P4 Control Plane software.
 
+Build flow
+==========
+
+The ``make-all.sh`` script builds and installs Open vSwitch (OVS), and then
+builds and installs the rest of P4 Control Plane.
+
+.. image:: make-all-build-flow.png
+
 Syntax
 ======
 
@@ -45,7 +53,7 @@ Paths
 ``--deps=DEPS``, ``-D DEPS``
   Directory in which the Stratum dependencies for the runtime system
   are installed.
-  
+
   P4 Control Plane will be linked with these libraries.
   Use this option instead of ``--host`` if are building for the native
   system (not cross-compiling).
@@ -74,15 +82,15 @@ Paths
 
 ``--prefix=PREFIX``, ``-P PREFIX``
   Directory in which P4 Control Plane will be installed.
-
   The directory will be created if it does not exist.
+
   May be the same as the ``--ovs`` option, in which case OVS and
   P4 Control Plane will be installed to the same directory tree.
   Specifies the value of the ``CMAKE_INSTALL_PREFIX`` variable when
   building P4 Control Plane.
 
 ``--sde=SDE``, ``-S SDE``
-  Directory in which the SDK for the Intel&reg; E2100 IPU is installed.
+  Directory in which the SDK for the P4 target is installed.
 
   Supplies the value of the ``SDE_INSTALL_DIR`` listfile variable.
   Defaults to the value of the ``SDE_INSTALL`` environment variable.
@@ -135,7 +143,7 @@ Configurations
   Build with ``-DCMAKE_BUILD_TYPE=Debug``.
   The compiler settings will default to ``-g``.
 
-``--minsize``  
+``--minsize``
   Build with ``-DCMAKE_BUILD_TYPE=MinSizeRel``.
   The compiler settings will default to ``-Os -DNDEBUG``.
 
@@ -147,6 +155,9 @@ Configurations
   Build with ``-DCMAKE_BUILD_TYPE=Release``.
   The compiler settings will default to ``-O3 -DNDEBUG``.
 
+If no configuration is specified, the CMake listfile currently defaults to
+``RelWithDebInfo``.
+
 Environment variables
 =====================
 
@@ -156,7 +167,7 @@ Environment variables
   May be overridden by ``--toolchain=TOOLFILE``.
   Must be defined when cross-compiling.
 
-``DEPEND_INSTALL``  
+``DEPEND_INSTALL``
   Directory in which the Stratum dependencies for the runtime system
   are installed.
   Supplies the default value of the ``--deps`` option.
