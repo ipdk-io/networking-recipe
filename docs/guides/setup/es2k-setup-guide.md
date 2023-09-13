@@ -5,20 +5,53 @@
 This document explains how to install, build, and run P4 Control Plane
 for the ES2K target.
 
+P4 Control Plane can be built to run on an x86 host processor or the ARM
+Compute Complex (ACC). The instructions here are for the host processor.
+
 ## Setup
 
 ### Install basic utilities
 
+For a Fedora system:
+
 ```bash
-For Fedora distro: yum install libatomic libnl3-devel openssl-devel
-For Ubuntu distro: apt install libatomic1 libnl-route-3-dev libssl-dev
+yum install libatomic libnl3-devel openssl-devel
+```
+
+For an Ubuntu system:
+
+```bash
+apt install libatomic1 libnl-route-3-dev libssl-dev
+```
+
+For all systems:
+
+```bash
 pip3 install -r requirements.txt
 ```
 
 ### Install P4 SDE
 
-Obtain a copy of the SDE for the Intel IPU E2100 and install it on your
-development system. A common install location is '/opt/p4/p4sde`.
+Obtain a copy of the IPU SDK (SDE) for the Intel&reg; IPU E2100 from the
+manufacturer, together with the instructions for building or installing it.
+
+> The above description is intentionally vague.
+The ES2K SDE (now called the IPU SDK) is under active development.
+This document cannot keep pace with the changes.
+
+Once installed, you will need to locate the root directory of the host SDE.
+A typical location is `/opt/p4/p4sde`.
+
+You can use the Linux `file` command to verify that the file structure
+is for the `x86-64` architecture.
+
+```text
+ahab@pequod:~/latest$ file -L /opt/deps/bin/protoc
+/opt/deps/bin/protoc: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV),
+dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2,
+BuildID[sha1]=93b21eff920e615fee679b0bd0a3ecc0c1139575, for GNU/Linux 3.2.0,
+not stripped
+```
 
 ### Build and install infrap4d dependencies
 
