@@ -154,8 +154,6 @@ absl::Status SendWriteRequest(P4rtSession* session,
 
 ::p4::v1::TableEntry* SetupTableEntryToInsert(P4rtSession* session,
                                               ::p4::v1::WriteRequest* req) {
-  req->set_device_id(session->DeviceId());
-  *req->mutable_election_id() = session->ElectionId();
   auto* update = req->add_updates();
   update->set_type(::p4::v1::Update::INSERT);
   return update->mutable_entity()->mutable_table_entry();
@@ -163,8 +161,6 @@ absl::Status SendWriteRequest(P4rtSession* session,
 
 ::p4::v1::TableEntry* SetupTableEntryToModify(P4rtSession* session,
                                               ::p4::v1::WriteRequest* req) {
-  req->set_device_id(session->DeviceId());
-  *req->mutable_election_id() = session->ElectionId();
   auto* update = req->add_updates();
   update->set_type(::p4::v1::Update::MODIFY);
   return update->mutable_entity()->mutable_table_entry();
@@ -172,8 +168,6 @@ absl::Status SendWriteRequest(P4rtSession* session,
 
 ::p4::v1::TableEntry* SetupTableEntryToDelete(P4rtSession* session,
                                               ::p4::v1::WriteRequest* req) {
-  req->set_device_id(session->DeviceId());
-  *req->mutable_election_id() = session->ElectionId();
   auto* update = req->add_updates();
   update->set_type(::p4::v1::Update::DELETE);
   return update->mutable_entity()->mutable_table_entry();
