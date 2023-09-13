@@ -19,7 +19,7 @@ ACC Build
 ---------
 
 These scripts help build P4 Control Plane for the ARM Compute Complex (ACC)
-of the Intel IPU E2100.
+of the ES2K target.
 
 .. toctree::
    :maxdepth: 1
