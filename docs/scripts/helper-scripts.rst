@@ -8,6 +8,8 @@ Helper Scripts
 Build
 -----
 
+This script helps build P4 Control Plane for most targets.
+
 .. toctree::
    :maxdepth: 1
 
@@ -15,6 +17,9 @@ Build
 
 ACC Build
 ---------
+
+These scripts help build P4 Control Plane for the ARM Compute Complex (ACC)
+of the Intel IPU E2100.
 
 .. toctree::
    :maxdepth: 1
