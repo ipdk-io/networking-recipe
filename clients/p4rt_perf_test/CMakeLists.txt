@@ -31,8 +31,8 @@ target_compile_options(p4rt_perf_test PRIVATE -O3)
 target_include_directories(p4rt_perf_test PRIVATE ${PROTO_INCLUDES})
 
 add_dependencies(p4rt_perf_test
-    stratum_proto
     p4runtime_proto
+    stratum_proto
 )
 
 target_link_libraries(p4rt_perf_test PUBLIC
