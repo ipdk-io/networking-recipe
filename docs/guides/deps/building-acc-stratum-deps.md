@@ -36,7 +36,7 @@ There are several things to do before you can build the dependencies.
 
 - Install the ACC SDK
 
-  See [Installing the ACC SDK](/guides/es2k/installing-acc-sdk.md) for directions.
+  See [Installing the ACC SDK](/docs/guides/es2k/installing-acc-sdk.md) for directions.
 
 ## 3. Getting the Source Code
 
