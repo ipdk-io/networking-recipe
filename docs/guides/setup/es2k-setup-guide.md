@@ -6,7 +6,8 @@ This document explains how to install, build, and run P4 Control Plane
 for the ES2K target.
 
 P4 Control Plane can be built to run on an x86 host processor or the ARM
-Compute Complex (ACC). The instructions here are for the host processor.
+Compute Complex (ACC). These instructions are for the host processor.
+For the ACC, see [Building for the ES2K ACC](/guides/building-for-es2k-acc).
 
 ## Setup
 
