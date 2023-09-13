@@ -8,13 +8,18 @@ Helper Scripts
 Build
 -----
 
+This script helps build P4 Control Plane for most targets.
+
 .. toctree::
    :maxdepth: 1
 
    make-all
 
-ES2K Build
-----------
+ACC Build
+---------
+
+These scripts help build P4 Control Plane for the ARM Compute Complex (ACC)
+of the ES2K target.
 
 .. toctree::
    :maxdepth: 1
