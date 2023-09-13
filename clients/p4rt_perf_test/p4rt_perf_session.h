@@ -20,8 +20,6 @@
 #include "p4/v1/p4runtime.grpc.pb.h"
 #include "p4/v1/p4runtime.pb.h"
 
-namespace p4rt_perf {
-
 // Generates an election id that increases monotonically over time.
 // Specifically, the upper 64 bits are the unix timestamp in seconds, and the
 // lower 64 bits are 0. This is compatible with election systems that use the
@@ -61,9 +59,8 @@ class P4rtSession {
   p4::v1::P4Runtime::Stub& Stub() { return *stub_; }
 
  private:
-  P4rtSession(uint32_t device_id,
-                 std::unique_ptr<p4::v1::P4Runtime::Stub> stub,
-                 ::absl::uint128 election_id)
+  P4rtSession(uint32_t device_id, std::unique_ptr<p4::v1::P4Runtime::Stub> stub,
+              ::absl::uint128 election_id)
       : device_id_(device_id),
         stub_(std::move(stub)),
         stream_channel_context_(::absl::make_unique<grpc::ClientContext>()),
@@ -95,10 +92,10 @@ std::unique_ptr<p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
     P4rtSession* session, const p4::v1::ReadRequest& read_request);
 
 ::absl::Status SendWriteRequest(P4rtSession* session,
-                              const p4::v1::WriteRequest& write_request);
+                                const p4::v1::WriteRequest& write_request);
 
 ::absl::Status GetForwardingPipelineConfig(P4rtSession* session,
-                                         p4::config::v1::P4Info* p4info);
+                                           p4::config::v1::P4Info* p4info);
 
 ::p4::v1::TableEntry* SetupTableEntryToInsert(P4rtSession* session,
                                               ::p4::v1::WriteRequest* req);
@@ -108,7 +105,5 @@ std::unique_ptr<p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
 
 ::p4::v1::TableEntry* SetupTableEntryToDelete(P4rtSession* session,
                                               ::p4::v1::WriteRequest* req);
-
-}  // namespace p4rt_perf
 
 #endif  // P4RT_PERF_SESSION_H_

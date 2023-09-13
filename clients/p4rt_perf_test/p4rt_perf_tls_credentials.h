@@ -18,8 +18,6 @@
 
 #define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
-namespace p4rt_perf {
-
 static std::string ca_cert_file = DEFAULT_CERTS_DIR "ca.crt";
 static std::string client_key_file = DEFAULT_CERTS_DIR "client.key";
 static std::string client_cert_file = DEFAULT_CERTS_DIR "client.crt";
@@ -30,7 +28,5 @@ static constexpr unsigned int kFileRefreshIntervalSeconds = 1;
 bool IsRegularFile(const std::string& filename);
 
 std::shared_ptr<::grpc::ChannelCredentials> GenerateClientCredentials();
-
-}  // namespace p4rt_perf
 
 #endif  // P4RT_PERF_TLS_CREDENTIALS_H_

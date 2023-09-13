@@ -1,9 +1,7 @@
 // Copyright 2023-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#include <arpa/inet.h>
 #include "p4rt_perf_util.h"
-namespace p4rt_perf {
 
 std::string EncodeByteValue(int arg_count...) {
   std::string byte_value;
@@ -80,5 +78,3 @@ int GetMatchFieldId(const ::p4::config::v1::P4Info& p4info,
   }
   return -1;
 }
-
-}  // namespace p4rt_perf

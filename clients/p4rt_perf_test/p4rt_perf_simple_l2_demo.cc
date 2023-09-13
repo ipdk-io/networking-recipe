@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "p4rt_perf_simple_l2_demo.h"
+
 #include "p4rt_perf_util.h"
 extern TestParams test_params;
-namespace p4rt_perf {
 
 void PrepareSimpleL2DemoTableEntry(p4::v1::TableEntry* table_entry,
                                    const SimpleL2DemoMacInfo& mac_info,
@@ -38,19 +38,23 @@ void PrepareSimpleL2DemoTableEntry(p4::v1::TableEntry* table_entry,
   return;
 }
 
-void SimpleL2DemoTest(p4rt_perf::P4rtSession* session,
-                      const ::p4::config::v1::P4Info& p4info, ThreadInfo &t_data) {
+void SimpleL2DemoTest(P4rtSession* session,
+                      const ::p4::config::v1::P4Info& p4info,
+                      ThreadInfo& t_data) {
   ::p4::v1::TableEntry* table_entry;
   SimpleL2DemoMacInfo mac_info;
   p4::v1::WriteRequest write_request;
 
   int batch_size = t_data.num_entries;
   uint64_t count = t_data.start + 1;
+
+  write_request.set_device_id(session->DeviceId());
+  *write_request.mutable_election_id() = session->ElectionId();
   for (uint64_t j = 0; j < t_data.num_entries; j++) {
     if (t_data.oper == ADD) {
-      table_entry = p4rt_perf::SetupTableEntryToInsert(session, &write_request);
+      table_entry = SetupTableEntryToInsert(session, &write_request);
     } else if (t_data.oper == DEL) {
-      table_entry = p4rt_perf::SetupTableEntryToDelete(session, &write_request);
+      table_entry = SetupTableEntryToDelete(session, &write_request);
     } else {
       std::cout << "Invalid operation" << std::endl;
     }
@@ -75,9 +79,15 @@ void SimpleL2DemoTest(p4rt_perf::P4rtSession* session,
                                   t_data.oper == ADD);
     count++;
   }
-  auto sts = p4rt_perf::SendWriteRequest(session, write_request);
+
+  absl::Time timestamp = absl::Now();
+
+  auto sts = SendWriteRequest(session, write_request);
+
+  absl::Time end_timestamp = absl::Now();
+  absl::Duration duration = end_timestamp - timestamp;
+  double seconds = absl::ToDoubleSeconds(duration);
+  t_data.time_taken = seconds;
 
   std::cout << "count: " << count - 1 << std::endl;
 }
-
-}  // namespace p4rt_perf

@@ -27,7 +27,7 @@
  *
  */
 
-#include "p4rt_perf.h"
+#include "p4rt_perf_test.h"
 
 #include <arpa/inet.h>
 #include <pthread.h>
@@ -55,10 +55,9 @@ ABSL_FLAG(std::string, grpc_addr, "localhost:9559",
           "P4Runtime server address.");
 ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
 
-namespace p4rt_perf {
 
 using P4rtStream = ::grpc::ClientReaderWriter<p4::v1::StreamMessageRequest,
-                                                 p4::v1::StreamMessageResponse>;
+                                              p4::v1::StreamMessageResponse>;
 
 void PopulateThreadInfo() {
   uint16_t index;
@@ -89,7 +88,6 @@ void PopulateThreadInfo() {
 }
 
 void RunPerfTest(int tid) {
-  using namespace p4rt_perf;
 
   // Start a new client session.
   auto status_or_session = P4rtSession::Create(absl::GetFlag(FLAGS_grpc_addr),
@@ -106,7 +104,6 @@ void RunPerfTest(int tid) {
   if (!status.ok()) return;
 
   ThreadInfo& t_data = thread_data[tid];
-  absl::Time timestamp = absl::Now();
   switch (test_params.profile) {
     case SIMPLE_L2_DEMO:
       SimpleL2DemoTest(session.get(), p4info, t_data);
@@ -116,14 +113,7 @@ void RunPerfTest(int tid) {
       return;
   }
 
-  absl::Time end_timestamp = absl::Now();
-  absl::Duration duration = end_timestamp - timestamp;
-  double seconds = absl::ToDoubleSeconds(duration);
-  t_data.time_taken = seconds;
 }
-
-}  // namespace p4rt_perf
-
 
 inline void PrintUsage(char* name) {
   std::cerr << "Usage: " << name << " -t <value> -o <value> -n <value>"
@@ -174,12 +164,12 @@ int main(int argc, char* argv[]) {
   std::cout << "Test Profile: " << test_params.profile << std::endl;
 
   // populate per thread entries
-  p4rt_perf::PopulateThreadInfo();
+  PopulateThreadInfo();
 
   cpu_set_t cpuset;
   std::thread client_threads[MAX_THREADS];
   for (int index = 0; index < test_params.num_threads; index++) {
-    client_threads[index] = std::thread(p4rt_perf::RunPerfTest, index);
+    client_threads[index] = std::thread(RunPerfTest, index);
 
     /* Assign Thread Affinity */
     CPU_ZERO(&cpuset);
@@ -208,7 +198,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Num of entries added: " << test_params.tot_num_entries
             << std::endl;
   std::cout << "Time taken: " << max_time << " seconds" << std::endl;
-  std::cout << "number of entires per second: "
+  std::cout << "Number of entries per second: "
             << test_params.tot_num_entries / max_time << std::endl;
 
   return 0;

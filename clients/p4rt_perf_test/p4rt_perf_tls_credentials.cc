@@ -10,8 +10,6 @@
 #include <iostream>
 #include <string>
 
-namespace p4rt_perf {
-
 using ::grpc::experimental::FileWatcherCertificateProvider;
 using ::grpc::experimental::TlsChannelCredentialsOptions;
 
@@ -45,5 +43,3 @@ std::shared_ptr<::grpc::ChannelCredentials> GenerateClientCredentials() {
   }
   return client_credentials_;
 }
-
-}  // namespace p4rt_perf

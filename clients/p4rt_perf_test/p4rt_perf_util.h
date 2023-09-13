@@ -4,10 +4,10 @@
 #ifndef P4RT_PERF_UTIL_H
 #define P4RT_PERF_UTIL_H
 
+#include <arpa/inet.h>
+
 #include "p4/v1/p4runtime.grpc.pb.h"
 #include "p4/v1/p4runtime.pb.h"
-
-namespace p4rt_perf {
 
 std::string EncodeByteValue(int arg_count...);
 std::string CanonicalizeIp(const uint32_t ipv4addr);
@@ -25,6 +25,5 @@ int GetParamId(const ::p4::config::v1::P4Info& p4info,
 
 int GetMatchFieldId(const ::p4::config::v1::P4Info& p4info,
                     const std::string& t_name, const std::string& mf_name);
-}  // namespace p4rt_perf
 
-#endif // P4RT_PERF_UTIL_H
+#endif  // P4RT_PERF_UTIL_H

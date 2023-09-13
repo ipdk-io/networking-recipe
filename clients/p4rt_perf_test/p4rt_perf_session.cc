@@ -14,8 +14,6 @@
 #include "p4/v1/p4runtime.grpc.pb.h"
 #include "p4/v1/p4runtime.pb.h"
 
-namespace p4rt_perf {
-
 using ::p4::config::v1::P4Info;
 using ::p4::v1::GetForwardingPipelineConfigRequest;
 using ::p4::v1::GetForwardingPipelineConfigResponse;
@@ -180,5 +178,3 @@ absl::Status SendWriteRequest(P4rtSession* session,
   update->set_type(::p4::v1::Update::DELETE);
   return update->mutable_entity()->mutable_table_entry();
 }
-
-}  // namespace p4rt_perf
