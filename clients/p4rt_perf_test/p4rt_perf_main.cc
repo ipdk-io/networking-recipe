@@ -27,8 +27,6 @@
  *
  */
 
-#include "p4rt_perf_test.h"
-
 #include <arpa/inet.h>
 #include <pthread.h>
 
@@ -41,6 +39,7 @@
 #include "absl/memory/memory.h"
 #include "p4rt_perf_session.h"
 #include "p4rt_perf_simple_l2_demo.h"
+#include "p4rt_perf_test.h"
 #include "p4rt_perf_tls_credentials.h"
 
 #define MAX_THREADS 8
@@ -54,7 +53,6 @@ uint8_t core_id[MAX_THREADS];
 ABSL_FLAG(std::string, grpc_addr, "localhost:9559",
           "P4Runtime server address.");
 ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
-
 
 using P4rtStream = ::grpc::ClientReaderWriter<p4::v1::StreamMessageRequest,
                                               p4::v1::StreamMessageResponse>;
@@ -88,7 +86,6 @@ void PopulateThreadInfo() {
 }
 
 void RunPerfTest(int tid) {
-
   // Start a new client session.
   auto status_or_session = P4rtSession::Create(absl::GetFlag(FLAGS_grpc_addr),
                                                GenerateClientCredentials(),
@@ -112,7 +109,6 @@ void RunPerfTest(int tid) {
       std::cerr << "unsupported profile " << std::endl;
       return;
   }
-
 }
 
 inline void PrintUsage(char* name) {

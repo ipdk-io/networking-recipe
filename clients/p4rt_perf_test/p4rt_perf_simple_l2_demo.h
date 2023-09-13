@@ -8,9 +8,9 @@
 #include "absl/memory/memory.h"
 #include "p4/v1/p4runtime.grpc.pb.h"
 #include "p4/v1/p4runtime.pb.h"
-#include "p4rt_perf_test.h"
 #include "p4rt_perf_session.h"
 #include "p4rt_perf_simple_l2_demo.h"
+#include "p4rt_perf_test.h"
 #include "p4rt_perf_tls_credentials.h"
 
 void PrepareSimpleL2DemoTableEntry(p4::v1::TableEntry* table_entry,
