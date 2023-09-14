@@ -21,11 +21,8 @@ P4 Control Plane User Guide
    :maxdepth: 1
    :caption: Building
 
-   guides/deps/building-stratum-deps
-   guides/deps/building-acc-stratum-deps
-   guides/es2k/installing-acc-sdk
-   guides/es2k/defining-acc-environment
-   guides/es2k/building-acc-p4cp
+   guides/building-for-es2k-host
+   guides/building-for-es2k-acc
    scripts/helper-scripts
 
 .. toctree::
