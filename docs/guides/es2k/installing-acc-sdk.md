@@ -6,10 +6,10 @@ Intel&reg; IPU E2100.
 
 **Disclaimer**:
 
-The ES2K SDE (now called the IPU SDK) is under active development.
+The contents and packaging of the SDK are under active development.
 Although the information in this document was correct at the time it was
-written, there is no guarantee that any part of it will be correct in the
-future.
+written, there is no guarantee that any part of it will be correct in
+the future.
 It is beyond the scope of this document to keep pace with the changes.
 Caveat emptor.
 
