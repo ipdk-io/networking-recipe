@@ -4,6 +4,15 @@ The ACC Software Development Kit (SDK) allows you to use an x86 host
 computer to build P4 Control Plane for the ARM Compute Complex (ACC) of the
 Intel&reg; IPU E2100.
 
+**Disclaimer**:
+
+The contents and packaging of the SDK are under active development.
+Although the information in this document was correct at the time it was
+written, there is no guarantee that any part of it will be correct in
+the future.
+It is beyond the scope of this document to keep pace with the changes.
+Caveat emptor.
+
 ## SDK contents
 
 The ACC SDK includes the following:
