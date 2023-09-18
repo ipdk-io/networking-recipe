@@ -3,7 +3,9 @@
 
 #include "p4rt_perf_simple_l2_demo.h"
 
+#include "p4rt_perf_test.h"
 #include "p4rt_perf_util.h"
+
 extern TestParams test_params;
 
 void PrepareSimpleL2DemoTableEntry(p4::v1::TableEntry* table_entry,
@@ -51,12 +53,13 @@ void SimpleL2DemoTest(P4rtSession* session,
   write_request.set_device_id(session->DeviceId());
   *write_request.mutable_election_id() = session->ElectionId();
   for (uint64_t j = 0; j < t_data.num_entries; j++) {
-    if (t_data.oper == ADD) {
-      table_entry = SetupTableEntryToInsert(session, &write_request);
-    } else if (t_data.oper == DEL) {
-      table_entry = SetupTableEntryToDelete(session, &write_request);
-    } else {
-      std::cout << "Invalid operation" << std::endl;
+    switch (t_data.oper) {
+      case ADD:
+        table_entry = SetupTableEntryToInsert(session, &write_request);
+        break;
+      case DEL:
+        table_entry = SetupTableEntryToDelete(session, &write_request);
+        break;
     }
 
     auto src_int = count;

@@ -4,8 +4,6 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-include(CheckLibraryExists)
-
 set(PROTO_INCLUDES
     # Protobuf C++ header files.
     ${PB_OUT_DIR}
@@ -34,6 +32,8 @@ add_dependencies(p4rt_perf_test
     p4runtime_proto
     stratum_proto
 )
+
+set_install_rpath(p4rt_perf_test ${EXEC_ELEMENT} ${DEP_ELEMENT})
 
 target_link_libraries(p4rt_perf_test PUBLIC
     absl::flags_private_handle_accessor

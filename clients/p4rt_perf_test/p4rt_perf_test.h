@@ -6,9 +6,11 @@
 
 #include <stdint.h>
 
-enum OPER { ADD = 1, DEL = 2, ADD_DEL = 3 };
+enum OPER { ADD = 1, DEL = 2 };
 
 enum TEST_PROFILE { SIMPLE_L2_DEMO = 1 };
+
+enum STATUS { SUCCESS = 0, INVALID_ARG = 1, INTERNAL_ERR = 2 };
 
 struct ThreadInfo {
   uint32_t tid;
@@ -17,13 +19,14 @@ struct ThreadInfo {
   uint64_t num_entries;
   uint32_t oper;
   double time_taken;
+  int status;
 };
 
 struct TestParams {
-  int num_threads = 1;
-  int oper = 0;
-  int tot_num_entries = 1000000;
-  int profile = SIMPLE_L2_DEMO;
+  uint32_t num_threads = 1;
+  uint32_t oper = 0;
+  uint64_t tot_num_entries = 1000000;
+  uint32_t profile = SIMPLE_L2_DEMO;
 };
 
 struct SimpleL2DemoMacInfo {

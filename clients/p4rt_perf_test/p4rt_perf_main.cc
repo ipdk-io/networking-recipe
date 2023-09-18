@@ -45,10 +45,14 @@
 #define MAX_THREADS 8
 #define CORE_BASE 20
 
+std::map<int, std::string> profileToStr = {
+    {SIMPLE_L2_DEMO, "simple_l2_demo"},
+};
+
 // globals
 TestParams test_params = {};
 ThreadInfo thread_data[MAX_THREADS];
-uint8_t core_id[MAX_THREADS];
+uint32_t core_id[MAX_THREADS];
 
 ABSL_FLAG(std::string, grpc_addr, "localhost:9559",
           "P4Runtime server address.");
@@ -59,14 +63,14 @@ using P4rtStream = ::grpc::ClientReaderWriter<p4::v1::StreamMessageRequest,
 
 void PopulateThreadInfo() {
   uint16_t index;
-  uint64_t num_entries_thread =
+  uint64_t entries_per_thread =
       test_params.tot_num_entries / test_params.num_threads;
   uint64_t rem_rules = test_params.tot_num_entries % test_params.num_threads;
 
   for (index = 0; index < test_params.num_threads; index++) {
     thread_data[index].tid = index;
-    thread_data[index].start = index * num_entries_thread;
-    thread_data[index].num_entries = num_entries_thread;
+    thread_data[index].start = index * entries_per_thread;
+    thread_data[index].num_entries = entries_per_thread;
     thread_data[index].oper = test_params.oper;
 
     /* Initialize Core Ids */
@@ -79,7 +83,7 @@ void PopulateThreadInfo() {
 
   // dump the data
   for (index = 0; index < test_params.num_threads; index++) {
-    printf("Thread data - Core: %d start_index: %d num_entries: %d\n",
+    printf("Thread data - Core: %u start_index: %llu num_entries: %llu\n",
            core_id[index], thread_data[index].start,
            thread_data[index].num_entries);
   }
@@ -91,6 +95,9 @@ void RunPerfTest(int tid) {
                                                GenerateClientCredentials(),
                                                absl::GetFlag(FLAGS_device_id));
   if (!status_or_session.ok()) {
+    std::cerr << "Failure to create session. Error: "
+              << status_or_session.status().message() << std::endl;
+    thread_data[tid].status = INTERNAL_ERR;
     return;
   }
 
@@ -98,31 +105,71 @@ void RunPerfTest(int tid) {
   std::unique_ptr<P4rtSession> session = std::move(status_or_session).value();
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
-  if (!status.ok()) return;
+  if (!status.ok()) {
+    std::cerr << "Failure to get forwarding pipeline. Error: "
+              << status.message() << std::endl;
+    thread_data[tid].status = INTERNAL_ERR;
+    return;
+  }
 
   ThreadInfo& t_data = thread_data[tid];
   switch (test_params.profile) {
     case SIMPLE_L2_DEMO:
       SimpleL2DemoTest(session.get(), p4info, t_data);
       break;
-    default:
-      std::cerr << "unsupported profile " << std::endl;
-      return;
   }
 }
 
-inline void PrintUsage(char* name) {
-  std::cerr << "Usage: " << name << " -t <value> -o <value> -n <value>"
-            << std::endl;
-  std::cout << "t: num of threads(optional, default: 1)" << std::endl;
-  std::cout << "o: operation(ADD=1, DEL=2)(mandatory)" << std::endl;
-  std::cout << "n: num of entries(optional, default:1000000)" << std::endl;
+inline void PrintUsage(const char* name) {
+  std::cerr << "Usage: " << name
+            << " -t <value> -o <value> -n <value> -p <value>" << std::endl;
+  std::cout << "t: num of threads (optional, default: 1, max: 8)" << std::endl;
+  std::cout << "o: operation (ADD=1, DEL=2) (mandatory)" << std::endl;
+  std::cout
+      << "n: num of entries (optional, default: 1000000, max: max of uint64)"
+      << std::endl;
   std::cout << "p: test profile (optional, default:SIMPLE_L2_DEMO(1))"
             << std::endl;
+  std::cout << "   Supported profiles:" << std::endl;
+  for (const auto& pair : profileToStr) {
+    std::cout << "   " << pair.first << " : " << pair.second << std::endl;
+  }
+}
+
+int ValidateInput(const char* name) {
+  // operation
+  if (test_params.oper == 0) {
+    std::cerr << "Operation not set" << std::endl;
+    PrintUsage(name);
+    return INVALID_ARG;
+  }
+  if (test_params.oper != ADD && test_params.oper != DEL) {
+    std::cerr << "Invalid Operation" << std::endl;
+    PrintUsage(name);
+    return INVALID_ARG;
+  }
+
+  // num of threads
+  if (test_params.num_threads > MAX_THREADS) {
+    std::cerr << "Number of threads greater than max allowed: " << MAX_THREADS
+              << std::endl;
+    PrintUsage(name);
+    return INVALID_ARG;
+  }
+
+  // profile
+  if (profileToStr.find(test_params.profile) == profileToStr.end()) {
+    std::cerr << "Not a supported profile" << std::endl;
+    PrintUsage(name);
+    return INVALID_ARG;
+  }
+
+  return SUCCESS;
 }
 
 int main(int argc, char* argv[]) {
   int option;
+  int status = SUCCESS;
 
   // parse command line args
   while ((option = getopt(argc, argv, "t:o:n:p:")) != -1) {
@@ -141,15 +188,13 @@ int main(int argc, char* argv[]) {
         break;
       default:
         PrintUsage(argv[0]);
-        return 1;
+        return INVALID_ARG;
     }
   }
 
   // basic checks
-  if (test_params.oper == 0) {
-    std::cerr << "operation not set" << std::endl;
-    PrintUsage(argv[0]);
-    return 1;
+  if ((status = ValidateInput(argv[0])) != SUCCESS) {
+    return status;
   }
 
   // print test data
@@ -172,8 +217,8 @@ int main(int argc, char* argv[]) {
     CPU_SET(core_id[index], &cpuset);
     if ((pthread_setaffinity_np(client_threads[index].native_handle(),
                                 sizeof(cpuset), &cpuset))) {
-      std::cerr << "error: pthread_setaffinity_np, rc:" << std::endl;
-      return 1;
+      std::cerr << "error: setting affinity" << std::endl;
+      return INTERNAL_ERR;
     }
   }
 
@@ -182,8 +227,16 @@ int main(int argc, char* argv[]) {
     client_threads[index].join();
   }
 
+  // check if any of the threads exited with an error
+  for (int index = 0; index < test_params.num_threads; index++) {
+    if (thread_data[index].status != SUCCESS) {
+      std::cerr << "Thread: " << index << " exited with error" << std::endl;
+      status = thread_data[index].status;
+    }
+  }
+
   // evaluate and print perf numbers
-  // incase of multiple threads, use the maximum time taken by a thread to
+  // in the case of multiple threads, use the maximum time taken by a thread to
   // calcuate perf
   double max_time = 0;
   for (int index = 0; index < test_params.num_threads; index++) {
@@ -197,5 +250,5 @@ int main(int argc, char* argv[]) {
   std::cout << "Number of entries per second: "
             << test_params.tot_num_entries / max_time << std::endl;
 
-  return 0;
+  return status;
 }

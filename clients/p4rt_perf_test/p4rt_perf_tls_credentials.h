@@ -10,12 +10,6 @@
 
 #include <string>
 
-#include "absl/status/status.h"
-#include "absl/status/statusor.h"
-#include "grpcpp/grpcpp.h"
-#include "grpcpp/security/server_credentials.h"
-#include "grpcpp/security/tls_credentials_options.h"
-
 #define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
 static std::string ca_cert_file = DEFAULT_CERTS_DIR "ca.crt";
