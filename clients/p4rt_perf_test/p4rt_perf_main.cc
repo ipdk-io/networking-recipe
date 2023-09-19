@@ -4,22 +4,6 @@
 /**
  * p4rt_perf_test- Performance Evaluation Tool for P4Runtime Server
  *
- * P4rt_perf_test is a test application designed to assess the performance
- * of a P4Runtime server across various P4 profiles. The application's primary
- * focus is on measuring the time required to program a specified number of
- * entries.
- *
- * Command Line Arguments:
- *   -t : Number of threads (optional, default: 1).
- *   -o : Operation type (mandatory). 1 is to ADD and 2 to DEL
- *   -n : Number of entries (optional, default: 1,000,000).
- *   -p : P4 profile (optional, default: SIMPLE_L2_DEMO).
- *
- * The application evaluates the time taken to perform the specified operation
- * on the defined number of entries within the chosen P4 profile. It supports
- * multithreading to simulate concurrent operations and can be configured via
- * command line arguments.
- *
  * TODO:
  * 1. Programming with multiple threads doesn't really work as stratum currently
  * supports write by only master.
@@ -90,6 +74,7 @@ void PopulateThreadInfo() {
 }
 
 void RunPerfTest(int tid) {
+  thread_data[tid].status = SUCCESS;
   // Start a new client session.
   auto status_or_session = P4rtSession::Create(absl::GetFlag(FLAGS_grpc_addr),
                                                GenerateClientCredentials(),
@@ -115,8 +100,12 @@ void RunPerfTest(int tid) {
   ThreadInfo& t_data = thread_data[tid];
   switch (test_params.profile) {
     case SIMPLE_L2_DEMO:
-      SimpleL2DemoTest(session.get(), p4info, t_data);
+      thread_data[tid].status = SimpleL2DemoTest(session.get(), p4info, t_data);
       break;
+    default:
+      std::cerr << "Unsupported profile" << std::endl;
+      thread_data[tid].status = INVALID_ARG;
+      return;
   }
 }
 

@@ -40,7 +40,7 @@ void PrepareSimpleL2DemoTableEntry(p4::v1::TableEntry* table_entry,
   return;
 }
 
-void SimpleL2DemoTest(P4rtSession* session,
+int SimpleL2DemoTest(P4rtSession* session,
                       const ::p4::config::v1::P4Info& p4info,
                       ThreadInfo& t_data) {
   ::p4::v1::TableEntry* table_entry;
@@ -60,6 +60,9 @@ void SimpleL2DemoTest(P4rtSession* session,
       case DEL:
         table_entry = SetupTableEntryToDelete(session, &write_request);
         break;
+      default:
+        std::cerr << "Invalid operation" << std::endl;
+        return INVALID_ARG;
     }
 
     auto src_int = count;
@@ -93,4 +96,5 @@ void SimpleL2DemoTest(P4rtSession* session,
   t_data.time_taken = seconds;
 
   std::cout << "count: " << count - 1 << std::endl;
+  return SUCCESS;
 }

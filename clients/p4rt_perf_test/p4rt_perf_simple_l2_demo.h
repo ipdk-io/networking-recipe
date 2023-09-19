@@ -13,7 +13,7 @@ void PrepareSimpleL2DemoTableEntry(p4::v1::TableEntry* table_entry,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry);
 
-void SimpleL2DemoTest(P4rtSession* session,
+int SimpleL2DemoTest(P4rtSession* session,
                       const ::p4::config::v1::P4Info& p4info,
                       ThreadInfo& t_data);
 
