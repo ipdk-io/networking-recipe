@@ -7,9 +7,6 @@
 # Version 3.15 is the baseline for P4 Control Plane.
 cmake_minimum_required(VERSION 3.15)
 
-# CMAKE_BUILD_TYPE must be set before the first project() command.
-set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
-
 project(networking-recipe VERSION 23.07 LANGUAGES C CXX)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -19,9 +16,17 @@ include(CTest)
 include(FindPkgConfig)
 include(GNUInstallDirs)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the build type"
+      FORCE)
+endif()
+
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug;MinSizeRel;Release;RelWithDebInfo")
+
+cmake_print_variables(CMAKE_STAGING_PREFIX)
 cmake_print_variables(CMAKE_SYSROOT)
 cmake_print_variables(CMAKE_TOOLCHAIN_FILE)
-cmake_print_variables(CMAKE_STAGING_PREFIX)
 
 #############################
 # Symbolic path definitions #
