@@ -269,9 +269,9 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
     RETURN_IF_ERROR(
         CreatePipeForSignalHandling(&pipe_read_fd_, &pipe_write_fd_));
   }
-  CHECK_RETURN_IF_FALSE(std::signal(SIGINT, HandleSignal) != SIG_ERR);
+  RET_CHECK(std::signal(SIGINT, HandleSignal) != SIG_ERR);
   pthread_t context_cancel_tid;
-  CHECK_RETURN_IF_FALSE(pthread_create(&context_cancel_tid, nullptr,
+  RET_CHECK(pthread_create(&context_cancel_tid, nullptr,
                            ContextCancelThreadFunc, nullptr) == 0);
   auto cleaner = absl::MakeCleanup([&context_cancel_tid, &ctx] {
     int signal = SIGINT;
@@ -338,7 +338,7 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
     auto stream_reader_writer = stub->Subscribe(&ctx);
     ::gnmi::SubscribeRequest req = BuildGnmiSubOnchangeRequest(path);
     PRINT_MSG(req, "REQUEST");
-    CHECK_RETURN_IF_FALSE(stream_reader_writer->Write(req)) << "Can not write request.";
+    RET_CHECK(stream_reader_writer->Write(req)) << "Cannot write request.";
     ::gnmi::SubscribeResponse resp;
     while (stream_reader_writer->Read(&resp)) {
       PRINT_MSG(resp, "RESPONSE");
@@ -349,7 +349,7 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
     ::gnmi::SubscribeRequest req =
         BuildGnmiSubSampleRequest(path, FLAGS_interval);
     PRINT_MSG(req, "REQUEST");
-    CHECK_RETURN_IF_FALSE(stream_reader_writer->Write(req)) << "Can not write request.";
+    RET_CHECK(stream_reader_writer->Write(req)) << "Cannot write request.";
     ::gnmi::SubscribeResponse resp;
     while (stream_reader_writer->Read(&resp)) {
       PRINT_MSG(resp, "RESPONSE");
