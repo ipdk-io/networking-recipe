@@ -9,7 +9,7 @@ set(PROTO_INCLUDES
     ${PB_OUT_DIR}
 )
 
-set(SRC_FILES
+add_executable(p4rt_perf_test
     p4rt_perf_main.cc
     p4rt_perf_session.cc
     p4rt_perf_session.h
@@ -21,8 +21,6 @@ set(SRC_FILES
     p4rt_perf_util.cc
     p4rt_perf_util.h
 )
-
-add_executable(p4rt_perf_test ${SRC_FILES})
 
 target_compile_options(p4rt_perf_test PRIVATE -O3)
 
