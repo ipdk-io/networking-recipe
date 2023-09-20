@@ -27,9 +27,9 @@ of the following targets:
 
 | Target | Instructions |
 | ------ | ------------ |
-| dpdk   | [DPDK Setup Guide](docs/guides/setup/dpdk-setup-guide.md) |
-| es2k   | [ES2K Setup Guide](docs/guides/setup/es2k-setup-guide.md) |
-| tofino | [Tofino Setup Guide](docs/guides/setup/tofino-setup-guide.md) |
+| dpdk   | [DPDK Setup Guide](https://ipdk.io/p4cp-userguide/guides/setup/dpdk-setup-guide.html) |
+| es2k   | [ES2K Setup Guide](https://ipdk.io/p4cp-userguide/guides/setup/es2k-setup-guide.html) |
+| tofino | [Tofino Setup Guide](https://ipdk.io/p4cp-userguide/guides/setup/tofino-setup-guide.html) |
 
 ## Documentation
 
