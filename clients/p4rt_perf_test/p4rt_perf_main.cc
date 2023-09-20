@@ -15,6 +15,7 @@
 #include <pthread.h>
 
 #include <chrono>
+#include <cinttypes>
 #include <ctime>
 #include <iostream>
 #include <thread>
@@ -67,7 +68,8 @@ void PopulateThreadInfo() {
 
   // dump the data
   for (index = 0; index < test_params.num_threads; index++) {
-    printf("Thread data - Core: %u start_index: %llu num_entries: %llu\n",
+    printf("Thread data - Core: %u start_index: %" PRIu64
+           " num_entries: %" PRIu64 "\n",
            core_id[index], thread_data[index].start,
            thread_data[index].num_entries);
   }
