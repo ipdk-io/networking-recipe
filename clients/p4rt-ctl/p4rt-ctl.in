@@ -72,6 +72,9 @@ for P4Runtime switches:
   get-counter SWITCH CTR_TBL CTR_FLOW   gets indirect counter table entry
   get-direct-counter SWITCH CTR_TBL CTR_FLOW   gets direct counter table entry
   reset-counter SWITCH CTR_TBL CTR_FLOW resets counter table entry
+
+  get-meter SWITCH MTR_TBL MTR_FLOW     gets packet mod meter table entry
+  get-direct-meter SWITCH MTR_TBL MTR_FLOW     gets direct packet mod meter table entry
 """
 
 def usage():
@@ -454,7 +457,8 @@ class P4InfoHelper(object):
                         action_params=None,
                         priority=None,
                         group_id=0,
-                        member_id=0):
+                        member_id=0,
+                        config_data=None):
         one_match_type_is_ternary = False
         table_entry = p4runtime_pb2.TableEntry()
         table_entry.table_id = self.get_tables_id(table_name)
@@ -498,6 +502,31 @@ class P4InfoHelper(object):
 
         if group_id:
             table_entry.action.action_profile_group_id = group_id
+
+        if config_data:
+            datas = config_data.split(",")
+
+            # Mapping of keys to attribute names
+            attribute_mapping = {
+            "policer_meter_prof_id": "policer_meter_prof_id",
+            "policer_spec_cir_unit": "policer_spec_cir_unit",
+            "policer_spec_cbs_unit": "policer_spec_cbs_unit",
+            "policer_spec_eir_unit": "policer_spec_eir_unit",
+            "policer_spec_ebs_unit": "policer_spec_ebs_unit",
+            "policer_spec_cir": "policer_spec_cir",
+            "policer_spec_cbs": "policer_spec_cbs",
+            "policer_spec_eir": "policer_spec_eir",
+            "policer_spec_ebs": "policer_spec_ebs"
+            }
+
+            meter_config = table_entry.meter_config.policer_meter_config
+
+            # Iterate through the key-value pairs and set attributes
+            for data in datas:
+                key, value = data.strip().split("=")
+                attribute_name = attribute_mapping.get(key)
+                if attribute_name:
+                    setattr(meter_config, attribute_name, int(value))
 
         return table_entry
 
@@ -930,6 +959,30 @@ def parse_profile_group(flow):
     max_size = mem[1]
     return group_id[1], ref_members, max_size
 
+def parse_match_key_configData(matchkey):
+    m_key = matchkey.split(",config_data=")
+    key = m_key[0]
+    config_data = m_key[1]
+    match_keys = dict()
+    mk_fields = key.split(",")
+    for mk_field in mk_fields:
+            m = mk_field.split("=")
+            if "/" in m[1]:
+                lpm_mk = m[1].split("/")
+                match_keys[m[0]] = (lpm_mk[0], int(lpm_mk[1]))
+            else:
+                match_keys[m[0]] = m[1]
+    return match_keys, config_data
+
+
+def parse_flow_meter(flow, helper):
+    tmp = flow.split(",action=")
+    mk = tmp[0]
+    act = tmp[1]
+
+    match_keys, config_data = parse_match_key_configData(mk)
+    action_name, act_data = parse_action(act, helper)
+    return match_keys, config_data, action_name, act_data
 
 @with_client
 def p4ctl_add_entry(client, bridge, tbl_name, flow):
@@ -958,6 +1011,10 @@ def p4ctl_add_entry(client, bridge, tbl_name, flow):
     elif (flow.find("priority") != -1):
         # For match_type ternary, we expect priority to be programmed by user.
         match_keys, priority_val, action, action_data = parse_flow_ternary(flow, helper)
+    elif (flow.find("config_data") != -1):
+        # For meter, we expect config data to be programmed by user.
+        match_keys, config_data, action, action_data = parse_flow_meter(flow, helper)
+
     else:
         # For TableAction when we use type as Action, p4rt-ctl expects flow to
         # have an 'action=' configured. In this parse_flow, we use 'action=' as
@@ -974,7 +1031,8 @@ def p4ctl_add_entry(client, bridge, tbl_name, flow):
                        a in enumerate(helper.get_action_params(action))},
         priority=priority_val,
         group_id=int(grp_id),
-        member_id=int(mem_id))
+        member_id=int(mem_id),
+        config_data=config_data)
 
     update = p4runtime_pb2.Update()
     update.type = p4runtime_pb2.Update.INSERT
@@ -1608,6 +1666,109 @@ def p4ctl_reset_counter_entry(client, bridge, cnt_tbl_name, flow):
 
     client.write_update(update)
 
+def parse_get_meter_flow(flow):
+    tmp = flow.split(",")
+
+    mtr_id_str = tmp[0].split("=")
+    index_str = tmp[1].split("=")
+
+    if mtr_id_str[0] != "meter_id":
+        print("Input error: parameter should be \'meter_id\'")
+        sys.exit(1)
+
+    if index_str[0] != "index":
+        print("Input error: parameter should be \'index\'")
+        sys.exit(1)
+
+    meter_id=mtr_id_str[1]
+    index=index_str[1]
+
+    if meter_id.isdigit() is False:
+        print("Meter ID: \"{}\" should be numeric value".format(meter_id))
+        sys.exit(1)
+
+    if index.isdigit() is False:
+        print("Index: \"{}\" should be numeric value".format(index))
+        sys.exit(1)
+
+    return meter_id, index
+
+def _format_me(ce):
+    output_buffer = 'meter_id={}, index={}'.format(ce.meter_id, ce.index)
+    output_buffer += ', meter_counter_data_green=(bytes={},packets={})'.format(ce.counter_data.green.byte_count, counter_data.green.packet_count)
+    output_buffer += ', meter_counter_data_yellow=(bytes={},packets={})'.format(ce.counter_data.yellow.byte_count, counter_data.yellow.packet_count)
+    output_buffer += ', meter_counter_data_red=(bytes={},packets={})'.format(ce.counter_data.red.byte_count, counter_data.red.packet_count)
+    return output_buffer
+
+def _format_dme(ce):
+    output_buffer = 'table_id={}, index={}'.format(ce.table_entry.table_id)
+    output_buffer += ', direct_meter_counter_data_green=(bytes={},packets={})'.format(ce.counter_data.green.byte_count, counter_data.green.packet_count)
+    output_buffer += ', direct_meter_counter_data_yellow=(bytes={},packets={})'.format(ce.counter_data.yellow.byte_count, counter_data.yellow.packet_count)
+    output_buffer += ', direct_meter_counter_data_red=(bytes={},packets={})'.format(ce.counter_data.red.byte_count, counter_data.red.packet_count)
+    return output_buffer
+
+
+@with_client
+def p4ctl_get_meter_entry(client, bridge, tbl_name, flow):
+    """
+    get-meter-entry SWITCH METER_TABLE READ_METER_FLOW
+    Example : // return single matching meter entry
+        p4rt-ctl get-meter br0 my_control.meter1 meter_id=47063180,meter_index=10
+    """
+    p4info = client.get_p4info()
+    if not p4info:
+        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
+
+    mtr_id, idx = parse_get_meter_flow(flow)
+
+
+    helper = P4InfoHelper(p4info)
+    entity = p4runtime_pb2.Entity()
+    ce = entity.meter_entry
+
+    if ce is None:
+        raise Exception("Cannot find meter_entry field in entity")
+
+    ce.meter_id = int(mtr_id) or 0 #Assign 0 if None
+
+    ce.index.index = int(idx)
+
+    for response in client.read_one(entity):
+        for entry in response.entities:
+            if entry.meter_entry.meter_id == ce.meter_id and entry.meter_entry.index.index == int(idx):
+                print(_format_me(entry.meter_entry))
+
+def p4ctl_get_direct_meter_entry(client, bridge, tbl_name, flow):
+    """
+    get-direct-meter SWITCH METER_TABLE READ_METER_FLOW
+    Example 1: // return direct meter stats for matching key
+        p4rt-ctl get-direct-meter br0 my_control.e_fwd
+                    "hdrs.mac[vmeta.common.depth].da="0x000000000275",
+                    hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9b1""
+    """
+    p4info = client.get_p4info()
+    if not p4info:
+        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
+
+    key = parse_match_key(flow)
+    helper = P4InfoHelper(p4info)
+    entity = p4runtime_pb2.Entity()
+    ce = entity.direct_meter_entry
+    if ce is None:
+        raise Exception("Cannot find direct_meter_entry field in entity")
+
+    te = helper.buildTableEntry(
+         table_name=cnt_tbl_name,
+         match_fields=key
+     )
+
+    ce.table_entry.CopyFrom(te)
+    entity.direct_meter_entry.table_entry.CopyFrom(te)
+    for response in client.read_one(entity):
+        for entry in response.entities:
+            if entity.direct_meter_entry.table_entry.table_id == ce.table_entry.table_id:
+                print(_format_dme(entry.direct_meter_entry))
+
 all_commands = {
     "show": (p4ctl_show, 1),
     "set-pipe": (p4ctl_set_pipe, 3),
@@ -1627,7 +1788,9 @@ all_commands = {
     "get-action-profile-group": (p4ctl_get_group, 3),
     "get-counter" : (p4ctl_get_counter_entry, 2),
     "get-direct-counter" : (p4ctl_get_direct_counter_entry, 2),
-    "reset-counter" : (p4ctl_reset_counter_entry, 2)
+    "reset-counter" : (p4ctl_reset_counter_entry, 2),
+    "get-meter" : (p4ctl_get_meter_entry, 2),
+    "get-direct-meter" : (p4ctl_get_direct_meter_entry, 2)
 }
 
 
