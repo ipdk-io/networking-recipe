@@ -1,72 +1,66 @@
-..
-      Copyright 2021-2023 Intel Corporation
-      SPDX-License-Identifier: Apache-2.0
+.. Copyright 2023 Intel Corporation
+   SPDX-License-Identifier: Apache-2.0
 
-==========================
-p4rt_perf_test Usage Guide
-==========================
+==============
+p4rt_perf_test
+==============
 
-This document describes how to use p4rt_perf_test application.
-
-Overview
--------------
-p4rt_perf_test is a test application designed to assess the performance
-of a P4Runtime server across various P4 profiles. The application's primary
-focus is on measuring the time required to program a specified number of
-entries.
+``p4rt_perf_test`` is a test application designed to assess the performance
+of a P4Runtime server across various P4 profiles.
+Its primary focus is to measure the time required to program a specified
+number of entries.
 
 Prerequisites
--------------
+=============
 
-Prior to running p4rt_perf_test, ensure that the infrap4d application has been initiated,
-and one of the supported pipelines has been configured.
-
-Usage
---------------
-
-``p4rt_perf_test`` is an executable generated when P4 Control Plane is built. It
-connects to the P4Runtime server in ``infrap4d`` via gRPC for
-enabling P4Runtime capabilities.
+Before running p4rt_perf_test, ensure that ``infrap4d`` has been started
+and a supported pipeline has been configured.
 
 Syntax
-~~~~~~
+======
 
 .. code-block:: text
 
-   p4rt_perf_test -t <value> -o <value> -n <value> -p <value>
+   p4rt_perf_test -o OPER [-t THREADS] [-n ENTRIES] [-p PROFILE]
 
-Arguments
-~~~~~~~~~
+Parameters
+==========
 
-* ``-t number of threads``
-      Optional argument that specifies the number of threads that can connect to the server.
-      Default is one thread with the maximum limit being 8.
+``-n ENTRIES``
+  Number of entries to be programmed.
+  Default is 1000000 (one million) entries, with a maximum value of 2^64-1.
 
-* ``-o operation``
-      Mandatory argument that specifies the operation to be performed.
-      ADD(1) and DEL(2) are the currently supported operations.
+``-o OPER``
+  Required.
+  Number specifying the operation to be performed.
 
-* ``-n number of threads``
-      Optional argument that specifies the number of entries to be programmed.
-      Default is 1000000 entires with the maximum limit being the maximum size of uint64.
+  +-------+-----------+
+  | Value | Operation |
+  +=======+===========+
+  | 1     | ADD       |
+  +-------+-----------+
+  | 2     | DEL       |
+  +-------+-----------+
 
-* ``-p p4 program used for the test``
-      Optional argument that specifies the p4 program used for the test.
-      Default is simple_l2_demo.
+``-p PROFILE``
+  Number specifying the p4 program used for the test.
+  Default is simple_l2_demo(1).
+  This is the only profile (program) currently supported.
 
-      Supported profiles: simple_l2_demo.
-
-      Number to profile mapping: 1 => simple_l2_demo.
-
+``-t THREADS``
+  Number of threads to connect to the server.
+  Default is 1 thread, with a maximum value of 8.
 
 Example
-~~~~~~~~
+=======
 
 .. code-block:: bash
 
    p4rt_perf_test -t 1 -o 1 -n 4000000 -p 1
 
 Known Issues
-------------
-At present, the P4Runtime server exclusively supports 'write' operations through the master client,
-rendering it incompatible with the use of multi-threaded clients.
+============
+
+At present, the P4Runtime server exclusively supports 'write' operations
+through the master client, rendering it incompatible with multi-threaded
+clients.
