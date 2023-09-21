@@ -3,7 +3,7 @@
 # Copyright 2022-2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
-# Sample script to configure and build the P4 Control Plane software.
+# Sample script to configure and build P4 Control Plane.
 #
 
 # Abort on error.
@@ -13,7 +13,6 @@ set -e
 # Default values #
 ##################
 
-_BLD_TYPE="RelWithDebInfo"
 _DEPS_DIR=${DEPEND_INSTALL}
 _HOST_DIR=${HOST_INSTALL}
 _NJOBS=8
@@ -36,7 +35,11 @@ _WITH_OVS=1
 
 print_help() {
     echo ""
-    echo "Configure and build P4 Control Plane software"
+    echo "Configure and build P4 Control Plane"
+    echo ""
+    echo "General:"
+    echo "  --dry-run        -n  Display cmake parameters and exit"
+    echo "  --help           -h  Display help text and exit"
     echo ""
     echo "Paths:"
     echo "  --deps=DIR       -D  Target dependencies directory [${_DEPS_DIR}]"
@@ -50,8 +53,6 @@ print_help() {
     echo "Options:"
     echo "  --coverage           Instrument build to measure code coverage"
     echo "  --cxx-std=STD        C++ standard (11|14|17) [$_CXX_STD])"
-    echo "  --dry-run        -n  Display cmake parameter values and exit"
-    echo "  --help           -h  Display this help text"
     echo "  --jobs=NJOBS     -j  Number of build threads [${_NJOBS}]"
     echo "  --no-build           Configure without building"
     echo "  --no-krnlmon         Exclude Kernel Monitor"
@@ -61,10 +62,8 @@ print_help() {
     echo "Configurations:"
     echo "  --debug              Debug configuration"
     echo "  --minsize            MinSizeRel configuration"
-    echo "  --reldeb             RelWithDebInfo configuration (default)"
+    echo "  --reldeb             RelWithDebInfo configuration"
     echo "  --release            Release configuration"
-    echo ""
-    echo "  Default config is RelWithDebInfo (--reldeb)"
     echo ""
     echo "Environment variables:"
     echo "  CMAKE_TOOLCHAIN_FILE - Default toolchain file"
@@ -82,7 +81,7 @@ print_help() {
 print_cmake_params() {
     echo ""
     [ -n "${_GENERATOR}" ] && echo "${_GENERATOR}"
-    echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
+    [ -n "${_BUILD_TYPE}" ] && echo "${_BUILD_TYPE:2}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     [ -n "${_STAGING_PREFIX}" ] && echo "${_STAGING_PREFIX:2}"
     [ -n "${_TOOLCHAIN_FILE}" ] && echo "${_TOOLCHAIN_FILE:2}"
@@ -113,7 +112,7 @@ print_cmake_params() {
 config_ovs() {
     # shellcheck disable=SC2086
     cmake -S ovs -B ${_OVS_BLD} \
-        -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
+        ${_BUILD_TYPE}  \
         -DCMAKE_INSTALL_PREFIX="${_OVS_DIR}" \
         ${_TOOLCHAIN_FILE} \
         -DP4OVS=ON
@@ -135,7 +134,7 @@ config_recipe() {
     # shellcheck disable=SC2086
     cmake -S . -B ${_BLD_DIR} \
         ${_GENERATOR} \
-        -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
+        ${_BUILD_TYPE} \
         -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
         ${_STAGING_PREFIX} \
         ${_TOOLCHAIN_FILE} \
@@ -144,7 +143,8 @@ config_recipe() {
         ${_HOST_DEPEND_DIR} \
         -DOVS_INSTALL_DIR="${_OVS_DIR}" \
         -DSDE_INSTALL_DIR="${_SDE_DIR}" \
-        ${_WITH_KRNLMON} ${_WITH_OVSP4RT} \
+        ${_WITH_KRNLMON} \
+        ${_WITH_OVSP4RT} \
         ${_COVERAGE} \
         ${_SET_RPATH} \
         ${_TARGET_TYPE}
@@ -175,7 +175,6 @@ LONGOPTS=${LONGOPTS},no-build,no-krnlmon,no-ovs,no-rpath
 GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 eval set -- "${GETOPTS}"
 
-# Process command-line options.
 while true ; do
     case "$1" in
     # Paths
@@ -270,6 +269,7 @@ if [ -z "${_SDE_DIR}" ]; then
     exit 1
 fi
 
+[ -n "${_BLD_TYPE}" ] && _BUILD_TYPE="-DCMAKE_BUILD_TYPE=${_BLD_TYPE}"
 [ -n "${_CXX_STD}" ] && _CXX_STANDARD="-DCMAKE_CXX_STANDARD=${_CXX_STD}"
 [ -n "${_HOST_DIR}" ] && _HOST_DEPEND_DIR="-DHOST_DEPEND_DIR=${_HOST_DIR}"
 [ -n "${_RPATH}" ] && _SET_RPATH="-DSET_RPATH=${_RPATH}"

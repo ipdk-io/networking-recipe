@@ -26,7 +26,6 @@ _SYSROOT=${SDKTARGETSYSROOT}
 ##################
 
 _BLD_DIR=ovs/build
-_BLD_TYPE=RelWithDebInfo
 _DRY_RUN=0
 _NJOBS=8
 _PREFIX=//opt/ovs
@@ -65,7 +64,6 @@ print_help() {
 
 print_cmake_params() {
     echo ""
-    echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
     echo "JOBS=${_NJOBS}"
@@ -136,7 +134,6 @@ fi
 rm -fr "${_BLD_DIR}"
 
 cmake -S ovs -B "${_BLD_DIR}" \
-    -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
     -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
     -DCMAKE_TOOLCHAIN_FILE="${_TOOLFILE}" \
     -DP4OVS=TRUE
