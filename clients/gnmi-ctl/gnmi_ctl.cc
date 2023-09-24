@@ -11,8 +11,8 @@
 
 #include "absl/cleanup/cleanup.h"
 #include "gflags/gflags.h"
-#include "gnmi_ctl_utils.h"
 #include "gnmi/gnmi.grpc.pb.h"
+#include "gnmi_ctl_utils.h"
 #include "grpcpp/grpcpp.h"
 #include "grpcpp/security/credentials.h"
 #include "grpcpp/security/tls_credentials_options.h"
@@ -26,7 +26,7 @@
 #include "stratum/lib/utils.h"
 
 DEFINE_bool(grpc_use_insecure_mode, false,
-              "grpc communication channel in insecure mode");
+            "grpc communication channel in insecure mode");
 DECLARE_bool(grpc_use_insecure_mode);
 
 #define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
@@ -171,7 +171,7 @@ void build_gnmi_path(std::string path_str, ::gnmi::Path* path) {
 ::gnmi::SetRequest build_gnmi_set_req(std::string path, std::string val) {
   ::gnmi::SetRequest req;
   ::gnmi::Update* update;
-  char *check;
+  char* check;
 
   if (FLAGS_replace) {
     update = req.add_replace();
@@ -220,8 +220,8 @@ void build_gnmi_path(std::string path_str, ::gnmi::Path* path) {
 }
 
 bool extract_interface_node(char** path, char* node_path, bool* vhost_dev) {
-  char* key =  NULL;
-  char* value =  NULL;
+  char* key = NULL;
+  char* value = NULL;
   int found_node = 0;
 
   while (client_parse_key_value(path, &key, &value)) {
@@ -242,36 +242,35 @@ bool extract_interface_node(char** path, char* node_path, bool* vhost_dev) {
     }
     if (strcmp(key, FLAGS_name_key.c_str()) == 0) {
       // Hardcoded length of "[name=]/"
-      snprintf(node_path + strlen(node_path), strlen(value) + 9,
-               "[name=%s]/", value);
+      snprintf(node_path + strlen(node_path), strlen(value) + 9, "[name=%s]/",
+               value);
       found_node += 1;
     }
-    if (found_node == 2)
-      return 0;
+    if (found_node == 2) return 0;
   }
   return -1;
 }
 
 void traverse_params(char** path, char* node_path, char* config_value,
                      bool& flag) {
-  char* key =  NULL;
-  char* value =  NULL;
+  char* key = NULL;
+  char* value = NULL;
 
   if (client_parse_key_value(path, &key, &value)) {
     if ((value != NULL) && value[0] != '\0') {
       // This should be executed for a <key=value> pair, specifically for
       // SET operation.
       snprintf(node_path + strlen(node_path),
-               strlen(FLAGS_subtree_config.c_str()) + strlen(key) + 2,
-               "%s/%s", FLAGS_subtree_config.c_str(), key);
+               strlen(FLAGS_subtree_config.c_str()) + strlen(key) + 2, "%s/%s",
+               FLAGS_subtree_config.c_str(), key);
       strcpy(config_value, value);
       return;
     } else if (key != NULL && key[0] != '\0') {
       // This should be executed for a <key>, specifically for
       // GET operation.
       snprintf(node_path + strlen(node_path),
-               strlen(FLAGS_subtree_config.c_str()) + strlen(key) + 2,
-               "%s/%s", FLAGS_subtree_config.c_str(), key);
+               strlen(FLAGS_subtree_config.c_str()) + strlen(key) + 2, "%s/%s",
+               FLAGS_subtree_config.c_str(), key);
       return;
     }
   }
@@ -283,7 +282,6 @@ void traverse_params(char** path, char* node_path, char* config_value,
     ::gnmi::SubscribeRequest, ::gnmi::SubscribeResponse>* stream_reader_writer;
 
 ::util::Status Main(int argc, char** argv) {
-
   // Default certificate file location for TLS-mode
   FLAGS_ca_cert_file = DEFAULT_CERTS_DIR "ca.crt";
   FLAGS_server_key_file = DEFAULT_CERTS_DIR "stratum.key";
@@ -297,7 +295,7 @@ void traverse_params(char** path, char* node_path, char* config_value,
   ::gflags::SetUsageMessage(kUsage);
   InitGoogle(argv[0], &argc, &argv, true);
   stratum::InitStratumLogging();
-  
+
   bool vhost_device = false;
   if (argc < 2) {
     std::cout << kUsage << std::endl;
@@ -311,9 +309,9 @@ void traverse_params(char** path, char* node_path, char* config_value,
     RETURN_IF_ERROR(
         CreatePipeForSignalHandling(&pipe_read_fd_, &pipe_write_fd_));
   }
-  CHECK_RETURN_IF_FALSE(std::signal(SIGINT, HandleSignal) != SIG_ERR);
+  RET_CHECK(std::signal(SIGINT, HandleSignal) != SIG_ERR);
   pthread_t context_cancel_tid;
-  CHECK_RETURN_IF_FALSE(pthread_create(&context_cancel_tid, nullptr,
+  RET_CHECK(pthread_create(&context_cancel_tid, nullptr,
                            ContextCancelThreadFunc, nullptr) == 0);
   auto cleaner = absl::MakeCleanup([&context_cancel_tid, &ctx] {
     int signal = SIGINT;
@@ -330,11 +328,11 @@ void traverse_params(char** path, char* node_path, char* config_value,
   std::shared_ptr<::grpc::Channel> channel;
   if (FLAGS_grpc_use_insecure_mode) {
     std::shared_ptr<::grpc::ChannelCredentials> channel_credentials =
-      ::grpc::InsecureChannelCredentials();
+        ::grpc::InsecureChannelCredentials();
     channel = ::grpc::CreateChannel(FLAGS_grpc_addr, channel_credentials);
   } else {
     ASSIGN_OR_RETURN(auto credentials_manager,
-                    CredentialsManager::CreateInstance(true));
+                     CredentialsManager::CreateInstance(true));
     channel = ::grpc::CreateChannel(
         FLAGS_grpc_addr,
         credentials_manager->GenerateExternalFacingClientCredentials());
@@ -357,7 +355,7 @@ void traverse_params(char** path, char* node_path, char* config_value,
     return ::util::OkStatus();
   }
 
-  char *path = argv[2];
+  char* path = argv[2];
   char buffer[MAX_STR_LENGTH];
   bool params = true;
 
@@ -380,7 +378,7 @@ void traverse_params(char** path, char* node_path, char* config_value,
     RETURN_IF_GRPC_ERROR(stub->Get(&ctx, req, &resp));
     PRINT_MSG(resp, "Get Response from Server");
   } else if (cmd == "set") {
-    while(params) {
+    while (params) {
       char path1[MAX_STR_LENGTH] = {0};
       char config_value[MAX_STR_LENGTH] = {0};
 
@@ -389,8 +387,9 @@ void traverse_params(char** path, char* node_path, char* config_value,
       // If device is 'virtual-device' and port type is 'link', consider it a
       // 'vhost' type.
       if (((strcmp(config_value, "link") == 0) ||
-           (strcmp(config_value, "LINK") == 0)) && vhost_device) {
-           strcpy(config_value, "vhost");
+           (strcmp(config_value, "LINK") == 0)) &&
+          vhost_device) {
+        strcpy(config_value, "vhost");
       }
       if (params) {
         auto stub = ::gnmi::gNMI::NewStub(channel);
@@ -414,7 +413,7 @@ void traverse_params(char** path, char* node_path, char* config_value,
     auto stream_reader_writer_ptr = stub->Subscribe(&ctx);
     stream_reader_writer = stream_reader_writer_ptr.get();
     ::gnmi::SubscribeRequest req = build_gnmi_sub_onchange_req(path);
-    // CHECK_RETURN_IF_FALSE(stream_reader_writer->Write(req))
+    // RET_CHECK(stream_reader_writer->Write(req))
     //     << "Cannot write request.";
     stream_reader_writer->Write(req);
     ::gnmi::SubscribeResponse resp;
@@ -429,7 +428,7 @@ void traverse_params(char** path, char* node_path, char* config_value,
     stream_reader_writer = stream_reader_writer_ptr.get();
     ::gnmi::SubscribeRequest req =
         build_gnmi_sub_sample_req(path, FLAGS_interval);
-    // CHECK_RETURN_IF_FALSE(stream_reader_writer->Write(req))
+    // RET_CHECK(stream_reader_writer->Write(req))
     //     << "Cannot write request.";
     stream_reader_writer->Write(req);
     ::gnmi::SubscribeResponse resp;
@@ -446,6 +445,4 @@ void traverse_params(char** path, char* node_path, char* config_value,
 
 }  // namespace gnmi
 
-int main(int argc, char** argv) {
-  return gnmi::Main(argc, argv).error_code();
-}
+int main(int argc, char** argv) { return gnmi::Main(argc, argv).error_code(); }
