@@ -13,7 +13,7 @@ For the ACC, see [Building for the ES2K ACC](/guides/building-for-es2k-acc).
 
 ### Install basic utilities
 
-Note: See [OpenSSL security guide](/guides/security/openssl-guide.md)
+See the [OpenSSL security guide](/guides/security/openssl-guide.md)
 for OpenSSL version and EOL information.
 
 For a Fedora system:

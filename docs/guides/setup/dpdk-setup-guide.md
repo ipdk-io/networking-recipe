@@ -17,7 +17,7 @@ For build instructions, see [P4 SDE Readme](https://github.com/p4lang/p4-dpdk-ta
 
 ### Install basic utilities
 
-Note: See [OpenSSL security guide](/guides/security/openssl-guide.md)
+See the [OpenSSL security guide](/guides/security/openssl-guide.md)
 for OpenSSL version and EOL information.
 
 ```bash

@@ -60,7 +60,7 @@ docker exec -it infrap4d bash
 
 ### Install basic utilities
 
-Note: See [OpenSSL security guide](/guides/security/openssl-guide.md)
+See the [OpenSSL security guide](/guides/security/openssl-guide.md)
 for OpenSSL version and EOL information.
 
 ```bash
