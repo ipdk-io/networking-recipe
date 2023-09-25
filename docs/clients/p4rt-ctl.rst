@@ -2,9 +2,9 @@
       Copyright 2021-2023 Intel Corporation
       SPDX-License-Identifier: Apache-2.0
 
-=====================
-p4rt-ctl Client Guide
-=====================
+========
+p4rt-ctl
+========
 
 This document describes how to use P4 Control Plane executables to support
 P4 programs.
