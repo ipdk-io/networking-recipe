@@ -17,6 +17,11 @@ For build instructions, see [P4 SDE Readme](https://github.com/p4lang/p4-dpdk-ta
 
 ### Install basic utilities
 
+See the [OpenSSL security guide](/guides/security/openssl-guide.md)
+for OpenSSL version and EOL information.
+
+---
+
 ```bash
 For Fedora distro: yum install libatomic libnl3-devel openssl
 For Ubuntu distro: apt install libatomic1 libnl-route-3-dev openssl
