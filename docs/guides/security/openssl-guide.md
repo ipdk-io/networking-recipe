@@ -3,7 +3,7 @@
 This document provides information about supported OpenSSL versions and
 security details that you need to consider.
 
-OpenSSL is a package dependency as infrap4d uses the library for gRPC.
+OpenSSL is a package dependency, as infrap4d uses the library for gRPC.
 
 ## End of Life for OpenSSL 1.1.1
 
