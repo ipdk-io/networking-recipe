@@ -52,6 +52,7 @@ P4 Control Plane User Guide
 
    guides/security/security-guide
    guides/security/using-tls-certificates
+   guides/security/openssl-guide
 
 .. toctree::
    :maxdepth: 1

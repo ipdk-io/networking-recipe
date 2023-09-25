@@ -63,6 +63,8 @@ docker exec -it infrap4d bash
 See the [OpenSSL security guide](/guides/security/openssl-guide.md)
 for OpenSSL version and EOL information.
 
+---
+
 ```bash
 apt-get update
 apt-get install sudo git cmake autoconf gcc g++ libtool python3 python3-dev python3-distutils iproute2 libssl-dev
