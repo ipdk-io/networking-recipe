@@ -4,40 +4,9 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-include(FindProtobuf)
-
-#############################
-# Find Protobuf executables #
-#############################
-
-# The Protobuf compiler and gRPC plugin are host tools, even if we're
-# cross-compiling. NO_CMAKE_FIND_ROOT_PATH ensures that we do not
-# search the cross-compiled binaries for the Protobuf executables.
-
-find_package(Protobuf REQUIRED NO_CMAKE_FIND_ROOT_PATH)
-set(HOST_PROTOC ${PROTOBUF_PROTOC_EXECUTABLE})
-
-find_package(gRPC NO_CMAKE_FIND_ROOT_PATH)
-
-if(gRPC AND TARGET(gRPC::grpc_cpp_plugin))
-    get_property(HOST_GRPC_CPP_PLUGIN
-        TARGET gRPC::grpc_cpp_plugin
-        PROPERTY IMPORTED_LOCATION_NOCONFIG)
-else()
-    find_program(HOST_GRPC_CPP_PLUGIN "grpc_cpp_plugin" REQUIRED
-        NO_CMAKE_FIND_ROOT_PATH)
-    mark_as_advanced(HOST_GRPC_CPP_PLUGIN)
-    if(NOT HOST_GRPC_CPP_PLUGIN)
-        message(FATAL_ERROR "grpc_cpp_plugin not found")
-    endif()
-endif()
-
-cmake_print_variables(HOST_PROTOC)
-cmake_print_variables(HOST_GRPC_CPP_PLUGIN)
-
-#############################
-# Define Generate functions #
-#############################
+##########################
+# Compile protobuf files #
+##########################
 
 set(PROTO_PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -76,7 +45,7 @@ add_library(grpc_proto SHARED
 
 target_include_directories(grpc_proto PRIVATE ${PB_OUT_DIR})
 
-target_link_libraries(grpc_proto PUBLIC protobuf)
+target_link_libraries(grpc_proto PUBLIC protobuf::libprotobuf)
 
 set_install_rpath(grpc_proto ${DEP_ELEMENT})
 
@@ -117,7 +86,8 @@ target_include_directories(p4runtime_proto PRIVATE ${PB_OUT_DIR})
 target_link_libraries(p4runtime_proto
     PUBLIC
         grpc_proto
-        absl::synchronization               
+        protobuf::libprotobuf
+        absl::synchronization
 )
 
 set_install_rpath(p4runtime_proto $ORIGIN ${DEP_ELEMENT})
@@ -203,5 +173,7 @@ add_library(stratum_proto SHARED
     $<TARGET_OBJECTS:stratum_proto1_o>
     $<TARGET_OBJECTS:stratum_proto2_o>
 )
+
+target_link_libraries(stratum_proto PUBLIC protobuf::libprotobuf)
 
 install(TARGETS stratum_proto LIBRARY)
