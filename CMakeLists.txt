@@ -140,7 +140,9 @@ cmake_print_variables(CMAKE_PREFIX_PATH)
 # External packages #
 #####################
 
-find_package(absl REQUIRED)
+find_package(absl CONFIG REQUIRED)
+set(GFLAGS_USE_TARGET_NAMESPACE TRUE)
+find_package(gflags CONFIG REQUIRED)
 
 if(DPDK_TARGET)
     include(dpdk-driver)
