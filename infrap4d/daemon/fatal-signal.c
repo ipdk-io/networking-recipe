@@ -15,30 +15,29 @@
  */
 
 #include "fatal-signal.h"
+
 #include <errno.h>
 #include <signal.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <signal.h>
 
 #ifndef SIG_ATOMIC_MAX
 #define SIG_ATOMIC_MAX TYPE_MAXIMUM(sig_atomic_t)
 #endif
 
 /* Signals to catch. */
-static const int fatal_signals[] = { SIGTERM, SIGINT, SIGHUP, SIGALRM,
-                                     SIGSEGV };
+static const int fatal_signals[] = {SIGTERM, SIGINT, SIGHUP, SIGALRM, SIGSEGV};
 
 /* Hooks to call upon catching a signal */
 struct infrap4d_hook {
-    void (*hook_cb)(void *aux);
-    void (*cancel_cb)(void *aux);
-    void *aux;
-    bool run_at_exit;
+  void (*hook_cb)(void* aux);
+  void (*cancel_cb)(void* aux);
+  void* aux;
+  bool run_at_exit;
 };
 #define MAX_HOOKS 32
 static struct infrap4d_hook infrap4d_hooks[MAX_HOOKS];
@@ -55,22 +54,20 @@ static volatile sig_atomic_t infrap4d_stored_sig_nr = SIG_ATOMIC_MAX;
  * allow it to terminate without calling the hooks registered before calling
  * this function.  New hooks registered after calling this function will take
  * effect normally. */
-void
-daemon_fatal_signal_fork(void)
-{
-    size_t i;
+void daemon_fatal_signal_fork(void) {
+  size_t i;
 
-    for (i = 0; i < infrap4d_n_hooks; i++) {
-        struct infrap4d_hook *h = &infrap4d_hooks[i];
-        if (h->cancel_cb) {
-            h->cancel_cb(h->aux);
-        }
+  for (i = 0; i < infrap4d_n_hooks; i++) {
+    struct infrap4d_hook* h = &infrap4d_hooks[i];
+    if (h->cancel_cb) {
+      h->cancel_cb(h->aux);
     }
-    infrap4d_n_hooks = 0;
+  }
+  infrap4d_n_hooks = 0;
 
-    /* Raise any signals that we have already received with the default
-     * handler. */
-    if (infrap4d_stored_sig_nr != SIG_ATOMIC_MAX) {
-        raise(infrap4d_stored_sig_nr);
-    }
+  /* Raise any signals that we have already received with the default
+   * handler. */
+  if (infrap4d_stored_sig_nr != SIG_ATOMIC_MAX) {
+    raise(infrap4d_stored_sig_nr);
+  }
 }

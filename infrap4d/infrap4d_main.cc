@@ -7,7 +7,7 @@
 #include "stratum/glue/status/status.h"
 #include "stratum/hal/bin/tdi/main.h"
 
-extern "C"  {
+extern "C" {
 #include "daemon/daemon.h"
 }
 
@@ -19,8 +19,8 @@ int main(int argc, char* argv[]) {
   stratum::hal::tdi::ParseCommandLine(argc, argv, true);
 
   if (FLAGS_detach) {
-      daemonize_start(false);
-      daemonize_complete();
+    daemonize_start(false);
+    daemonize_complete();
   }
 
   absl::Notification ready_sync;
@@ -36,15 +36,15 @@ int main(int argc, char* argv[]) {
    * sequence, just disables krnlmon logic.
    */
   if (!FLAGS_disable_krnlmon) {
-      krnlmon_create_main_thread(&ready_sync);
-      krnlmon_create_shutdown_thread(&done_sync);
+    krnlmon_create_main_thread(&ready_sync);
+    krnlmon_create_shutdown_thread(&done_sync);
   }
 
   auto status = stratum::hal::tdi::Main(&ready_sync, &done_sync);
   if (!status.ok()) {
-     // TODO: Figure out logging for infrap4d
-     return status.error_code();
-   }
+    // TODO: Figure out logging for infrap4d
+    return status.error_code();
+  }
 
   return 0;
 }
