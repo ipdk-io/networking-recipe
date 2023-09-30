@@ -28,8 +28,8 @@ for more information.
 We plan to phase out the `networking-recipe/setup` directory toward the end
 of October 2023.
 
-If you would like to start using it before then,
-[version v1.2.0](https://github.com/ipdk-io/stratum-deps/tree/v1.2.0)
+If you would like to start using `stratum-deps` before then,
+[version 1.2.0](https://github.com/ipdk-io/stratum-deps/tree/v1.2.0)
 is a good place to start.
 
 ### Documentation

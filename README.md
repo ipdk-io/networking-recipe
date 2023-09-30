@@ -12,6 +12,12 @@ upstreaming.
 It moves the P4-specific components of the architecture to a separate
 process called `infrap4d`.
 
+## Upcoming changes
+
+Setup for the Stratum dependencies will be moving to its own repository
+toward the end of October 2023. See the [README file](setup/README.md) for
+further information.
+
 ## Source code
 
 To download the source code for P4 Control Plane:
