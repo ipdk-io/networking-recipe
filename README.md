@@ -18,7 +18,7 @@ to a separate process called `infrap4d`.
 The Stratum dependencies will be moving from the `setup` directory to
 a separate `stratum-deps` repository towards the end of October 2023.
 
-See the [README file](setup/README.md) for further information.
+See the setup directory's [README file](setup/README.md) for more information.
 
 ## Source code
 
