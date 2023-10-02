@@ -37,6 +37,6 @@ is a good place to start.
 The `stratum-deps` repository includes updated versions of relevant sections
 of the user manual, plus new documentation on the helper scripts.
 
-See the
-[README](https://github.com/ipdk-io/stratum-deps/blob/main/README.md) file
+See the repository's
+[README file](https://github.com/ipdk-io/stratum-deps/blob/main/README.md)
 for links to the documentation.
