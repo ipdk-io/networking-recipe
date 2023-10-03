@@ -1,6 +1,6 @@
 # FindDpdkDriver.cmake - import DPDK P4 Driver (SDE).
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
