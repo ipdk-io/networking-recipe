@@ -145,7 +145,7 @@ set(GFLAGS_USE_TARGET_NAMESPACE TRUE)
 find_package(gflags CONFIG REQUIRED)
 
 if(DPDK_TARGET)
-    include(dpdk-driver)
+    find_package(DpdkDriver)
 elseif(ES2K_TARGET)
     include(es2k-driver)
 elseif(TOFINO_TARGET)
