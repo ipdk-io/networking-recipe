@@ -36,7 +36,7 @@ if(DPDK_TARGET)
 elseif(ES2K_TARGET)
     add_es2k_target_libraries(infrap4d)
 elseif(TOFINO_TARGET)
-    target_link_libraries(infrap4d PUBLIC ${DRIVER_SDK_LIBS})
+    add_tofino_target_libraries(infrap4d)
 endif()
 
 if(WITH_KRNLMON)

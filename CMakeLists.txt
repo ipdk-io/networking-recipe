@@ -149,7 +149,7 @@ if(DPDK_TARGET)
 elseif(ES2K_TARGET)
     find_package(Es2kDriver)
 elseif(TOFINO_TARGET)
-    include(tofino-driver)
+    find_package(TofinoDriver)
 endif()
 
 if(WITH_OVSP4RT)
