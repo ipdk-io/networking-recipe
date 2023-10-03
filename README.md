@@ -9,8 +9,16 @@ It is the successor to P4-OVS.
 P4 Control Plane modularizes P4-OVS and reduces coupling between its
 components, making the code easier to maintain and more suitable for
 upstreaming.
-It moves the P4-specific components of the architecture to a separate
-process called `infrap4d`.
+
+It moves the P4-specific components of the architecture from `ovs-vswitchd`
+to a separate process called `infrap4d`.
+
+## Upcoming changes
+
+The Stratum dependencies will be moving from the `setup` directory to
+a separate `stratum-deps` repository towards the end of October 2023.
+
+See the setup directory's [README file](setup/README.md) for more information.
 
 ## Source code
 
