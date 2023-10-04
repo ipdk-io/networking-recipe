@@ -74,7 +74,7 @@ for P4Runtime switches:
   reset-counter SWITCH CTR_TBL CTR_FLOW resets counter table entry
 
   get-meter SWITCH MTR_TBL MTR_FLOW     gets packet mod meter table entry
-  get-direct-meter SWITCH MTR_TBL MTR_FLOW     gets direct packet mod meter table entry
+  get-direct-pkt-mod-meter SWITCH MTR_TBL MTR_FLOW     gets direct packet mod meter table entry
 """
 
 def usage():
@@ -1701,12 +1701,12 @@ def _format_me(ce):
     return output_buffer
 
 def _format_dme(ce):
-    output_buffer = 'table_id={}, index={}'.format(ce.table_entry.table_id)
-    output_buffer += ', direct_meter_counter_data_green=(bytes={},packets={})'.format(ce.counter_data.green.byte_count, counter_data.green.packet_count)
-    output_buffer += ', direct_meter_counter_data_yellow=(bytes={},packets={})'.format(ce.counter_data.yellow.byte_count, counter_data.yellow.packet_count)
-    output_buffer += ', direct_meter_counter_data_red=(bytes={},packets={})'.format(ce.counter_data.red.byte_count, counter_data.red.packet_count)
+    pdb.set_trace()
+    output_buffer = 'table_id={}'.format(ce.table_entry.table_id)
+    output_buffer += ', direct_meter_counter_data_green=(bytes={},packets={})'.format(ce.counter_data.green.byte_count, ce.counter_data.green.packet_count)
+    output_buffer += ', direct_meter_counter_data_yellow=(bytes={},packets={})'.format(ce.counter_data.yellow.byte_count, ce.counter_data.yellow.packet_count)
+    output_buffer += ', direct_meter_counter_data_red=(bytes={},packets={})'.format(ce.counter_data.red.byte_count, ce.counter_data.red.packet_count)
     return output_buffer
-
 
 @with_client
 def p4ctl_get_meter_entry(client, bridge, tbl_name, flow):
@@ -1738,11 +1738,12 @@ def p4ctl_get_meter_entry(client, bridge, tbl_name, flow):
             if entry.meter_entry.meter_id == ce.meter_id and entry.meter_entry.index.index == int(idx):
                 print(_format_me(entry.meter_entry))
 
-def p4ctl_get_direct_meter_entry(client, bridge, tbl_name, flow):
+@with_client
+def p4ctl_get_direct_pkt_mod_meter_entry(client, bridge, tbl_name, flow):
     """
-    get-direct-meter SWITCH METER_TABLE READ_METER_FLOW
+    get-direct-pkt-mod-meter SWITCH METER_TABLE READ_METER_FLOW
     Example 1: // return direct meter stats for matching key
-        p4rt-ctl get-direct-meter br0 my_control.e_fwd
+        p4rt-ctl get-direct-pkt-mod-meter br0 my_control.e_fwd
                     "hdrs.mac[vmeta.common.depth].da="0x000000000275",
                     hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9b1""
     """
@@ -1790,7 +1791,7 @@ all_commands = {
     "get-direct-counter" : (p4ctl_get_direct_counter_entry, 2),
     "reset-counter" : (p4ctl_reset_counter_entry, 2),
     "get-meter" : (p4ctl_get_meter_entry, 2),
-    "get-direct-meter" : (p4ctl_get_direct_meter_entry, 2)
+    "get-direct-pkt-mod-meter" : (p4ctl_get_direct_pkt_mod_meter_entry, 2)
 }
 
 
