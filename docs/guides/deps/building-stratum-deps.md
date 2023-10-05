@@ -20,7 +20,7 @@ Protobuf build to fail. This problem was fixed in version 3.26.
 
 ### 1.2 OpenSSL
 
-OpenSSL 1.1 must be installed. P4 Control Plane uses OpenSSL instead of
+OpenSSL 3.x must be installed. P4 Control Plane uses OpenSSL instead of
 BoringSSL.
 
 ## 2 Source Code

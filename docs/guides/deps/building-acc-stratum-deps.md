@@ -30,7 +30,7 @@ There are several things to do before you can build the dependencies.
 
   Avoid versions 3.24 and 3.25. They cause the dependencies build to fail.
 
-- Install OpenSSL 1.1
+- Install OpenSSL 3.x
 
   Note that P4 Control Plane is not compatible with BoringSSL.
 
