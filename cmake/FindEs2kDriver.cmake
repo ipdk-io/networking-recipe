@@ -19,6 +19,12 @@ if(NOT SDE_INCLUDE_DIR)
 endif()
 mark_as_advanced(SDE_INCLUDE_DIR)
 
+if(CMAKE_CROSSCOMPILING)
+  list(APPEND CMAKE_FIND_ROOT_PATH ${SDE_INSTALL_DIR})
+else()
+  list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
+endif()
+
 #-----------------------------------------------------------------------
 # Find libraries
 #-----------------------------------------------------------------------
