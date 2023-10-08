@@ -84,9 +84,9 @@ endif()
 # Global compiler settings #
 ############################
 
-add_basic_settings()
-#add_recent_security_settings(${CMAKE_BUILD_TYPE})
-add_legacy_security_settings()
+set_basic_compiler_options()
+set_legacy_security_options()
+#set_extended_security_options()
 
 add_compile_options(-D${TARGETFLAG})
 

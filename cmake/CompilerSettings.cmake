@@ -1,7 +1,9 @@
-# CompilerSettings.cmake - Apply recommended compiler settings.
+# CompilerSettings.cmake
 #
 # Copyright 2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
+#
+# Apply recommended compiler settings.
 #
 
 include(CheckCCompilerFlag)
@@ -13,7 +15,14 @@ include(CMakePrintHelpers)
 option(ENABLE_WARNING_SETTINGS "Enable compiler warnings" OFF)
 option(ENABLE_SPECTRE_SETTINGS "Enable Spectre mitigations" ON)
 
-function(add_basic_settings)
+macro(check_and_add_compile_option _option _have_flag)
+  check_c_compiler_flag(${_option} ${_have_flag})
+  if(${_have_flag})
+    add_compile_options(${_option})
+  endif()
+endmacro()
+
+function(set_basic_compiler_options)
   # Compiler flags
   add_compile_options("-pipe")
   add_compile_options("-feliminate-unused-debug-types")
@@ -23,11 +32,11 @@ function(add_basic_settings)
   add_link_options("-Wl,--hash-style=gnu")
   add_link_options("-Wl,--as-needed")
   add_link_options("-Wl,-z,now")
-endfunction(add_basic_settings)
+endfunction(set_basic_compiler_options)
 
-# Defines the security settings used in earlier versions
+# Enables the security settings used in earlier versions
 # of the software.
-function(add_legacy_security_settings)
+function(set_legacy_security_options)
   # Format String Defense
   add_compile_options("-Wformat")
   add_compile_options("-Wformat-security")
@@ -37,61 +46,43 @@ function(add_legacy_security_settings)
   set(CMAKE_POSITION_INDEPENDENT_CODE TRUE PARENT_SCOPE)
 
   # Preprocessor Macros
-  add_compile_options("-D_FORTIFY_SOURCE=2")
+  add_compile_definitions("_FORTIFY_SOURCE=2")
 
   # Read-only Relocation
   add_link_options("-Wl,-z,relro")
 
   # Stack Protection
   add_compile_options("-fstack-protector-strong")
-endfunction()
+endfunction(set_legacy_security_options)
 
-# Defines security settings according to the
+# Enables additional security settings in accordance with the
 # Intel Secure Coding Standards.
-function(add_recent_security_settings CONFIG)
-  string(TOUPPER ${CONFIG} CONFIG)
-  if(CONFIG STREQUAL "DEBUG")
-    set(IS_RELEASE FALSE)
+function(set_extended_security_options)
+  string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type)
+  if(_build_type STREQUAL "DEBUG")
+    set(_is_release FALSE)
   else()
-    set(IS_RELEASE TRUE)
+    set(_is_release TRUE)
   endif()
-
-  macro(check_and_add_option OPTION HAVE_FLAG)
-    check_c_compiler_flag(${OPTION} ${HAVE_FLAG})
-    if(${HAVE_FLAG})
-      add_compile_options(${OPTION})
-    endif()
-  endmacro()
 
   # Compiler Warnings and Error Detection
   if(ENABLE_WARNING_SETTINGS)
     add_compile_options("-Wall")
     add_compile_options("-Wextra")
-    if(IS_RELEASE)
+    if(_is_release)
       add_compile_options("-Werror")
     endif()
   endif()
 
   # Control Flow Integrity
-  check_and_add_option("-fsanitize=cfi" HAVE_SANITIZE_CFI)
-  if(IS_RELEASE)
-    check_and_add_option("-flto" HAVE_LTO)
-    check_and_add_option("-fvisibility=hidden" HAVE_VISIBILITY_HIDDEN)
-  endif()
-
-  # Format String Defense
-  check_and_add_option("-Wformat" HAVE_WFORMAT)
-  check_and_add_option("-Wformat-security" HAVE_WFORMAT_SECURITY)
-  if(IS_RELEASE)
-    check_and_add_option(
-        "-Werror=format-security" FLAGS_WERROR_FORMAT_SECURITY)
+  check_and_add_compile_option("-fsanitize=cfi" HAVE_SANITIZE_CFI)
+  if(_is_release)
+    check_and_add_compile_option("-flto" HAVE_LTO)
+    check_and_add_compile_option("-fvisibility=hidden" HAVE_VISIBILITY_HIDDEN)
   endif()
 
   # Inexecutable Stack
-  check_and_add_option("-Wl,-z,noexecstack" HAVE_NOEXECSTACK)
-
-  # Position Independent Code
-  set(CMAKE_POSITION_INDEPENDENT_CODE TRUE PARENT_SCOPE)
+  check_and_add_compile_option("-Wl,-z,noexecstack" HAVE_NOEXECSTACK)
 
   # Position Independent Execution
   check_pie_supported(LANGUAGES C CXX)
@@ -99,26 +90,17 @@ function(add_recent_security_settings CONFIG)
     add_compile_options("-fPIE -pie")
   endif()
 
-  # Preprocessor Macros
-  add_compile_definitions("FORTIFY_SOURCE=2")
-
-  # Read-only Relocation
-  check_and_add_option("-Wl,-z,relro" HAVE_RELRO)
-
-  # Stack Protection
-  add_compile_options("-fstack-protector-strong")
-
   # Spectre Protection
-  if(IS_RELEASE AND ENABLE_SPECTRE_SETTINGS)
+  if(_is_release AND ENABLE_SPECTRE_SETTINGS)
     # Mitigating Bounds Check Bypass (Spectre Variant 1)
-    check_and_add_option(
+    check_and_add_compile_option(
         "-mconditional-branch=keep" HAVE_COND_BRANCH_KEEP)
-    check_and_add_option(
+    check_and_add_compile_option(
         "-mconditional-branch=pattern-report" HAVE_COND_BRANCH_PATTERN_REPORT)
-    check_and_add_option(
+    check_and_add_compile_option(
         "-mconditional-branch=pattern-fix" HAVE_COND_BRANCH_PATTERN_FIX)
 
     # Mitigating Branch Target Injection (Spectre Variant 2)
-    check_and_add_option("-mretpoline" HAVE_RETPOLINE)
+    check_and_add_compile_option("-mretpoline" HAVE_RETPOLINE)
   endif()
-endfunction(add_recent_security_settings)
+endfunction(set_extended_security_options)
