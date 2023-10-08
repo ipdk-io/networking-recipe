@@ -53,7 +53,7 @@ message(STATUS "Found gRPC version ${gRPC_VERSION}")
 # Protobuf compiler.
 # Runs on the development system.
 #-----------------------------------------------------------------------
-find_program(HOST_PROTOC "protoc")
+find_program(HOST_PROTOC "protoc" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_PROTOC)
 
 if(HOST_PROTOC)
@@ -66,7 +66,7 @@ endif()
 # gRPC plugin for Protobuf compiler.
 # Runs on the development system.
 #-----------------------------------------------------------------------
-find_program(HOST_GRPC_CPP_PLUGIN "grpc_cpp_plugin")
+find_program(HOST_GRPC_CPP_PLUGIN "grpc_cpp_plugin" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_GRPC_CPP_PLUGIN)
 
 if(HOST_GRPC_CPP_PLUGIN)
