@@ -19,6 +19,9 @@ if(NOT SDE_INCLUDE_DIR)
 endif()
 mark_as_advanced(SDE_INCLUDE_DIR)
 
+#-----------------------------------------------------------------------
+# Add SDE install directory to search path
+#-----------------------------------------------------------------------
 if(CMAKE_CROSSCOMPILING)
   list(APPEND CMAKE_FIND_ROOT_PATH ${SDE_INSTALL_DIR})
 else()

@@ -26,6 +26,11 @@ endif()
 mark_as_advanced(SDE_INCLUDE_DIR)
 
 #-----------------------------------------------------------------------
+# Add SDE install directory to search path
+#-----------------------------------------------------------------------
+list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
+
+#-----------------------------------------------------------------------
 # Find libraries
 #-----------------------------------------------------------------------
 find_library(LIBBF_SWITCHD bf_switchd_lib)
