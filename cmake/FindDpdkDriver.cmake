@@ -8,12 +8,6 @@
 # It needs additional work to make it a proper CMake find-module.
 
 #-----------------------------------------------------------------------
-# Use pkg-config to find DPDK module
-#-----------------------------------------------------------------------
-include(FindPkgConfig)
-pkg_check_modules(DPDK REQUIRED libdpdk)
-
-#-----------------------------------------------------------------------
 # Define SDE_INCLUDE_DIR
 #-----------------------------------------------------------------------
 find_path(SDE_INCLUDE_DIR
@@ -120,6 +114,34 @@ set_target_properties(sde::target_utils PROPERTIES
     IMPORTED_LOCATION ${LIBTARGET_UTILS}
     INTERFACE_INCLUDE_DIRECTORIES ${SDE_INCLUDE_DIR}
     IMPORTED_LINK_INTERFACE_LANGUAGES C)
+
+#-----------------------------------------------------------------------
+# Append SDE pkgconfig directories to PKG_CONFIG_PATH
+#-----------------------------------------------------------------------
+function(_set_pkg_config_path)
+  file(TO_CMAKE_PATH "$ENV{PKG_CONFIG_PATH}" _sde_pkg_path)
+
+  foreach(_libdir lib lib64 lib/x86_64-linux-gnu)
+    set(_path ${SDE_INSTALL_DIR}/${_libdir}/pkgconfig)
+    if(EXISTS ${_path})
+      list(APPEND _sde_pkg_path ${_path})
+    endif()
+  endforeach()
+
+  list(JOIN _sde_pkg_path ":" _sde_pkg_path)
+
+  if(NOT _sde_pkg_path STREQUAL "")
+    set(ENV{PKG_CONFIG_PATH} "${_sde_pkg_path}")
+  endif()
+endfunction()
+
+_set_pkg_config_path()
+
+#-----------------------------------------------------------------------
+# Use pkg-config to find DPDK module
+#-----------------------------------------------------------------------
+include(FindPkgConfig)
+pkg_check_modules(DPDK REQUIRED libdpdk)
 
 #-----------------------------------------------------------------------
 # Define SDE_LIBRARY_DIRS
