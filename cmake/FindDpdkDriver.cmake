@@ -141,14 +141,14 @@ _set_pkg_config_path()
 # Use pkg-config to find DPDK module
 #-----------------------------------------------------------------------
 include(FindPkgConfig)
-pkg_check_modules(DPDK REQUIRED libdpdk)
+pkg_check_modules(DpdkDriver REQUIRED libdpdk)
 
 #-----------------------------------------------------------------------
 # Define SDE_LIBRARY_DIRS
 #-----------------------------------------------------------------------
 set(SDE_LIBRARY_DIRS
     ${SDE_INSTALL_DIR}/lib
-    ${DPDK_LIBRARY_DIRS}
+    ${DpdkDriver_LIBRARY_DIRS}
 )
 
 #-----------------------------------------------------------------------
@@ -167,7 +167,7 @@ function(add_dpdk_target_libraries TGT)
   target_link_directories(${TGT} PUBLIC ${SDE_LIBRARY_DIRS})
 
   target_link_options(${TGT} PUBLIC
-      ${DPDK_LD_FLAGS}
-      ${DPDK_LDFLAGS_OTHER}
+      ${DpdkDriver_LDFLAGS}
+      ${DpdkDriver_LDFLAGS_OTHER}
   )
 endfunction()
