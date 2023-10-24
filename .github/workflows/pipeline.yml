@@ -1,0 +1,150 @@
+name: "P4 Control Plane CI Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+      - ipdk_v*
+  pull_request:
+    branches:
+      - main
+      - ipdk_v*
+
+concurrency:
+  # If workflow for PR or push is already running, stop it and start a new one.
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+env:
+  #---------------------------------------------------------------------
+  # Environment variables
+  #---------------------------------------------------------------------
+  SDE_REPOSITORY: ipdk-io/p4dev.dpdk-sde
+  SDE_TAG: 2023.10.1
+  SDE_FILENAME: dpdk-sde-dev-ubuntu-20.04.tar.gz
+  SDE_INSTALL_DIR: /opt/p4dev/dpdk-sde
+
+  DEPS_REPOSITORY: ipdk-io/stratum-deps
+  DEPS_TAG: v1.2.1
+  DEPS_FILENAME: deps-ubuntu-latest-x86_64.tar.gz
+  DEPS_INSTALL_DIR: /opt/p4dev/x86deps
+
+  PREREQS: libbsd-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev
+
+jobs:
+  #---------------------------------------------------------------------
+  # 1-build_dpdk_p4cp
+  #---------------------------------------------------------------------
+  build_dpdk_p4cp:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: recipe
+
+      - name: Install prerequisites
+        run: |
+          sudo apt install $PREREQS
+
+      - name: Install DPDK SDE
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: ${{ env.SDE_REPOSITORY }}
+          tag: ${{ env.SDE_TAG }}
+          fileName: ${{ env.SDE_FILENAME }}
+
+      - run: |
+          sudo tar -xzf $SDE_FILENAME -C /
+          rm $SDE_FILENAME
+
+      - name: Install stratum dependencies
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: ${{ env.DEPS_REPOSITORY }}
+          tag: ${{ env.DEPS_TAG }}
+          fileName: ${{ env.DEPS_FILENAME }}
+
+      - run: |
+          sudo tar -xzf $DEPS_FILENAME -C /
+          rm $DEPS_FILENAME
+
+      - name: Build networking-recipe
+        working-directory: recipe
+        run: |
+          export DEPEND_INSTALL=$DEPS_INSTALL_DIR
+          export SDE_INSTALL=$SDE_INSTALL_DIR
+          ./make-all.sh --target=dpdk --rpath
+
+  #---------------------------------------------------------------------
+  # 2-krnlmon_unit_tests
+  #---------------------------------------------------------------------
+  krnlmon_unit_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v3
+        with:
+          path: recipe
+
+      - name: Initialize krnlmon submodule
+        working-directory: recipe
+        run: git submodule update --init --checkout --depth 1 krnlmon
+
+      - name: Install prerequisites
+        run: |
+          sudo apt install $PREREQS
+
+      - name: Install DPDK SDE
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: ${{ env.SDE_REPOSITORY }}
+          tag: ${{ env.SDE_TAG }}
+          fileName: ${{ env.SDE_FILENAME }}
+
+      - run: |
+          sudo tar -xzf $SDE_FILENAME -C /
+          rm $SDE_FILENAME
+
+      - name: Install stratum dependencies
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: ${{ env.DEPS_REPOSITORY }}
+          tag: ${{ env.DEPS_TAG }}
+          fileName: ${{ env.DEPS_FILENAME }}
+
+      - run: |
+          sudo tar -xzf $DEPS_FILENAME -C /
+          rm $DEPS_FILENAME
+
+      - name: Run krnlmon unit tests
+        working-directory: recipe/krnlmon/krnlmon
+        run: |
+          export DEPEND_INSTALL=$DEPS_INSTALL_DIR
+          export SDE_INSTALL=$SDE_INSTALL_DIR
+          cmake -S . -B build -DTDI_TARGET=DPDK
+          cmake --build build --target krnlmon-test
+
+  #---------------------------------------------------------------------
+  # 3-py_bandit_check
+  #---------------------------------------------------------------------
+  py_bandit_check:
+     timeout-minutes: 10
+     runs-on: ubuntu-latest
+     steps:
+       - name: Clone networking-recipe
+         uses: actions/checkout@v3
+         with:
+           path: recipe
+
+       - name: Check p4rt-ctl
+         uses: tj-actions/bandit@v5.1
+         with:
+           targets: |  # or a single string "."
+            ./recipe/clients/p4rt-ctl/p4rt-ctl.in
+           options: "-v"
