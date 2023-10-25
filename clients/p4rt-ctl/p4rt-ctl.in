@@ -39,7 +39,6 @@ import threading
 import time
 import fcntl
 import select
-import subprocess
 from functools import wraps
 
 import google.protobuf.text_format
@@ -675,9 +674,9 @@ class P4RuntimeClient:
         packet_out_req.packet.CopyFrom(packet_out)
         self.stream_out_q.put(packet_out_req)
 
-    # Continously poll for pkts from the server
+    # Continuously poll for pkts from the server
     def pktio_rx(self, tap_device):
-        print("Waiting for Rx pkts...")
+        print("Waiting for Rx packets...")
         while True:
             pkt = self.get_packet_in()
             if pkt is not None:
@@ -792,14 +791,11 @@ def p4ctl_show(client, bridge):
 def p4ctl_set_pipe(client, bridge, device_config, p4info):
     client.set_fwd_pipe_config(p4info, device_config)
 
-TUNSETIFF = 0x400454CA
-IFF_TAP = 0x0002
-IFF_NO_PI = 0x1000
-MAX_FRAME_SIZE = 1500
-SELECT_TIMEOUT = 0.1
-
 class TapDevice:
     def __init__(self, tap_name):
+        TUNSETIFF = 0x400454CA
+        IFF_TAP = 0x0002
+        IFF_NO_PI = 0x1000
         try:
             self.tap = os.open("/dev/net/tun", os.O_RDWR)
 
@@ -807,15 +803,14 @@ class TapDevice:
             ifr = struct.pack('16sH', tap_name.encode(), IFF_TAP | IFF_NO_PI)
             fcntl.ioctl(self.tap, TUNSETIFF, ifr)
 
-            # Bring the TAP interface up.
-            subprocess.run(["sudo", "ip", "link", "set", "dev", tap_name, "up"], check=True)
-
             print(f"Created TAP device {tap_name}")
         except Exception as e:
             print(f"Error creating TAP interface: {e}")
 
     # Continuously reads pkts from TAP port and sends them out to the server
     def read(self, client):
+        MAX_FRAME_SIZE = 1500
+        SELECT_TIMEOUT = 0.1
         while True:
             readable, _, _ = select.select([self.tap], [], [], SELECT_TIMEOUT)
             if self.tap in readable:
