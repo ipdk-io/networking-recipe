@@ -39,6 +39,7 @@ import threading
 import time
 import fcntl
 import select
+import subprocess
 from functools import wraps
 
 import google.protobuf.text_format
@@ -807,7 +808,7 @@ class TapDevice:
             fcntl.ioctl(self.tap, TUNSETIFF, ifr)
 
             # Bring the TAP interface up.
-            os.system(f"sudo ip link set dev {tap_name} up")
+            subprocess.run(["sudo", "ip", "link", "set", "dev", tap_name, "up"], check=True)
 
             print(f"Created TAP device {tap_name}")
         except Exception as e:
