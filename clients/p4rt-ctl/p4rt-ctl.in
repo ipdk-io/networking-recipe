@@ -806,6 +806,8 @@ class TapDevice:
             print(f"Created TAP device {tap_name}")
         except Exception as e:
             print(f"Error creating TAP interface: {e}")
+            if self.tap is not None:
+                 os.close(self.tap)
 
     # Continuously reads pkts from TAP port and sends them out to the server
     def read(self, client):
