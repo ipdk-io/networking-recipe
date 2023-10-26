@@ -792,7 +792,12 @@ def p4ctl_set_pipe(client, bridge, device_config, p4info):
     client.set_fwd_pipe_config(p4info, device_config)
 
 class TapDevice:
-    def __init__(self, tap_name):
+    def __init__(self, tap_no):
+        if tap_no < 0 or tap_no > 255:
+            raise ValueError("TAP number {%u} is invalid" % tap_no)
+
+        self.tap_name = "pktioTap{}".format(tap_no)
+
         TUNSETIFF = 0x400454CA
         IFF_TAP = 0x0002
         IFF_NO_PI = 0x1000
@@ -800,10 +805,13 @@ class TapDevice:
             self.tap = os.open("/dev/net/tun", os.O_RDWR)
 
             # Configure the TAP interface.
-            ifr = struct.pack('16sH', tap_name.encode(), IFF_TAP | IFF_NO_PI)
+            ifr = struct.pack('16sH', self.tap_name.encode(), IFF_TAP | IFF_NO_PI)
             fcntl.ioctl(self.tap, TUNSETIFF, ifr)
 
-            print(f"Created TAP device {tap_name}")
+            # Bring the TAP interface up.
+            os.system(f"sudo ip link set dev {self.tap_name} up")
+
+            print(f"Created TAP device {self.tap_name}")
         except Exception as e:
             print(f"Error creating TAP interface: {e}")
             if self.tap is not None:
@@ -833,10 +841,13 @@ def read_from_tap(tap, client):
 
 @with_client
 def p4ctl_start_pktio(client, bridge):
-    tap_device = TapDevice("pktioTap0")
-    tx_thread = threading.Thread(target=read_from_tap, args=(tap_device,client))
-    tx_thread.start()
-    client.pktio_rx(tap_device)
+    try:
+        tap_device = TapDevice(0)
+        tx_thread = threading.Thread(target=read_from_tap, args=(tap_device,client))
+        tx_thread.start()
+        client.pktio_rx(tap_device)
+    except Exception as e:
+        print(f"Error: Failed to start packetIo {e}")
 
 @with_client
 def p4ctl_get_pipe(client, bridge):
