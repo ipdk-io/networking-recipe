@@ -13,7 +13,9 @@ include(CMakePrintHelpers)
 # Disabled by default, on the assumption that the choice of warnings
 # is best left to the application.
 option(ENABLE_WARNING_SETTINGS "Enable compiler warnings" OFF)
-option(ENABLE_SPECTRE_SETTINGS "Enable Spectre mitigations" ON)
+option(ENABLE_SPECTRE_SETTINGS "Enable Spectre mitigations" OFF)
+mark_as_advanced(ENABLE_WARNING_SETTINGS)
+mark_as_advanced(ENABLE_SPECTRE_SETTINGS)
 
 macro(check_and_add_compile_option _option _have_flag)
   check_c_compiler_flag(${_option} ${_have_flag})
