@@ -792,11 +792,9 @@ def p4ctl_set_pipe(client, bridge, device_config, p4info):
     client.set_fwd_pipe_config(p4info, device_config)
 
 class TapDevice:
-    def __init__(self, tap_no):
-        if tap_no < 0 or tap_no > 255:
-            raise ValueError("TAP number {%u} is invalid" % tap_no)
+    def __init__(self, tap_name):
 
-        self.tap_name = "pktioTap{}".format(tap_no)
+        self.tap_name = tap_name
 
         TUNSETIFF = 0x400454CA
         IFF_TAP = 0x0002
@@ -807,9 +805,6 @@ class TapDevice:
             # Configure the TAP interface.
             ifr = struct.pack('16sH', self.tap_name.encode(), IFF_TAP | IFF_NO_PI)
             fcntl.ioctl(self.tap, TUNSETIFF, ifr)
-
-            # Bring the TAP interface up.
-            os.system(f"sudo ip link set dev {self.tap_name} up")
 
             print(f"Created TAP device {self.tap_name}")
         except Exception as e:
@@ -842,7 +837,7 @@ def read_from_tap(tap, client):
 @with_client
 def p4ctl_start_pktio(client, bridge):
     try:
-        tap_device = TapDevice(0)
+        tap_device = TapDevice("pktioTap0")
         tx_thread = threading.Thread(target=read_from_tap, args=(tap_device,client))
         tx_thread.start()
         client.pktio_rx(tap_device)
