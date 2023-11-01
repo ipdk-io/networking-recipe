@@ -13,12 +13,16 @@ upstreaming.
 It moves the P4-specific components of the architecture from `ovs-vswitchd`
 to a separate process called `infrap4d`.
 
-## Upcoming changes
+See the [Overview](https://ipdk.io/p4cp-userguide/overview/overview.html)
+section of the User Guide for a description of the components.
 
-The Stratum dependencies will be moving from the `setup` directory to
-a separate `stratum-deps` repository towards the end of October 2023.
+## Major changes
 
-See the setup directory's [README file](setup/README.md) for more information.
+The Stratum dependencies component has formally moved from the `setup`
+directory to a new <https://github.com/ipdk-io/stratum-deps> repository.
+
+See the [README file](setup/README.md) in the `setup` directory
+for more information.
 
 ## Source code
 
@@ -27,17 +31,6 @@ To download the source code for P4 Control Plane:
 ```bash
 git clone --recursive https://github.com/ipdk-io/networking-recipe
 ```
-
-## Targets
-
-P4 Control Plane can be configured at build time to support any one
-of the following targets:
-
-| Target | Instructions |
-| ------ | ------------ |
-| dpdk   | [DPDK Setup Guide](https://ipdk.io/p4cp-userguide/guides/setup/dpdk-setup-guide.html) |
-| es2k   | [ES2K Setup Guide](https://ipdk.io/p4cp-userguide/guides/setup/es2k-setup-guide.html) |
-| tofino | [Tofino Setup Guide](https://ipdk.io/p4cp-userguide/guides/setup/tofino-setup-guide.html) |
 
 ## Documentation
 
