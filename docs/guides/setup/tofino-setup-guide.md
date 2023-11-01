@@ -1,8 +1,6 @@
 # Tofino Setup Guide
 
-## Overview
-
-This document explains how to install, build, and run the P4 Control Plane
+This document explains how to build, install, and run the P4 Control Plane
 software on Tofino hardware.
 
 Similar steps apply when running on the Tofino simulation model. Please see
@@ -34,10 +32,16 @@ docker run --privileged --cap-add=ALL -it --name infrap4d --network host -d ubun
 
 ### Git
 
-Clone IPDK networking-recipe
+Clone IPDK networking-recipe:
 
 ```bash
 git clone --recursive git@github.com:ipdk-io/networking-recipe.git ipdk.recipe
+```
+
+Clone the repository used to build the Stratum dependencies:
+
+```bash
+git clone --recursive https://github.com/ipdk-io/stratum-deps.git
 ```
 
 ### Intel P4Studio
@@ -60,22 +64,18 @@ docker exec -it infrap4d bash
 
 ### Install basic utilities
 
-See the [OpenSSL security guide](/guides/security/openssl-guide.md)
-for OpenSSL version and EOL information.
-
----
-
 ```bash
 apt-get update
 apt-get install sudo git cmake autoconf gcc g++ libtool python3 python3-dev python3-distutils iproute2 libssl-dev
 ```
 
-### Build and install infrap4d dependencies
+See the [OpenSSL security guide](/guides/security/openssl-guide.md)
+for OpenSSL version and EOL information.
+
+### Build and install stratum dependencies
 
 ```bash
-cd ipdk.recipe
-export IPDK_RECIPE=`pwd`
-cd $IPDK_RECIPE/setup
+cd stratum-deps
 cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/
 make
 ldconfig

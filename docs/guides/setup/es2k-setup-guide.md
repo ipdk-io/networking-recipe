@@ -1,42 +1,32 @@
 # ES2K Setup Guide
 
-## Overview
-
-This document explains how to install, build, and run P4 Control Plane
+This document explains how to build, install, and run P4 Control Plane
 for the ES2K target.
 
 P4 Control Plane can be built to run on an x86 host processor or the ARM
 Compute Complex (ACC). These instructions are for the host processor.
 For the ACC, see [Building for the ES2K ACC](/guides/building-for-es2k-acc).
 
-## Setup
+## Prerequisites
 
-### Install basic utilities
-
-See the [OpenSSL security guide](/guides/security/openssl-guide.md)
-for OpenSSL version and EOL information.
-
----
-
-For a Fedora system:
+For Fedora:
 
 ```bash
-yum install libatomic libnl3-devel openssl-devel
-```
-
-For an Ubuntu system:
-
-```bash
-apt install libatomic1 libnl-route-3-dev libssl-dev
-```
-
-For all systems:
-
-```bash
+yum install libatomic libnl3-devel
 pip3 install -r requirements.txt
 ```
 
-### Install P4 SDE
+For Ubuntu:
+
+```bash
+apt install libatomic1 libnl-route-3-dev
+pip3 install -r requirements.txt
+```
+
+See the [OpenSSL security guide](/guides/security/openssl-guide.md)
+for information on installing OpenSSL.
+
+## Build and install ES2K SDE
 
 Obtain a copy of the IPU SDK (SDE) for the Intel&reg; IPU E2100 from the
 manufacturer, together with the instructions for building or installing it.
@@ -59,59 +49,83 @@ BuildID[sha1]=93b21eff920e615fee679b0bd0a3ecc0c1139575, for GNU/Linux 3.2.0,
 not stripped
 ```
 
-### Build and install infrap4d dependencies
+Remember the directory in which you install the ES2K SDE.
+You will need it to define the `SDE_INSTALL` environment variable.
+
+## Build and install stratum dependencies
+
+Clone the repository used to build the Stratum dependencies:
+
+```bash
+git clone --recursive https://github.com/ipdk-io/stratum-deps.git
+```
+
+Now follow the instructions in the
+[Building Host Dependencies](https://github.com/ipdk-io/stratum-deps/blob/main/docs/building-host-deps.md)
+document.
+
+Remember the directory in which you install the Stratum dependencies.
+You will need it to define the `DEPEND_INSTALL` environment variable.
+
+## Define environment variables
+
+Define the following environment variables. They supply default values to
+the build system and helper scripts.
+
+| Variable | Definition |
+| -------- | ---------- |
+| `DEPEND_INSTALL` | Path to the directory in which the Stratum dependencies are installed. |
+| `SDE_INSTALL` | Path to the directory in which the ES2K SDE is installed. |
+
+## Build P4 Control Plane
+
+### Clone repository
+
+Clone the repository used to build P4 Control Plane:
 
 ```bash
 git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
 cd ipdk.recipe
-export IPDK_RECIPE=`pwd`
-cd $IPDK_RECIPE/setup
-cmake -B build -DCMAKE_INSTALL_PREFIX=<dependency install path> [-DUSE_SUDO=ON]
-cmake --build build [-j<njobs>]
+export P4CP_RECIPE=`pwd`
 ```
 
-*Note*: If running as non-root user, provide `-DUSE_SUDO=ON` option to cmake
-config.
-
-### Build P4 Control Plane
-
-#### Set environment variables
-
-- export DEPEND_INSTALL=`absolute path for installing dependencies`
-- export SDE_INSTALL=`absolute path for p4 sde install built in previous step`
+### Compile the recipe
 
 ```bash
-cd $IPDK_RECIPE
-mkdir install
-export P4CP_INSTALL=`pwd`/install
+cd $P4CP_RECIPE
+./make-all.sh --target=es2k --rpath
 ```
 
-#### Compile the recipe
+By default, make-all.sh will create an `install` folder in the networking-recipe
+directory in which to install the build artifacts. You can specify a different
+directory by means of the `--prefix` parameter.
 
-```bash
-cd $IPDK_RECIPE
-./make-all.sh --target=es2k
-```
+See the [make-all.sh](/scripts/make-all.rst) user guide for information
+about the options of the `make-all.sh` helper script.
 
-*Note*: By default, `make-all.sh` will create an `install` directory under the
-networking recipe. User can specify a different directory using `--prefix`
-option to make-all.sh. The following examples assume default `install`
-directory for the executables. If not, user will need to specify the
-appropriate path instead of ./install.
+### Define P4CP_INSTALL
 
-### Run Infrap4d
+We recommend that you define the following environment variable:
 
-#### Set up the environment required by infrap4d
+| Variable | Definition |
+| -------- | ---------- |
+| `P4CP_INSTALL` | Path to the directory in which the P4 Control Plane build artifacts are installed. |
 
-*Note*: `sudo` option is required when running copy_config_files.sh since
-we are creating directories and copying config file at system level.
+It is used throughout the remainder of this document.
+
+## Run Infrap4d
+
+### Set up the environment required by infrap4d
+
+*Note*: `sudo` is required when running `copy_config_files.sh` since you are
+copying files to system directories.
 
 ```bash
 source $P4CP_INSTALL/sbin/setup_env.sh $P4CP_INSTALL $SDE_INSTALL $DEPEND_INSTALL
 sudo $P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 ```
 
-#### Set hugepages required for ES2K
+### Set hugepages required for ES2K
 
 Run the hugepages script.
 
@@ -119,17 +133,17 @@ Run the hugepages script.
 sudo $P4CP_INSTALL/sbin/set_hugepages.sh
 ```
 
-#### Export all environment variables to sudo user
+### Export all environment variables to sudo user
 
 ```bash
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
-#### Modify the conf file
+### Modify the conf file
 
 Update `/usr/share/stratum/es2k/es2k_skip_p4.conf` with CPF BDF as per your setup.
 User can get CPF BDF by running `lspci | grep 1453`
-Note: max vport you can pass here from [0-6] "eal-args": "--lcores=1-2 -a <cpf_bdf>,vport=[0-1] -- -i --rxq=1 --txq=1 --hairpinq=1 --hairpin-mode=0x0"
+Note: max vport you can pass here from [0-6] "eal-args": "--lcores=1-2 -a &lt;cpf_bdf&gt;,vport=[0-1] -- -i --rxq=1 --txq=1 --hairpinq=1 --hairpin-mode=0x0"
 
 Eg. "eal-args": "--lcores=1-2 -a 00:01.6,vport=[0-1] -- -i --rxq=1 --txq=1 --hairpinq=1 --hairpin-mode=0x0"
 
@@ -140,10 +154,10 @@ If you want 16 cfgqs, use "cfgqs-idx": "0-15". Specify the range as a string. In
 In multi process environment, user should plan and split the queues between primary and secondary processes and specify
 the range with cfgqs-idx parameter. Total number of queues split between processes should not exceed 16.
 
-#### Run the infrap4d daemon
+### Run the infrap4d daemon
 
 ```bash
-cd $IPDK_RECIPE
+cd $P4CP_RECIPE
 sudo $P4CP_INSTALL/sbin/infrap4d
 ```
 
@@ -151,7 +165,7 @@ sudo $P4CP_INSTALL/sbin/infrap4d
 attached mode, specify the --nodetach command-line option.
 
 - All infrap4d logs are by default logged under `/var/log/stratum`.
-- All P4SDE logs are logged in `p4_driver.log` under `$IPDK_RECIPE`.
+- All P4SDE logs are logged in `p4_driver.log` under `$P4CP_RECIPE`.
 *-All OVS logs are logged under `/tmp/ovs-vswitchd.log`.
 
 ### Run a sample program
@@ -165,7 +179,7 @@ $P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
-#### Create IPDF netdevs
+### Create IPDF netdevs
 
 After installing ATE Kernel on HOST machine, install the following drivers
 to bind the network devices (netdevs) to the E2100 target.
@@ -175,7 +189,7 @@ modprobe auxiliary
 modprobe idpf
 ```
 
-#### Create P4 artifacts
+### Create P4 artifacts
 
 - P4 programs are available in the P4 SDE repository.
 
@@ -222,13 +236,13 @@ $P4CP_INSTALL/bin/tdi_pipeline_builder \
     --bf_pipeline_config_binary_file=$OUTPUT_DIR/simple_l3_l4_pna.pb.bin
 ```
 
-#### Set forwarding pipeline
+### Set forwarding pipeline
 
 ```bash
 sudo $P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3_l4_pna.pb.bin $OUTPUT_DIR/simple_l3_l4_pna.p4info.txt
 ```
 
-#### Configure forwarding rule to receive traffic
+### Configure forwarding rule to receive traffic
 
 Add a forwarding rule to receive traffic on VSI-1 (base offset 16 + VSI ID 1) \
 when the key matches.
@@ -243,7 +257,7 @@ sudo  $P4CP_INSTALL/bin/p4rt-ctl add-entry br0 MainControlImpl.l3_l4_match_rx \
 See the [p4rt-ctl client guide](/clients/p4rt-ctl.rst) for more information
 on the `p4rt-ctl` utility.
 
-#### Test traffic from link partner to E2100
+### Test traffic from link partner to E2100
 
 Send a packet from a physical port of link partner to the E2100 using any
 traffic generator application, and listen on the netdev corresponding to VSI-1

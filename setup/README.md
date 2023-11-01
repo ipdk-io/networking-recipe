@@ -1,42 +1,26 @@
-# Stratum Dependencies
+<!-- markdownlint-disable MD026 -->
+# We've Moved!
+<!-- markdownlint-enable MD026 -->
 
-Stratum is the component of `infrap4d` that implements the P4Runtime and gNMI
-(OpenConfig) services.
+The Stratum dependencies have formally moved from the `setup` directory
+to a new <https://github.com/ipdk-io/stratum-deps> repository.
 
-This directory allows you to build and install the third-party libraries
-that Stratum requires.
+This change makes the dependencies easier to maintain, and it allows
+them to be downloaded and built independently of the Networking Recipe
+(P4 Control Plane).
 
-<!-- markdownlint-disable-next-line -->
-## We're Moving!
+See the [README file](https://github.com/ipdk-io/stratum-deps/blob/main/README.md)
+in the `stratum-deps` repository for more information.
 
-The Stratum dependencies are being relocated to their own repository,
-<https://github.com/ipdk-io/stratum-deps>.
+## Transition
 
-This allows the dependencies to be updated independently of the Networking
-Recipe (P4 Control Plane).
+We are retaining the `setup` directory for now, to allow users time to
+to transition to the `stratum-deps` repository. Note that this is an older
+version of the component and does not include any recent improvements.
 
-### Development
-
-New development is currently taking place in the `stratum-deps` repository.
+We will be removing the `setup` directory in the near future.
+You are encouraged to transition to `stratum-deps` as soon as possible.
 
 See the
-[change history](https://github.com/ipdk-io/stratum-deps/blob/main/docs/change-history.md)
-for more information.
-
-### Transition
-
-We plan to phase out the `networking-recipe/setup` directory toward the end
-of October 2023.
-
-If you would like to start using `stratum-deps` before then,
-[version 1.2.0](https://github.com/ipdk-io/stratum-deps/tree/v1.2.0)
-is a good place to start.
-
-### Documentation
-
-The `stratum-deps` repository includes updated versions of relevant sections
-of the user manual, plus new documentation on the helper scripts.
-
-See the repository's
-[README file](https://github.com/ipdk-io/stratum-deps/blob/main/README.md)
-for links to the documentation.
+[Transition Guide](https://github.com/ipdk-io/stratum-deps/blob/main/docs/transition-guide.md)
+for details.

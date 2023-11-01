@@ -1,76 +1,105 @@
 # DPDK Setup Guide
 
-## Overview
-
-This document explains how to install, build, and run P4 Control Plane
+This document explains how to build, install, and run P4 Control Plane
 for the DPDK target.
 
-## Setup
+## Prerequisites
 
-### Build P4 SDE for DPDK
+For Fedora:
+
+```bash
+yum install libatomic libnl3-devel
+pip3 install -r requirements.txt
+```
+
+For Ubuntu:
+
+```bash
+apt install libatomic1 libnl-route-3-dev
+pip3 install -r requirements.txt
+```
+
+See the [OpenSSL security guide](/guides/security/openssl-guide.md)
+for information on installing OpenSSL.
+
+## Build and install DPDK SDE
+
+Clone the repository used to build the DPDK SDE:
 
 ```bash
 git clone --recursive https://github.com/p4lang/p4-dpdk-target.git p4sde
 ```
 
-For build instructions, see [P4 SDE Readme](https://github.com/p4lang/p4-dpdk-target/blob/main/README.md#building-and-installing)
+Follow the build and installation instructions in the
+[P4 SDE Readme](https://github.com/p4lang/p4-dpdk-target/blob/main/README.md#building-and-installing).
 
-### Install basic utilities
+Remember the directory in which you install the DPDK SDE.
+You will need it to define the `SDE_INSTALL` environment variable.
 
-See the [OpenSSL security guide](/guides/security/openssl-guide.md)
-for OpenSSL version and EOL information.
+## Build and install stratum dependencies
 
----
+Clone the repository used to build the Stratum dependencies:
 
 ```bash
-For Fedora distro: yum install libatomic libnl3-devel openssl
-For Ubuntu distro: apt install libatomic1 libnl-route-3-dev openssl
-pip3 install -r requirements.txt
+git clone --recursive https://github.com/ipdk-io/stratum-deps.git
 ```
 
-### Build and install infrap4d dependencies
+Now follow the instructions in the
+[Building Host Dependencies](https://github.com/ipdk-io/stratum-deps/blob/main/docs/building-host-deps.md)
+document.
+
+Remember the directory in which you install the Stratum dependencies.
+You will need it to define the `DEPEND_INSTALL` environment variable.
+
+## Define environment variables
+
+Define the following environment variables. They supply default values to
+the build system and helper scripts.
+
+| Variable | Definition |
+| -------- | ---------- |
+| `DEPEND_INSTALL` | Path to the directory in which the Stratum dependencies are installed. |
+| `SDE_INSTALL` | Path to the directory in which the DPDK SDE is installed. |
+
+## Build networking recipe
+
+### Clone repository
+
+Clone the repository used to build P4 Control Plane:
 
 ```bash
 git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
 cd ipdk.recipe
-export IPDK_RECIPE=`pwd`
-cd $IPDK_RECIPE/setup
-cmake -B build -DCMAKE_INSTALL_PREFIX=<dependency install path> [-DUSE_SUDO=ON]
-cmake --build build [-j<njobs>]
+export P4CP_RECIPE=`pwd`
 ```
 
-*Note*: If running as non-root user, provide `-DUSE_SUDO=ON` option to cmake
-config.
-
-### Build Networking Recipe
-
-#### Set environment variables
-
-- export DEPEND_INSTALL=`absolute path for installing dependencies`
-- export SDE_INSTALL=`absolute path for p4 sde install built in previous step`
+### Compile the recipe
 
 ```bash
-cd $IPDK_RECIPE
-mkdir install
-export P4CP_INSTALL=`pwd`/install
+cd $P4CP_RECIPE
+./make-all.sh --target=dpdk --rpath
 ```
 
-#### Compile the recipe
+By default, make-all.sh will create an `install` folder in the networking-recipe
+directory in which to install the build artifacts. You can specify a different
+directory by means of the `--prefix` parameter.
 
-```bash
-cd $IPDK_RECIPE
-./make-all.sh --target=dpdk
-```
+See the [make-all.sh](/scripts/make-all.rst) user guide for information
+about the options of the `make-all.sh` helper script.
 
-*Note*: By default, make-all.sh will create the `install` directory under the
-networking recipe. You can specify a different directory using the `--prefix`
-option to `make-all.sh`. The following examples assume the default `install`
-directory for the executables. If not, you will need to specify the
-appropriate path instead of `./install`.
+### Define P4CP_INSTALL
 
-### Run P4 Control Plane
+We recommend that you define the following environment variable:
 
-#### Set up the environment required by infrap4d
+| Variable | Definition |
+| -------- | ---------- |
+| `P4CP_INSTALL` | Path to the directory in which the P4 Control Plane build artifacts are installed. |
+
+It is used throughout the remainder of this document.
+
+## Run Infrap4d
+
+### Set up the environment required by infrap4d
 
 *Note*: `sudo` is required when running `copy_config_files.sh` since you are
 copying files to system directories.
@@ -80,7 +109,7 @@ source $P4CP_INSTALL/sbin/setup_env.sh $P4CP_INSTALL $SDE_INSTALL $DEPEND_INSTAL
 sudo $P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 ```
 
-#### Set hugepages required for DPDK
+### Set hugepages required for DPDK
 
 Run the hugepages script.
 
@@ -88,13 +117,13 @@ Run the hugepages script.
 sudo $P4CP_INSTALL/sbin/set_hugepages.sh
 ```
 
-#### Export all environment variables to sudo user
+### Export all environment variables to sudo user
 
 ```bash
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
-#### Run the infrap4d daemon
+### Run the infrap4d daemon
 
 By default, infrap4d runs in secure mode and expects certificates to be available in
 a specific directory. For information on running infrap4d in insecure mode, or steps to generate TLS
@@ -108,7 +137,7 @@ sudo $P4CP_INSTALL/sbin/infrap4d
  infrap4d in attached mode, use the `--nodetach` option.
 
 - All infrap4d logs are by default logged under /var/log/stratum.
-- All P4SDE logs are logged in p4_driver.log under $IPDK_RECIPE.
+- All P4SDE logs are logged in p4_driver.log under $P4CP_RECIPE.
 - All OVS logs are logged under /tmp/ovs-vswitchd.log.
 
 ### Run a sample program
@@ -122,7 +151,7 @@ $P4CP_INSTALL/sbin/copy_config_files.sh $P4CP_INSTALL $SDE_INSTALL
 alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" SDE_INSTALL="$SDE_INSTALL"'
 ```
 
-#### Create 2 TAP ports
+### Create two TAP ports
 
 ```bash
 sudo ./install/bin/gnmi-ctl set "device:virtual-device,name:TAP0,pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP"
@@ -134,7 +163,7 @@ ifconfig TAP1 up
  *Note*: See [gnmi-ctl client guide](/clients/gnmi-ctl.rst)
  for more information on the gnmi-ctl utility.
 
-#### Create P4 artifacts
+### Create P4 artifacts
 
 - Clone the ipdk repo for scripts to build p4c and sample p4 program
 
@@ -146,7 +175,7 @@ git clone https://github.com/ipdk-io/ipdk.git --recursive ipdk-io
   and follow the readme for procedure. Alternatively, refer to
   [p4c script](https://github.com/ipdk-io/ipdk/blob/main/build/networking/scripts/build_p4c.sh)
 
-- Set the environment variable OUTPUT_DIR to the location where artifacts
+- Set the environment variable OUTPUT_DIR to the directory in which artifacts
   should be generated and where p4 files are available
 
 ```bash
