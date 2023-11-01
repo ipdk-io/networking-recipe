@@ -796,6 +796,8 @@ class TapDevice:
 
         self.tap_name = tap_name
 
+        # constants derived from
+        # https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/if_tun.h#L34
         TUNSETIFF = 0x400454CA
         IFF_TAP = 0x0002
         IFF_NO_PI = 0x1000
