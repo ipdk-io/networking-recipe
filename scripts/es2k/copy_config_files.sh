@@ -18,15 +18,17 @@ then
     return 0
 fi
 
-export IPDK_RECIPE=$1
+export IPDK_INSTALL=$1
 export SDE_INSTALL=$2
 
 #... Create required directories and copy the config files ...#
-cd $IPDK_RECIPE
+cd $IPDK_INSTALL
 sudo mkdir -p /etc/stratum/
 sudo mkdir -p /var/log/stratum/
 sudo mkdir -p /usr/share/stratum/es2k
-sudo cp ./install/share/stratum/es2k/es2k_port_config.pb.txt /usr/share/stratum/es2k/
-sudo cp ./install/share/stratum/es2k/es2k_skip_p4.conf /usr/share/stratum/es2k/
+sudo mkdir -p /usr/share/bf_rt_shared
+sudo cp $IPDK_INSTALL/share/stratum/es2k/es2k_port_config.pb.txt /usr/share/stratum/es2k/
+sudo cp $IPDK_INSTALL/share/stratum/es2k/es2k_skip_p4.conf /usr/share/stratum/es2k/
+sudo cp $SDE_INSTALL/share/bf_rt_shared/tdi_pktio.json /usr/share/bf_rt_shared/
 sudo cp $SDE_INSTALL/share/target_sys/zlog-cfg /usr/share/target_sys/
 set +e
