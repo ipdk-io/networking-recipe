@@ -12,6 +12,7 @@ pkg_check_modules(PC_OVS libopenvswitch REQUIRED)
 
 #-----------------------------------------------------------------------
 # Find include directory
+# We rely on find_package_handle_standard_args() to check for errors
 #-----------------------------------------------------------------------
 find_path(OVS_INCLUDE_DIR
     NAMES "openvswitch/version.h"
@@ -21,6 +22,8 @@ mark_as_advanced(OVS_INCLUDE_DIR)
 
 #-----------------------------------------------------------------------
 # Find libraries
+# We rely on find_package_handle_standard_args() to check for errors
+# Not all libraries are required
 #-----------------------------------------------------------------------
 find_library(OVS_LIBRARY
     NAMES openvswitch
