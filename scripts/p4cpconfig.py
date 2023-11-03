@@ -3,7 +3,7 @@
 # Copyright 2023 Intel Corporation.
 # SPDX-License-Identifier: Apache-2.0
 #
-# Generates P4 Control Plane configuration files.
+# Generates P4 Control Plane build configuration files.
 #
 
 import argparse
@@ -411,12 +411,12 @@ def resolve_path(name, value, check_path=True):
     return realpath
 
 #-----------------------------------------------------------------------
-# parse_args() - Parses the command-line parameters.
+# create_parser() - Creates the command-line parser.
 #-----------------------------------------------------------------------
-def parse_args():
+def create_parser():
     parser = argparse.ArgumentParser(
-        prog='setup-util.py',
-        description='Generates build configuration file(s) for a target.')
+        prog='p4cpconfig',
+        description='Generates build configuration file for a target.')
 
     parser.add_argument('--format', '-f', type=str,
                         default='cmake',
@@ -464,9 +464,10 @@ def parse_args():
     options.add_argument('--with-ovs', type=str2bool,
                          help='include open vswitch')
 
-    return parser.parse_args()
+    return parser
 
 def str2bool(v):
+    """Converts a string to a Boolean value."""
     if isinstance(v, bool):
         return v
     if v.lower() in ('yes', 'on', 'true', 't', 'y', '1'):
@@ -482,7 +483,8 @@ def str2bool(v):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
-    args = parse_args()
+    parser = create_parser()
+    args = parser.parse_args()
     process_args(args)
 
     if errcount != 0:
