@@ -21,9 +21,11 @@ or add to the parameters in the configuration file.
 Output formats
 ==============
 
+The output file format may be specified using the ``--format`` (``-f``)
+parameter. The default value is ``cmake``.
+
 +-----------+--------------------------------------------------------+
-| ``cmake`` | Output will be a cmake configuration file. This is the |
-|           | default output format.                                 |
+| ``cmake`` | Output will be a cmake configuration file.             |
 +-----------+--------------------------------------------------------+
 | ``env``   | Output will be a file that sets environment variables. |
 +-----------+--------------------------------------------------------+
