@@ -52,6 +52,8 @@ message(STATUS "Found gRPC version ${gRPC_VERSION}")
 #-----------------------------------------------------------------------
 # Protobuf compiler.
 # Runs on the development system.
+#
+# TODO: rename to HOST_PROTOC_COMMAND.
 #-----------------------------------------------------------------------
 find_program(HOST_PROTOC "protoc" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_PROTOC)
@@ -63,8 +65,8 @@ else()
 endif()
 
 #-----------------------------------------------------------------------
-# gRPC plugin for Protobuf compiler.
-# Runs on the development system.
+# gRPC c++ plugin for the Protobuf compiler.
+# Runs on the development (host) system.
 #-----------------------------------------------------------------------
 find_program(HOST_GRPC_CPP_PLUGIN "grpc_cpp_plugin" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_GRPC_CPP_PLUGIN)
@@ -73,6 +75,19 @@ if(HOST_GRPC_CPP_PLUGIN)
   message(STATUS "Found grpc_cpp_plugin: ${HOST_GRPC_CPP_PLUGIN}")
 else()
   message(FATAL_ERROR "grpc_cpp_plugin not found")
+endif()
+
+#-----------------------------------------------------------------------
+# gRPC Python plugin for the Protobuf compiler.
+# Runs on the development (host) system.
+#-----------------------------------------------------------------------
+find_program(HOST_GRPC_PY_PLUGIN "grpc_python_plugin" NO_CMAKE_FIND_ROOT_PATH)
+mark_as_advanced(HOST_GRPC_PY_PLUGIN)
+
+if(HOST_GRPC_PY_PLUGIN)
+  message(STATUS "Found grpc_python_plugin: ${HOST_GRPC_PY_PLUGIN}")
+else()
+  message(FATAL_ERROR "grpc_python_plugin not found")
 endif()
 
 #-----------------------------------------------------------------------
