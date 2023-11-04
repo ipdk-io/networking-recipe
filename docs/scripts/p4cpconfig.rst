@@ -6,20 +6,10 @@ p4cpconfig.py
 =============
 
 Generates a file that defines one or more build parameters, which may
-be specified to ``cmake`` when configuring the build:
+be specified to ``cmake`` when configuring the build.
 
-.. code-block:: text
-
-  cmake -B build -C es2k-setup.cmake [parameters]
-
-Parameters specified on the cmake command line will add to, or override,
-the parameters in the configuration file.
-
-If ``--format=env`` is specified, p4cpconfig will generate a file
-that sets environment variables.
-
-If ``--format=json`` is specified, the output will be a JSON file that
-that can be used to specify default settings on a subsequent run.
+Additional parameters may specified on the cmake command line to override
+or add to the parameters in the configuration file.
 
 .. note::
 
@@ -27,6 +17,19 @@ that can be used to specify default settings on a subsequent run.
   Parameters and functionality may change.
 
   This version does not support cross-compilation for ACC.
+
+Output formats
+==============
+
++-----------+--------------------------------------------------------+
+| ``cmake`` | Output will be a cmake configuration file. This is the |
+|           | default output format.                                 |
++-----------+--------------------------------------------------------+
+| ``env``   | Output will be a file that sets environment variables. |
++-----------+--------------------------------------------------------+
+| ``json``  | Output will be a JSON file that that can be used to    |
+|           | specify default settings on a subsequent run.          |
++-----------+--------------------------------------------------------+
 
 Syntax
 ======
@@ -194,7 +197,7 @@ The file it generates will be something like this:
 JSON configuration file
 -----------------------
 
-In this example, we're going to specify a build configuration and save it
+In this example, we're going to define a build configuration and save it
 to a json file.
 
 .. code-block:: bash
