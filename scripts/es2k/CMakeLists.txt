@@ -12,7 +12,7 @@ add_custom_target(es2k-copy-script ALL
     ${GENSCRIPT_COMMAND}
     --template=${_template}
     --output=${_outfile}
-    --target=dpdk
+    --target=es2k
   BYPRODUCTS
     ${_outfile}
   WORKING_DIRECTORY
