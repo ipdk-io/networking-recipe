@@ -162,8 +162,8 @@ Options
 Examples
 ========
 
-Default configuration
----------------------
+Default configuration file
+--------------------------
 
 By default, ``make-all.sh`` creates a separate install tree for OVS,
 the P4 Control Plane ``install`` tree is under the main directory,
@@ -246,8 +246,8 @@ This produces the following cmake file:
   set(SET_RPATH True CACHE BOOL "config: whether to set RPATH in binary artifacts")
   set(TDI_TARGET "ES2K" CACHE STRING "config: TDI target to build")
 
-Derivative configuration
-------------------------
+Derivative configuration file
+-----------------------------
 
 In the above examples, we could have created the the CMake file directly,
 instead of generating a JSON file first.
