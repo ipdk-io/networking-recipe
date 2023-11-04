@@ -239,10 +239,10 @@ This produces the following cmake file:
 .. code-block:: cmake
 
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "config: build configuration")
-  set(CMAKE_INSTALL_PREFIX "/home/dfoster/work/latest/install" CACHE PATH "config: install path prefix")
+  set(CMAKE_INSTALL_PREFIX "/home/rocky/work/latest/install" CACHE PATH "config: install path prefix")
   set(DEPEND_INSTALL_DIR "/opt/deps" CACHE PATH "config: dependencies install directory")
-  set(OVS_INSTALL_DIR "/home/dfoster/work/latest/ovs/install" CACHE PATH "config: ovs install directory")
-  set(SDE_INSTALL_DIR "/home/dfoster/mev-p4-sde/install" CACHE PATH "config: SDE install directory")
+  set(OVS_INSTALL_DIR "/home/rocky/work/latest/ovs/install" CACHE PATH "config: ovs install directory")
+  set(SDE_INSTALL_DIR "/home/rocky/mev-p4-sde/install" CACHE PATH "config: SDE install directory")
   set(SET_RPATH True CACHE BOOL "config: whether to set RPATH in binary artifacts")
   set(TDI_TARGET "ES2K" CACHE STRING "config: TDI target to build")
 
@@ -257,16 +257,19 @@ create variants:
 
 .. code-block:: bash
 
-  ./scripts/prcpconfig -L es2k-config.json --build-type=Debug -o debug-config.cmake
+  ./scripts/p4cpconfig -L es2k-config.json --build-type=Debug -o debug-config.cmake
 
 The output is:
 
 .. code-block:: cmake
 
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "config: build configuration")
-  set(CMAKE_INSTALL_PREFIX "/home/dfoster/work/latest/install" CACHE PATH "config: install path prefix")
+  set(CMAKE_INSTALL_PREFIX "/home/rocky/work/latest/install" CACHE PATH "config: install path prefix")
   set(DEPEND_INSTALL_DIR "/opt/deps" CACHE PATH "config: dependencies install directory")
-  set(OVS_INSTALL_DIR "/home/dfoster/work/latest/ovs/install" CACHE PATH "config: ovs install directory")
-  set(SDE_INSTALL_DIR "/home/dfoster/mev-p4-sde/install" CACHE PATH "config: SDE install directory")
+  set(OVS_INSTALL_DIR "/home/rocky/work/latest/ovs/install" CACHE PATH "config: ovs install directory")
+  set(SDE_INSTALL_DIR "/home/rocky/mev-p4-sde/install" CACHE PATH "config: SDE install directory")
   set(SET_RPATH True CACHE BOOL "config: whether to set RPATH in binary artifacts")
   set(TDI_TARGET "ES2K" CACHE STRING "config: TDI target to build")
+
+The new file the configuration parameters as the previous example, but the
+build type has been changed from ``Release`` to ``Debug``.
