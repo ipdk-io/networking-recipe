@@ -168,12 +168,18 @@ Default configuration
 By default, ``make-all.sh`` creates a separate install tree for OVS,
 the P4 Control Plane ``install`` tree is under the main directory,
 and the target type defaults to ``dpdk``.
+
 You can duplicate this behavior by creating a default configuration file:
 
 .. code-block:: bash
 
   ./scripts/p4cpconfig.py -L- -f json --target=dpdk \
       -O ovs/install -P install -o .p4cpconfig
+
+Where:
+
+- ``-L-`` keeps p4cpconfig from loading the current defaults
+- ``-f json`` tells it to create a json file
 
 The file it generates will be something like this:
 
@@ -185,7 +191,82 @@ The file it generates will be something like this:
       "tdi_target": "DPDK"
   }
 
-Notes:
+JSON configuration file
+-----------------------
 
-* ``-L-`` keeps p4cpconfig from loading the current defaults.
-* ``-f json`` tells it to create a json file.
+In this example, we're going to specify a build configuration and save it
+to a json file.
+
+.. code-block:: bash
+
+  ./scripts/p4cpconfig.py --target=es2k --build-type=release \
+      -D /opt/deps/ -S ~/mev-p4-sde/install/ -O ovs/install/ \
+      --set-rpath=on --format=json \
+      -o es2k-config.json
+
+Which produces the following JSON file:
+
+.. code-block:: json
+
+  {
+    "build_type": "Release",
+    "dep_install": "/opt/deps",
+    "ovs_install": "/home/rocky/work/latest/ovs/install",
+    "prefix": "/home/rocky/work/latest/install",
+    "sde_install": "/home/rocky/mev-p4-sde/install",
+    "set_rpath": true,
+    "tdi_target": "ES2K"
+  }
+
+The definition of ``prefix`` came from the ``.p4cpconfig`` file.
+
+CMake configuration file
+------------------------
+
+In this example, we're going to create a cmake configuration file from a
+saved JSON configuration:
+
+.. code-block:: bash
+
+  ./scripts/p4cpconfig.py -L es2k-config.json -o release-config.cmake
+
+Where:
+
+- The output format defaults to ``cmake``.
+
+This produces the following cmake file:
+
+.. code-block:: cmake
+
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "config: build configuration")
+  set(CMAKE_INSTALL_PREFIX "/home/dfoster/work/latest/install" CACHE PATH "config: install path prefix")
+  set(DEPEND_INSTALL_DIR "/opt/deps" CACHE PATH "config: dependencies install directory")
+  set(OVS_INSTALL_DIR "/home/dfoster/work/latest/ovs/install" CACHE PATH "config: ovs install directory")
+  set(SDE_INSTALL_DIR "/home/dfoster/mev-p4-sde/install" CACHE PATH "config: SDE install directory")
+  set(SET_RPATH True CACHE BOOL "config: whether to set RPATH in binary artifacts")
+  set(TDI_TARGET "ES2K" CACHE STRING "config: TDI target to build")
+
+Derivative configuration
+------------------------
+
+In the above examples, we could have created the the CMake file directly,
+instead of generating a JSON file first.
+
+The advantage of having a JSON configuration is that you can use it to
+create variants:
+
+.. code-block:: bash
+
+  ./scripts/prcpconfig -L es2k-config.json --build-type=Debug -o debug-config.cmake
+
+The output is:
+
+.. code-block:: cmake
+
+  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "config: build configuration")
+  set(CMAKE_INSTALL_PREFIX "/home/dfoster/work/latest/install" CACHE PATH "config: install path prefix")
+  set(DEPEND_INSTALL_DIR "/opt/deps" CACHE PATH "config: dependencies install directory")
+  set(OVS_INSTALL_DIR "/home/dfoster/work/latest/ovs/install" CACHE PATH "config: ovs install directory")
+  set(SDE_INSTALL_DIR "/home/dfoster/mev-p4-sde/install" CACHE PATH "config: SDE install directory")
+  set(SET_RPATH True CACHE BOOL "config: whether to set RPATH in binary artifacts")
+  set(TDI_TARGET "ES2K" CACHE STRING "config: TDI target to build")
