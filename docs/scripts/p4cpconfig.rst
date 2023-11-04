@@ -273,3 +273,39 @@ The output is:
 
 The new file the configuration parameters as the previous example, but the
 build type has been changed from ``Release`` to ``Debug``.
+
+Using a cmake configuration
+---------------------------
+
+The cmake configuration file is used when you configure the build:
+
+.. code-block:: bash
+
+  cmake -B build -C debug-config.cmake
+
+You are now free to specify any build-time parameters you choose. For
+instance, you could use the configuration to run the krnlmon unit tests:
+
+.. code-block:: bash
+
+  cmake --build build -j4 --target krnlmon-test
+
+With the following results:
+
+.. code-block:: text
+
+  Scanning dependencies of target switchlink_route_test
+  Scanning dependencies of target switchlink_neighbor_test
+  Scanning dependencies of target switchlink_link_test
+  Scanning dependencies of target switchlink_address_test
+    .
+    .
+  Test project /home/rocky/work/latest/build
+      Start 1: switchlink_link_test
+  1/4 Test #1: switchlink_link_test .............   Passed    0.00 sec
+      Start 2: switchlink_address_test
+  2/4 Test #2: switchlink_address_test ..........   Passed    0.00 sec
+      Start 3: switchlink_neighbor_test
+  3/4 Test #3: switchlink_neighbor_test .........   Passed    0.00 sec
+      Start 4: switchlink_route_test
+  4/4 Test #4: switchlink_route_test ............   Passed    0.00 sec
