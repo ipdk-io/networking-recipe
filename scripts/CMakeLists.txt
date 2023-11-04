@@ -5,6 +5,7 @@
 #
 
 add_subdirectory(common)
+add_subdirectory(gen)
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
