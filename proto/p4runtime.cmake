@@ -38,6 +38,7 @@ set(PROTOFLAGS -I${GOOGLE_SOURCE_DIR} -I${P4RT_PROTO_DIR})
 
 # P4Runtime protobufs for C++
 add_custom_target(p4rt_cpp_out ALL
+  COMMAND
     ${HOST_PROTOC_COMMAND}
     ${p4rt_proto_sources}
     --cpp_out ${CPP_OUT}
@@ -56,6 +57,7 @@ add_custom_target(p4rt_cpp_out ALL
 
 # P4Runtime gRPC for C++
 add_custom_target(p4rt_grpc_out ALL
+  COMMAND
     ${HOST_PROTOC_COMMAND}
     ${grpc_proto_sources}
     --grpc_out ${GRPC_OUT}
@@ -72,6 +74,7 @@ add_custom_target(p4rt_grpc_out ALL
 
 # P4Runtime protobufs for Python
 add_custom_target(p4rt_py_out ALL
+  COMMAND
     ${HOST_PROTOC_COMMAND}
     ${p4rt_proto_sources}
     --python_out ${PY_OUT}
@@ -89,6 +92,7 @@ add_custom_target(p4rt_py_out ALL
 
 # P4Runtime Google protobufs for Go
 add_custom_target(p4rt_go_out ALL
+  COMMAND
     ${HOST_PROTOC_COMMAND}
     ${p4rt_proto_sources}
     --go_out=${GO_OUT}

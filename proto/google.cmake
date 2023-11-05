@@ -22,6 +22,7 @@ set(google_proto_cpp_headers
 
 # Google protobufs for C++
 add_custom_target(google_cpp_out ALL
+  COMMAND
     ${HOST_PROTOC_COMMAND}
     ${google_proto_sources}
     --cpp_out ${CPP_OUT}
@@ -40,6 +41,7 @@ add_custom_target(google_cpp_out ALL
 
 # Google protobufs for Python
 add_custom_target(google_py_out ALL
+  COMMAND
     ${HOST_PROTOC_COMMAND}
     ${google_proto_sources}
     --python_out ${PY_OUT}
@@ -57,6 +59,7 @@ add_custom_target(google_py_out ALL
 
 # Google protobufs for Go
 add_custom_target(google_go_out ALL
+  COMMAND
     ${HOST_PROTOC_COMMAND}
     ${google_proto_sources}
     --go_out=${GO_OUT}
