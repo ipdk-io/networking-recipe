@@ -50,8 +50,6 @@ add_custom_target(p4rt_cpp_out ALL
     ${p4rt_proto_cpp_headers}
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT
-    "Generating p4rt_cpp_out"
   VERBATIM
 )
 
@@ -67,8 +65,6 @@ add_custom_target(p4rt_grpc_out ALL
     ${grpc_proto_outputs}
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT
-    "Generating p4rt_grpc_out"
   VERBATIM
 )
 
@@ -85,8 +81,6 @@ add_custom_target(p4rt_py_out ALL
     find ${PY_OUT}/p4 -type d | xargs -I FNAME touch FNAME/__init__.py
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT
-    "Generating p4rt_py_out"
   VERBATIM
 )
 
@@ -100,7 +94,5 @@ add_custom_target(p4rt_go_out ALL
     ${PROTOFLAGS}
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT
-    "Generating p4rt_go_out"
   VERBATIM
 )

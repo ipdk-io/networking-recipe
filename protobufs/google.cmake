@@ -34,8 +34,6 @@ add_custom_target(google_cpp_out ALL
     ${google_proto_cpp_headers}
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT
-    "Generating google_cpp_out"
   VERBATIM
 )
 
@@ -52,8 +50,6 @@ add_custom_target(google_py_out ALL
     find ${PY_OUT}/google -type d | xargs -I FNAME touch FNAME/__init__.py
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT
-    "Generating google_py_out"
   VERBATIM
 )
 
@@ -67,7 +63,5 @@ add_custom_target(google_go_out ALL
     -I${GOOGLE_SOURCE_DIR}
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT
-    "Generating google_go_out"
   VERBATIM
 )
