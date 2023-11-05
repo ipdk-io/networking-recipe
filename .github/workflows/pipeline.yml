@@ -51,6 +51,11 @@ jobs:
         run: |
           sudo apt install $PREREQS
 
+      - name: Set up Go environment
+        uses: actions/setup-go@v4.1.0
+        with:
+          go-version: '1.21.3'
+
       - name: Install DPDK SDE
         uses: robinraju/release-downloader@v1.8
         with:
