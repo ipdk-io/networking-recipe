@@ -102,6 +102,6 @@ add_custom_target(p4rt_go_out ALL
   COMMAND
     ""
   COMMENT
-    "p4rt_go_out disabled"
+    "p4rt_go_out is disabled"
 )
 endif(GO_ENABLED)
