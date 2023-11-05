@@ -49,15 +49,28 @@ set(P4RT_PROTO_DIR "../stratum/p4runtime/proto")
 include(google.cmake)
 include(p4runtime.cmake)
 
+set(cpp_tarball_name cpp_out_protos.tar.gz)
+set(py_tarball_name py_out_protos.tar.gz)
+set(go_tarball_name go_out_protos.tar.gz)
+
 set(_tar_flags -z --owner=ipdk --group=ipdk --sort=name)
 
 add_custom_target(protobuf-tarballs ALL
   COMMAND
-    tar -cf cpp_out_protos.tar.gz ${_tar_flags} cpp_out
+    tar -cf ${cpp_tarball_name}
+    ${_tar_flags}
+    -C ${CPP_OUT}/..
+    cpp_out
   COMMAND
-    tar -cf py_out_protos.tar.gz ${_tar_flags} py_out
+    tar -cf ${py_tarball_name}
+    ${_tar_flags}
+    -C ${PY_OUT}/..
+    py_out
   COMMAND
-    tar -cf go_out_protos.tar.gz ${_tar_flags} go_out
+    tar -cf ${go_tarball_name}
+    ${_tar_flags}
+    -C ${GO_OUT}/..
+    go_out
   DEPENDS
     google_cpp_out
     google_py_out
@@ -67,9 +80,9 @@ add_custom_target(protobuf-tarballs ALL
     p4rt_py_out
     p4rt_go_out
   BYPRODUCTS
-    cpp_out_protos.tar.gz
-    py_out_protos.tar.gz
-    go_out_protos.tar.gz
+    ${cpp_tarball_name}
+    ${py_tarball_name}
+    ${go_tarball_name}
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT
@@ -79,9 +92,9 @@ add_custom_target(protobuf-tarballs ALL
 
 install(
   FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/cpp_out_protos.tar.gz
-    ${CMAKE_CURRENT_BINARY_DIR}/py_out_protos.tar.gz
-    ${CMAKE_CURRENT_BINARY_DIR}/go_out_protos.tar.gz
+    ${CMAKE_CURRENT_BINARY_DIR}/${cpp_tarball_name}
+    ${CMAKE_CURRENT_BINARY_DIR}/${py_tarball_name}
+    ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name}
   DESTINATION
     ${CMAKE_INSTALL_DATAROOTDIR}/stratum/proto
 )

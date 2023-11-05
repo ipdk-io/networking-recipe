@@ -14,6 +14,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(CMakePrintHelpers)
 include(CompilerSettings)
 include(CTest)
+include(ExternalProject)
 include(FindPkgConfig)
 include(GNUInstallDirs)
 
@@ -242,6 +243,23 @@ function(set_install_rpath TARGET)
         # message(STATUS "${TARGET}::RPATH=\"${_rpath}\"")
     endif()
 endfunction()
+
+######################
+# Compiled protobufs #
+######################
+
+ExternalProject_Add(protobufs
+  SOURCE_DIR
+    ${CMAKE_CURRENT_SOURCE_DIR}/proto
+  CMAKE_ARGS
+    -DDEPEND_INSTALL_DIR=${DEPEND_INSTALL_DIR}
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCPP_OUT=${CMAKE_CURRENT_BINARY_DIR}/cpp_out
+    -DGO_OUT=${CMAKE_CURRENT_BINARY_DIR}/go_out
+    -DPY_OUT=${CMAKE_CURRENT_BINARY_DIR}/py_out
+  INSTALL_COMMAND
+    ${CMAKE_MAKE_PROGRAM} install
+)
 
 ##################
 # Subdirectories #
