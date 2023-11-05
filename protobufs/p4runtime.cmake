@@ -84,6 +84,7 @@ add_custom_target(p4rt_py_out ALL
   VERBATIM
 )
 
+if(GO_ENABLED)
 # P4Runtime Google protobufs for Go
 add_custom_target(p4rt_go_out ALL
   COMMAND
@@ -96,3 +97,11 @@ add_custom_target(p4rt_go_out ALL
     ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM
 )
+else(GO_ENABLED)
+add_custom_target(p4rt_go_out ALL
+  COMMAND
+    ""
+  COMMENT
+    "p4rt_go_out disabled"
+)
+endif(GO_ENABLED)

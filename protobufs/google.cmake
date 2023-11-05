@@ -53,6 +53,7 @@ add_custom_target(google_py_out ALL
   VERBATIM
 )
 
+if(GO_ENABLED)
 # Google protobufs for Go
 add_custom_target(google_go_out ALL
   COMMAND
@@ -65,3 +66,11 @@ add_custom_target(google_go_out ALL
     ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM
 )
+else(GO_ENABLED)
+add_custom_target(google_go_out ALL
+  COMMAND
+    ""
+  COMMENT
+    "google_go_out is disabled"
+)
+endif(GO_ENABLED)

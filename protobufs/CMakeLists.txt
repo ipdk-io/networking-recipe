@@ -1,16 +1,17 @@
-# Builds external protobufs.
 #
 # Copyright 2023 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
+#
+# Compile p4runtime protobufs for supported languages.
 #
 
 # Version 3.15 is the baseline for P4 Control Plane.
 cmake_minimum_required(VERSION 3.15)
 
+project(protobufs LANGUAGES CXX)
+
 include(CMakePrintHelpers)
 include(GNUInstallDirs)
-
-project(protobufs LANGUAGES CXX)
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   set(DEPEND_INSTALL_DIR "$ENV{DEPEND_INSTALL}" CACHE PATH
@@ -25,12 +26,14 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   include(../cmake/StratumDependencies.cmake)
 endif()
 
-option(WITH_GRPC_OUT False "Use separate grpc_out directory")
+option(GO_ENABLED True "Compile protobufs for Go")
+option(GRPC_OUT_ENABLED False "Generate grpc_out directory")
+option(WHEEL_ENABLED False "Generate Python wheel")
 
 set(CPP_OUT ${CMAKE_BINARY_DIR}/cpp_out CACHE PATH "C++ protobuf files")
 file(MAKE_DIRECTORY ${CPP_OUT})
 
-if(WITH_GRPC_OUT)
+if(GRPC_OUT_ENABLED)
   set(GRPC_OUT ${CMAKE_BINARY_DIR}/grpc_out CACHE PATH "C++ gRPC files")
   file(MAKE_DIRECTORY ${GRPC_OUT})
 else()
@@ -40,8 +43,10 @@ endif()
 set(PY_OUT ${CMAKE_BINARY_DIR}/py_out CACHE PATH "Python protobuf files")
 file(MAKE_DIRECTORY ${PY_OUT})
 
+if(GO_ENABLED)
 set(GO_OUT ${CMAKE_BINARY_DIR}/go_out CACHE PATH "Go protobuf files")
 file(MAKE_DIRECTORY ${GO_OUT})
+endif(GO_ENABLED)
 
 set(GOOGLE_SOURCE_DIR "../stratum/googleapis")
 set(P4RT_PROTO_DIR "../stratum/p4runtime/proto")

@@ -50,9 +50,10 @@ add_custom_target(py-tarball ALL
   VERBATIM
 )
 
+if(GO_ENABLED)
 # Go tarball
 add_custom_target(go-tarball ALL
-  COMMAND
+COMMAND
     tar -cf ${go_tarball_name}
     ${_tar_flags}
     -C ${GO_OUT}/..
@@ -68,12 +69,42 @@ add_custom_target(go-tarball ALL
     "Generating Go tarball"
   VERBATIM
 )
+set(go_tarball ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name})
+else(GO_ENABLED)
+add_custom_target(go-tarball ALL
+  COMMAND
+    ""
+  COMMENT
+    "go-tarball is disabled"
+  VERBATIM
+)
+set(go_tarball "")
+endif(GO_ENABLED)
 
 install(
   FILES
     ${CMAKE_CURRENT_BINARY_DIR}/${cpp_tarball_name}
     ${CMAKE_CURRENT_BINARY_DIR}/${py_tarball_name}
-    ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name}
+    ${go_tarball}
   DESTINATION
     ${CMAKE_INSTALL_DATAROOTDIR}/stratum/proto
 )
+
+if(WHEEL_ENABLED)
+add_custom_target(py-wheel ALL
+  COMMAND
+    # Create temporary directory
+    mkdir wheelgen
+  COMMAND
+    # Copy standard contents
+    cp -pv ${CMAKE_CURRENT_SOURCE_DIR}/py/* wheelgen
+  COMMAND
+    # Copy generated files
+    cp -prv ${PY_OUT}/p4 wheelgen
+  COMMAND
+    # Generate Python wheel
+    env -C wheelgen python setup.py bdist_wheel --universal
+  WORKING_DIRECTORY
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+endif(WHEEL_ENABLED)
