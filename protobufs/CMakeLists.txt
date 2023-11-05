@@ -26,9 +26,13 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   include(../cmake/StratumDependencies.cmake)
 endif()
 
-option(GO_ENABLED TRUE "Compile protobufs for Go")
-option(GRPC_OUT_ENABLED False "Generate grpc_out directory")
-option(WHEEL_ENABLED FALSE "Generate Python wheel")
+set(GO_ENABLED TRUE CACHE BOOL "Compile protobufs for Go")
+set(GRPC_OUT_ENABLED FALSE CACHE BOOL "Generate grpc_out directory")
+set(WHEEL_ENABLED FALSE CACHE BOOL "Generate Python wheel")
+
+cmake_print_variables(GO_ENABLED)
+cmake_print_variables(GRPC_OUT_ENABLED)
+cmake_print_variables(WHEEL_ENABLED)
 
 set(CPP_OUT ${CMAKE_BINARY_DIR}/cpp_out CACHE PATH "C++ protobuf files")
 file(MAKE_DIRECTORY ${CPP_OUT})

@@ -87,7 +87,7 @@ install(
     ${CMAKE_CURRENT_BINARY_DIR}/${py_tarball_name}
     ${go_tarball}
   DESTINATION
-    ${CMAKE_INSTALL_DATAROOTDIR}/stratum/proto
+    ${CMAKE_INSTALL_DATAROOTDIR}/stratum/protobufs
 )
 
 if(WHEEL_ENABLED)
