@@ -85,11 +85,11 @@ jobs:
           ./make-all.sh --target=dpdk --rpath
 
       - name: Upload protobufs
-        working-directory: recipe
         uses: actions/upload-artifact@v3
         with:
           name: protobufs
           path: install/share/protobufs/*.tar.gz
+        working-directory: recipe
 
   #---------------------------------------------------------------------
   # 2-krnlmon_unit_tests
