@@ -52,14 +52,12 @@ message(STATUS "Found gRPC version ${gRPC_VERSION}")
 #-----------------------------------------------------------------------
 # Protobuf compiler.
 # Runs on the development system.
-#
-# TODO: rename to HOST_PROTOC_COMMAND.
 #-----------------------------------------------------------------------
-find_program(HOST_PROTOC "protoc" NO_CMAKE_FIND_ROOT_PATH)
-mark_as_advanced(HOST_PROTOC)
+find_program(HOST_PROTOC_COMMAND "protoc" NO_CMAKE_FIND_ROOT_PATH)
+mark_as_advanced(HOST_PROTOC_COMMAND)
 
-if(HOST_PROTOC)
-  message(STATUS "Found protoc: ${HOST_PROTOC}")
+if(HOST_PROTOC_COMMAND)
+  message(STATUS "Found protoc: ${HOST_PROTOC_COMMAND}")
 else()
   message(FATAL_ERROR "protoc not found")
 endif()

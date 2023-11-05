@@ -45,7 +45,7 @@ list(TRANSFORM _google_list
 # Generate Python files
 #-----------------------------------------------------------------------
 add_custom_target(py_out ALL
-    ${HOST_PROTOC}
+    ${HOST_PROTOC_COMMAND}
     ${P4RT_PROTOS}
     ${GOOGLE_PROTOS}
     --python_out ${PY_OUT}

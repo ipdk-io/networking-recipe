@@ -47,7 +47,7 @@ list(TRANSFORM _google_sources
 # Generate Go files.
 #-----------------------------------------------------------------------
 add_custom_target(go_out ALL
-    ${HOST_PROTOC}
+    ${HOST_PROTOC_COMMAND}
     ${P4RT_PROTOS}
     ${GOOGLE_PROTOS}
     --go_out=${GO_OUT}
