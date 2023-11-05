@@ -65,6 +65,6 @@ list(TRANSFORM GRPC_PROTO_FILES
   OUTPUT_VARIABLE GRPC_PROTOS
 )
 
-include(cmake/cpp.cmake)
-include(cmake/python.cmake)
-include(cmake/go.cmake)
+include(cpp.cmake)
+include(python.cmake)
+include(go.cmake)
