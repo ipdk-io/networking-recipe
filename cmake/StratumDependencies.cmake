@@ -83,9 +83,33 @@ find_program(HOST_GRPC_PY_PLUGIN "grpc_python_plugin" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_GRPC_PY_PLUGIN)
 
 if(HOST_GRPC_PY_PLUGIN)
-  message(STATUS "Found grpc_python_plugin: ${HOST_GRPC_PY_PLUGIN}")
-else()
-  message(FATAL_ERROR "grpc_python_plugin not found")
+  message(STATUS "Found grpc_py_plugin: ${HOST_GRPC_PY_PLUGIN}")
+endif()
+
+#-----------------------------------------------------------------------
+# Go plugin for the Protobuf compiler.
+# Runs on the development (host) system.
+#-----------------------------------------------------------------------
+find_program(HOST_PROTOC_GO_PLUGIN "protoc-gen-go" NO_CMAKE_FIND_ROOT_PATH)
+mark_as_advanced(HOST_PROTOC_GO_PLUGIN)
+
+if(HOST_PROTOC_GO_PLUGIN)
+  # TODO: protoc-gen-go --version to determine version
+  # protoc-gen-go v1.28.1
+  message(STATUS "Found protoc_go_plugin: ${HOST_PROTOC_GO_PLUGIN}")
+endif()
+
+#-----------------------------------------------------------------------
+# Go gRPC plugin for the Protobuf compiler.
+# Runs on the development (host) system.
+#-----------------------------------------------------------------------
+find_program(HOST_GRPC_GO_PLUGIN "protoc-gen-go-grpc" NO_CMAKE_FIND_ROOT_PATH)
+mark_as_advanced(HOST_GRPC_GO_PLUGIN)
+
+if(HOST_GRPC_GO_PLUGIN)
+  # TODO: protoc-gen-go-grpc --version to determine version
+  # protoc-gen-go-grpc 1.2.0
+  message(STATUS "Found grpc_go_plugin: ${HOST_GRPC_GO_PLUGIN}")
 endif()
 
 #-----------------------------------------------------------------------

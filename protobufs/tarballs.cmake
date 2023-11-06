@@ -50,36 +50,33 @@ add_custom_target(py-tarball ALL
   VERBATIM
 )
 
-if(GO_ENABLED)
 # Go tarball
-add_custom_target(go-tarball ALL
-COMMAND
-    tar -cf ${go_tarball_name}
-    ${_tar_flags}
-    -C ${GO_OUT}/..
-    go_out
-  DEPENDS
-    google_go_out
-    p4rt_go_out
-  BYPRODUCTS
-    ${go_tarball_name}
-  WORKING_DIRECTORY
-    ${CMAKE_CURRENT_BINARY_DIR}
-  COMMENT
-    "Generating Go tarball"
-  VERBATIM
-)
-set(go_tarball ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name})
-else(GO_ENABLED)
-add_custom_target(go-tarball ALL
-  COMMAND
-    ""
-  COMMENT
-    "go-tarball is disabled"
-  VERBATIM
-)
-set(go_tarball "")
-endif(GO_ENABLED)
+if(HOST_PROTOC_GO_PLUGIN)
+  add_custom_target(go-tarball ALL
+    COMMAND
+      tar -cf ${go_tarball_name}
+      ${_tar_flags}
+      -C ${GO_OUT}/..
+      go_out
+    DEPENDS
+      google_go_out
+      p4rt_go_out
+    BYPRODUCTS
+      ${go_tarball_name}
+    WORKING_DIRECTORY
+      ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT
+      "Generating Go tarball"
+    VERBATIM
+  )
+  set(go_tarball ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name})
+else(HOST_PROTOC_GO_PLUGIN)
+  add_custom_target(go-tarball ALL
+    COMMAND ""
+    COMMENT "go-tarball is disabled"
+  )
+  set(go_tarball "")
+endif(HOST_PROTOC_GO_PLUGIN)
 
 install(
   FILES
@@ -91,20 +88,17 @@ install(
 )
 
 if(WHEEL_ENABLED)
-add_custom_target(py-wheel ALL
-  COMMAND
-    # Create temporary directory
-    mkdir wheelgen
-  COMMAND
-    # Copy standard contents
-    cp -pv ${CMAKE_CURRENT_SOURCE_DIR}/py/* wheelgen
-  COMMAND
-    # Copy generated files
-    cp -prv ${PY_OUT}/p4 wheelgen
-  COMMAND
-    # Generate Python wheel
-    env -C wheelgen python setup.py bdist_wheel --universal
-  WORKING_DIRECTORY
-    ${CMAKE_CURRENT_BINARY_DIR}
-)
+  add_custom_target(py-wheel ALL
+    COMMAND
+      mkdir wheelgen
+    COMMAND
+      cp -pv ${CMAKE_CURRENT_SOURCE_DIR}/py/* wheelgen
+    COMMAND
+      cp -prv ${PY_OUT}/p4 wheelgen
+    COMMAND
+      # Generate Python wheel
+      env -C wheelgen python setup.py bdist_wheel --universal
+    WORKING_DIRECTORY
+      ${CMAKE_CURRENT_BINARY_DIR}
+  )
 endif(WHEEL_ENABLED)
