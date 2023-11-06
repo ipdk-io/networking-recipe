@@ -55,14 +55,12 @@ jobs:
         uses: actions/setup-go@v4.1.0
         with:
           go-version: 'stable'
-      - run: go version
 
       - name: Install gRPC plugins
         run: |
+          go version
           go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
-          export PATH="$PATH:$(go env GOPATH)/bin"
-          printenv PATH
 
       - name: Install DPDK SDE
         uses: robinraju/release-downloader@v1.8
@@ -90,12 +88,6 @@ jobs:
           export DEPEND_INSTALL=$DEPS_INSTALL_DIR
           export SDE_INSTALL=$SDE_INSTALL_DIR
           ./make-all.sh --target=dpdk --rpath
-
-      - name: Upload protobufs
-        uses: actions/upload-artifact@v3
-        with:
-          name: protobufs
-          path: recipe/install/share/protobufs/*.tar.gz
 
   #---------------------------------------------------------------------
   # 2-krnlmon_unit_tests
