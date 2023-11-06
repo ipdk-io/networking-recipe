@@ -10,9 +10,9 @@
 #include "ovs_p4rt_tls_credentials.h"
 
 #if defined(DPDK_TARGET)
-  #include "dpdk/p4_name_mapping.h"
+#include "dpdk/p4_name_mapping.h"
 #elif defined(ES2K_TARGET)
-  #include "es2k/p4_name_mapping.h"
+#include "es2k/p4_name_mapping.h"
 #endif
 
 ABSL_FLAG(std::string, grpc_addr, "localhost:9559",
