@@ -9,6 +9,7 @@ set(_template ${_filename}.jinja)
 set(_outfile ${CMAKE_CURRENT_BINARY_DIR}/${_filename})
 
 add_custom_target(es2k-copy-script ALL
+  COMMAND
     ${GENSCRIPT_COMMAND}
     --template=${_template}
     --output=${_outfile}
@@ -24,12 +25,6 @@ add_custom_target(es2k-copy-script ALL
 
 # Sets execute permissions
 install(
-  PROGRAMS
-    ${_outfile}
-  TYPE
-    SBIN
+  PROGRAMS ${_outfile}
+  TYPE SBIN
 )
-
-unset(_filename)
-unset(_template)
-unset(_outfile)
