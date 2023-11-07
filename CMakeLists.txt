@@ -259,6 +259,7 @@ ExternalProject_Add(protobufs
     -DPY_OUT=${CMAKE_CURRENT_BINARY_DIR}/py_out
   INSTALL_COMMAND
     ${CMAKE_MAKE_PROGRAM} install
+  EXCLUDE_FROM_ALL TRUE
 )
 
 ##################

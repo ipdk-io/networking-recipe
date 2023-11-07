@@ -70,7 +70,7 @@ find_program(HOST_GRPC_CPP_PLUGIN "grpc_cpp_plugin" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_GRPC_CPP_PLUGIN)
 
 if(HOST_GRPC_CPP_PLUGIN)
-  message(STATUS "Found grpc_cpp_plugin: ${HOST_GRPC_CPP_PLUGIN}")
+  message(STATUS "Found grpc_cpp_plugin")
 else()
   message(FATAL_ERROR "grpc_cpp_plugin not found")
 endif()
@@ -83,7 +83,9 @@ find_program(HOST_GRPC_PY_PLUGIN "grpc_python_plugin" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_GRPC_PY_PLUGIN)
 
 if(HOST_GRPC_PY_PLUGIN)
-  message(STATUS "Found grpc_py_plugin: ${HOST_GRPC_PY_PLUGIN}")
+  message(STATUS "Found grpc_python_plugin")
+else()
+  message(WARNING "grpc_python_plugin not found")
 endif()
 
 #-----------------------------------------------------------------------
@@ -94,9 +96,15 @@ find_program(HOST_PROTOC_GO_PLUGIN "protoc-gen-go" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_PROTOC_GO_PLUGIN)
 
 if(HOST_PROTOC_GO_PLUGIN)
-  # TODO: protoc-gen-go --version to determine version
-  # protoc-gen-go v1.28.1
-  message(STATUS "Found protoc_go_plugin: ${HOST_PROTOC_GO_PLUGIN}")
+  execute_process(
+    COMMAND ${HOST_PROTOC_GO_PLUGIN} --version
+    OUTPUT_VARIABLE plugin_output
+  )
+  string(STRIP "${plugin_output}" plugin_output)
+  message(STATUS "Found ${plugin_output}")
+  unset(plugin_output)
+else()
+  message(STATUS "protoc-gen-go not found")
 endif()
 
 #-----------------------------------------------------------------------
@@ -107,9 +115,15 @@ find_program(HOST_GRPC_GO_PLUGIN "protoc-gen-go-grpc" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_GRPC_GO_PLUGIN)
 
 if(HOST_GRPC_GO_PLUGIN)
-  # TODO: protoc-gen-go-grpc --version to determine version
-  # protoc-gen-go-grpc 1.2.0
-  message(STATUS "Found grpc_go_plugin: ${HOST_GRPC_GO_PLUGIN}")
+  execute_process(
+    COMMAND ${HOST_GRPC_GO_PLUGIN} --version
+    OUTPUT_VARIABLE plugin_output
+  )
+  string(STRIP "${plugin_output}" plugin_output)
+  message(STATUS "Found ${plugin_output}")
+  unset(plugin_output)
+else()
+  message(STATUS "protoc-gen-go-grpc plugin not found")
 endif()
 
 #-----------------------------------------------------------------------
