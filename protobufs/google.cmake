@@ -54,7 +54,7 @@ add_custom_target(google_py_out ALL
 )
 
 # Google protobufs for Go
-if(HOST_PROTOC_GO_PLUGIN)
+if(GEN_GO_PROTOBUFS)
   add_custom_target(google_go_out ALL
     COMMAND
       ${HOST_PROTOC_COMMAND}
@@ -66,9 +66,9 @@ if(HOST_PROTOC_GO_PLUGIN)
       ${CMAKE_CURRENT_SOURCE_DIR}
     VERBATIM
   )
-else(HOST_PROTOC_GO_PLUGIN)
+else(GEN_GO_PROTOBUFS)
   add_custom_target(google_go_out ALL
     COMMAND ""
     COMMENT "google_go_out is disabled"
   )
-endif(HOST_PROTOC_GO_PLUGIN)
+endif(GEN_GO_PROTOBUFS)

@@ -29,6 +29,18 @@ endif()
 set(GRPC_OUT_ENABLED FALSE CACHE BOOL "Generate grpc_out directory")
 set(WHEEL_ENABLED FALSE CACHE BOOL "Generate Python wheel")
 
+if(NOT DEFINED GEN_GO_PROTOBUFS)
+  if(NOT HOST_PROTOC_GO_PLUGIN OR NOT HOST_GRPC_GO_PLUGIN)
+    message(WARNING
+      "Plugin missing - p4runtime protobufs for Go will not be generated.")
+    set(GEN_GO_PROTOBUFS FALSE CACHE BOOL "Disable Go protobuf generation")
+  else()
+    set(GEN_GO_PROTOBUFS TRUE CACHE BOOL "Enable Go protobuf generation")
+  endif()
+elseif(NOT GEN_GO_PROTOBUFS)
+  message(STATUS "Go protobuf generation disabled")
+endif()
+
 set(CPP_OUT ${CMAKE_BINARY_DIR}/cpp_out CACHE PATH "C++ protobuf files")
 file(MAKE_DIRECTORY ${CPP_OUT})
 
@@ -42,12 +54,12 @@ endif()
 set(PY_OUT ${CMAKE_BINARY_DIR}/py_out CACHE PATH "Python protobuf files")
 file(MAKE_DIRECTORY ${PY_OUT})
 
-if(HOST_PROTOC_GO_PLUGIN)
+if(GEN_GO_PROTOBUFS)
   set(GO_OUT ${CMAKE_BINARY_DIR}/go_out CACHE PATH "Go protobuf files")
   file(MAKE_DIRECTORY ${GO_OUT})
-else(HOST_PROTOC_GO_PLUGIN)
+else(GEN_GO_PROTOBUFS)
   set(_sink ${GO_OUT}) # suppress cmake warning
-endif(HOST_PROTOC_GO_PLUGIN)
+endif(GEN_GO_PROTOBUFS)
 
 set(GOOGLE_SOURCE_DIR "../stratum/googleapis")
 set(P4RT_PROTO_DIR "../stratum/p4runtime/proto")

@@ -51,7 +51,7 @@ add_custom_target(py-tarball ALL
 )
 
 # Go tarball
-if(HOST_PROTOC_GO_PLUGIN)
+if(GEN_GO_PROTOBUFS)
   add_custom_target(go-tarball ALL
     COMMAND
       tar -cf ${go_tarball_name}
@@ -70,13 +70,13 @@ if(HOST_PROTOC_GO_PLUGIN)
     VERBATIM
   )
   set(go_tarball ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name})
-else(HOST_PROTOC_GO_PLUGIN)
+else(GEN_GO_PROTOBUFS)
   add_custom_target(go-tarball ALL
     COMMAND ""
     COMMENT "go-tarball is disabled"
   )
   set(go_tarball "")
-endif(HOST_PROTOC_GO_PLUGIN)
+endif(GEN_GO_PROTOBUFS)
 
 install(
   FILES

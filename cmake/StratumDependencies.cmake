@@ -66,15 +66,11 @@ endif()
 # gRPC c++ plugin for the Protobuf compiler.
 # Runs on the development (host) system.
 #-----------------------------------------------------------------------
-if(CROSS_COMPILING)
-  find_program(HOST_GRPC_CPP_PLUGIN "grpc_cpp_plugin" NO_CMAKE_FIND_ROOT_PATH)
-  if(HOST_GRPC_CPP_PLUGIN)
-    message(STATUS "Found grpc_cpp_plugin")
-  else()
-    message(FATAL_ERROR "grpc_cpp_plugin not found")
-  endif()
+find_program(HOST_GRPC_CPP_PLUGIN "grpc_cpp_plugin" NO_CMAKE_FIND_ROOT_PATH)
+if(HOST_GRPC_CPP_PLUGIN)
+  message(STATUS "Found grpc_cpp_plugin")
 else()
-  set(HOST_GRPC_CPP_PLUGIN gRPC::grpc_cpp_plugin CACHE STRING "")
+  message(FATAL_ERROR "grpc_cpp_plugin not found")
 endif()
 mark_as_advanced(HOST_GRPC_CPP_PLUGIN)
 
@@ -82,15 +78,11 @@ mark_as_advanced(HOST_GRPC_CPP_PLUGIN)
 # gRPC Python plugin for the Protobuf compiler.
 # Runs on the development (host) system.
 #-----------------------------------------------------------------------
-if(CROSS_COMPILING)
-  find_program(HOST_GRPC_PY_PLUGIN "grpc_python_plugin" NO_CMAKE_FIND_ROOT_PATH)
-  if(HOST_GRPC_PY_PLUGIN)
-    message(STATUS "Found grpc_python_plugin")
-  else()
-    message(WARNING "grpc_python_plugin not found")
-  endif()
+find_program(HOST_GRPC_PY_PLUGIN "grpc_python_plugin" NO_CMAKE_FIND_ROOT_PATH)
+if(HOST_GRPC_PY_PLUGIN)
+  message(STATUS "Found grpc_python_plugin")
 else()
-  set(HOST_GRPC_PY_PLUGIN gRPC::grpc_python_plugin CACHE STRING "")
+  message(WARNING "grpc_python_plugin not found")
 endif()
 mark_as_advanced(HOST_GRPC_PY_PLUGIN)
 
@@ -134,6 +126,9 @@ endif()
 
 #-----------------------------------------------------------------------
 # SSL/TLS library (OpenSSL).
+#
+# We substitute OpenSSL for BoringSSL, which is bundled with gRPC,
+# so we treat it as a Stratum dependency.
 #-----------------------------------------------------------------------
 find_package(OpenSSL REQUIRED)
 mark_as_advanced(OpenSSL_DIR)
