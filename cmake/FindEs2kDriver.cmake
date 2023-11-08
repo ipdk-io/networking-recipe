@@ -15,7 +15,12 @@ find_path(SDE_INCLUDE_DIR
     PATHS ${SDE_INSTALL_DIR}/include
 )
 if(NOT SDE_INCLUDE_DIR)
-  message(FATAL_ERROR "bf_switchd.h not found")
+  message(STATUS "bf_switchd.h not found")
+  message("---------------------------------------------")
+  message("Your SDE_INSTALL_DIR appears to be incorrect.")
+  message("Its current value is '${SDE_INSTALL_DIR}'.")
+  message("---------------------------------------------")
+  message(FATAL_ERROR "ES2K SDE setup failed")
 endif()
 mark_as_advanced(SDE_INCLUDE_DIR)
 
