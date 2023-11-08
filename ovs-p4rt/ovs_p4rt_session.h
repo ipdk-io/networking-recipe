@@ -95,10 +95,10 @@ std::unique_ptr<p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
     OvsP4rtSession* session, const p4::v1::ReadRequest& read_request);
 
 ::absl::Status SendWriteRequest(OvsP4rtSession* session,
-                              const p4::v1::WriteRequest& write_request);
+                                const p4::v1::WriteRequest& write_request);
 
 ::absl::Status GetForwardingPipelineConfig(OvsP4rtSession* session,
-                                         p4::config::v1::P4Info* p4info);
+                                           p4::config::v1::P4Info* p4info);
 
 ::p4::v1::TableEntry* SetupTableEntryToInsert(OvsP4rtSession* session,
                                               ::p4::v1::WriteRequest* req);
