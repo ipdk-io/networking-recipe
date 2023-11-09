@@ -26,7 +26,7 @@ The Host and Target libraries must be the same version.
 
 There are a couple of things to do before you build the dependencies:
 
-- Install CMake 3.15 or above.
+- Install CMake 3.15 or above
 
   Avoid versions 3.24 and 3.25. There is an issue in cmake that causes the
   Protobuf build to fail. This problem was fixed in version 3.26.
@@ -122,7 +122,7 @@ dependencies (`--host`) as well as the install prefix (`--prefix`).
 
 ### Target build
 
-Source the file that the defines the
+Source the file that defines the
 [target build environment variables](/guides/es2k/defining-acc-environment.md).
 
 ```bash
