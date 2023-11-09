@@ -11,7 +11,7 @@ This document explains how to build and install the Stratum dependencies.
 
 ## Prerequisites
 
-There a couple of things to do before you build the dependencies.
+There are a couple of things to do before you build the dependencies:
 
 - Install CMake 3.15 or above
 
@@ -27,7 +27,7 @@ There a couple of things to do before you build the dependencies.
 There are two ways to obtain the source code: from the open-source repository
 on GitHub, or as a source package.
 
-### Github repository
+### GitHub repository
 
 The script to build the Stratum dependencies is in the `stratum-deps`
 repository. To clone the repository:

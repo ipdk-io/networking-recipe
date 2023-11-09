@@ -24,7 +24,7 @@ The Host and Target libraries must be the same version.
 
 ## 2. Preparing the System
 
-There a couple of things to do before you build the dependencies.
+There are a couple of things to do before you build the dependencies:
 
 - Install CMake 3.15 or above.
 
