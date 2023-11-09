@@ -29,8 +29,8 @@ on GitHub, or as a source package.
 
 ### Github repository
 
-The Stratum dependencies can be built using a script that is part of the
-IPDK networking-recipe. To clone the repository:
+The script to build the Stratum dependencies is in the `stratum-deps`
+repository. To clone the repository:
 
 ```bash
 git clone https://github.com/ipdk-io/stratum-deps.git
