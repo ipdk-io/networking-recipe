@@ -13,9 +13,8 @@ The following packages must be installed:
 
 - Python
 
-If you wish to generate protobufs for Go, you should also follow the
-instructions in the
-gRPC [Quick start](https://grpc.io/docs/languages/go/quickstart/) guide
+If you wish to generate protobufs for Go, follow the instructions in the
+[Quick start](https://grpc.io/docs/languages/go/quickstart/) guide
 to install Go and the gRPC plugins.
 
 ## Main directory
@@ -23,7 +22,7 @@ to install Go and the gRPC plugins.
 To build the P4Runtime protobufs in the main directory, you must first
 configure cmake.
 
-If you've done a recent build, you should already be configured.
+If you've done a recent build, there should already be a configuration.
 
 Otherwise, you can use `make-all.sh` with the `--no-build` option.
 
