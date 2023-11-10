@@ -4,15 +4,27 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-set(TARGET_NAME "dpdk")
-configure_file("../common/copy_config_files.sh.in"
-               ${CMAKE_CURRENT_BINARY_DIR}/copy_config_files.sh @ONLY)
-unset(TARGET_NAME)
+set(_filename copy_config_files.sh)
+set(_template ${_filename}.jinja)
+set(_outfile ${CMAKE_CURRENT_BINARY_DIR}/${_filename})
+
+add_custom_target(dpdk-copy-script ALL
+  COMMAND
+    ${GENSCRIPT_COMMAND}
+    --template=${_template}
+    --output=${_outfile}
+    --target=dpdk
+  BYPRODUCTS
+    ${_outfile}
+  WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMENT
+    "Generating ${_filename}"
+  VERBATIM
+)
 
 # Sets execute permissions
 install(
-    PROGRAMS
-        ${CMAKE_CURRENT_BINARY_DIR}/copy_config_files.sh
-    TYPE
-        SBIN
+  PROGRAMS ${_outfile}
+  TYPE SBIN
 )

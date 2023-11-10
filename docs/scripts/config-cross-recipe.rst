@@ -53,8 +53,8 @@ General
 ``--help``, ``-h``
   Displays usage information and exits.
 
-Paths
------
+Host paths
+----------
 
 ``--build=BLDDIR``, ``-B BLDDIR``
   Directory that CMake will use to perform the build.
@@ -65,16 +65,6 @@ Paths
   cross-compiled builds.
   Defaults to ``build``.
 
-``--deps=DEPS``, ``-D DEPS`` *(see note)*
-  Directory in which the Stratum dependencies for the runtime system
-  are installed.
-
-  P4 Control Plane will be linked with these libraries.
-  Supplies the value of the ``DEPEND_INSTALL_DIR`` listfile variable.
-  Defaults to the value of the ``DEPEND_INSTALL`` environment variable,
-  if defined.
-  Otherwise, defaults to ``//opt/deps``.
-
 ``--host=HOST``, ``-H HOST``
   Directory in which the Stratum dependencies for the development
   system are installed.
@@ -84,6 +74,26 @@ Paths
   Defaults to the value of the ``HOST_INSTALL`` environment variable,
   if defined.
   Otherwise, defaults to ``setup/hostdeps``.
+
+``--toolchain=FILE``, ``-T FILE``
+  Path to the CMake toolchain file.
+
+  Specifies the value of the ``CMAKE_TOOLCHAIN_FILE`` variable.
+  Defaults to the value of the ``CMAKE_TOOLCHAIN_FILE`` environment
+  variable.
+
+Target paths
+------------
+
+``--deps=DEPS``, ``-D DEPS`` *(see note)*
+  Directory in which the Stratum dependencies for the runtime system
+  are installed.
+
+  P4 Control Plane will be linked with these libraries.
+  Supplies the value of the ``DEPEND_INSTALL_DIR`` listfile variable.
+  Defaults to the value of the ``DEPEND_INSTALL`` environment variable,
+  if defined.
+  Otherwise, defaults to ``//opt/deps``.
 
 ``--ovs=OVS``, ``-O OVS`` *(see note)*
   Directory in which Open vSwitch is installed.
@@ -113,13 +123,6 @@ Paths
   Defaults to the value of the ``SDE_INSTALL`` environment variable,
   if defined.
   Otherwise, defaults to ``//opt/p4sde``.
-
-``--toolchain=FILE``, ``-T FILE``
-  Path to the CMake toolchain file.
-
-  Specifies the value of the ``CMAKE_TOOLCHAIN_FILE`` variable.
-  Defaults to the value of the ``CMAKE_TOOLCHAIN_FILE`` environment
-  variable.
 
 .. note::
   ``//`` at the beginning of the directory path will be replaced with

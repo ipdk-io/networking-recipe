@@ -6,9 +6,9 @@
 
   <br/>
 
-=====================
-gnmi-ctl Client Guide
-=====================
+========
+gnmi-ctl
+========
 
 gnmi-ctl is a gRPC-based C++ network management interface client to handle
 port configurations and program fixed functions in the P4 pipeline.  This

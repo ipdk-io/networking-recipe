@@ -1,0 +1,53 @@
+{#- Jinja template to create copy_config_files.sh -#}
+#!/bin/bash
+#
+# Copyright 2021-2023 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
+# Install {{ target|upper }} configuration files.
+#
+set -e
+
+if [ -z "$1" ]
+then
+    echo "- Missing mandatory argument: P4CP_INSTALL"
+    echo " - Usage: sudo copy_config_files.sh <P4CP_INSTALL> <SDE_INSTALL>"
+    return 0
+fi
+
+if [ -z "$2" ]
+then
+    echo "- Missing mandatory argument: SDE_INSTALL"
+    echo " - Usage: sudo copy_config_files.sh <P4CP_INSTALL> <SDE_INSTALL>"
+    return 0
+fi
+
+export P4CP_INSTALL=$1
+export SDE_INSTALL=$2
+
+# stratum directories
+mkdir -p /etc/stratum/
+mkdir -p /var/log/stratum/
+
+# stratum configuration
+SOURCE_DIR=${P4CP_INSTALL}/share/stratum/{{ target }}
+TARGET_DIR=/usr/share/stratum/{{ target }}
+mkdir -p ${TARGET_DIR}
+cp ${SOURCE_DIR}/{{ target }}_port_config.pb.txt ${TARGET_DIR}/
+cp ${SOURCE_DIR}/{{ target }}_skip_p4.conf ${TARGET_DIR}/
+
+# tls certificate generation
+TLS_CERTS_DIR=/usr/share/stratum
+cp ${SOURCE_DIR}/ca.conf ${TLS_CERTS_DIR}/
+cp ${SOURCE_DIR}/grpc-client.conf ${TLS_CERTS_DIR}/
+cp ${P4CP_INSTALL}/sbin/generate-certs.sh ${TLS_CERTS_DIR}/
+{%- if target == 'es2k' -%}
+{{'\n\n'}}# packetio configuration
+mkdir -p /usr/share/bf_rt_shared
+cp $SDE_INSTALL/share/bf_rt_shared/tdi_pktio.json /usr/share/bf_rt_shared/
+{%- endif %}
+
+# zlog configuration
+mkdir -p /usr/share/target_sys/
+cp $SDE_INSTALL/share/target_sys/zlog-cfg /usr/share/target_sys/
+

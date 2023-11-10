@@ -26,7 +26,7 @@
 #define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
 DEFINE_bool(grpc_use_insecure_mode, false,
-              "grpc communication in insecure mode");
+            "grpc communication in insecure mode");
 DEFINE_string(grpc_addr, stratum::kLocalStratumUrl, "gNMI server address");
 DEFINE_string(bool_val, "", "Boolean value to be set");
 DEFINE_string(int_val, "", "Integer value to be set (64-bit)");
@@ -243,7 +243,6 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
 }
 
 ::util::Status Main(int argc, char** argv) {
-
   // Default certificate file location for TLS-mode
   FLAGS_ca_cert_file = DEFAULT_CERTS_DIR "ca.crt";
   FLAGS_server_key_file = DEFAULT_CERTS_DIR "stratum.key";
@@ -269,9 +268,9 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
     RETURN_IF_ERROR(
         CreatePipeForSignalHandling(&pipe_read_fd_, &pipe_write_fd_));
   }
-  CHECK_RETURN_IF_FALSE(std::signal(SIGINT, HandleSignal) != SIG_ERR);
+  RET_CHECK(std::signal(SIGINT, HandleSignal) != SIG_ERR);
   pthread_t context_cancel_tid;
-  CHECK_RETURN_IF_FALSE(pthread_create(&context_cancel_tid, nullptr,
+  RET_CHECK(pthread_create(&context_cancel_tid, nullptr,
                            ContextCancelThreadFunc, nullptr) == 0);
   auto cleaner = absl::MakeCleanup([&context_cancel_tid, &ctx] {
     int signal = SIGINT;
@@ -288,13 +287,13 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
   std::shared_ptr<::grpc::Channel> channel;
   if (FLAGS_grpc_use_insecure_mode) {
     ASSIGN_OR_RETURN(auto credentials_manager,
-                    CredentialsManager::CreateInstance(true));
+                     CredentialsManager::CreateInstance(true));
     channel = ::grpc::CreateChannel(
         FLAGS_grpc_addr,
         credentials_manager->GenerateExternalFacingClientCredentials());
   } else {
     std::shared_ptr<::grpc::ChannelCredentials> channel_credentials =
-      ::grpc::InsecureChannelCredentials();
+        ::grpc::InsecureChannelCredentials();
     channel = ::grpc::CreateChannel(FLAGS_grpc_addr, channel_credentials);
   }
 
@@ -338,7 +337,7 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
     auto stream_reader_writer = stub->Subscribe(&ctx);
     ::gnmi::SubscribeRequest req = BuildGnmiSubOnchangeRequest(path);
     PRINT_MSG(req, "REQUEST");
-    CHECK_RETURN_IF_FALSE(stream_reader_writer->Write(req)) << "Can not write request.";
+    RET_CHECK(stream_reader_writer->Write(req)) << "Cannot write request.";
     ::gnmi::SubscribeResponse resp;
     while (stream_reader_writer->Read(&resp)) {
       PRINT_MSG(resp, "RESPONSE");
@@ -349,7 +348,7 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
     ::gnmi::SubscribeRequest req =
         BuildGnmiSubSampleRequest(path, FLAGS_interval);
     PRINT_MSG(req, "REQUEST");
-    CHECK_RETURN_IF_FALSE(stream_reader_writer->Write(req)) << "Can not write request.";
+    RET_CHECK(stream_reader_writer->Write(req)) << "Cannot write request.";
     ::gnmi::SubscribeResponse resp;
     while (stream_reader_writer->Read(&resp)) {
       PRINT_MSG(resp, "RESPONSE");

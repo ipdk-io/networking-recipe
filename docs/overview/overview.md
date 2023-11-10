@@ -1,4 +1,4 @@
-# P4 Control Plane
+# Overview
 
 P4 Control Plane (formerly P4-OVS Split Architecture) modularizes P4-OVS
 and reduces coupling between its components, making the code easier to maintain

@@ -37,6 +37,8 @@ import struct
 import sys
 import threading
 import time
+import fcntl
+import select
 from functools import wraps
 
 import google.protobuf.text_format
@@ -690,6 +692,26 @@ class P4RuntimeClient:
             pass
         return None
 
+    def get_packet_in(self, timeout=3):
+        msg = self.get_stream_packet("packet", timeout)
+        if msg is not None:
+            return msg.packet
+
+    def send_packet_out(self, payload):
+        packet_out = p4runtime_pb2.PacketOut()
+        packet_out.payload = payload
+        packet_out_req = p4runtime_pb2.StreamMessageRequest()
+        packet_out_req.packet.CopyFrom(packet_out)
+        self.stream_out_q.put(packet_out_req)
+
+    # Continuously poll for pkts from the server
+    def pktio_rx(self, tap_device):
+        print("Waiting for Rx packets...")
+        while True:
+            pkt = self.get_packet_in()
+            if pkt is not None:
+                tap_device.write(pkt.payload)
+
     @parse_p4runtime_error
     def get_p4info(self):
         req = p4runtime_pb2.GetForwardingPipelineConfigRequest()
@@ -799,6 +821,60 @@ def p4ctl_show(client, bridge):
 def p4ctl_set_pipe(client, bridge, device_config, p4info):
     client.set_fwd_pipe_config(p4info, device_config)
 
+class TapDevice:
+    def __init__(self, tap_name):
+
+        self.tap_name = tap_name
+
+        # constants derived from
+        # https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/if_tun.h#L34
+        TUNSETIFF = 0x400454CA
+        IFF_TAP = 0x0002
+        IFF_NO_PI = 0x1000
+        try:
+            self.tap = os.open("/dev/net/tun", os.O_RDWR)
+
+            # Configure the TAP interface.
+            ifr = struct.pack('16sH', self.tap_name.encode(), IFF_TAP | IFF_NO_PI)
+            fcntl.ioctl(self.tap, TUNSETIFF, ifr)
+
+            print(f"Created TAP device {self.tap_name}")
+        except Exception as e:
+            print(f"Error creating TAP interface: {e}")
+            if self.tap is not None:
+                 os.close(self.tap)
+
+    # Continuously reads pkts from TAP port and sends them out to the server
+    def read(self, client):
+        MAX_FRAME_SIZE = 1500
+        SELECT_TIMEOUT = 0.1
+        while True:
+            readable, _, _ = select.select([self.tap], [], [], SELECT_TIMEOUT)
+            if self.tap in readable:
+                # read pkt from tap port
+                data = os.read(self.tap, MAX_FRAME_SIZE)
+
+                # send the packet to the server
+                client.send_packet_out(data)
+
+    # Sends pkts to the tap port
+    def write(self, data):
+        os.write(self.tap, data)
+
+# Thread function to read pkts from TAP port
+def read_from_tap(tap, client):
+    print("Tx thread polling on TAP port")
+    tap.read(client)
+
+@with_client
+def p4ctl_start_pktio(client, bridge):
+    try:
+        tap_device = TapDevice("pktioTap0")
+        tx_thread = threading.Thread(target=read_from_tap, args=(tap_device,client))
+        tx_thread.start()
+        client.pktio_rx(tap_device)
+    except Exception as e:
+        print(f"Error: Failed to start packetIo {e}")
 
 @with_client
 def p4ctl_get_pipe(client, bridge):
@@ -1835,6 +1911,7 @@ def p4ctl_get_direct_pkt_mod_meter_entry(client, bridge, tbl_name, flow):
 all_commands = {
     "show": (p4ctl_show, 1),
     "set-pipe": (p4ctl_set_pipe, 3),
+    "start-pktio": (p4ctl_start_pktio, 1),
     "get-pipe": (p4ctl_get_pipe, 1),
     "add-entry": (p4ctl_add_entry, 3),
     "modify-entry": (p4ctl_mod_entry, 3),

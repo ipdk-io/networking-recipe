@@ -16,7 +16,7 @@
 # The process is:
 #
 # - Check for each of the legacy xxxx_TARGET Boolean options. Create a list
-#   of targets we've seen and unset the xxxx_TARGET options.
+#   of the targets we've seen, and then unset the legacy variables.
 #
 # - Process the TDI_TARGET=<target> option. Check for errors.
 #
@@ -30,6 +30,7 @@
 #   TARGETTYPE    string specifying the target type (DPDK, ES2K, etc.)
 #
 #   xxxx_TARGET   Boolean to enable target-specific cmake code.
+#                 Only the selected target will be defined.
 #
 # ----------------------------------------------------------------------
 
@@ -44,13 +45,15 @@ set(_default_tdi_target DPDK)
 
 #-----------------------------------------------------------------------
 # Checks for the specified legacy target option.
+# If enabled, returns the target variable name in TARGETVAR.
+# Unsets the target variable.
 #-----------------------------------------------------------------------
 function(_check_legacy_target_option typename TARGETVAR)
     unset(${TARGETVAR} PARENT_SCOPE)
     set(varname ${typename}_TARGET)
     if(${varname})
         # Progression: NOTICE (accept), WARNING (accept), FATAL_ERROR (abort).
-        message(NOTICE "${varname} option is deprecated; use TDI_TARGET=${typename} instead.")
+        message(WARNING "${varname} option is deprecated; use TDI_TARGET=${typename} instead.")
         set(${TARGETVAR} ${typename} PARENT_SCOPE)
     endif()
     # Eradicate legacy target variable.
@@ -61,7 +64,8 @@ endfunction()
 
 #-----------------------------------------------------------------------
 # Checks for the legacy DPDK_TARGET, ES2K_TARGET, and TOFINO_TARGET
-# Boolean options.
+# Boolean options. Ensures that no more than one is specified.
+# If found, returns the target name in TARGETVAR.
 #-----------------------------------------------------------------------
 function(_get_legacy_target_option TARGETVAR)
     set(legacy_targets)
@@ -84,6 +88,7 @@ endfunction()
 
 #-----------------------------------------------------------------------
 # Checks for the TDI_TARGET=<target> option.
+# If valid, converts <target> to upper case and returns it in TARGETVAR.
 #-----------------------------------------------------------------------
 function(_get_tdi_target_option TARGETVAR)
     string(STRIP "${TDI_TARGET}" tdi_target)
@@ -134,6 +139,7 @@ function(_select_tdi_target_type)
     mark_as_advanced(TARGETFLAG)
     mark_as_advanced(TARGETTYPE)
 
+    # "{Building|Defaulting to} <TARGETFLAG>"
     message(NOTICE "${target_action} ${target_flag}")
 endfunction()
 

@@ -19,20 +19,20 @@ set_install_rpath(gnmi-ctl ${EXEC_ELEMENT} ${DEP_ELEMENT})
 target_link_libraries(gnmi-ctl
     PUBLIC
         stratum_static
-        gnmi_proto grpc_proto
-        grpc protobuf gflags grpc++
-        pthread re2
+        gnmi_proto
+        grpc_proto
+        gflags::gflags_shared
+        gRPC::grpc
+        gRPC::grpc++
+        gRPC::re2
+        protobuf::libprotobuf
+        pthread
 )
 
 target_include_directories(gnmi-ctl
     PRIVATE
         ${STRATUM_SOURCE_DIR}
         ${PB_OUT_DIR}
-)
-
-add_dependencies(gnmi-ctl
-    gnmi_proto
-    grpc_proto
 )
 
 if(DPDK_TARGET)

@@ -208,8 +208,7 @@ int main(int argc, char* argv[]) {
     CPU_SET(core_id[index], &cpuset);
     if ((pthread_setaffinity_np(client_threads[index].native_handle(),
                                 sizeof(cpuset), &cpuset))) {
-      std::cerr << "error: setting affinity" << std::endl;
-      return INTERNAL_ERR;
+      std::cout << "setting affinity failed. Moving on" << std::endl;
     }
   }
 

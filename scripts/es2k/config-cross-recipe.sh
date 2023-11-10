@@ -24,7 +24,6 @@ _SYSROOT=${SDKTARGETSYSROOT}
 # Default values #
 ##################
 
-_BLD_TYPE=RelWithDebInfo
 _DEPS_DIR="${DEPEND_INSTALL:-//opt/deps}"
 _HOST_DIR="${HOST_INSTALL:-setup/host-deps}"
 _OVS_DIR="${OVS_INSTALL:-//opt/ovs}"
@@ -41,20 +40,24 @@ _DRY_RUN=0
 
 print_help() {
     echo ""
-    echo "Configure P4 Control Plane build"
+    echo "Configure P4 Control Plane build for ACC"
     echo ""
-    echo "Paths:"
+    echo "General:"
+    echo "  --dry-run        -n  Display cmake parameters and exit"
+    echo "  --help           -h  Display help text and exit"
+    echo ""
+    echo "Host paths:"
     echo "  --build=DIR      -B  Build directory path [${_BLD_DIR}]"
+    echo "  --host=DIR       -H  Host dependencies directory [${_HOST_DIR}]"
+    echo "  --toolchain=FILE -T  CMake toolchain file"
+    echo ""
+    echo "Target paths:"
     echo "  --deps=DIR*      -D  Target dependencies directory [${_DEPS_DIR}]"
-    echo "  --host=DIR*      -H  Host dependencies directory [${_HOST_DIR}]"
     echo "  --ovs=DIR*       -O  OVS install directory [${_OVS_DIR}]"
     echo "  --prefix=DIR*    -P  Install directory prefix [${_PREFIX}]"
     echo "  --sde=DIR*       -S  SDE install directory [${_SDE_DIR}]"
-    echo "  --toolchain=FILE -T  CMake toolchain file"
     echo ""
     echo "Options:"
-    echo "  --dry-run        -n  Display cmake parameter values and exit"
-    echo "  --help           -h  Display this help text"
     echo "  --no-krnlmon         Exclude Kernel Monitor"
     echo "  --no-ovs             Exclude OVS support"
     echo ""
@@ -77,7 +80,6 @@ print_help() {
 
 print_cmake_params() {
     echo ""
-    echo "CMAKE_BUILD_TYPE=${_BLD_TYPE}"
     echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
     echo "CMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
     echo "DEPEND_INSTALL_DIR=${_DEPS_DIR}"
@@ -160,7 +162,6 @@ done
 [ "${_PREFIX:0:2}" = "//" ] && _PREFIX=${_SYSROOT}/${_PREFIX:2}
 [ "${_SDE_DIR:0:2}" = "//" ] && _SDE_DIR=${_SYSROOT}/${_SDE_DIR:2}
 
-# Expand WITH_KRNLMON and WITH_OVSP4RT if not empty
 [ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON=-DWITH_KRNLMON=${_WITH_KRNLMON}
 [ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT=-DWITH_OVSP4RT=${_WITH_OVSP4RT}
 
@@ -176,9 +177,8 @@ fi
 
 rm -fr "${_BLD_DIR}"
 
- # shellcheck disable=SC2086
- cmake -S . -B "${_BLD_DIR}" \
-    -DCMAKE_BUILD_TYPE=${_BLD_TYPE} \
+# shellcheck disable=SC2086
+cmake -S . -B "${_BLD_DIR}" \
     -DCMAKE_INSTALL_PREFIX="${_PREFIX}" \
     -DCMAKE_TOOLCHAIN_FILE="${_TOOLFILE}" \
     -DDEPEND_INSTALL_DIR="${_DEPS_DIR}" \

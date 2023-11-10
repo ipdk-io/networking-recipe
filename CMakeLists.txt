@@ -7,21 +7,27 @@
 # Version 3.15 is the baseline for P4 Control Plane.
 cmake_minimum_required(VERSION 3.15)
 
-# CMAKE_BUILD_TYPE must be set before the first project() command.
-set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Type of build to perform")
-
 project(networking-recipe VERSION 23.07 LANGUAGES C CXX)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 include(CMakePrintHelpers)
+include(CompilerSettings)
 include(CTest)
 include(FindPkgConfig)
 include(GNUInstallDirs)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the build type"
+      FORCE)
+endif()
+
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug;MinSizeRel;Release;RelWithDebInfo")
+
+cmake_print_variables(CMAKE_STAGING_PREFIX)
 cmake_print_variables(CMAKE_SYSROOT)
 cmake_print_variables(CMAKE_TOOLCHAIN_FILE)
-cmake_print_variables(CMAKE_STAGING_PREFIX)
 
 #############################
 # Symbolic path definitions #
@@ -48,20 +54,19 @@ set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
     "Path to generated Protobuf files")
 file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
-############################
-# Target selection options #
-############################
-
-include(SelectTdiTarget)
-
 ###################
 # Feature toggles #
 ###################
 
 option(SET_RPATH    "Set RPATH in libraries and executables" OFF)
-
 option(WITH_KRNLMON "Enable Kernel Monitor support" ON)
 option(WITH_OVSP4RT "Enable OVS support" ON)
+
+############################
+# Target selection options #
+############################
+
+include(SelectTdiTarget)
 
 if(TOFINO_TARGET)
     set(WITH_KRNLMON OFF)
@@ -71,9 +76,17 @@ endif()
 cmake_print_variables(WITH_KRNLMON)
 cmake_print_variables(WITH_OVSP4RT)
 
-###########################
-# Global compiler options #
-###########################
+if(WITH_OVSP4RT AND OVS_INSTALL_DIR STREQUAL "")
+    message(FATAL_ERROR "OVS_INSTALL_DIR (OVS_INSTALL) not defined!")
+endif()
+
+############################
+# Global compiler settings #
+############################
+
+set_basic_compiler_options()
+set_legacy_security_options()
+#set_extended_security_options()
 
 add_compile_options(-D${TARGETFLAG})
 
@@ -84,8 +97,6 @@ if(NOT DEPEND_INSTALL_DIR STREQUAL "")
         link_directories(${DEPEND_INSTALL_DIR}/lib64)
     endif()
 endif()
-
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 ############################
 # find_xxxx() search paths #
@@ -135,20 +146,17 @@ cmake_print_variables(CMAKE_PREFIX_PATH)
 # External packages #
 #####################
 
-find_package(absl REQUIRED)
+include(StratumDependencies)
 
 if(DPDK_TARGET)
-    include(dpdk-driver)
+    find_package(DpdkDriver)
 elseif(ES2K_TARGET)
-    include(es2k-driver)
+    find_package(Es2kDriver)
 elseif(TOFINO_TARGET)
-    include(tofino-driver)
+    find_package(TofinoDriver)
 endif()
 
 if(WITH_OVSP4RT)
-    if(OVS_INSTALL_DIR STREQUAL "")
-        message(FATAL_ERROR "OVS_INSTALL_DIR (OVS_INSTALL) not defined!")
-    endif()
     find_package(OVS)
 endif()
 

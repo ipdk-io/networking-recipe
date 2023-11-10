@@ -5,7 +5,7 @@ Copyright 2022-2023 Intel Corporation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# sgnmi_cli Client Guide
+# sgnmi_cli
 
 This is a basic gNMI client that can be used for testing and sending
 messages to a gNMI server such as `infrap4d`. A YANG path needs to be

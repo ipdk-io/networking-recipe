@@ -16,6 +16,18 @@ include(GNUInstallDirs)
 option(P4OVS "Build OVS with P4Runtime support" OFF)
 option(WITH_RUNDIRS "Build with OVS runtime directories" OFF)
 
+##############
+# Build type #
+##############
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
+        "Choose the build type" FORCE)
+endif()
+
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug;MinSizeRel;Release;RelWithDebInfo")
+
 ####################
 # Path definitions #
 ####################
