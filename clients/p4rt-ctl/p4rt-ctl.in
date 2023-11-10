@@ -1773,9 +1773,9 @@ def _format_dme(ce):
     return output_buffer
 
 @with_client
-def p4ctl_get_meter_entry(client, bridge, tbl_name, flow):
+def p4ctl_get_packet_mod_meter_entry(client, bridge, tbl_name, flow):
     """
-    get-meter-entry SWITCH METER_TABLE READ_METER_FLOW
+    p4ctl-get-packet-mod-meter-entry SWITCH METER_TABLE READ_METER_FLOW
     Example : // return single matching meter entry
         p4rt-ctl get-packet-mod-meter br0 my_control.meter1 "meter_id=2244878476,meter_index=6"
     """
@@ -1785,7 +1785,6 @@ def p4ctl_get_meter_entry(client, bridge, tbl_name, flow):
 
     mtr_id, idx = parse_get_meter_flow(flow)
 
-
     helper = P4InfoHelper(p4info)
     entity = p4runtime_pb2.Entity()
     ce = entity.meter_entry
@@ -1794,7 +1793,6 @@ def p4ctl_get_meter_entry(client, bridge, tbl_name, flow):
         raise Exception("Cannot find meter_entry field in entity")
 
     ce.meter_id = int(mtr_id) or 0 #Assign 0 if None
-
     ce.index.index = int(idx)
 
     for response in client.read_one(entity):
