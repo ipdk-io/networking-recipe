@@ -3,7 +3,7 @@
 This document explains how to build the Stratum dependencies for the
 ARM Compute Complex (ACC) of the Intel&reg; IPU E2100.
 
-> **Note**: To build the dependencies for a different target, see
+> **Note**: To build the dependencies for a target other than ES2K, see
 [Building the Stratum Dependencies](building-stratum-deps.md).
 
 ## 1. Introduction
@@ -24,37 +24,27 @@ The Host and Target libraries must be the same version.
 
 ## 2. Preparing the System
 
-There are several things to do before you can build the dependencies.
+There are a couple of things to do before you build the dependencies:
 
 - Install CMake 3.15 or above
 
-  Avoid versions 3.24 and 3.25. They cause the dependencies build to fail.
+  Avoid versions 3.24 and 3.25. There is an issue in cmake that causes the
+  Protobuf build to fail. This problem was fixed in version 3.26.
 
 - Install OpenSSL 3.x
 
   Note that P4 Control Plane is not compatible with BoringSSL.
 
-- Install the ACC SDK
-
-  See [Installing the ACC SDK](/guides/es2k/installing-acc-sdk.md) for directions.
-
 ## 3. Getting the Source Code
 
-The script to build the Stratum dependencies is in the IPDK networking-recipe
+The script to build the Stratum dependencies is in the stratum-deps
 repository.
 
 To clone the repository:
 
 ```bash
-git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
+git clone https://github.com/ipdk-io/stratum-deps.git
 ```
-
-You may omit the `--recursive` option if you are only interested in building
-the dependencies.
-
-You may substitute your own local directory name for `ipdk.recipe`.
-
-The build script for the Stratum dependencies is in the `setup` directory.
 
 The source code for the dependencies is not part of the distribution.
 It is downloaded by the build script.
@@ -73,17 +63,13 @@ It is recommended that you *not* install the Host dependencies in `/usr` or
 `/usr/local`. It will be easier to rebuild or update the dependencies if
 their libraries are not mingled with other libraries.
 
-The `setup` directory includes a helper script (`make-host-deps.sh`) that
+The `scripts` subdirectory includes a helper script (`make-host-deps.sh`) that
 can be used to build the Host dependencies.
 
 - The `--help` (`-h`) option lists the parameters the helper script supports
 
 - The `--dry-run` (`-n`) option displays the parameter values without
   running CMake
-
-The script normally does a minimal build, containing just the components
-needed for cross-compilation. Specify the `--full` parameter if you want
-to build all the libraries.
 
 > **Note:** The Host and Target build environments are mutually incompatible.
   You must ensure that the [target build environment variables](/guides/es2k/defining-acc-environment.md)
@@ -94,7 +80,7 @@ to build all the libraries.
 To install the dependencies in a user directory:
 
 ```bash
-./make-host-deps.sh --prefix=PREFIX
+./scripts/make-host-deps.sh --prefix=PREFIX
 ```
 
 PREFIX might something like `~/hostdeps`.
@@ -108,7 +94,7 @@ To install the Host dependencies in a system directory, log in as `root`
 or build from an account that has `sudo` privilege.
 
 ```bash
-./make-host-deps.sh --prefix=PREFIX --sudo
+./scripts/make-host-deps.sh --prefix=PREFIX --sudo
 ```
 
 PREFIX might be something like `/opt/ipdk/x86deps`.
@@ -123,8 +109,8 @@ This will typically be under the sysroot directory structure. For
 example, the `opt` subdirectory will become the root-level `/opt`
 directory when the file structure is copied to the E2100 file system.
 
-The `setup` directory includes a helper script (`make-cross-deps.sh`) that
-can be used to build the Target dependencies.
+The `scripts` subdirectory includes a helper script (`make-cross-deps.sh`)
+that can be used to build the Target dependencies.
 
 - The `--help` (`-h`) option lists the parameters the helper script supports
 
@@ -136,7 +122,8 @@ dependencies (`--host`) as well as the install prefix (`--prefix`).
 
 ### Target build
 
-Source the file that the defines the [target build environment variables](/guides/es2k/defining-acc-environment.md).
+Source the file that defines the
+[target build environment variables](/guides/es2k/defining-acc-environment.md).
 
 ```bash
 source es2k-setup.env
@@ -151,7 +138,7 @@ rm -fr build
 Now run the build script:
 
 ```bash
-./make-cross-deps.sh --host=HOSTDEPS --prefix=PREFIX
+./scripts/make-cross-deps.sh --host=HOSTDEPS --prefix=PREFIX
 ```
 
 `HOSTDEPS` is the path to the Host dependencies, e.g., `~/p4cp-dev/hostdeps`.
