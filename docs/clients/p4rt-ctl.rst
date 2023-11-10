@@ -469,6 +469,86 @@ Example:
 
    p4rt-ctl dump-entries br0
 
+Add configuration to meter table
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   add-meter-config SWITCH METER_TBL METER_CONFIGURATION
+
+Arguments:
+
+* ``SWITCH``: Bridge name. Maps internally to device name.
+* ``METER_TBL``: Meter table.
+* ``METER_CONFIGURATION``: COnfiguration for meter table.
+
+Example:
+
+.. code-block:: bash
+
+   p4rt-ctl add-meter-config br0 my_control.meter1 "meter_id=2244878476,meter_index=10,meter_config=policer_meter_prof_id=0,policer_spec_cir_unit=1,policer_spec_cbs_unit=1,policer_spec_eir_unit=1,policer_spec_ebs_unit=1,policer_spec_cir=1000,policer_spec_cbs=1500,policer_spec_eir=1000,policer_spec_ebs=1500"
+
+Add table entry (rule) for Direct meter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   p4rt-ctl add-entry SWITCH TABLE FLOW
+
+Arguments:
+
+* ``SWITCH``: Bridge name. Maps internally to device name.
+* ``TABLE``: table_name present in the p4info.txt file.
+* ``FLOW``: Parameters for the TABLE entry.
+  Format: match_field_key=value config_data=value action=action_name(value).
+
+Example:
+
+.. code-block:: bash
+
+   p4rt-ctl add-entry br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000193",hdrs.mac[vmeta.common.depth].sa="0x9ebace99d1d2",config_data=policer_meter_prof_id=0,policer_spec_cir_unit=0,policer_spec_cbs_unit=1,policer_spec_eir_unit=0,policer_spec_ebs_unit=1,policer_spec_cir=100,policer_spec_cbs=1500,policer_spec_eir=100,policer_spec_ebs=1500,action=my_control.send_with_policer_meter3(17)"   
+
+Get direct meter value
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   p4rt-ctl get-direct-meter SWITCH TABLE KEY
+
+Arguments:
+
+* ``SWITCH``: Bridge name. Maps internally to device name.
+* ``TABLE``: table_name present in p4info.txt file.
+* ``KEY``: match_field_key parameter of the TABLE.
+  Format: match_field_key=value.
+
+Examples:
+
+.. code-block:: bash
+
+   p4rt-ctl get-direct-meter br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000193",hdrs.mac[vmeta.common.depth].sa="0x9ebace99d1d2" 
+
+Get indirect meter value
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   p4rt-ctl get-packet-mod-meter SWITCH METER_TABLE COUNTER_FLOW
+
+Arguments:
+
+* ``SWITCH``: Bridge name. Maps internally to device name.
+* ``METER_TABLE``: Specifies meter table entry from the p4 file.
+* ``METER_FLOW``: Meter ID (generated ID by p4c; see bfrt.json file)
+  and meter table index. 
+  Format: "meter_id=<number>,meter_index=<number>".
+
+Examples:
+
+.. code-block:: bash
+
+   p4rt-ctl get-packet-mod-meter br0 my_control.meter1 "meter_id=2244878476,meter_index=10"
+
 Known Issues
 ------------
 
