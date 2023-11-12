@@ -5,9 +5,9 @@
 # Builds and installs tarballs.
 #
 
-set(cpp_tarball_name cpp_out_protos.tar.gz)
-set(py_tarball_name py_out_protos.tar.gz)
-set(go_tarball_name go_out_protos.tar.gz)
+set(cpp_tarball_name p4runtime-cpp-0.0.0.tar.gz)
+set(py_tarball_name p4runtime-py-0.0.0.tar.gz)
+set(go_tarball_name p4runtime-go-0.0.0.tar.gz)
 
 set(_tar_flags -z --owner=ipdk --group=ipdk --sort=name)
 
@@ -86,19 +86,3 @@ install(
   DESTINATION
     ${CMAKE_INSTALL_DATAROOTDIR}/stratum/protobufs
 )
-
-if(WHEEL_ENABLED)
-  add_custom_target(py-wheel ALL
-    COMMAND
-      mkdir wheelgen
-    COMMAND
-      cp -pv ${CMAKE_CURRENT_SOURCE_DIR}/py/* wheelgen
-    COMMAND
-      cp -prv ${PY_OUT}/p4 wheelgen
-    COMMAND
-      # Generate Python wheel
-      env -C wheelgen python setup.py bdist_wheel --universal
-    WORKING_DIRECTORY
-      ${CMAKE_CURRENT_BINARY_DIR}
-  )
-endif(WHEEL_ENABLED)
