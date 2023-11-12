@@ -10,8 +10,8 @@ You can do this from the main directory, or from the `protobufs` subdirectory.
 The following packages must be installed:
 
 - Stratum dependencies
-
-- Python
+- Python 3.8 or above
+- Python dependencies (`requirements.txt`)
 
 If you wish to generate protobufs for Go, follow the instructions in the
 [Quick start](https://grpc.io/docs/languages/go/quickstart/) guide
@@ -51,17 +51,15 @@ Scanning dependencies of target protobufs
 [ 50%] Performing configure step for 'protobufs'
    .
    .
-[ 33%] Generating C++ tarball
-[ 33%] Built target cpp-tarball
-[ 66%] Generating Go tarball
-[ 66%] Built target go-tarball
-[100%] Generating Python tarball
-[100%] Built target py-tarball
+[100%] Generating Go tarball
+[100%] Built target go-tarball
 Install the project...
 -- Install configuration: ""
--- Installing: /home/frodo/work/latest/install/share/stratum/protobufs/cpp_out_protos.tar.gz
--- Installing: /home/frodo/work/latest/install/share/stratum/protobufs/py_out_protos.tar.gz
--- Installing: /home/frodo/work/latest/install/share/stratum/protobufs/go_out_protos.tar.gz
+-- Installing: /home/samwise/work/latest/install/share/stratum/protobufs/p4runtime-cpp-0.0.0.tar.gz
+-- Installing: /home/samwise/work/latest/install/share/stratum/protobufs/p4runtime-py-0.0.0.tar.gz
+-- Installing: /home/samwise/work/latest/install/share/stratum/protobufs/p4runtime-go-0.0.0.tar.gz
+-- Up-to-date: /home/samwise/work/latest/install/share/stratum
+-- Installing: /home/samwise/work/latest/install/share/stratum/p4runtime-0.0.0-py3-none-any.whl
 [100%] Completed 'protobufs'
 [100%] Built target protobufs  
 ```

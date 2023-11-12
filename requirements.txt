@@ -2,3 +2,6 @@ p4runtime==1.3.0
 Jinja2>=3.0.0
 fcntl
 select
+setuptools
+build
+wheel
