@@ -28,7 +28,7 @@ add_custom_target(cpp-tarball ALL
     p4rt_cpp_out
     p4rt_grpc_out
   BYPRODUCTS
-    ${cpp_tarball_name}
+    ${CMAKE_CURRENT_BINARY_DIR}/${cpp_tarball_name}
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT
@@ -47,7 +47,7 @@ add_custom_target(py-tarball ALL
     google_py_out
     p4rt_py_out
   BYPRODUCTS
-    ${py_tarball_name}
+    ${CMAKE_CURRENT_BINARY_DIR}/${py_tarball_name}
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT
@@ -67,7 +67,7 @@ if(GEN_GO_PROTOBUFS)
       google_go_out
       p4rt_go_out
     BYPRODUCTS
-      ${go_tarball_name}
+      ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name}
     WORKING_DIRECTORY
       ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT

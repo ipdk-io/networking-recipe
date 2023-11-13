@@ -47,7 +47,7 @@ add_custom_target(google_py_out ALL
     --plugin=protoc-gen-grpc=${HOST_GRPC_PY_PLUGIN}
     -I${GOOGLE_SOURCE_DIR}
   COMMAND
-    find ${PY_OUT}/google -type d | xargs -I FNAME touch FNAME/__init__.py
+    find ${PY_OUT}/google -type d -exec touch {}/__init__.py \;
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM

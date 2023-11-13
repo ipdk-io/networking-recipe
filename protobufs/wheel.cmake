@@ -9,7 +9,7 @@ set(WHEELGEN ${CMAKE_BINARY_DIR}/p4runtime)
 
 file(MAKE_DIRECTORY ${WHEELGEN})
 
-file(INSTALL
+file(COPY
     content/LICENSE
     content/README.md
     content/pyproject.toml
@@ -33,7 +33,7 @@ add_custom_target(py-wheel ALL
     google_py_out
     p4rt_py_out
   COMMENT
-    "Generating Python wheel"
+    "Generating Python packages"
   VERBATIM
 )
 
@@ -41,7 +41,5 @@ install(
   DIRECTORY
     ${WHEELGEN}/dist/
   DESTINATION
-    ${CMAKE_INSTALL_DATAROOTDIR}/stratum
-  FILES_MATCHING
-    PATTERN "*.whl"
+    ${CMAKE_INSTALL_DATAROOTDIR}/stratum/python
 )
