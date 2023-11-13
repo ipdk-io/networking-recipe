@@ -40,6 +40,8 @@ mark_as_advanced(glog_DIR)
 find_package(Protobuf CONFIG REQUIRED)
 mark_as_advanced(Protobuf_DIR)
 
+message(STATUS "Found Protobuf version ${Protobuf_VERSION}")
+
 #-----------------------------------------------------------------------
 # Google RPC (gRPC).
 #-----------------------------------------------------------------------
@@ -57,7 +59,15 @@ find_program(HOST_PROTOC_COMMAND "protoc" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_PROTOC_COMMAND)
 
 if(HOST_PROTOC_COMMAND)
-  message(STATUS "Found protoc: ${HOST_PROTOC_COMMAND}")
+  execute_process(
+    COMMAND ${HOST_PROTOC_COMMAND} --version
+    OUTPUT_VARIABLE protoc_output
+  )
+  string(STRIP "${protoc_output}" protoc_output)
+  string(REGEX REPLACE
+    "^libprotoc +([0-9.]+)$" "\\1" PROTOC_VERSION ${protoc_output})
+  message(STATUS "Found protoc: ${HOST_PROTOC_COMMAND} (version found \"${PROTOC_VERSION}\")")
+  unset(protoc_output)
 else()
   message(FATAL_ERROR "protoc not found")
 endif()
