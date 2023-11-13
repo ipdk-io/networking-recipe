@@ -5,25 +5,43 @@
 # Builds and installs a Python wheel.
 #
 
+set(WHEELGEN ${CMAKE_BINARY_DIR}/p4runtime)
+
+file(MAKE_DIRECTORY ${WHEELGEN})
+
+file(INSTALL
+    content/LICENSE
+    content/README.md
+    content/pyproject.toml
+    content/setup.py
+  DESTINATION
+    ${WHEELGEN}
+)
+
+configure_file(
+  content/setup.cfg.in
+  ${WHEELGEN}/setup.cfg
+  @ONLY
+)
+
 add_custom_target(py-wheel ALL
   COMMAND
-    rm -fr wheelgen
+    cp -pr ${PY_OUT}/p4 ${WHEELGEN}
   COMMAND
-    mkdir wheelgen
-  COMMAND
-    cp -pv ${CMAKE_CURRENT_SOURCE_DIR}/py/* wheelgen
-  COMMAND
-    cp -prv ${PY_OUT}/p4 wheelgen
-  COMMAND
-    # Generate Python wheel
-    env -C wheelgen python setup.py bdist_wheel
-  WORKING_DIRECTORY
-    ${CMAKE_CURRENT_BINARY_DIR}
+    env -C ${WHEELGEN} python -m build
+  DEPENDS
+    google_py_out
+    p4rt_py_out
+  COMMENT
+    "Generating Python wheel"
+  VERBATIM
 )
 
 install(
-  FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/wheelgen/dist/
+  DIRECTORY
+    ${WHEELGEN}/dist/
   DESTINATION
     ${CMAKE_INSTALL_DATAROOTDIR}/stratum
+  FILES_MATCHING
+    PATTERN "*.whl"
 )
