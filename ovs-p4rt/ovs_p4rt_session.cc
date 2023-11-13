@@ -154,6 +154,13 @@ absl::Status SendWriteRequest(OvsP4rtSession* session,
   return GrpcStatusToAbslStatus(status);
 }
 
+::p4::v1::TableEntry* SetupTableEntryToRead(OvsP4rtSession* session,
+                                            ::p4::v1::ReadRequest* req) {
+  req->set_device_id(session->DeviceId());
+  auto* entity = req->add_entities();
+  return entity->mutable_table_entry();
+}
+
 ::p4::v1::TableEntry* SetupTableEntryToInsert(OvsP4rtSession* session,
                                               ::p4::v1::WriteRequest* req) {
   req->set_device_id(session->DeviceId());

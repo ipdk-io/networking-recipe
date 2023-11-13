@@ -113,107 +113,73 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
   match->mutable_exact()->set_value(mac_addr);
 
 #if defined(ES2K_TARGET)
-  // Based on p4 program for ES2K, we need to provide a match key Tunnel Flag
+  // Based on p4 program for ES2K, we need to provide a match key Bridge ID
   auto match1 = table_entry->add_match();
   match1->set_field_id(
-      GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_TUN_FLAG));
+      GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_BRIDGE_ID));
 
-  match1->mutable_exact()->set_value(EncodeByteValue(1, 0));
+  match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 #endif
 
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
-    action->set_action_id(GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD));
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD,
-                                     ACTION_L2_FWD_PARAM_PORT));
+    if (learn_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+      action->set_action_id(
+          GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_REMOVE_VLAN_AND_FWD));
+      {
+        auto param = action->add_params();
+        param->set_param_id(
+            GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_REMOVE_VLAN_AND_FWD,
+                       ACTION_REMOVE_VLAN_AND_FWD_PARAM_PORT_ID));
+        auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
+        param->set_value(EncodeByteValue(1, port_id));
+      }
+      {
+        auto param = action->add_params();
+        param->set_param_id(
+            GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_REMOVE_VLAN_AND_FWD,
+                       ACTION_REMOVE_VLAN_AND_FWD_PARAM_VLAN_PTR));
+        param->set_value(EncodeByteValue(1, learn_info.vlan_info.port_vlan));
+      }
+    } else if (learn_info.vlan_info.port_vlan_mode ==
+               P4_PORT_VLAN_NATIVE_TAGGED) {
+      action->set_action_id(
+          GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_ADD_VLAN_AND_FWD));
+      {
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(p4info,
+                                       L2_FWD_TX_TABLE_ACTION_ADD_VLAN_AND_FWD,
+                                       ACTION_ADD_VLAN_AND_FWD_PARAM_PORT_ID));
+        auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
+        param->set_value(EncodeByteValue(1, port_id));
+      }
+      {
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(p4info,
+                                       L2_FWD_TX_TABLE_ACTION_ADD_VLAN_AND_FWD,
+                                       ACTION_ADD_VLAN_AND_FWD_PARAM_VLAN_PTR));
+        param->set_value(EncodeByteValue(1, learn_info.vlan_info.port_vlan));
+      }
+    } else {
+      action->set_action_id(GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD));
+      {
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD,
+                                       ACTION_L2_FWD_PARAM_PORT));
 #if defined(DPDK_TARGET)
-      auto port_id = learn_info.vln_info.vlan_id - 1;
+        auto port_id = learn_info.vln_info.vlan_id - 1;
 #elif defined(ES2K_TARGET)
-      auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
+        auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
 #else
-      auto port_id = 0;
+        auto port_id = 0;
 #endif
-      param->set_value(EncodeByteValue(1, port_id));
+        param->set_value(EncodeByteValue(1, port_id));
+      }
     }
   }
   return;
 }
-
-#if defined(ES2K_TARGET)
-void PrepareFdbTxV6VlanTableEntry(p4::v1::TableEntry* table_entry,
-                                  const struct mac_learning_info& learn_info,
-                                  const ::p4::config::v1::P4Info& p4info,
-                                  bool insert_entry) {
-  table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_IPV6_TABLE));
-  auto match = table_entry->add_match();
-  match->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_IPV6_TABLE,
-                                      L2_FWD_TX_IPV6_TABLE_KEY_DST_MAC));
-
-  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
-  match->mutable_exact()->set_value(mac_addr);
-
-  // Based on p4 program for ES2K, we need to provide a match key Tunnel Flag
-  auto match1 = table_entry->add_match();
-  match1->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
-                                       L2_FWD_TX_IPV6_TABLE_KEY_TUN_FLAG));
-
-  match1->mutable_exact()->set_value(EncodeByteValue(1, 0));
-
-  if (insert_entry) {
-    auto table_action = table_entry->mutable_action();
-    auto action = table_action->mutable_action();
-    action->set_action_id(
-        GetActionId(p4info, L2_FWD_TX_IPV6_TABLE_ACTION_L2_FWD));
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info, L2_FWD_TX_IPV6_TABLE_ACTION_L2_FWD,
-                                     ACTION_L2_FWD_PARAM_PORT));
-      auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
-      param->set_value(EncodeByteValue(1, port_id));
-    }
-  }
-  return;
-}
-#endif
-
-#if defined(ES2K_TARGET)
-/* Sem Bypass table is specific to ES2K platform. When Data packets exchange
- * between overlay network (VSI to VSI), along with l2_fwd_tx table SEM bypass
- * table also should be programmed.
- * Match Key: DMAC
- * Action: VSI ID to which a matching packet need to forwarded.
- */
-void PrepareSemBypassTableEntry(p4::v1::TableEntry* table_entry,
-                                const struct mac_learning_info& learn_info,
-                                const ::p4::config::v1::P4Info& p4info,
-                                bool insert_entry) {
-  table_entry->set_table_id(GetTableId(p4info, SEM_BYPASS_TABLE));
-  auto match = table_entry->add_match();
-  match->set_field_id(
-      GetMatchFieldId(p4info, SEM_BYPASS_TABLE, SEM_BYPASS_TABLE_KEY_DST_MAC));
-
-  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
-  match->mutable_exact()->set_value(mac_addr);
-
-  if (insert_entry) {
-    auto table_action = table_entry->mutable_action();
-    auto action = table_action->mutable_action();
-    action->set_action_id(
-        GetActionId(p4info, SEM_BYPASS_TABLE_ACTION_SET_DEST));
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info, SEM_BYPASS_TABLE_ACTION_SET_DEST,
-                                     ACTION_SET_DEST_PARAM_PORT_ID));
-      auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
-      param->set_value(EncodeByteValue(1, port_id));
-    }
-  }
-  return;
-}
-#endif
 
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
@@ -248,39 +214,6 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
   return;
 }
 
-#if defined(ES2K_TARGET)
-void PrepareFdbRxV6VlanTableEntry(p4::v1::TableEntry* table_entry,
-                                  const struct mac_learning_info& learn_info,
-                                  const ::p4::config::v1::P4Info& p4info,
-                                  bool insert_entry) {
-  table_entry->set_table_id(
-      GetTableId(p4info, L2_FWD_RX_IPV6_WITH_TUNNEL_TABLE));
-  auto match = table_entry->add_match();
-  match->set_field_id(
-      GetMatchFieldId(p4info, L2_FWD_RX_IPV6_WITH_TUNNEL_TABLE,
-                      L2_FWD_RX_IPV6_WITH_TUNNEL_TABLE_KEY_DST_MAC));
-  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
-  match->mutable_exact()->set_value(mac_addr);
-
-  if (insert_entry) {
-    auto table_action = table_entry->mutable_action();
-    auto action = table_action->mutable_action();
-    action->set_action_id(
-        GetActionId(p4info, L2_FWD_RX_IPV6_WITH_TUNNEL_TABLE_ACTION_L2_FWD));
-    {
-      auto param = action->add_params();
-      param->set_param_id(
-          GetParamId(p4info, L2_FWD_RX_IPV6_WITH_TUNNEL_TABLE_ACTION_L2_FWD,
-                     ACTION_L2_FWD_PARAM_PORT));
-      auto port_id = learn_info.mac_addr[1] + ES2K_VPORT_ID_OFFSET;
-      param->set_value(EncodeByteValue(1, port_id));
-    }
-  }
-
-  return;
-}
-#endif
-
 void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
                                      const struct mac_learning_info& learn_info,
                                      const ::p4::config::v1::P4Info& p4info,
@@ -292,14 +225,13 @@ void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
 
   std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
   match->mutable_exact()->set_value(mac_addr);
-
 #if defined(ES2K_TARGET)
-  // Based on p4 program for ES2K, we need to provide a match key Tunnel Flag
+  // Based on p4 program for ES2K, we need to provide a match key Bridge ID
   auto match1 = table_entry->add_match();
   match1->set_field_id(
-      GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_TUN_FLAG));
+      GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_BRIDGE_ID));
 
-  match1->mutable_exact()->set_value(EncodeByteValue(1, 0));
+  match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 #endif
 
 #if defined(DPDK_TARGET)
@@ -329,68 +261,111 @@ void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
-    action->set_action_id(GetActionId(
-        p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V4_OVERLAY_V4));
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(
-          p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V4_OVERLAY_V4,
-          ACTION_SET_TUNNEL_UNDERLAY_V4_OVERLAY_V4_PARAM_TUNNEL_ID));
-      param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
-    }
 
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(
-          p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V4_OVERLAY_V4,
-          ACTION_SET_TUNNEL_UNDERLAY_V4_OVERLAY_V4_PARAM_DST_ADDR));
-      std::string ip_address =
-          CanonicalizeIp(learn_info.tnl_info.remote_ip.ip.v4addr.s_addr);
-      param->set_value(ip_address);
+    if (learn_info.tnl_info.local_ip.family == AF_INET &&
+        learn_info.tnl_info.remote_ip.family == AF_INET) {
+      if (learn_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+        action->set_action_id(GetActionId(
+            p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V4));
+        {
+          auto param = action->add_params();
+          param->set_param_id(GetParamId(
+              p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V4,
+              ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V4_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+        }
+      } else {
+        action->set_action_id(
+            GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V4));
+        {
+          auto param = action->add_params();
+          param->set_param_id(
+              GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V4,
+                         ACTION_SET_TUNNEL_UNDERLAY_V4_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+        }
+      }
+    } else if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
+               learn_info.tnl_info.remote_ip.family == AF_INET6) {
+      if (learn_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+        action->set_action_id(GetActionId(
+            p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V6));
+        {
+          auto param = action->add_params();
+          param->set_param_id(GetParamId(
+              p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V6,
+              ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V6_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+        }
+      } else {
+        action->set_action_id(
+            GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V6));
+        {
+          auto param = action->add_params();
+          param->set_param_id(
+              GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V6,
+                         ACTION_SET_TUNNEL_UNDERLAY_V6_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+        }
+      }
     }
   }
 #endif
   return;
 }
 
-#if defined(ES2K_TARGET)
-void PrepareFdbTableEntryforV6Tunnel(p4::v1::TableEntry* table_entry,
-                                     const struct mac_learning_info& learn_info,
-                                     const ::p4::config::v1::P4Info& p4info,
-                                     bool insert_entry) {
-  table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_IPV6_TABLE));
+void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
+                         const struct mac_learning_info& learn_info,
+                         const ::p4::config::v1::P4Info& p4info,
+                         bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, L2_TO_TUNNEL_V4_TABLE));
   auto match = table_entry->add_match();
-  match->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_IPV6_TABLE,
-                                      L2_FWD_TX_IPV6_TABLE_KEY_DST_MAC));
+  match->set_field_id(
+      GetMatchFieldId(p4info, L2_TO_TUNNEL_V4_TABLE, L2_TO_TUNNEL_V4_KEY_DA));
 
   std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
   match->mutable_exact()->set_value(mac_addr);
 
-  // Based on p4 program for ES2K, we need to provide a match key Tunnel Flag
-  auto match1 = table_entry->add_match();
-  match1->set_field_id(
-      GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_TUN_FLAG));
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(
+        GetActionId(p4info, L2_TO_TUNNEL_V4_ACTION_SET_TUNNEL_V4));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     L2_TO_TUNNEL_V4_ACTION_SET_TUNNEL_V4,
+                                     ACTION_SET_TUNNEL_V4_PARAM_DST_ADDR));
+      std::string ip_address =
+          CanonicalizeIp(learn_info.tnl_info.remote_ip.ip.v4addr.s_addr);
+      param->set_value(ip_address);
+    }
+  }
+  return;
+}
 
-  match1->mutable_exact()->set_value(EncodeByteValue(1, 0));
+void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
+                         const struct mac_learning_info& learn_info,
+                         const ::p4::config::v1::P4Info& p4info,
+                         bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, L2_TO_TUNNEL_V6_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(
+      GetMatchFieldId(p4info, L2_TO_TUNNEL_V6_TABLE, L2_TO_TUNNEL_V6_KEY_DA));
+
+  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
+  match->mutable_exact()->set_value(mac_addr);
 
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
-    action->set_action_id(GetActionId(
-        p4info, L2_FWD_TX_IPV6_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6));
+    action->set_action_id(
+        GetActionId(p4info, L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6));
     {
       auto param = action->add_params();
-      param->set_param_id(GetParamId(
-          p4info, L2_FWD_TX_IPV6_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6,
-          ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6_PARAM_TUNNEL_ID));
-      param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
-    }
-
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(
-          p4info, L2_FWD_TX_IPV6_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6,
-          ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6_PARAM_IPV6_1));
+      param->set_param_id(GetParamId(p4info,
+                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
+                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_1));
       std::string ip_address = CanonicalizeIp(
           learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[0]);
       param->set_value(ip_address);
@@ -398,9 +373,9 @@ void PrepareFdbTableEntryforV6Tunnel(p4::v1::TableEntry* table_entry,
 
     {
       auto param = action->add_params();
-      param->set_param_id(GetParamId(
-          p4info, L2_FWD_TX_IPV6_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6,
-          ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6_PARAM_IPV6_2));
+      param->set_param_id(GetParamId(p4info,
+                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
+                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_2));
       std::string ip_address = CanonicalizeIp(
           learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[1]);
       param->set_value(ip_address);
@@ -408,9 +383,9 @@ void PrepareFdbTableEntryforV6Tunnel(p4::v1::TableEntry* table_entry,
 
     {
       auto param = action->add_params();
-      param->set_param_id(GetParamId(
-          p4info, L2_FWD_TX_IPV6_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6,
-          ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6_PARAM_IPV6_3));
+      param->set_param_id(GetParamId(p4info,
+                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
+                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_3));
       std::string ip_address = CanonicalizeIp(
           learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[0]);
       param->set_value(ip_address);
@@ -418,9 +393,9 @@ void PrepareFdbTableEntryforV6Tunnel(p4::v1::TableEntry* table_entry,
 
     {
       auto param = action->add_params();
-      param->set_param_id(GetParamId(
-          p4info, L2_FWD_TX_IPV6_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6,
-          ACTION_SET_TUNNEL_UNDERLAY_V6_OVERLAY_V6_PARAM_IPV6_4));
+      param->set_param_id(GetParamId(p4info,
+                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
+                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_4));
       std::string ip_address = CanonicalizeIp(
           learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[0]);
       param->set_value(ip_address);
@@ -428,7 +403,6 @@ void PrepareFdbTableEntryforV6Tunnel(p4::v1::TableEntry* table_entry,
   }
   return;
 }
-#endif
 
 absl::Status ConfigFdbTxVlanTableEntry(
     ovs_p4rt::OvsP4rtSession* session,
@@ -444,57 +418,6 @@ absl::Status ConfigFdbTxVlanTableEntry(
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, insert_entry);
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
-
-#if defined(ES2K_TARGET)
-absl::Status ConfigFdbTxV6VlanTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
-    const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  ::p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
-  PrepareFdbTxV6VlanTableEntry(table_entry, learn_info, p4info, insert_entry);
-  return ovs_p4rt::SendWriteRequest(session, write_request);
-}
-#endif
-
-#if defined(ES2K_TARGET)
-absl::Status ConfigSemBypassTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
-    const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  ::p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
-  PrepareSemBypassTableEntry(table_entry, learn_info, p4info, insert_entry);
-  return ovs_p4rt::SendWriteRequest(session, write_request);
-}
-#endif
-
-#if defined(ES2K_TARGET)
-absl::Status ConfigFdbRxV6VlanTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
-    const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  ::p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
-  PrepareFdbRxV6VlanTableEntry(table_entry, learn_info, p4info, insert_entry);
-  return ovs_p4rt::SendWriteRequest(session, write_request);
-}
-#endif
 
 absl::Status ConfigFdbRxVlanTableEntry(
     ovs_p4rt::OvsP4rtSession* session,
@@ -523,21 +446,29 @@ absl::Status ConfigFdbTunnelTableEntry(
     table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
   }
 
-#if defined(DPDK_TARGET)
   PrepareFdbTableEntryforV4Tunnel(table_entry, learn_info, p4info,
                                   insert_entry);
-#elif defined(ES2K_TARGET)
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+}
+
+absl::Status ConfigL2TunnelTableEntry(
+    ovs_p4rt::OvsP4rtSession* session,
+    const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
+  ::p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
+
   if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
       learn_info.tnl_info.remote_ip.family == AF_INET6) {
-    PrepareFdbTableEntryforV6Tunnel(table_entry, learn_info, p4info,
-                                    insert_entry);
+    PrepareL2ToTunnelV6(table_entry, learn_info, p4info, insert_entry);
   } else {
-    PrepareFdbTableEntryforV4Tunnel(table_entry, learn_info, p4info,
-                                    insert_entry);
+    PrepareL2ToTunnelV4(table_entry, learn_info, p4info, insert_entry);
   }
-#else
-  return absl::UnknownError("Unsupported platform")
-#endif
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
 
@@ -562,6 +493,7 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
                                      ACTION_VXLAN_ENCAP_PARAM_SRC_ADDR));
       param->set_value(CanonicalizeIp(tunnel_info.local_ip.ip.v4addr.s_addr));
     }
+    // Done
     {
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP,
@@ -621,6 +553,7 @@ void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
                                      ACTION_VXLAN_ENCAP_V6_PARAM_SRC_ADDR));
       param->set_value(CanonicalizeIpv6(tunnel_info.local_ip.ip.v6addr));
     }
+    // Done
     {
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP_V6,
@@ -657,15 +590,215 @@ void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
 }
 #endif
 
-void PrepareDecapTableEntry(p4::v1::TableEntry* table_entry,
-                            const struct tunnel_info& tunnel_info,
-                            const ::p4::config::v1::P4Info& p4info,
-                            bool insert_entry) {
+#if defined(ES2K_TARGET)
+void PrepareEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
+                                      const struct tunnel_info& tunnel_info,
+                                      const ::p4::config::v1::P4Info& p4info,
+                                      bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, VXLAN_ENCAP_VLAN_POP_MOD_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(GetMatchFieldId(
+      p4info, VXLAN_ENCAP_VLAN_POP_MOD_TABLE,
+      VXLAN_ENCAP_VLAN_POP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  match->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.vni));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(GetActionId(p4info, ACTION_VXLAN_ENCAP_VLAN_POP));
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_ENCAP_VLAN_POP,
+                     ACTION_VXLAN_ENCAP_VLAN_POP_PARAM_SRC_ADDR));
+      param->set_value(CanonicalizeIp(tunnel_info.local_ip.ip.v4addr.s_addr));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_ENCAP_VLAN_POP,
+                     ACTION_VXLAN_ENCAP_VLAN_POP_PARAM_DST_ADDR));
+      param->set_value(CanonicalizeIp(tunnel_info.remote_ip.ip.v4addr.s_addr));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_ENCAP_VLAN_POP,
+                     ACTION_VXLAN_ENCAP_VLAN_POP_PARAM_SRC_PORT));
+      uint16_t dst_port = htons(tunnel_info.dst_port);
+
+      param->set_value(EncodeByteValue(2, (((dst_port * 2) >> 8) & 0xff),
+                                       ((dst_port * 2) & 0xff)));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_ENCAP_VLAN_POP,
+                     ACTION_VXLAN_ENCAP_VLAN_POP_PARAM_DST_PORT));
+      uint16_t dst_port = htons(tunnel_info.dst_port);
+
+      param->set_value(
+          EncodeByteValue(2, ((dst_port >> 8) & 0xff), (dst_port & 0xff)));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP_VLAN_POP,
+                                     ACTION_VXLAN_ENCAP_VLAN_POP_PARAM_VNI));
+      param->set_value(EncodeByteValue(1, tunnel_info.vni));
+    }
+  }
+
+  return;
+}
+
+void PrepareV6EncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
+                                        const struct tunnel_info& tunnel_info,
+                                        const ::p4::config::v1::P4Info& p4info,
+                                        bool insert_entry) {
+  table_entry->set_table_id(
+      GetTableId(p4info, VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(GetMatchFieldId(
+      p4info, VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE,
+      VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  match->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.vni));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(GetActionId(p4info, ACTION_VXLAN_ENCAP_V6_VLAN_POP));
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_ENCAP_V6_VLAN_POP,
+                     ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_SRC_ADDR));
+      param->set_value(CanonicalizeIpv6(tunnel_info.local_ip.ip.v6addr));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_ENCAP_V6_VLAN_POP,
+                     ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_DST_ADDR));
+      param->set_value(CanonicalizeIpv6(tunnel_info.remote_ip.ip.v6addr));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_ENCAP_V6_VLAN_POP,
+                     ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_SRC_PORT));
+      uint16_t dst_port = htons(tunnel_info.dst_port);
+
+      param->set_value(EncodeByteValue(2, ((dst_port * 2) >> 8) & 0xff,
+                                       (dst_port * 2) & 0xff));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_ENCAP_V6_VLAN_POP,
+                     ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_DST_PORT));
+      uint16_t dst_port = htons(tunnel_info.dst_port);
+
+      param->set_value(
+          EncodeByteValue(2, (dst_port >> 8) & 0xff, dst_port & 0xff));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP_V6_VLAN_POP,
+                                     ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_VNI));
+      param->set_value(EncodeByteValue(1, tunnel_info.vni));
+    }
+  }
+
+  return;
+}
+#endif
+
+void PrepareRxTunnelTableEntry(p4::v1::TableEntry* table_entry,
+                               const struct tunnel_info& tunnel_info,
+                               const ::p4::config::v1::P4Info& p4info,
+                               bool insert_entry) {
+  table_entry->set_table_id(
+      GetTableId(p4info, RX_IPV4_TUNNEL_SOURCE_PORT_TABLE));
+
+  auto match = table_entry->add_match();
+  match->set_field_id(
+      GetMatchFieldId(p4info, RX_IPV4_TUNNEL_SOURCE_PORT_TABLE,
+                      RX_IPV4_TUNNEL_SOURCE_PORT_TABLE_KEY_VNI));
+  match->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.vni));
+
+  auto match1 = table_entry->add_match();
+  match1->set_field_id(
+      GetMatchFieldId(p4info, RX_IPV4_TUNNEL_SOURCE_PORT_TABLE,
+                      RX_IPV4_TUNNEL_SOURCE_PORT_TABLE_KEY_IPV4_SRC));
+  match1->mutable_exact()->set_value(
+      CanonicalizeIp(tunnel_info.remote_ip.ip.v4addr.s_addr));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(GetActionId(
+        p4info, RX_IPV4_TUNNEL_SOURCE_PORT_TABLE_ACTION_SET_SRC_PORT));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(
+          p4info, RX_IPV4_TUNNEL_SOURCE_PORT_TABLE_ACTION_SET_SRC_PORT,
+          ACTION_SET_SRC_PORT));
+      param->set_value(EncodeByteValue(2, ((tunnel_info.src_port >> 8) & 0xff),
+                                       (tunnel_info.src_port & 0xff)));
+    }
+  }
+
+  return;
+}
+
+#if defined(ES2K_TARGET)
+void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
+                                 const struct tunnel_info& tunnel_info,
+                                 const ::p4::config::v1::P4Info& p4info,
+                                 bool insert_entry) {
+  table_entry->set_table_id(
+      GetTableId(p4info, RX_IPV6_TUNNEL_SOURCE_PORT_TABLE));
+
+  auto match = table_entry->add_match();
+  match->set_field_id(
+      GetMatchFieldId(p4info, RX_IPV6_TUNNEL_SOURCE_PORT_TABLE,
+                      RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_KEY_VNI));
+  match->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.vni));
+
+  auto match1 = table_entry->add_match();
+  match1->set_field_id(
+      GetMatchFieldId(p4info, RX_IPV6_TUNNEL_SOURCE_PORT_TABLE,
+                      RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_KEY_IPV6_SRC));
+  match1->mutable_exact()->set_value(
+      CanonicalizeIpv6(tunnel_info.remote_ip.ip.v6addr));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(GetActionId(
+        p4info, RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_ACTION_SET_SRC_PORT));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(
+          p4info, RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_ACTION_SET_SRC_PORT,
+          ACTION_SET_SRC_PORT));
+      param->set_value(EncodeByteValue(1, tunnel_info.src_port));
+    }
+  }
+
+  return;
+}
+#endif
+
+void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
+                                 const struct tunnel_info& tunnel_info,
+                                 const ::p4::config::v1::P4Info& p4info,
+                                 bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, IPV4_TUNNEL_TERM_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
-                                      IPV4_TUNNEL_TERM_TABLE_KEY_TUNNEL_TYPE));
-  match->mutable_exact()->set_value(EncodeByteValue(1, TUNNEL_TYPE_VXLAN));
+                                      IPV4_TUNNEL_TERM_TABLE_KEY_BRIDGE_ID));
+  match->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.bridge_id));
 
   auto match1 = table_entry->add_match();
   match1->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
@@ -675,9 +808,8 @@ void PrepareDecapTableEntry(p4::v1::TableEntry* table_entry,
 
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
-                                       IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_DST));
-  match2->mutable_exact()->set_value(
-      CanonicalizeIp(tunnel_info.local_ip.ip.v4addr.s_addr));
+                                       IPV4_TUNNEL_TERM_TABLE_KEY_VNI));
+  match2->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.vni));
 
 #if defined(DPDK_TARGET)
   if (insert_entry) {
@@ -696,8 +828,16 @@ void PrepareDecapTableEntry(p4::v1::TableEntry* table_entry,
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
-    action->set_action_id(GetActionId(p4info, ACTION_DECAP_OUTER_HDR));
-    {
+    if (tunnel_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+      action->set_action_id(
+          GetActionId(p4info, ACTION_DECAP_OUTER_HDR_AND_PUSH_VLAN));
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_DECAP_OUTER_HDR_AND_PUSH_VLAN,
+                     ACTION_DECAP_OUTER_HDR_AND_PUSH_VLAN_PARAM_TUNNEL_ID));
+      param->set_value(EncodeByteValue(1, tunnel_info.vni));
+    } else {
+      action->set_action_id(GetActionId(p4info, ACTION_DECAP_OUTER_HDR));
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_DECAP_OUTER_HDR,
                                      ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_ID));
@@ -710,15 +850,15 @@ void PrepareDecapTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 #if defined(ES2K_TARGET)
-void PrepareV6DecapTableEntry(p4::v1::TableEntry* table_entry,
-                              const struct tunnel_info& tunnel_info,
-                              const ::p4::config::v1::P4Info& p4info,
-                              bool insert_entry) {
+void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
+                                   const struct tunnel_info& tunnel_info,
+                                   const ::p4::config::v1::P4Info& p4info,
+                                   bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, IPV6_TUNNEL_TERM_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, IPV6_TUNNEL_TERM_TABLE,
-                                      IPV6_TUNNEL_TERM_TABLE_KEY_TUNNEL_TYPE));
-  match->mutable_exact()->set_value(EncodeByteValue(1, TUNNEL_TYPE_VXLAN));
+                                      IPV6_TUNNEL_TERM_TABLE_KEY_BRIDGE_ID));
+  match->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.bridge_id));
 
   auto match1 = table_entry->add_match();
   match1->set_field_id(GetMatchFieldId(p4info, IPV6_TUNNEL_TERM_TABLE,
@@ -728,15 +868,22 @@ void PrepareV6DecapTableEntry(p4::v1::TableEntry* table_entry,
 
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, IPV6_TUNNEL_TERM_TABLE,
-                                       IPV6_TUNNEL_TERM_TABLE_KEY_IPV6_DST));
-  match2->mutable_exact()->set_value(
-      CanonicalizeIpv6(tunnel_info.local_ip.ip.v6addr));
+                                       IPV6_TUNNEL_TERM_TABLE_KEY_VNI));
+  match2->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.vni));
 
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
-    action->set_action_id(GetActionId(p4info, ACTION_DECAP_OUTER_HDR));
-    {
+    if (tunnel_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+      action->set_action_id(
+          GetActionId(p4info, ACTION_DECAP_OUTER_HDR_AND_PUSH_VLAN));
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_DECAP_OUTER_HDR_AND_PUSH_VLAN,
+                     ACTION_DECAP_OUTER_HDR_AND_PUSH_VLAN_PARAM_TUNNEL_ID));
+      param->set_value(EncodeByteValue(1, tunnel_info.vni));
+    } else {
+      action->set_action_id(GetActionId(p4info, ACTION_DECAP_OUTER_HDR));
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_DECAP_OUTER_HDR,
                                      ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_ID));
@@ -766,16 +913,87 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt::OvsP4rtSession* session,
 #elif defined(ES2K_TARGET)
   if (tunnel_info.local_ip.family == AF_INET &&
       tunnel_info.remote_ip.family == AF_INET) {
-    PrepareEncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+    if (tunnel_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+      PrepareEncapAndVlanPopTableEntry(table_entry, tunnel_info, p4info,
+                                       insert_entry);
+    } else {
+      PrepareEncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+    }
   } else if (tunnel_info.local_ip.family == AF_INET6 &&
              tunnel_info.remote_ip.family == AF_INET6) {
-    PrepareV6EncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+    if (tunnel_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+      PrepareV6EncapAndVlanPopTableEntry(table_entry, tunnel_info, p4info,
+                                         insert_entry);
+    } else {
+      PrepareV6EncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+    }
   }
 #else
   return absl::UnknownError("Unsupported platform")
 #endif
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
+}
+
+void PrepareDecapModTableEntry(p4::v1::TableEntry* table_entry,
+                               const struct tunnel_info& tunnel_info,
+                               const ::p4::config::v1::P4Info& p4info,
+                               bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, VXLAN_DECAP_MOD_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(GetMatchFieldId(p4info, VXLAN_DECAP_MOD_TABLE,
+                                      VXLAN_DECAP_MOD_TABLE_KEY_MOD_BLOB_PTR));
+  match->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.vni));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    {
+      action->set_action_id(GetActionId(p4info, ACTION_VXLAN_DECAP_OUTER_HDR));
+    }
+  }
+  return;
+}
+
+void PrepareDecapModAndVlanPushTableEntry(
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
+  table_entry->set_table_id(
+      GetTableId(p4info, VXLAN_DECAP_AND_VLAN_PUSH_MOD_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(
+      GetMatchFieldId(p4info, VXLAN_DECAP_AND_VLAN_PUSH_MOD_TABLE,
+                      VXLAN_DECAP_AND_VLAN_PUSH_MOD_TABLE_KEY_MOD_BLOB_PTR));
+  match->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.vni));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(
+        GetActionId(p4info, ACTION_VXLAN_DECAP_AND_PUSH_VLAN));
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_DECAP_AND_PUSH_VLAN,
+                     ACTION_VXLAN_DECAP_AND_PUSH_VLAN_PARAM_PCP));
+      param->set_value(EncodeByteValue(1, 1));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_DECAP_AND_PUSH_VLAN,
+                     ACTION_VXLAN_DECAP_AND_PUSH_VLAN_PARAM_DEI));
+      param->set_value(EncodeByteValue(1, 0));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(
+          GetParamId(p4info, ACTION_VXLAN_DECAP_AND_PUSH_VLAN,
+                     ACTION_VXLAN_DECAP_AND_PUSH_VLAN_PARAM_VLAN_ID));
+      param->set_value(EncodeByteValue(1, tunnel_info.vlan_info.port_vlan));
+    }
+  }
+  return;
 }
 
 absl::Status ConfigDecapTableEntry(ovs_p4rt::OvsP4rtSession* session,
@@ -790,20 +1008,267 @@ absl::Status ConfigDecapTableEntry(ovs_p4rt::OvsP4rtSession* session,
   } else {
     table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
   }
+
+  if (tunnel_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_TAGGED) {
+    PrepareDecapModTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+  } else {
+    PrepareDecapModAndVlanPushTableEntry(table_entry, tunnel_info, p4info,
+                                         insert_entry);
+  }
+
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+}
+
+absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
+                                        const struct tunnel_info& tunnel_info,
+                                        const ::p4::config::v1::P4Info& p4info,
+                                        bool insert_entry) {
+  p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
 #if defined(DPDK_TARGET)
-  PrepareDecapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+  PrepareTunnelTermTableEntry(table_entry, tunnel_info, p4info, insert_entry);
 
 #elif defined(ES2K_TARGET)
   if (tunnel_info.local_ip.family == AF_INET &&
       tunnel_info.remote_ip.family == AF_INET) {
-    PrepareDecapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+    PrepareTunnelTermTableEntry(table_entry, tunnel_info, p4info, insert_entry);
   } else if (tunnel_info.local_ip.family == AF_INET6 &&
              tunnel_info.remote_ip.family == AF_INET6) {
-    PrepareV6DecapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+    PrepareV6TunnelTermTableEntry(table_entry, tunnel_info, p4info,
+                                  insert_entry);
   }
 #else
   return absl::UnknownError("Unsupported platform")
 #endif
+
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+}
+
+void PrepareVlanPushTableEntry(p4::v1::TableEntry* table_entry,
+                               const uint16_t vlan_id,
+                               const ::p4::config::v1::P4Info& p4info,
+                               bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, VLAN_PUSH_MOD_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(GetMatchFieldId(p4info, VLAN_PUSH_MOD_TABLE,
+                                      VLAN_PUSH_MOD_KEY_MOD_BLOB_PTR));
+
+  match->mutable_exact()->set_value(EncodeByteValue(1, vlan_id));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(GetActionId(p4info, VLAN_PUSH_MOD_ACTION_VLAN_PUSH));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info, VLAN_PUSH_MOD_ACTION_VLAN_PUSH,
+                                     ACTION_VLAN_PUSH_PARAM_PCP));
+
+      param->set_value(EncodeByteValue(1, 1));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info, VLAN_PUSH_MOD_ACTION_VLAN_PUSH,
+                                     ACTION_VLAN_PUSH_PARAM_DEI));
+
+      param->set_value(EncodeByteValue(1, 0));
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info, VLAN_PUSH_MOD_ACTION_VLAN_PUSH,
+                                     ACTION_VLAN_PUSH_PARAM_VLAN_ID));
+
+      param->set_value(EncodeByteValue(1, vlan_id));
+    }
+  }
+  return;
+}
+
+void PrepareVlanPopTableEntry(p4::v1::TableEntry* table_entry,
+                              const uint16_t vlan_id,
+                              const ::p4::config::v1::P4Info& p4info,
+                              bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, VLAN_POP_MOD_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(GetMatchFieldId(p4info, VLAN_POP_MOD_TABLE,
+                                      VLAN_POP_MOD_KEY_MOD_BLOB_PTR));
+
+  match->mutable_exact()->set_value(EncodeByteValue(1, vlan_id));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(GetActionId(p4info, VLAN_POP_MOD_ACTION_VLAN_POP));
+  }
+  return;
+}
+
+absl::Status ConfigVlanPushTableEntry(ovs_p4rt::OvsP4rtSession* session,
+                                      const uint16_t vlan_id,
+                                      const ::p4::config::v1::P4Info& p4info,
+                                      bool insert_entry) {
+  p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
+
+  PrepareVlanPushTableEntry(table_entry, vlan_id, p4info, insert_entry);
+
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+}
+
+absl::StatusOr<::p4::v1::ReadResponse> GetVlanPushTableEntry(
+    ovs_p4rt::OvsP4rtSession* session, const uint16_t vlan_id,
+    const ::p4::config::v1::P4Info& p4info) {
+  ::p4::v1::ReadRequest read_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
+
+  PrepareVlanPushTableEntry(table_entry, vlan_id, p4info, false);
+
+  return ovs_p4rt::SendReadRequest(session, read_request);
+}
+
+absl::Status ConfigVlanPopTableEntry(ovs_p4rt::OvsP4rtSession* session,
+                                     const uint16_t vlan_id,
+                                     const ::p4::config::v1::P4Info& p4info,
+                                     bool insert_entry) {
+  p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
+
+  PrepareVlanPopTableEntry(table_entry, vlan_id, p4info, insert_entry);
+
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+}
+
+void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
+                              const struct src_port_info& sp,
+                              const ::p4::config::v1::P4Info& p4info,
+                              bool insert_entry) {
+  table_entry->set_table_id(
+      GetTableId(p4info, SOURCE_PORT_TO_BRIDGE_MAP_TABLE));
+  auto match = table_entry->add_match();
+  table_entry->set_priority(1);
+  match->set_field_id(
+      GetMatchFieldId(p4info, SOURCE_PORT_TO_BRIDGE_MAP_TABLE,
+                      SOURCE_PORT_TO_BRIDGE_MAP_TABLE_KEY_SRC_PORT));
+  match->mutable_ternary()->set_value(
+      EncodeByteValue(2, ((sp.src_port >> 8) & 0xff), (sp.src_port & 0xff)));
+  match->mutable_ternary()->set_mask(EncodeByteValue(2, 0xff, 0xff));
+
+  auto match1 = table_entry->add_match();
+  match1->set_field_id(
+      GetMatchFieldId(p4info, SOURCE_PORT_TO_BRIDGE_MAP_TABLE,
+                      SOURCE_PORT_TO_BRIDGE_MAP_TABLE_KEY_VID));
+  match1->mutable_ternary()->set_value(
+      EncodeByteValue(2, ((sp.vlan_id >> 8) & 0x0f), (sp.vlan_id & 0xff)));
+  match1->mutable_ternary()->set_mask(EncodeByteValue(2, 0x0f, 0xff));
+  // match1->mutable_ternary()->set_mask(EncodeByteValue(1, 0xff));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(GetActionId(
+        p4info, SOURCE_PORT_TO_BRIDGE_MAP_TABLE_ACTION_SET_BRIDGE_ID));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(
+          p4info, SOURCE_PORT_TO_BRIDGE_MAP_TABLE_ACTION_SET_BRIDGE_ID,
+          ACTION_SET_BRIDGE_ID_PARAM_BRIDGE_ID));
+      param->set_value(EncodeByteValue(1, sp.bridge_id));
+    }
+  }
+
+  return;
+}
+
+void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry,
+                               const struct src_port_info& sp,
+                               const ::p4::config::v1::P4Info& p4info) {
+  table_entry->set_table_id(GetTableId(p4info, TX_ACC_VSI_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(
+      GetMatchFieldId(p4info, TX_ACC_VSI_TABLE, TX_ACC_VSI_TABLE_KEY_VSI));
+
+  match->mutable_exact()->set_value(
+      EncodeByteValue(1, (sp.src_port - ES2K_VPORT_ID_OFFSET)));
+#if 0
+  /* un-used match key of 0, code is added for reference */
+  auto match1 = table_entry->add_match();
+  match1->set_field_id(
+      GetMatchFieldId(p4info, TX_ACC_VSI_TABLE, TX_ACC_VSI_TABLE_KEY_ZERO_PADDING));
+
+  match->mutable_exact()->set_value(EncodeByteValue(1, 0));
+#endif
+  return;
+}
+
+absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
+    ovs_p4rt::OvsP4rtSession* session, const struct src_port_info& sp,
+    const ::p4::config::v1::P4Info& p4info) {
+  ::p4::v1::ReadRequest read_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
+
+  PrepareTxAccVsiTableEntry(table_entry, sp, p4info);
+
+  return ovs_p4rt::SendReadRequest(session, read_request);
+}
+
+absl::Status ConfigureVsiSrcPortTableEntry(
+    ovs_p4rt::OvsP4rtSession* session, const struct src_port_info& sp,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
+  p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
+
+  PrepareSrcPortTableEntry(table_entry, sp, p4info, insert_entry);
+
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+}
+
+absl::Status ConfigRxTunnelSrcPortTableEntry(
+    ovs_p4rt::OvsP4rtSession* session, const struct tunnel_info& tunnel_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
+  p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
+
+  if (tunnel_info.local_ip.family == AF_INET &&
+      tunnel_info.remote_ip.family == AF_INET) {
+    PrepareRxTunnelTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+  } else if (tunnel_info.local_ip.family == AF_INET6 &&
+             tunnel_info.remote_ip.family == AF_INET6) {
+    PrepareV6RxTunnelTableEntry(table_entry, tunnel_info, p4info, insert_entry);
+  }
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
@@ -837,7 +1302,12 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
   if (learn_info.is_tunnel) {
     status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
-  } else if (learn_info.is_vlan) {
+    if (!status.ok()) return;
+
+    status = ConfigL2TunnelTableEntry(session.get(), learn_info, p4info,
+                                      insert_entry);
+
+  } else {
     status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) return;
@@ -845,18 +1315,6 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
     status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) return;
-
-#if defined(ES2K_TARGET)
-    status = ConfigFdbTxV6VlanTableEntry(session.get(), learn_info, p4info,
-                                         insert_entry);
-    if (!status.ok()) return;
-    status = ConfigSemBypassTableEntry(session.get(), learn_info, p4info,
-                                       insert_entry);
-    if (!status.ok()) return;
-
-    status = ConfigFdbRxV6VlanTableEntry(session.get(), learn_info, p4info,
-                                         insert_entry);
-#endif
   }
   if (!status.ok()) return;
   return;
@@ -882,8 +1340,199 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry) {
   status =
       ConfigEncapTableEntry(session.get(), tunnel_info, p4info, insert_entry);
   if (!status.ok()) return;
+
   status =
       ConfigDecapTableEntry(session.get(), tunnel_info, p4info, insert_entry);
   if (!status.ok()) return;
+
+  status = ConfigTunnelTermTableEntry(session.get(), tunnel_info, p4info,
+                                      insert_entry);
+  if (!status.ok()) return;
+
+  return;
+}
+
+void ConfigIpTunnelTermTableEntry(struct tunnel_info tunnel_info,
+                                  bool insert_entry) {
+  using namespace ovs_p4rt;
+
+  // Start a new client session.
+  auto status_or_session = OvsP4rtSession::Create(
+      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      absl::GetFlag(FLAGS_device_id));
+  if (!status_or_session.ok()) {
+    return;
+  }
+
+  // Unwrap the session from the StatusOr object.
+  std::unique_ptr<OvsP4rtSession> session =
+      std::move(status_or_session).value();
+  ::p4::config::v1::P4Info p4info;
+  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  if (!status.ok()) return;
+
+  status = ConfigTunnelTermTableEntry(session.get(), tunnel_info, p4info,
+                                      insert_entry);
+  if (!status.ok()) return;
+
+  return;
+}
+
+void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
+                                 bool insert_entry) {
+  using namespace ovs_p4rt;
+
+  // Start a new client session.
+  auto status_or_session = OvsP4rtSession::Create(
+      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      absl::GetFlag(FLAGS_device_id));
+  if (!status_or_session.ok()) {
+    return;
+  }
+
+  // Unwrap the session from the StatusOr object.
+  std::unique_ptr<OvsP4rtSession> session =
+      std::move(status_or_session).value();
+  ::p4::config::v1::P4Info p4info;
+  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  if (!status.ok()) return;
+
+  status = ConfigRxTunnelSrcPortTableEntry(session.get(), tunnel_info, p4info,
+                                           insert_entry);
+  if (!status.ok()) return;
+
+  return;
+}
+
+void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
+                                   bool insert_entry) {
+  using namespace ovs_p4rt;
+
+  p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  // Start a new client session.
+  auto status_or_session = OvsP4rtSession::Create(
+      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      absl::GetFlag(FLAGS_device_id));
+  if (!status_or_session.ok()) {
+    return;
+  }
+
+  // Unwrap the session from the StatusOr object.
+  std::unique_ptr<OvsP4rtSession> session =
+      std::move(status_or_session).value();
+  ::p4::config::v1::P4Info p4info;
+  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  if (!status.ok()) return;
+
+  if (insert_entry) {
+    table_entry =
+        ovs_p4rt::SetupTableEntryToInsert(session.get(), &write_request);
+  } else {
+    table_entry =
+        ovs_p4rt::SetupTableEntryToDelete(session.get(), &write_request);
+  }
+
+  PrepareSrcPortTableEntry(table_entry, tnl_sp, p4info, insert_entry);
+
+  status = ovs_p4rt::SendWriteRequest(session.get(), write_request);
+
+  if (!status.ok()) return;
+}
+
+void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
+  using namespace ovs_p4rt;
+
+  p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  // Start a new client session.
+  auto status_or_session = OvsP4rtSession::Create(
+      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      absl::GetFlag(FLAGS_device_id));
+  if (!status_or_session.ok()) {
+    return;
+  }
+
+  // Unwrap the session from the StatusOr object.
+  std::unique_ptr<OvsP4rtSession> session =
+      std::move(status_or_session).value();
+  ::p4::config::v1::P4Info p4info;
+  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  if (!status.ok()) return;
+
+  auto status_or_read_response =
+      GetTxAccVsiTableEntry(session.get(), vsi_sp, p4info);
+  if (!status_or_read_response.ok()) return;
+
+  ::p4::v1::ReadResponse read_response =
+      std::move(status_or_read_response).value();
+  std::vector<::p4::v1::TableEntry> table_entries;
+
+  table_entries.reserve(read_response.entities().size());
+
+  int param_id =
+      GetParamId(p4info, TX_ACC_VSI_TABLE_ACTION_L2_FWD_AND_BYPASS_BRIDGE,
+                 ACTION_L2_FWD_AND_BYPASS_BRIDGE_PARAM_PORT);
+
+  std::cout << "Param ID is = " << param_id << std::endl;
+  uint32_t host_sp = 0;
+  for (const auto& entity : read_response.entities()) {
+    p4::v1::TableEntry table_entry_1 = entity.table_entry();
+    auto* table_action = table_entry_1.mutable_action();
+    auto* action = table_action->mutable_action();
+    for (const auto& param : action->params()) {
+      if (param_id == param.param_id()) {
+        const std::string& s1 = param.value();
+        std::string s2 = s1;
+        for (int param_bytes = 0; param_bytes < 4; param_bytes++) {
+          host_sp = host_sp << 8 | int(s2[param_bytes]);
+        }
+        break;
+      }
+    }
+  }
+
+  std::cout << "Port Representer VSI ID = " << vsi_sp.src_port << std::endl;
+  vsi_sp.src_port = host_sp;
+  std::cout << "HOST port VSI ID = " << vsi_sp.src_port << std::endl;
+
+  status = ConfigureVsiSrcPortTableEntry(session.get(), vsi_sp, p4info,
+                                         insert_entry);
+  if (!status.ok()) return;
+
+  return;
+}
+
+void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry) {
+  using namespace ovs_p4rt;
+
+  p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  // Start a new client session.
+  auto status_or_session = OvsP4rtSession::Create(
+      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      absl::GetFlag(FLAGS_device_id));
+  if (!status_or_session.ok()) {
+    return;
+  }
+
+  // Unwrap the session from the StatusOr object.
+  std::unique_ptr<OvsP4rtSession> session =
+      std::move(status_or_session).value();
+  ::p4::config::v1::P4Info p4info;
+  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  if (!status.ok()) return;
+
+  status =
+      ConfigVlanPushTableEntry(session.get(), vlan_id, p4info, insert_entry);
+  if (!status.ok()) return;
+
+  status =
+      ConfigVlanPopTableEntry(session.get(), vlan_id, p4info, insert_entry);
+  if (!status.ok()) return;
+
   return;
 }
