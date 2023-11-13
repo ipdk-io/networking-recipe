@@ -20,6 +20,6 @@ packages = find:
 platforms = any
 python_requires = >=3.8
 install_requires =
-    protobuf >= 3.6.1
-    grpcio >= 1.17.2
-    googleapis-common-protos >= 1.52
+    protobuf >= 4.25.0
+    grpcio >= 1.59.2
+    googleapis-common-protos >= 1.61.0
