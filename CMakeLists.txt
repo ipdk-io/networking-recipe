@@ -248,7 +248,7 @@ endfunction()
 # Protobufs project #
 #####################
 
-include(GenerateProtobufs)
+include(P4RuntimeProtobufs)
 
 ##################
 # Subdirectories #
