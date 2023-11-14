@@ -480,7 +480,7 @@ Arguments:
 
 * ``SWITCH``: Bridge name. Maps internally to device name.
 * ``METER_TBL``: Meter table.
-* ``METER_CONFIGURATION``: COnfiguration for meter table.
+* ``METER_CONFIGURATION``: Configuration for meter table.
 
 Example:
 
@@ -488,7 +488,7 @@ Example:
 
    p4rt-ctl add-meter-config br0 my_control.meter1 "meter_id=2244878476,meter_index=10,meter_config=policer_meter_prof_id=0,policer_spec_cir_unit=1,policer_spec_cbs_unit=1,policer_spec_eir_unit=1,policer_spec_ebs_unit=1,policer_spec_cir=1000,policer_spec_cbs=1500,policer_spec_eir=1000,policer_spec_ebs=1500"
 
-Add table entry (rule) for Direct meter
+Add table entry (rule) for direct meter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
@@ -533,7 +533,7 @@ Get indirect meter value
 
 .. code-block:: bash
 
-   p4rt-ctl get-packet-mod-meter SWITCH METER_TABLE COUNTER_FLOW
+   p4rt-ctl get-packet-mod-meter SWITCH METER_TABLE METER_FLOW
 
 Arguments:
 
