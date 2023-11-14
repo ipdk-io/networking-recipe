@@ -169,6 +169,10 @@ jobs:
           submodules: recursive
           path: recipe
 
+      - name: Install prerequisites
+        run: |
+          sudo apt install $PREREQS
+
       - name: Set up Go environment
         uses: actions/setup-go@v4.1.0
         with:
