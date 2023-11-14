@@ -112,7 +112,7 @@ jobs:
       - name: Install python dependencies
         working-directory: recipe
         run: |
-          pip install -r requirements.txt
+          python -m pip install setuptools build wheel
 
       - name: Install DPDK SDE
         uses: robinraju/release-downloader@v1.8
