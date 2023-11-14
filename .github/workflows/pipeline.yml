@@ -39,6 +39,7 @@ jobs:
   #---------------------------------------------------------------------
   build_dpdk_p4cp:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Clone networking-recipe
@@ -94,6 +95,7 @@ jobs:
   #---------------------------------------------------------------------
   krnlmon_unit_tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Clone networking-recipe
@@ -141,7 +143,7 @@ jobs:
   # 3-py_bandit_check
   #---------------------------------------------------------------------
   py_bandit_check:
-     timeout-minutes: 10
+     timeout-minutes: 5
      runs-on: ubuntu-latest
      steps:
        - name: Clone networking-recipe
@@ -161,6 +163,7 @@ jobs:
   #---------------------------------------------------------------------
   build_p4runtime_protos:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Clone networking-recipe
