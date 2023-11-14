@@ -24,7 +24,14 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 
   list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
 
-  include(../cmake/StratumDependencies.cmake)
+  # Add networking-recipe/cmake to the search path for the package file.
+  get_filename_component(_path "../cmake" REALPATH)
+  cmake_print_variables(_path)
+  list(APPEND CMAKE_MODULE_PATH ${_path})
+  unset(_path)
+
+  # Find the host Protobuf compiler.
+  find_package(HostProtoc)
 endif()
 
 set(GRPC_OUT_ENABLED FALSE CACHE BOOL "Generate grpc_out directory")
