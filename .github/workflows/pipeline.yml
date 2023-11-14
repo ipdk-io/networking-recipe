@@ -107,7 +107,12 @@ jobs:
 
       - name: Install prerequisites
         run: |
-          sudo apt install $PREREQS
+          sudo apt install libbsd-dev
+
+      - name: Install python dependencies
+        working-directory: recipe
+        run: |
+          pip install -r requirements.txt
 
       - name: Install DPDK SDE
         uses: robinraju/release-downloader@v1.8
