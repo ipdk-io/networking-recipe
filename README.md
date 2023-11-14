@@ -1,3 +1,6 @@
+<!-- markdownlint-disable MD041 -->
+[![P4 Control Plane CI Pipeline](https://github.com/ipdk-io/networking-recipe/actions/workflows/pipeline.yml/badge.svg)](https://github.com/ipdk-io/networking-recipe/actions/workflows/pipeline.yml)
+<!-- markdownlint-enable MD041 -->
 # P4 Control Plane
 
 This repository is the superproject for P4 Control Plane.
