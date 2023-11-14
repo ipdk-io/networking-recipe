@@ -143,7 +143,7 @@ jobs:
            path: recipe
 
        - name: Check p4rt-ctl
-         uses: tj-actions/bandit@v5.1
+         uses: tj-actions/bandit@v5.5
          with:
            targets: |  # or a single string "."
             ./recipe/clients/p4rt-ctl/p4rt-ctl.in
