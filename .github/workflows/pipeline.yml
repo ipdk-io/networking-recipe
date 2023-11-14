@@ -107,12 +107,7 @@ jobs:
 
       - name: Install prerequisites
         run: |
-          sudo apt install libbsd-dev
-
-      - name: Install python dependencies
-        working-directory: recipe
-        run: |
-          python -m pip install setuptools build wheel
+          sudo apt install $PREREQS
 
       - name: Install DPDK SDE
         uses: robinraju/release-downloader@v1.8
@@ -176,7 +171,12 @@ jobs:
 
       - name: Install prerequisites
         run: |
-          sudo apt install $PREREQS
+          sudo apt install libbsd-dev
+
+      - name: Install python dependencies
+        working-directory: recipe
+        run: |
+          python -m pip install setuptools build wheel
 
       - name: Set up Go environment
         uses: actions/setup-go@v4.1.0
