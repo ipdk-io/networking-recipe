@@ -7,7 +7,7 @@ This repository is the superproject for P4 Control Plane.
 It is the successor to P4-OVS.
 
 - also called the IPDK Networking Recipe
-- formally known as P4-OVS Split Architecture
+- formerly known as P4-OVS Split Architecture
 
 P4 Control Plane modularizes P4-OVS and reduces coupling between its
 components, making the code easier to maintain and more suitable for
