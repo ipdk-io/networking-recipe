@@ -7,11 +7,9 @@
 
 set(tarball_suffix ${CMAKE_PROJECT_VERSION}.tar.gz)
 set(cpp_tarball_name p4runtime-cpp-${tarball_suffix})
-set(py_tarball_name p4runtime-py-${tarball_suffix})
 set(go_tarball_name p4runtime-go-${tarball_suffix})
 
 get_filename_component(cpp_dir ${CPP_OUT} NAME_WE)
-get_filename_component(py_dir ${PY_OUT} NAME_WE)
 get_filename_component(go_dir ${GO_OUT} NAME_WE)
 
 set(tar_flags -z --owner=ipdk --group=ipdk --sort=name)
