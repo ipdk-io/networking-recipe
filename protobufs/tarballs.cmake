@@ -36,24 +36,7 @@ add_custom_target(cpp-tarball ALL
   VERBATIM
 )
 
-# Python tarball
-add_custom_target(py-tarball ALL
-  COMMAND
-    tar -cf ${py_tarball_name}
-    ${tar_flags}
-    -C ${PY_OUT}/..
-    ${py_dir}
-  DEPENDS
-    google_py_out
-    p4rt_py_out
-  BYPRODUCTS
-    ${CMAKE_CURRENT_BINARY_DIR}/${py_tarball_name}
-  WORKING_DIRECTORY
-    ${CMAKE_CURRENT_BINARY_DIR}
-  COMMENT
-    "Generating Python tarball"
-  VERBATIM
-)
+# Python source tarball is generated when we build the wheel.
 
 # Go tarball
 if(GEN_GO_PROTOBUFS)
@@ -86,7 +69,6 @@ endif(GEN_GO_PROTOBUFS)
 install(
   FILES
     ${CMAKE_CURRENT_BINARY_DIR}/${cpp_tarball_name}
-    ${CMAKE_CURRENT_BINARY_DIR}/${py_tarball_name}
     ${go_tarball}
   DESTINATION
     ${CMAKE_INSTALL_DATAROOTDIR}/p4runtime
