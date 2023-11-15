@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Clone networking-recipe
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           path: recipe
@@ -99,7 +99,7 @@ jobs:
 
     steps:
       - name: Clone networking-recipe
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: recipe
 
@@ -147,12 +147,12 @@ jobs:
      runs-on: ubuntu-latest
      steps:
        - name: Clone networking-recipe
-         uses: actions/checkout@v3
+         uses: actions/checkout@v4
          with:
            path: recipe
 
        - name: Check p4rt-ctl
-         uses: tj-actions/bandit@v5.1
+         uses: tj-actions/bandit@v5.5
          with:
            targets: |  # or a single string "."
             ./recipe/clients/p4rt-ctl/p4rt-ctl.in

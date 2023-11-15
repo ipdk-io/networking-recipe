@@ -5,13 +5,14 @@
 #
 
 #-----------------------------------------------------------------------
-# Use pkg-config to search for the modules.
+# Use pkg-config to search for the modules
 #-----------------------------------------------------------------------
-find_package(PkgConfig)
-pkg_check_modules(PC_OVS libopenvswitch)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PC_OVS libopenvswitch REQUIRED)
 
 #-----------------------------------------------------------------------
-# Find libraries and include directories.
+# Find include directory
+# We rely on find_package_handle_standard_args() to check for errors
 #-----------------------------------------------------------------------
 find_path(OVS_INCLUDE_DIR
     NAMES "openvswitch/version.h"
@@ -19,6 +20,11 @@ find_path(OVS_INCLUDE_DIR
 )
 mark_as_advanced(OVS_INCLUDE_DIR)
 
+#-----------------------------------------------------------------------
+# Find libraries
+# We rely on find_package_handle_standard_args() to check for errors
+# Not all libraries are required
+#-----------------------------------------------------------------------
 find_library(OVS_LIBRARY
     NAMES openvswitch
     PATHS ${PC_OVS_LIBRARY_DIRS}

@@ -1,10 +1,13 @@
+<!-- markdownlint-disable MD041 -->
+[![P4 Control Plane CI Pipeline](https://github.com/ipdk-io/networking-recipe/actions/workflows/pipeline.yml/badge.svg)](https://github.com/ipdk-io/networking-recipe/actions/workflows/pipeline.yml)
+<!-- markdownlint-enable MD041 -->
 # P4 Control Plane
 
 This repository is the superproject for P4 Control Plane.
 It is the successor to P4-OVS.
 
 - also called the IPDK Networking Recipe
-- formally known as P4-OVS Split Architecture
+- formerly known as P4-OVS Split Architecture
 
 P4 Control Plane modularizes P4-OVS and reduces coupling between its
 components, making the code easier to maintain and more suitable for
