@@ -89,5 +89,5 @@ install(
     ${CMAKE_CURRENT_BINARY_DIR}/${py_tarball_name}
     ${go_tarball}
   DESTINATION
-    ${CMAKE_INSTALL_DATAROOTDIR}/stratum/protobufs
+    ${CMAKE_INSTALL_DATAROOTDIR}/p4runtime
 )

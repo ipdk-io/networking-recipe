@@ -5,7 +5,7 @@
 # Builds and installs a Python wheel.
 #
 
-set(WHEELGEN ${CMAKE_BINARY_DIR}/p4runtime)
+set(WHEELGEN ${CMAKE_BINARY_DIR}/wheelgen)
 
 file(MAKE_DIRECTORY ${WHEELGEN})
 
@@ -41,5 +41,5 @@ install(
   DIRECTORY
     ${WHEELGEN}/dist/
   DESTINATION
-    ${CMAKE_INSTALL_DATAROOTDIR}/stratum/python
+    ${CMAKE_INSTALL_DATAROOTDIR}/p4runtime
 )
