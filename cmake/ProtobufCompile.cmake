@@ -13,7 +13,9 @@
 #   Directory in which the input .proto files should be installed
 # HOST_GRPC_CPP_PLUGIN
 #   Path to the host grpc_cpp_plugin executable
-# HOST_PROTOC
+# HOST_GRPC_PY_PLUGIN
+#   Path to the host grpc_python_plugin executable
+# HOST_PROTOC_COMMAND
 #   Path to the host protobuf compiler
 # PB_HEADER_INSTALL_DIR
 #   Directory in which the generated pb.h files should be installed
@@ -45,7 +47,7 @@ function(generate_proto_files PROTO_FILES SRC_DIR)
       OUTPUT
         ${_src} ${_hdr}
       COMMAND
-        ${HOST_PROTOC}
+        ${HOST_PROTOC_COMMAND}
         --proto_path=${PROTO_IMPORT_PATH}
         --cpp_out=${PB_OUT_DIR}
         -I${STRATUM_SOURCE_DIR}
@@ -97,7 +99,7 @@ function(generate_grpc_files PROTO_FILES SRC_DIR)
       OUTPUT
         ${_src} ${_hdr}
       COMMAND
-        ${HOST_PROTOC}
+        ${HOST_PROTOC_COMMAND}
         --proto_path=${PROTO_IMPORT_PATH}
         --grpc_out=${PB_OUT_DIR}
         --plugin=protoc-gen-grpc=${HOST_GRPC_CPP_PLUGIN}
