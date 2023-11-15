@@ -51,18 +51,23 @@ Scanning dependencies of target protobufs
 [ 50%] Performing configure step for 'protobufs'
    .
    .
+Successfully built p4runtime-2023.11.0.tar.gz and p4runtime-2023.11.0-py3-none-any.whl
+[ 66%] Built target py-wheel
 [100%] Generating Go tarball
 [100%] Built target go-tarball
 Install the project...
 -- Install configuration: ""
--- Installing: /home/samwise/work/latest/install/share/stratum/protobufs/p4runtime-cpp-0.0.0.tar.gz
--- Installing: /home/samwise/work/latest/install/share/stratum/protobufs/p4runtime-py-0.0.0.tar.gz
--- Installing: /home/samwise/work/latest/install/share/stratum/protobufs/p4runtime-go-0.0.0.tar.gz
--- Up-to-date: /home/samwise/work/latest/install/share/stratum
--- Installing: /home/samwise/work/latest/install/share/stratum/p4runtime-0.0.0-py3-none-any.whl
+-- Installing: /home/samwise/work/latest/install/share/p4runtime/p4runtime-cpp-2023.11.0.tar.gz
+-- Installing: /home/samwise/work/latest/install/share/p4runtime/p4runtime-go-2023.11.0.tar.gz
+-- Up-to-date: /home/samwise/work/latest/install/share/p4runtime
+-- Installing: /home/samwise/work/latest/install/share/p4runtime/p4runtime-2023.11.0-py3-none-any.whl
+-- Installing: /home/samwise/work/latest/install/share/p4runtime/p4runtime-2023.11.0.tar.gz
 [100%] Completed 'protobufs'
-[100%] Built target protobufs  
+[100%] Built target protobufs
 ```
+
+The tarballs and the Python wheel are placed in the `share/p4runtime` folder
+in the install tree.
 
 The Go tarball will be omitted if golang is not installed.
 
