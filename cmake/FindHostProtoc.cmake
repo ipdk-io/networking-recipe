@@ -13,19 +13,31 @@ include_guard(GLOBAL)
 find_program(HOST_PROTOC_COMMAND "protoc" NO_CMAKE_FIND_ROOT_PATH)
 mark_as_advanced(HOST_PROTOC_COMMAND)
 
-if(HOST_PROTOC_COMMAND)
-  execute_process(
-    COMMAND ${HOST_PROTOC_COMMAND} --version
-    OUTPUT_VARIABLE protoc_output
-  )
-  string(STRIP "${protoc_output}" protoc_output)
-  string(REGEX REPLACE
-    "^libprotoc +([0-9.]+)$" "\\1" PROTOC_VERSION ${protoc_output})
-  message(STATUS "Found protoc: ${HOST_PROTOC_COMMAND} (version found \"${PROTOC_VERSION}\")")
-  unset(protoc_output)
-else()
+if(NOT HOST_PROTOC_COMMAND)
   message(FATAL_ERROR "protoc not found")
 endif()
+
+#-----------------------------------------------------------------------
+# Get compiler version number.
+#-----------------------------------------------------------------------
+execute_process(
+  COMMAND ${HOST_PROTOC_COMMAND} --version
+  OUTPUT_VARIABLE protoc_output
+)
+string(STRIP "${protoc_output}" protoc_output)
+
+string(REGEX REPLACE
+  "^libprotoc +([0-9.]+)$" "\\1" protoc_version "${protoc_output}")
+
+message(STATUS "Found protoc: ${HOST_PROTOC_COMMAND} (version found \"${protoc_version}\")")
+
+if(NOT protoc_version STREQUAL "")
+  set(HOST_PROTOC_VERSION "${protoc_version}" CACHE STRING "Host Protobuf compiler version")
+  mark_as_advanced(HOST_PROTOC_VERSION)
+endif()
+
+unset(protoc_output)
+unset(protoc_version)
 
 #-----------------------------------------------------------------------
 # gRPC c++ plugin for the Protobuf compiler.
