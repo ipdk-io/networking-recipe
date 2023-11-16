@@ -52,17 +52,6 @@ jobs:
         run: |
           sudo apt install $PREREQS
 
-      - name: Set up Go environment
-        uses: actions/setup-go@v4.1.0
-        with:
-          go-version: 'stable'
-
-      - name: Install gRPC plugins
-        run: |
-          go version
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
-          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
-
       - name: Install DPDK SDE
         uses: robinraju/release-downloader@v1.8
         with:
@@ -101,11 +90,8 @@ jobs:
       - name: Clone networking-recipe
         uses: actions/checkout@v4
         with:
+          submodules: recursive
           path: recipe
-
-      - name: Initialize krnlmon submodule
-        working-directory: recipe
-        run: git submodule update --init --checkout --depth 1 krnlmon
 
       - name: Install prerequisites
         run: |
