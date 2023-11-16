@@ -20,7 +20,7 @@ if(HOST_PROTOC_COMMAND)
   )
   string(STRIP "${protoc_output}" protoc_output)
   string(REGEX REPLACE
-    "^libprotoc +([0-9.]+)$" "\\1" PROTOC_VERSION ${protoc_output})
+    "^libprotoc +([0-9.]+)$" "\\1" PROTOC_VERSION "${protoc_output}")
   message(STATUS "Found protoc: ${HOST_PROTOC_COMMAND} (version found \"${PROTOC_VERSION}\")")
   unset(protoc_output)
 else()
