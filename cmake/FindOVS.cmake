@@ -5,7 +5,29 @@
 #
 
 #-----------------------------------------------------------------------
-# Use pkg-config to search for the modules
+# Append OVS pkgconfig directory to PKG_CONFIG_PATH
+# We define a function to limit the scope of the local variables
+# It must be called before we use PkgConfig
+#-----------------------------------------------------------------------
+function(_set_ovs_pkg_config_path)
+  file(TO_CMAKE_PATH "$ENV{PKG_CONFIG_PATH}" _ovs_pkg_path)
+
+  set(_path ${OVS_INSTALL_DIR}/lib/pkgconfig)
+  if(EXISTS ${_path})
+    list(APPEND _ovs_pkg_path ${_path})
+  endif()
+
+  list(JOIN _ovs_pkg_path ":" _ovs_pkg_path)
+
+  if(NOT _ovs_pkg_path STREQUAL "")
+    set(ENV{PKG_CONFIG_PATH} "${_ovs_pkg_path}")
+  endif()
+endfunction()
+
+_set_ovs_pkg_config_path()
+
+#-----------------------------------------------------------------------
+# Use pkg-config to search for the OVS modules
 #-----------------------------------------------------------------------
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PC_OVS libopenvswitch REQUIRED)
