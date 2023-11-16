@@ -52,17 +52,6 @@ jobs:
         run: |
           sudo apt install $PREREQS
 
-      - name: Set up Go environment
-        uses: actions/setup-go@v4.1.0
-        with:
-          go-version: 'stable'
-
-      - name: Install gRPC plugins
-        run: |
-          go version
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
-          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
-
       - name: Install DPDK SDE
         uses: robinraju/release-downloader@v1.8
         with:
@@ -101,11 +90,8 @@ jobs:
       - name: Clone networking-recipe
         uses: actions/checkout@v4
         with:
+          submodules: recursive
           path: recipe
-
-      - name: Initialize krnlmon submodule
-        working-directory: recipe
-        run: git submodule update --init --checkout --depth 1 krnlmon
 
       - name: Install prerequisites
         run: |
@@ -186,6 +172,11 @@ jobs:
         with:
           go-version: 'stable'
 
+      - name: Install gRPC plugins
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+
       - name: Install DPDK SDE
         uses: robinraju/release-downloader@v1.8
         with:
@@ -195,11 +186,6 @@ jobs:
       - run: |
           sudo tar -xzf $SDE_FILENAME -C /
           rm $SDE_FILENAME
-
-      - name: Install gRPC plugins
-        run: |
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
-          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 
       - name: Install stratum dependencies
         uses: robinraju/release-downloader@v1.8
@@ -211,10 +197,18 @@ jobs:
           sudo tar -xzf $DEPS_FILENAME -C /
           rm $DEPS_FILENAME
 
-      - name: Build p4runtime protobufs
+      - name: Build protobufs in superproject
         working-directory: recipe
         run: |
           export DEPEND_INSTALL=$DEPS_INSTALL_DIR
           export SDE_INSTALL=$SDE_INSTALL_DIR
           ./make-all.sh --target=dpdk --no-ovs --no-build
           cmake --build build --target protobufs
+
+      - name: Build protobufs in subdirectory
+        working-directory: recipe/protobufs
+        run: |
+          export DEPEND_INSTALL=$DEPS_INSTALL_DIR
+          cmake -B build
+          cmake --build build
+          cmake --install build --prefix install
