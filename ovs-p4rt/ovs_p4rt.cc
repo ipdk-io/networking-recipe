@@ -325,9 +325,7 @@ void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
       param->set_value(ip_address);
     }
   }
-#endif
-
-#if defined(ES2K_TARGET)
+#elif defined(ES2K_TARGET)
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
@@ -919,7 +917,6 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
 #elif defined(ES2K_TARGET)
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
@@ -1275,7 +1272,7 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
   match->mutable_exact()->set_value(
       EncodeByteValue(1, (sp - ES2K_VPORT_ID_OFFSET)));
 #if 0
-  /* un-used match key of 0, code is added for reference */
+  /* unused match key of 0, code is added for reference */
   auto match1 = table_entry->add_match();
   match1->set_field_id(
       GetMatchFieldId(p4info, TX_ACC_VSI_TABLE, TX_ACC_VSI_TABLE_KEY_ZERO_PADDING));
@@ -1441,9 +1438,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
-  if (!status_or_session.ok()) {
-    return;
-  }
+  if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<ovs_p4rt::OvsP4rtSession> session =
@@ -1571,9 +1566,7 @@ void ConfigIpTunnelTermTableEntry(struct tunnel_info tunnel_info,
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
-  if (!status_or_session.ok()) {
-    return;
-  }
+  if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
@@ -1597,9 +1590,7 @@ void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
-  if (!status_or_session.ok()) {
-    return;
-  }
+  if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
@@ -1626,9 +1617,7 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
-  if (!status_or_session.ok()) {
-    return;
-  }
+  if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
@@ -1662,9 +1651,7 @@ void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
-  if (!status_or_session.ok()) {
-    return;
-  }
+  if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
@@ -1723,9 +1710,7 @@ void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry) {
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
-  if (!status_or_session.ok()) {
-    return;
-  }
+  if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
@@ -1755,9 +1740,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
-  if (!status_or_session.ok()) {
-    return;
-  }
+  if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<ovs_p4rt::OvsP4rtSession> session =
@@ -1779,7 +1762,6 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
                                        insert_entry);
     if (!status.ok()) return;
   }
-  if (!status.ok()) return;
   return;
 }
 
@@ -1818,9 +1800,7 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry) {
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id));
-  if (!status_or_session.ok()) {
-    return;
-  }
+  if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
