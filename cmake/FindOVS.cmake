@@ -5,13 +5,36 @@
 #
 
 #-----------------------------------------------------------------------
-# Use pkg-config to search for the modules.
+# Append OVS pkgconfig directory to PKG_CONFIG_PATH
+# We define a function to limit the scope of the local variables
+# It must be called before we use PkgConfig
 #-----------------------------------------------------------------------
-find_package(PkgConfig)
-pkg_check_modules(PC_OVS libopenvswitch)
+function(_set_ovs_pkg_config_path)
+  file(TO_CMAKE_PATH "$ENV{PKG_CONFIG_PATH}" _ovs_pkg_path)
+
+  set(_path ${OVS_INSTALL_DIR}/lib/pkgconfig)
+  if(EXISTS ${_path})
+    list(APPEND _ovs_pkg_path ${_path})
+  endif()
+
+  list(JOIN _ovs_pkg_path ":" _ovs_pkg_path)
+
+  if(NOT _ovs_pkg_path STREQUAL "")
+    set(ENV{PKG_CONFIG_PATH} "${_ovs_pkg_path}")
+  endif()
+endfunction()
+
+_set_ovs_pkg_config_path()
 
 #-----------------------------------------------------------------------
-# Find libraries and include directories.
+# Use pkg-config to search for the OVS modules
+#-----------------------------------------------------------------------
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PC_OVS libopenvswitch REQUIRED)
+
+#-----------------------------------------------------------------------
+# Find include directory
+# We rely on find_package_handle_standard_args() to check for errors
 #-----------------------------------------------------------------------
 find_path(OVS_INCLUDE_DIR
     NAMES "openvswitch/version.h"
@@ -19,6 +42,11 @@ find_path(OVS_INCLUDE_DIR
 )
 mark_as_advanced(OVS_INCLUDE_DIR)
 
+#-----------------------------------------------------------------------
+# Find libraries
+# We rely on find_package_handle_standard_args() to check for errors
+# Not all libraries are required
+#-----------------------------------------------------------------------
 find_library(OVS_LIBRARY
     NAMES openvswitch
     PATHS ${PC_OVS_LIBRARY_DIRS}

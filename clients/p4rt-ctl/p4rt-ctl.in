@@ -1069,6 +1069,7 @@ def p4ctl_add_entry(client, bridge, tbl_name, flow):
         p4rt-ctl add-entry br0 pipe.filter_tbl
                     headers.ipv4.dstAddr=10.10.10.10,action=pipe.push_mpls(10)
     """
+    config_data = None
     priority_val = None
     grp_id = 0
     mem_id = 0

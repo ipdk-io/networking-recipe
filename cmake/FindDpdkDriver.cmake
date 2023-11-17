@@ -122,8 +122,10 @@ set_target_properties(sde::target_utils PROPERTIES
 
 #-----------------------------------------------------------------------
 # Append SDE pkgconfig directories to PKG_CONFIG_PATH
+# We define a function to limit the scope of the local variables
+# It must be called before we use PkgConfig
 #-----------------------------------------------------------------------
-function(_set_pkg_config_path)
+function(_set_sde_pkg_config_path)
   file(TO_CMAKE_PATH "$ENV{PKG_CONFIG_PATH}" _sde_pkg_path)
 
   foreach(_libdir lib lib64 lib/x86_64-linux-gnu)
@@ -140,7 +142,7 @@ function(_set_pkg_config_path)
   endif()
 endfunction()
 
-_set_pkg_config_path()
+_set_sde_pkg_config_path()
 
 #-----------------------------------------------------------------------
 # Use pkg-config to find DPDK module
