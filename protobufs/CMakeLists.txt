@@ -13,26 +13,22 @@ project(protobufs VERSION 2023.11.0 LANGUAGES CXX)
 include(CMakePrintHelpers)
 include(GNUInstallDirs)
 
-# Initialize if we are being configured for a direct build.
-if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-  set(DEPEND_INSTALL_DIR "$ENV{DEPEND_INSTALL}" CACHE PATH
-      "Dependencies install directory")
+set(DEPEND_INSTALL_DIR "$ENV{DEPEND_INSTALL}" CACHE PATH
+    "Dependencies install directory")
 
-  if(DEPEND_INSTALL_DIR STREQUAL "")
-    message(FATAL_ERROR "DEPEND_INSTALL_DIR (DEPEND_INSTALL) not defined!")
-  endif()
-
-  list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
-
-  # Add networking-recipe/cmake to the search path for the package file.
-  get_filename_component(_path "../cmake" REALPATH)
-  cmake_print_variables(_path)
-  list(APPEND CMAKE_MODULE_PATH ${_path})
-  unset(_path)
-
-  # Find the host Protobuf compiler.
-  find_package(HostProtoc)
+if(DEPEND_INSTALL_DIR STREQUAL "")
+  message(FATAL_ERROR "DEPEND_INSTALL_DIR (DEPEND_INSTALL) not defined!")
 endif()
+
+list(APPEND CMAKE_PREFIX_PATH ${DEPEND_INSTALL_DIR})
+
+# Add networking-recipe/cmake to the search path for the package file.
+get_filename_component(_path "../cmake" REALPATH)
+list(APPEND CMAKE_MODULE_PATH ${_path})
+unset(_path)
+
+# Find the host Protobuf compiler.
+find_package(HostProtoc)
 
 set(GRPC_OUT_ENABLED FALSE CACHE BOOL "Generate grpc_out directory")
 set(WHEEL_ENABLED TRUE CACHE BOOL "Generate Python wheel")

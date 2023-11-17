@@ -7,7 +7,7 @@
 
 if(DEFINED GEN_GO_PROTOBUFS)
   # Don't forward option to external project if it's undefined.
-  set(gen_go_protobufs -DGEN_GO_PROTOBUFS=${GEN_GO_PROTOBUFS})
+  set(_gen_go_protobufs -DGEN_GO_PROTOBUFS=${GEN_GO_PROTOBUFS})
 endif()
 
 ExternalProject_Add(protobufs
@@ -19,10 +19,10 @@ ExternalProject_Add(protobufs
     -DCPP_OUT=${CMAKE_CURRENT_BINARY_DIR}/cpp_out
     -DGO_OUT=${CMAKE_CURRENT_BINARY_DIR}/go_out
     -DPY_OUT=${CMAKE_CURRENT_BINARY_DIR}/py_out
-    ${gen_go_protobufs}
+    ${_gen_go_protobufs}
   INSTALL_COMMAND
     ${CMAKE_MAKE_PROGRAM} install
   EXCLUDE_FROM_ALL TRUE
 )
 
-unset(gen_go_protobufs)
+unset(_gen_go_protobufs)
