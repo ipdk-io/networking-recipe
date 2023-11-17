@@ -109,6 +109,8 @@ std::unique_ptr<p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
 ::p4::v1::TableEntry* SetupTableEntryToDelete(OvsP4rtSession* session,
                                               ::p4::v1::WriteRequest* req);
 
+::p4::v1::TableEntry* SetupTableEntryToRead(OvsP4rtSession* session,
+                                            ::p4::v1::ReadRequest* req);
 }  // namespace ovs_p4rt
 
 #endif  // OVS_P4RT_SESSION_H_
