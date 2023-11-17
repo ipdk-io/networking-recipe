@@ -1079,7 +1079,7 @@ def p4ctl_add_entry(client, bridge, tbl_name, flow):
 
     helper = P4InfoHelper(p4info)
 
-    if (flow.find("group_id") != -1 or flow.find("member_id") != -1):
+    if (flow.find(",group_id") != -1 or flow.find(",member_id") != -1):
         # For TableAction when we use type as action_profile_member_id or
         # action_profile_group_id, p4rt-ctl expects either group_id or
         # member_id as part of flow. Hence delimiter as 'action=' doesnt work

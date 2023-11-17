@@ -126,6 +126,8 @@ extern "C" {
 #define L2_FWD_RX_TABLE "linux_networking_control.l2_fwd_rx_table"
 
 #define L2_FWD_RX_TABLE_KEY_DST_MAC "dst_mac"
+#define L2_FWD_RX_TABLE_KEY_BRIDGE_ID "user_meta.pmeta.bridge_id"
+#define L2_FWD_RX_TABLE_KEY_SMAC_LEARNED "user_meta.pmeta.smac_learned"
 
 #define L2_FWD_RX_TABLE_ACTION_L2_FWD "linux_networking_control.l2_fwd"
 #define ACTION_L2_FWD_PARAM_PORT "port"
@@ -153,6 +155,7 @@ extern "C" {
 
 #define L2_FWD_TX_TABLE_KEY_DST_MAC "dst_mac"
 #define L2_FWD_TX_TABLE_KEY_BRIDGE_ID "user_meta.pmeta.bridge_id"
+#define L2_FWD_TX_TABLE_KEY_SMAC_LEARNED "user_meta.pmeta.smac_learned"
 
 #define L2_FWD_TX_TABLE_ACTION_L2_FWD "linux_networking_control.l2_fwd"
 
@@ -318,7 +321,25 @@ extern "C" {
 
 #define ACTION_L2_FWD_AND_BYPASS_BRIDGE_PARAM_PORT "port"
 
-//#define ACTION_L2_FWD_AND_BYPASS_BRIDGE_PARAM_ID_PORT 1
+/* VSI_TO_VSI_LOOPBACK TABLE */
+#define VSI_TO_VSI_LOOPBACK_TABLE "linux_networking_control.vsi_to_vsi_loopback"
+
+#define VSI_TO_VSI_LOOPBACK_KEY_VSI "vmeta.common.vsi"
+
+#define VSI_TO_VSI_LOOPBACK_KEY_ZERO_PADDING "zero_padding"
+
+#define VSI_TO_VSI_LOOPBACK_ACTION_FWD_TO_VSI \
+  "linux_networking_control.fwd_to_vsi"
+
+#define ACTION_L2_FWD_PORT "port"
+
+/* L2_FWD_SMAC TABLE */
+#define L2_FWD_SMAC_TABLE "linux_networking_control.l2_fwd_smac_table"
+
+#define L2_FWD_SMAC_TABLE_KEY_SA "hdrs.mac[vmeta.common.depth].sa"
+
+#define L2_FWD_SMAC_TABLE_ACTION_SMAC_LEARN \
+  "linux_networking_control.set_smac_learn"
 
 #ifdef __cplusplus
 };  // extern "C"
