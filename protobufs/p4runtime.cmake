@@ -58,7 +58,7 @@ add_custom_target(p4rt_grpc_out ALL
   COMMAND
     ${HOST_PROTOC_COMMAND}
     ${grpc_proto_sources}
-    --grpc_out ${GRPC_OUT}
+    --grpc_out ${CPP_OUT}
     --plugin=protoc-gen-grpc=${HOST_GRPC_CPP_PLUGIN}
     ${PROTOFLAGS}
   BYPRODUCTS
@@ -96,10 +96,5 @@ if(GEN_GO_PROTOBUFS)
     WORKING_DIRECTORY
       ${CMAKE_CURRENT_SOURCE_DIR}
     VERBATIM
-  )
-else(GEN_GO_PROTOBUFS)
-  add_custom_target(p4rt_go_out ALL
-    COMMAND ""
-    COMMENT "p4rt_go_out is disabled"
   )
 endif(GEN_GO_PROTOBUFS)
