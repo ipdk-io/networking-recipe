@@ -154,7 +154,8 @@ used to escape temporarily to the host build environment.
 4. Neutralize the cross-compilation environment.
 
    ```bash
-   unset CMAKE_TOOLCHAIN_FILE CMAKE_SYSROOT
+   unset CMAKE_TOOLCHAIN_FILE
+   unset CMAKE_SYSROOT
    ```
 
 5. Build the P4Runtime protobufs.
