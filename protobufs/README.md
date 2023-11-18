@@ -41,7 +41,7 @@ protobufs.
 ## Main directory
 
 To build the P4Runtime protobufs in the main directory, you must first
-configure cmake to build for the x86 host (not cross-compiled for the ACC).
+configure cmake to build for the x86 host (not cross-compile for the ACC).
 
 If you've done a recent build, there should already be a configuration.
 
