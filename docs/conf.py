@@ -21,7 +21,7 @@ extensions = [
 ]
 
 templates_path = ['_templates']
-exclude_patterns = ['CONTRIBUTING.rst']
+exclude_patterns = ['CONTRIBUTING.rst', 'README.md']
 
 myst_heading_anchors = 3
 
