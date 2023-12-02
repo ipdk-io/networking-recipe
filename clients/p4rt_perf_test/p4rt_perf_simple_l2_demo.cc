@@ -41,8 +41,8 @@ void PrepareSimpleL2DemoTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 int SimpleL2DemoTest(P4rtSession* session,
-                      const ::p4::config::v1::P4Info& p4info,
-                      ThreadInfo& t_data) {
+                     const ::p4::config::v1::P4Info& p4info,
+                     ThreadInfo& t_data) {
   ::p4::v1::TableEntry* table_entry;
   SimpleL2DemoMacInfo mac_info;
   p4::v1::WriteRequest write_request;

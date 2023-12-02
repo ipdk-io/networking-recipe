@@ -26,7 +26,7 @@
 #define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
 DEFINE_bool(grpc_use_insecure_mode, false,
-              "grpc communication in insecure mode");
+            "grpc communication in insecure mode");
 DEFINE_string(grpc_addr, stratum::kLocalStratumUrl, "gNMI server address");
 DEFINE_string(bool_val, "", "Boolean value to be set");
 DEFINE_string(int_val, "", "Integer value to be set (64-bit)");
@@ -243,7 +243,6 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
 }
 
 ::util::Status Main(int argc, char** argv) {
-
   // Default certificate file location for TLS-mode
   FLAGS_ca_cert_file = DEFAULT_CERTS_DIR "ca.crt";
   FLAGS_server_key_file = DEFAULT_CERTS_DIR "stratum.key";
@@ -288,13 +287,13 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
   std::shared_ptr<::grpc::Channel> channel;
   if (FLAGS_grpc_use_insecure_mode) {
     ASSIGN_OR_RETURN(auto credentials_manager,
-                    CredentialsManager::CreateInstance(true));
+                     CredentialsManager::CreateInstance(true));
     channel = ::grpc::CreateChannel(
         FLAGS_grpc_addr,
         credentials_manager->GenerateExternalFacingClientCredentials());
   } else {
     std::shared_ptr<::grpc::ChannelCredentials> channel_credentials =
-      ::grpc::InsecureChannelCredentials();
+        ::grpc::InsecureChannelCredentials();
     channel = ::grpc::CreateChannel(FLAGS_grpc_addr, channel_credentials);
   }
 

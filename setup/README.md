@@ -5,9 +5,9 @@
 The Stratum dependencies have formally moved from the `setup` directory
 to a new <https://github.com/ipdk-io/stratum-deps> repository.
 
-This change makes the dependencies easier to maintain, and it allows
-them to be downloaded and built independently of the Networking Recipe
-(P4 Control Plane).
+This change allows the dependencies to be downloaded and built independently
+of the Networking Recipe (P4 Control Plane).
+It also makes them easier to maintain.
 
 See the [README file](https://github.com/ipdk-io/stratum-deps/blob/main/README.md)
 in the `stratum-deps` repository for more information.

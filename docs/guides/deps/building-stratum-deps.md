@@ -9,49 +9,44 @@ This document explains how to build and install the Stratum dependencies.
 > **Note**: For the Intel&reg; IPU E2100, see
 [Building Stratum Dependencies for the ACC](building-acc-stratum-deps.md).
 
-## 1 Prerequisites
+## Prerequisites
 
-### 1.1 CMake
+There are a couple of things to do before you build the dependencies:
 
-CMake 3.15 or above must be installed.
+- Install CMake 3.15 or above
 
-Avoid versions 3.24 and 3.25. There is an issue in cmake that causes the
-Protobuf build to fail. This problem was fixed in version 3.26.
+  Avoid versions 3.24 and 3.25. There is an issue in cmake that causes the
+  Protobuf build to fail. This problem was fixed in version 3.26.
 
-### 1.2 OpenSSL
+- Install OpenSSL 3.x
 
-OpenSSL 3.x must be installed. P4 Control Plane uses OpenSSL instead of
-BoringSSL.
+  P4 Control Plane uses OpenSSL instead of BoringSSL.
 
-## 2 Source Code
+## Source Code
 
 There are two ways to obtain the source code: from the open-source repository
 on GitHub, or as a source package.
 
-### 2.1 GitHub Repository
+### GitHub repository
 
-The Stratum dependencies can be built using a script that is part of the
-IPDK networking-recipe. To clone the repository:
+The script to build the Stratum dependencies is in the `stratum-deps`
+repository. To clone the repository:
 
 ```bash
-git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
+git clone https://github.com/ipdk-io/stratum-deps.git
 ```
 
-You may omit the `--recursive` option if you are only interested in building
-the dependencies.
+The source code for the dependencies is not part of the distribution.
+It is downloaded by the build script.
 
-You may substitute your own local directory name for `ipdk.recipe`.
-
-The build script for the stratum dependencies is in the `setup` directory.
-
-### 2.2 Source Package
+### Source package
 
 You may receive the source code for the Stratum dependencies in the form of
 an RPM file, a Debian file, or a tarball.
 
 If this is case, use the appropriate command to unpack the source files.
 
-## 3 Install Location
+## Install Location
 
 You will need to decide where on your system you would like to install the
 dependencies. This location (the "install prefix") must be specified when you
@@ -67,43 +62,32 @@ the dependencies should be installed.
 If you plan to install the dependency libraries in a system directory, you will
 need to log in as `root` or run from an account that has `sudo` privilege.
 
-## 4 Downloaded Source vs. Source Package
-
-By default, the cmake build script downloads the source code for each module
-and then builds and installs it.
-
-If you are working from a source distribution, or if the source files were
-downloaded by a previous build, you can override the download stage by
-specifying:
-
-```text
-  -DDOWNLOAD=no -DFORCE_PATCH=yes
-```  
-
-when you configure the cmake build.
-
-## 5 CMake Build Options
+## CMake Build Options
 
 The CMake build script supports the following configuration options.
 
 | Option | Type | Description |
 | ------ | ---- | ----------- |
 | `CMAKE_INSTALL_PREFIX` | Path | Directory in which the dependencies should be installed. |
-| `CXX_STANDARD` | Number | C++ standard (11, 14, 17, etc.) the compiler should apply. (Default: not specified) |
-| `DOWNLOAD` | Boolean | Whether to download the source repositories. (Default: TRUE)
-| `FORCE_PATCH` | Boolean | Whether to specify the force (`-f`) option when patching a downloaded repository. (Default: FALSE) |
+| `CXX_STANDARD` | Number | C++ standard (11, 14, 17, etc.) the compiler should apply. (Default: None) |
+| `DOWNLOAD` | Boolean | Whether to download the source repositories. (Default: [1]) |
+| `PATCH` | Boolean | Whether to patch the downloaded repositories. (Default: [1]) |
 | `ON_DEMAND` | Boolean | Whether to build only the specified target(s). If this option is FALSE, all targets will be built. (Default: FALSE) |
-| `USE_LDCONFIG` | Boolean | Whether to use `ldconfig` to update the loader cache[1] after installing a module. Only valid if `USE_SUDO` is enabled. (Default: FALSE) |
+| `USE_LDCONFIG` | Boolean | Whether to use `ldconfig` to update the loader cache[2] after installing a module. Only valid if `USE_SUDO` is enabled. (Default: FALSE) |
 | `USE_SUDO` | Boolean | Whether to use `sudo` to install each module. (Default: FALSE) |
 
 Boolean values are (`TRUE`, `YES`, `ON`) and (`FALSE`, `NO`, `OFF`).
 They may be upper or lower case.
 
-[1] See the `ldconfig` man page for more information.
+[1] `DOWNLOAD` and `PATCH` default to `TRUE` if you download stratum-deps
+    from GitHub, and `FALSE` if you receive a distribution that includes
+    the source.
 
-## 6 Examples
+[2] See the `ldconfig` man page for more information.
 
-### 6.1 Non-root build
+## Examples
+
+### Non-root build
 
 To build and install as a non-privileged user:
 
@@ -113,44 +97,27 @@ cmake -B build -DCMAKE_INSTALL_PREFIX=./install
 cmake --build build -j8
 ```
 
-The source files will be downloaded, built, and installed in the `setup/install`
+The source files will be downloaded, built, and installed in the `install`
 directory. The targets will be built in parallel, using eight threads.
 
-CMake will generate all of its temporary files in the `setup/build` directory.
+CMake will generate all of its temporary files in the `build` directory.
 This is called an "out-of-source" build.
 
-### 6.2 Non-root build to system directory
+### Non-root build to system directory
 
-To build as a non-privileged user and use `sudo` to install the libraries to
-a system directory:
+To build as a non-privileged user and install the libraries in a
+system directory:
 
 ```bash
 cmake -B build -DCMAKE_INSTALL_PREFIX=/opt/deps -DUSE_SUDO=yes
 cmake --build build -j6
 ```
 
-CMake will build the dependencies as the current user and use `sudo` to
-install the libraries in `/opt/deps`. The build will be done in parallel,
-using six threads.
+CMake will build the dependencies as the current user.
+It will use `sudo` only when it installs the libraries.
+The build will be done in parallel, using six threads.
 
-### 6.3 Root build from source
-
-To build from a source distribution or from repositories that were previously
-downloaded:
-
-```bash
-cmake -B build -DDOWNLOAD=no -DFORCE_PATCH=yes \
-      -DCMAKE_INSTALL_PREFIX=/opt/ipdk/hostdeps
-cmake --build build -j8
-```
-
-CMake will build and install the dependency libraries without downloading the
-source code.
-
-The `FORCE_PATCH` option instructs the patch step to continue without prompting
-if a module has already patched.
-
-### 6.4 On-demand build
+### On-demand build
 
 To build and install just gRPC and its dependencies:
 
@@ -163,23 +130,49 @@ The necessary components will be downloaded, built, and installed in
 `/home/<username>/hostdeps`. The build will be done in parallel, using
 six threads.
 
-### 6.5 Clean build
+### Rebuilding without downloading
+
+To instruct cmake not to download the source repositories again:
+
+```bash
+cmake -B build -DCMAKE_INSTALL_PREFIX=deps -DDOWNLOAD=NO -DPATCH=NO
+cmake --build build -j6
+```
+
+----
+
+Alternatively, you can run a script that changes the default values
+of the `DOWNLOAD` and `PATCH` parameters to `NO`.
+
+```bash
+./scripts/preconfig.sh
+```
+
+The script writes a `preload.cmake` file to the `source` directory
+that cmake will read the next time it configures the build.
+
+### Clean builds
 
 To do a clean build without deleting the source directories:
 
 ```bash
 rm -fr build
+cmake -B build -DCMAKE_INSTALL_PREFIX=deps ...
 ```
 
-This deletes all temporary files from the previous build, preserving the
-source directories.
+You'll need to specify `-DDOWNLOAD=NO -DPATCH=NO` or run the `preload.sh`
+script, as described under
+[Rebuilding without downloading](#rebuilding-without-downloading), or
+cmake will download the repositories a second time.
 
-### 6.6 Clean the `setup` directory
+This erases the configuration as well as the binary build artifacts.
+
+----
+
+To get a fresh start, delete both the `build` and `source` directories:
 
 To scrub the directory:
 
 ```bash
-./cleanup.sh
+rm -fr build 
 ```
-
-This removes the `build` and source directories.
