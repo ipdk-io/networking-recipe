@@ -1898,7 +1898,7 @@ def p4ctl_get_direct_pkt_mod_meter_entry(client, bridge, tbl_name, flow):
         raise Exception("Cannot find direct_meter_entry field in entity")
 
     te = helper.buildTableEntry(
-         table_name=cnt_tbl_name,
+         table_name=tbl_name,
          match_fields=key
      )
 
