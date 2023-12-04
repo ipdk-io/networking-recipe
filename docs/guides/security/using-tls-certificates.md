@@ -30,7 +30,7 @@ The `/usr/share/stratum/generate-certs.sh` script uses the installed OpenSSL ver
 
 OpenSSL 1.1.1x has reached EOL and usage should be discontinued. See the [OpenSSL security guide](openssl-guide.md) for details.
 
-Also, note that if running gRPC clients on remote system, both systems are running OpenSSL 3.x. Running an OpenSSL 1.1.1x client with a OpenSSL 3.x server has known to fail TLS handshakes to establish communication.
+Also, note that if running gRPC clients on remote system, both systems should be running OpenSSL 3.x. Running an OpenSSL 1.1.1x client with a OpenSSL 3.x server has been known to fail TLS handshakes with `WRONG_VERSION_NUMBER` error when trying to establish communication.
 
 ## Installing certificates
 
