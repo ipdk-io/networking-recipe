@@ -1,26 +1,6 @@
-<!--
-/*
- * Copyright 2023 Intel Corporation.
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at:
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-- -->
-
 # Linux Networking with LAG (ES2K)
 
-This document explains how to run the Linux networking scenario with LAG(Link Aggregation Group) on ES2K.
+This document explains how to run the Linux networking scenario with LAG (Link Aggregation Group) on ES2K.
 
 ## Topology
 
@@ -28,41 +8,39 @@ This document explains how to run the Linux networking scenario with LAG(Link Ag
 
 Notes about topology:
 
-- Four Kernel netdevs are created by default by loading IDPF driver during ACC bring-up. You can also create more than Four netdevs. For that, we need to modify `acc_apf` parameter under `num_default_vport` in `/etc/dpcp/cfg/cp_init.cfg` on IMC before starting `run_default_init_app`.
-- In `/etc/dpcp/cfg/cp_init.cfg` file also modify default `sem_num_pages` value to the value mentioned in `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking/README_P4_CP_NWS`.
-- In `/etc/dpcp/cfg/cp_init.cfg` file also modify default `allow_change_mac_address` value to true.
-- vlan1, vlan2, .... vlanN created using Linux commands and are on top of an IDPF Netdev. These VLAN ports should be equal to number of VM's that are spawned.
-- br-int, VxLAN ports are created using ovs-vsctl command provided by the networking recipe and all the vlan ports are attached to br-int using ovs-vsctl command.
+- Four Kernel netdevs are created by default by loading IDPF driver during ACC bring-up. You can also create more than four netdevs. For that, we need to modify the `acc_apf` parameter under `num_default_vport` in `/etc/dpcp/cfg/cp_init.cfg` on IMC before starting `run_default_init_app`.
+- In `/etc/dpcp/cfg/cp_init.cfg`, also change the default `sem_num_pages` to the value specified in `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking/README_P4_CP_NWS`.
+- In `/etc/dpcp/cfg/cp_init.cfg`, also modify the default `allow_change_mac_address` value to true.
+- vlan1, vlan2, .... vlanN created using Linux commands and are on top of an IDPF Netdev. These VLAN ports should be equal to number of VMs that are spawned.
+- br-int and the VxLAN ports are created using the ovs-vsctl command. The VLAN ports are attached to br-int using ovs-vsctl command.
 - Both physical ports P0 and P1 should be B2B connected to the Link Partner device and LAG should be configured on both the devices with the associated ports as LAG members using ip link command.
 
-System under test will have above topology running the networking recipe. Link Partner can have the networking recipe or legacy OvS or kernel VxLAN. Note the [Limitations](#limitations) section before setting up the topology.
+System under test will have the above topology running the networking recipe. Link Partner can have the networking recipe or legacy OvS or kernel VxLAN. See the [Limitations](#limitations) section before setting up the topology.
 
 ## Create P4 artifacts and start Infrap4d process
 
-- Use Linux networking p4 program present in the directory `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking` for this scenario.
-- See [Running Infrap4d on Intel IPU E2100](/guides/es2k/running-infrap4d) for compiling `P4 artifacts`, `bringing up ACC` and running `infrap4d` on ACC.
+Use the Linux networking P4 program present in the `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking` directory for this scenario.
+See [Running Infrap4d on Intel IPU E2100](/guides/es2k/running-infrap4d) for instructions on compiling the P4 program, bringing up  the ACC, and running `infrap4d` on the ACC.
 
-## Creating the topology
+## Create the topology
 
 The p4rt-ctl and ovs-vsctl utilities can be found in $P4CP_INSTALL/bin.
 
 ### Set the forwarding pipeline
 
-Once the application is started, set the forwarding pipeline config using
-P4Runtime Client `p4rt-ctl` set-pipe command
+Once the application is started, set the forwarding pipeline config using the P4Runtime Client (`p4rt-ctl`) set-pipe command:
 
 ```bash
 $P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/linux_networking.pb.bin \
     $OUTPUT_DIR/linux_networking.p4info.txt
 ```
 
-Note: Assuming `linux_networking.pb.bin` and `linux_networking.p4info.txt`
-along with other P4 artifacts are created as per the steps mentioned in previous section.
+`linux_networking.pb.bin` and `linux_networking.p4info.txt` were created, along with other artifacts, when the P4 program was compiled.
 
-### Configure VSI Group and add a netdev
+### Configure VSI group and add a netdev
 
 Use one of the IDPF netdevs on ACC to receive all control packets from overlay
-VM's by assigning to a VSI group. VSI group 3 is dedicated for this configuration,
+VMs by assigning to a VSI group. VSI group 3 is dedicated for this configuration,
 execute below devmem commands on IMC.
 
 ```bash
@@ -81,10 +59,10 @@ Note: Here VSI 8 has been used for receiving all control packets and added
 to VSI group 3.  This refers to HOST netdev VSIG 3 as per the topology
 diagram.  Modify this VSI based on your configuration.
 
-### Create Overlay network
+### Create overlay network
 
-Option 1: Create VF's on HOST and spawn VM's on top of those VF's.
-Example to create 4 VF's:  echo 4 > /sys/devices/pci0000:ae/0000:ae:00.0/0000:af:00.0/sriov_numvfs
+Option 1: Create VFs on HOST and attach VMs to the created VFs.
+Example to create 4 VFs:  echo 4 > /sys/devices/pci0000:ae/0000:ae:00.0/0000:af:00.0/sriov_numvfs
 
 ```bash
 # VM1 configuration
@@ -98,8 +76,9 @@ ip addr add 99.0.0.2/24 dev <Netdev connected to VF2>
 ifconfig <Netdev connected to VF> up
 ```
 
-Option 2: If we are unable to spawn VM's on top of the VF's, for this use case we can also leverage kernel network namespaces.
-Move each VF to a network namespace and assign IP addresses
+Option 2: Use kernel network namespaces.
+
+Move each VF to a network namespace and assign IP addresses:
 
 ```bash
 ip netns add VM0
@@ -115,7 +94,7 @@ ip netns exec VM1 ifconfig <VF2 port> up
 
 ### Start OvS as a separate process
 
-Legacy OvS is used as a control plane for source MAC learning of overlay VM's. OvS should be started as a seperate process.
+Legacy OvS is used as a control plane for source MAC learning of overlay VMs. OvS should be started as a seperate process.
 
 ```bash
 export RUN_OVS=/tmp
@@ -150,8 +129,8 @@ ovs-vsctl  show
 
 ### Create VLAN representers
 
-For each VM that is spawned for overlay network we need to have a port representer.
-We create VLAN netdevs on top of the IPDF netdev which is assigned to VSI group 3 in step-2 mentioned above.
+We need to have a port representer for each VM that is spawned for the overlay network.
+We create VLAN netdevs on top of the IPDF netdev that was assigned to VSI group 3 in the [Configure VSI Group](#configure-vsi-group-and-add-a-netdev) step.
 
 ```bash
 ip link add link <VSI 8> name vlan1 type vlan id 1
@@ -160,7 +139,7 @@ ifconfig vlan1 up
 ifconfig vlan2 up
 ```
 
-Note: Here the assumption is, we have created 2 overlay VM's and creating 2 port representers for those VM's.
+Note: Here the assumption is, we have created 2 overlay VMs and creating 2 port representers for those VMs.
 Port representer should always be in the format: `lowercase string 'vlan'+'vlanID'`
 
 ### Create integration bridge and add ports to the bridge
@@ -180,23 +159,23 @@ ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan \
     options:local_ip=30.1.1.1 options:remote_ip=40.1.1.1 options:dst_port=4789
 ```
 
-Note: Here we are creating VxLAN tunnel with VNI 0, you can create any VNI for tunneling.
+Note: Here we are creating VxLAN tunnel with VNI 0. You can create any VNI for tunneling.
 
 ### Configure rules for overlay control packets
 
 Configure rules to send overlay control packets from a VM to its respective port representers.
 
-Below configuration assumes
+The following configuration assumes that:
 
 - Overlay VF1 has a VSI value 14
 - Overlay VF2 has a VSI value 15
 
-These VSI values can be checked with `/usr/bin/cli_client -q -c` command
+These VSI values can be checked with the `/usr/bin/cli_client -q -c` command
 on IMC.  This command provides VSI ID, Vport ID, and corresponding MAC
 addresses for all:
 
 - IDPF netdevs on ACC
-- VF's on HOST
+- VFs on HOST
 - IDPF netdevs on HOST (if IDPF driver loaded by you on HOST)
 - Netdevs on IMC
 
@@ -275,7 +254,7 @@ p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_o
 
 Create a LAG interface and add 2 IDPF netdevs as LAG members in it. Assign IP to the LAG interface.
 
-Below configuration assumes
+The following configuration assumes that:
 
 - Underlay IDPF netdev has a VSI value 10 for first LAG member
 - Underlay IDPF netdev has a VSI value 11 for second LAG member
@@ -314,7 +293,7 @@ ip link set bond0 up
 ### Test the ping scenarios
 
 - Verify the underlay ping is working fine via the active path.
-- Verify the overlay ping between VM's on same host is working fine via the active path.
+- Verify the overlay ping between VMs on same host is working fine via the active path.
 - Note the active link by using the command "cat /proc/net/bonding/bond0" on both MEV host and LP device.
 - Shut the active link on both MEV host and its peer Link Partner.
 - Verify the switchover happened from active to backup interface.
@@ -327,9 +306,9 @@ Current Linux Networking support for the networking recipe has following limitat
 - All VLAN interfaces created on top of IDPF netdev, should always be in lowercase format "vlan+vlan_id"
 Ex: vlan1, vlan2, vlan3 ... vlan4094.
 - Set the pipeline before adding br-int port, vxlan0 port, and adding vlan ports to br-int bridge.
-- VxLAN destination port should always be standard port. i.e., 4789. (limitation by p4 parser)
+- VxLAN destination port should always be standard port. i.e., 4789. (limitation by P4 parser).
 - We do not support any ofproto rules that would prevent FDB learning on OvS.
-- VLAN Tagged packets are not supported.
+- VLAN-tagged packets are not supported.
 - For VxLAN tunneled packets only IPv4-in-IPv4 is supported.
 - LAG and ECMP are mutually exclusive. Both can't co-exist in the system configuration at the same time.
 - LAG configuration done via bonding driver is supported and the supported mode in active-backup.
