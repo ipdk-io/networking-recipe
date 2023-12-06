@@ -9,7 +9,7 @@ Packet-IO consists of two essential components: Packet-In and Packet-Out.
 - **Packet-In**: Refers to a data plane packet sent by the P4Runtime server to the control plane for further analysis. This is specified as `packetIn` message response in the [p4runtime specification](https://github.com/ipdk-io/p4runtime-dev/blob/mirroring/proto/p4/v1/p4runtime.proto).
 - **Packet-Out**: Defined as a data packet originated by the control plane and injected into the data plane through the P4Runtime server. This is specified as `packetOut` in p4runtime specification.
 
-During the set pipeline sequence, the Packet-IO configuration is extracted from the pipeline configuration. This configuration is then utilized to register RX and TX callbacks with the device driver. When a packet is received, the device driver invokes the RX callback, and when a packet is transmitted, the TX callback is triggered.
+During the set pipeline sequence, the Packet-IO configuration is extracted from the pipeline configuration. This configuration is then utilized to register Rx and Tx callbacks with the device driver. When a packet is received, the device driver invokes the RX callback, and when a packet is transmitted, the Tx callback is triggered.
 
 ### Rx Path
 The P4 device driver invokes the registered RX callback upon receiving a packet, passing the packet details to the Stratum layer of `infrap4d`. The Stratum layer parses the received packet and translates it into a PacketIn message as defined in p4runtime.proto. The P4Runtime server sends the PacketIn message to the connected client.
