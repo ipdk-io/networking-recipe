@@ -12,7 +12,7 @@ Packet-IO consists of two essential components: Packet-In and Packet-Out.
 During the set pipeline sequence, the Packet-IO configuration is extracted from the pipeline configuration. This configuration is then utilized to register Rx and Tx callbacks with the device driver. When a packet is received, the device driver invokes the RX callback, and when a packet is transmitted, the Tx callback is triggered.
 
 ### Rx Path
-The P4 device driver invokes the registered RX callback upon receiving a packet, passing the packet details to the Stratum layer of `infrap4d`. The Stratum layer parses the received packet and translates it into a PacketIn message as defined in p4runtime.proto. The P4Runtime server sends the PacketIn message to the connected client.
+The P4 device driver invokes the registered Rx callback upon receiving a packet, passing the packet details to the Stratum layer of `infrap4d`. The Stratum layer parses the received packet and translates it into a PacketIn message as defined in p4runtime.proto. The P4Runtime server sends the PacketIn message to the connected client.
 
 ### Tx Path
 A P4runtime client/controller can send packets to the PacketIO port as a PacketOut message defined in p4runtime.proto. The P4CP Stratum layer translates the PacketOut message to TDI structures and sends them to the driver.
