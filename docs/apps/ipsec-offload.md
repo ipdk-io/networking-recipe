@@ -44,10 +44,10 @@ to load the hardware FXP pipeline with the IPsec package.
 
 ### Configure and run infrap4d
 
-To be able to program Security Association Database (SAD) entries using gNMI,
-enable fixed function support in infrap4d. Follow the instructions in
+Follow the instructions in
 [Running infrap4d](/guides/es2k/running-infrap4d.md)
-to prepare system with generated TDI.json and context.json file references.
+and prepare the system with generated TDI.json and context.json file references.
+In order to  offload IPsec, fixed function support must be enabled in infrap4d. 
 
 The /usr/share/stratum/es2k/es2k_skip_p4.conf file must include the fixed
 function configuration reference.
@@ -82,7 +82,7 @@ between local and peer system.
 
 This section provides detailed information on OpenConfig model and gNMI
 messages with the expected format. The strongSwan plugin has the following
-details encoded.
+details encoded, and user interaction is not needed.
 
 ### Config SAD message
 
@@ -130,10 +130,10 @@ at `/ipsec-offload/ipsec-spi/rx-spi`.
 ### Key Expiry Notification message
 
 The [gRPC Notification message](https://github.com/ipdk-io/openconfig-public/blob/master/release/models/ipsec/openconfig-ipsec-offload.yang#L308)
-at `/ipsec-offload` is used as a signal to trigger the
+at `/ipsec-offload/sadb-expire` is used as a signal to trigger the
 re-keying mechanism in IKE protocol.
 
 A gNMI subscription stream is opened from the gNMI client listening to these
 notification messages originating in the target. Upon receiving this
-notification, clients will initiate the re-keying mechanism to refresh
-the encyrption keys.
+notification, client will initiate the re-keying mechanism to refresh
+the encryption keys.
