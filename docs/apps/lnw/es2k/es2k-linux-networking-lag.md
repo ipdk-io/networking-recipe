@@ -12,7 +12,7 @@ Notes about topology:
 - In `/etc/dpcp/cfg/cp_init.cfg`, also change the default `sem_num_pages` to the value specified in `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking/README_P4_CP_NWS`.
 - In `/etc/dpcp/cfg/cp_init.cfg`, also modify the default `allow_change_mac_address` value to true.
 - vlan1, vlan2, .... vlanN created using Linux commands and are on top of an IDPF Netdev. These VLAN ports should be equal to number of VMs that are spawned.
-- br-int and the VxLAN ports are created using the ovs-vsctl command. The VLAN ports are attached to br-int using ovs-vsctl command.
+- br-int and the VxLAN ports are created using the ovs-vsctl command. The VxLAN ports are attached to br-int using ovs-vsctl command.
 - Both physical ports P0 and P1 should be B2B connected to the Link Partner device and LAG should be configured on both the devices with the associated ports as LAG members using ip link command.
 
 System under test will have the above topology running the networking recipe. Link Partner can have the networking recipe or legacy OvS or kernel VxLAN. See the [Limitations](#limitations) section before setting up the topology.
@@ -62,6 +62,7 @@ diagram.  Modify this VSI based on your configuration.
 ### Create overlay network
 
 Option 1: Create VFs on HOST and attach VMs to the created VFs.
+
 Example to create 4 VFs:  echo 4 > /sys/devices/pci0000:ae/0000:ae:00.0/0000:af:00.0/sriov_numvfs
 
 ```bash
@@ -130,7 +131,7 @@ ovs-vsctl  show
 ### Create VLAN representers
 
 We need to have a port representer for each VM that is spawned for the overlay network.
-We create VLAN netdevs on top of the IPDF netdev that was assigned to VSI group 3 in the [Configure VSI Group](#configure-vsi-group-and-add-a-netdev) step.
+We create VLAN netdevs on top of the IDPF netdev that was assigned to VSI group 3 in the [Configure VSI Group](#configure-vsi-group-and-add-a-netdev) step.
 
 ```bash
 ip link add link <VSI 8> name vlan1 type vlan id 1
