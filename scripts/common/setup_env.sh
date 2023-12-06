@@ -37,11 +37,12 @@ echo "${OS} : ${VER}"
 
 # Update SDE libraries
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SDE_INSTALL}/lib
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SDE_INSTALL}/lib64
 
-if [ "$OS" = "Fedora" ]; then
+if [ -d ${SDE_INSTALL}/lib64 ]; then
     export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SDE_INSTALL}/lib64
-else
+fi
+
+if [ -d ${SDE_INSTALL}/lib/x86_64-linux-gnu ]; then
     export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SDE_INSTALL}/lib/x86_64-linux-gnu
 fi
 
