@@ -34,11 +34,18 @@ The Packet-IO configuration is per device and should be added under the `p4_devi
 
 #### Example
 ```json
-	"pktio-args": {
-		"ports": \[2,3\],
-		"nb_rxqs" : 4,
-		"nb_txqs" : 4
-	},
+
+    "p4_devices": [
+    {
+        "device-id": 0,
+        "fixed_functions" : [],
+        "eal-args": "--lcores=1-2 -a af:00.6,vport=[0-1] -- -i --rxq=1 --txq=1 --hairpinq=1 --hairpin-mode=0x0",
+        "pktio-args": {
+            "ports": [0,1],
+            "nb_rxqs" : 4,
+            "nb_txqs" : 4
+        },
+
 ```
 
 Follow the sequence of steps listed below to enable Packet-IO functionality.
