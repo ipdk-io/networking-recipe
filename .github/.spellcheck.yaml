@@ -1,0 +1,11 @@
+matrix:
+  - name: markdown
+    path: '**/*.md'
+    aspell:
+      lang: en
+      mode: markdown
+  - name: reStructuredText
+    path: '**/*.rst'
+    aspell:
+      lang: en
+      mode: tex
