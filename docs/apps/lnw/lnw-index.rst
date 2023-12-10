@@ -24,4 +24,5 @@ ES2K
    es2k/es2k-linux-networking-ipv6
    es2k/es2k-linux-networking-ecmp
    es2k/es2k-linux-networking-frr
+   es2k/es2k-linux-networking-lag
    

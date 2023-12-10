@@ -24,6 +24,14 @@ COMMON_NAME=<IP> ./generate-certs.sh
 
 The system relies on mTLS (mutual TLS) for authentication.
 
+### OpenSSL version
+
+The `/usr/share/stratum/generate-certs.sh` script uses the installed OpenSSL version to generate the certificates. 
+
+OpenSSL 1.1.1x has reached EOL and usage should be discontinued. See the [OpenSSL security guide](openssl-guide.md) for details.
+
+Also, note that if running gRPC clients on remote system, both systems should be running OpenSSL 3.x. Running an OpenSSL 1.1.1x client with a OpenSSL 3.x server has been known to fail TLS handshakes with `WRONG_VERSION_NUMBER` error when trying to establish communication.
+
 ## Installing certificates
 
 `infrap4d` will check for server certificates in the default location

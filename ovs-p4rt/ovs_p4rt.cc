@@ -226,6 +226,7 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
   return;
 }
 
+#if defined(ES2K_TARGET)
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
@@ -237,7 +238,6 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
   std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
   match->mutable_exact()->set_value(mac_addr);
 
-#if defined(ES2K_TARGET)
   // Based on p4 program for ES2K, we need to provide a match key Bridge ID
   auto match1 = table_entry->add_match();
   match1->set_field_id(
@@ -251,7 +251,6 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                        L2_FWD_RX_TABLE_KEY_SMAC_LEARNED));
 
   match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-#endif
 
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
@@ -261,19 +260,42 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD,
                                      ACTION_L2_FWD_PARAM_PORT));
-#if defined(DPDK_TARGET)
-      auto port_id = learn_info.vln_info.vlan_id - 1;
-#elif defined(ES2K_TARGET)
       auto port_id = learn_info.src_port;
-#else
-      auto port_id = 0;
-#endif
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
 
   return;
 }
+
+#elif defined(DPDK_TARGET)
+void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
+                                const struct mac_learning_info& learn_info,
+                                const ::p4::config::v1::P4Info& p4info,
+                                bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, L2_FWD_RX_WITH_TUNNEL_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(GetMatchFieldId(p4info, L2_FWD_RX_WITH_TUNNEL_TABLE,
+                                      L2_FWD_TX_TABLE_KEY_DST_MAC));
+  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
+  match->mutable_exact()->set_value(mac_addr);
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD,
+                                     ACTION_L2_FWD_PARAM_PORT));
+      auto port_id = learn_info.vln_info.vlan_id - 1;
+      param->set_value(EncodeByteValue(1, port_id));
+    }
+  }
+
+  return;
+}
+#endif
 
 void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
                                      const struct mac_learning_info& learn_info,
