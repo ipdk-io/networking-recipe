@@ -177,25 +177,6 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
                        ACTION_REMOVE_VLAN_AND_FWD_PARAM_VLAN_PTR));
         param->set_value(EncodeByteValue(1, learn_info.vlan_info.port_vlan));
       }
-    } else if (learn_info.vlan_info.port_vlan_mode ==
-               P4_PORT_VLAN_NATIVE_TAGGED) {
-      action->set_action_id(
-          GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_ADD_VLAN_AND_FWD));
-      {
-        auto param = action->add_params();
-        param->set_param_id(GetParamId(p4info,
-                                       L2_FWD_TX_TABLE_ACTION_ADD_VLAN_AND_FWD,
-                                       ACTION_ADD_VLAN_AND_FWD_PARAM_PORT_ID));
-        auto port_id = learn_info.src_port;
-        param->set_value(EncodeByteValue(1, port_id));
-      }
-      {
-        auto param = action->add_params();
-        param->set_param_id(GetParamId(p4info,
-                                       L2_FWD_TX_TABLE_ACTION_ADD_VLAN_AND_FWD,
-                                       ACTION_ADD_VLAN_AND_FWD_PARAM_VLAN_PTR));
-        param->set_value(EncodeByteValue(1, learn_info.vlan_info.port_vlan));
-      }
     } else {
       action->set_action_id(GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD));
       {
