@@ -20,29 +20,78 @@
 
 # Linux Networking for ES2K
 
-This document explains how to run the Linux networking scenario on ES2K.
+This document explains how to run the Linux networking scenario on ES2K with 8 overlay VMs.
 
 ## Topology
 
 ![Linux Networking Topology](es2k-lnw-topology.png)
 
+Refer to [Linux Networking for E2100](linux-networking-for-es2k.md) document for more details on this feature.
+
+Prerequisites:
+
+- Follow steps mentioned in [Deploying P4 Programs for E2100](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/running-infrap4d.md) for bringing up IPU with a particular release build.
+- Download `hw-p4-programs` TAR file specific to the build and extract it to get `fxp-net_linux-networking-v2` p4 artifacts. Go through `Limitations` specified in `README` and bringup the setup accordingly.
+  - Modify `sem_num_pages` to 25 and `lem_num_pages` to 10 in `cp_init.cfg` present in IMC.
+- For this use case, before booting ACC with a particular release build, modify `acc_apf` value to 16 under `num_default_vport` in file `cp_init.cfg` present in IMC.
+- Download `IPU_Documentation` TAR file specific to the build and refer to `Getting Started Guide` on how to install compatible `IDPF driver` on host. Once an IDPF driver is installed, bring up SRIOV VF by modifying the `sriov_numvfs` file present under one of the IDPF network devices. Example as below
+
+  ```bash
+  echo 16 > /sys/class/net/ens802f0/device/sriov_numvfs
+  ```
+
 Notes about topology:
 
-- Four Kernel netdevs are created by default by loading IDPF driver during ACC bring-up. You can also create more than Four netdevs. For that, we need to modify `acc_apf` parameter under `num_default_vport` in `/etc/dpcp/cfg/cp_init.cfg` on IMC before starting `run_default_init_app`.
-- In `/etc/dpcp/cfg/cp_init.cfg` file also modify default `sem_num_pages` value to the value mentioned in `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking/README_P4_CP_NWS`.
-- vlan1, vlan2, .... vlanN created using Linux commands and are on top of an IDPF Netdev. These VLAN ports should be equal to number of VM's that are spawned.
-- br-int, VxLAN ports are created using ovs-vsctl command provided by the networking recipe and all the vlan ports are attached to br-int using ovs-vsctl command.
+- VMs are spawned on top of each VFs. Each VF will have a respective port representer in ACC. P4 runtime rules are configured to map VFs and its corresponding port representers.
+- Each physical port will have a port representer in ACC. P4 runtime rules are configured to map VFs and its corresponding port representers.
+- Each physical port will have a corresponding APF netdev on HOST. Create port representers in ACC for each HOST APF netdev. These APF netdev on HOST will receive unknown traffic for applications to act on.
+- All port representers should be part of an OvS bridge. Based on topology, these OvS bridges will just perform bridging or TEP termination bridges which are used to enable underlay connectivity for VxLAN traffic.
+- OvS bridges, VxLAN ports are created using ovs-vsctl command provided by the networking recipe and all the port representers are attached to OvS bridge using ovs-vsctl command.
+- This config has:
+  - 8 Overlay VFs
+  - 8 Port representers in ACC for the above 8 Overlay VFs
+  - 2 physical ports
+  - 2 Port representers in ACC for the above 2 physical ports
+  - 2 APF netdev on HOST
+  - 2 Port representers in ACC for the above 2 HOST APF netdevs
 
-System under test will have above topology running the networking recipe. Link Partner can have the networking recipe or legacy OvS or kernel VxLAN. Note the [Limitations](#limitations) section before setting up the topology.
-
-## Create P4 artifacts and start Infrap4d process
-
-- Use Linux networking p4 program present in the directory `/opt/p4/p4sde/share/mev_reference_p4_files/linux_networking` for this scenario.
-- See [Running Infrap4d on Intel IPU E2100](/guides/es2k/running-infrap4d) for compiling `P4 artifacts`, `bringing up ACC` and running `infrap4d` on ACC.
+System under test will have above topology running the networking recipe. Link Partner can have the networking recipe or legacy OvS or kernel VxLAN. Refer to the limitation section in [Linux Networking for E2100](linux-networking-for-es2k.md) before setting up the topology.
 
 ## Creating the topology
 
-The p4rt-ctl and ovs-vsctl utilities can be found in $P4CP_INSTALL/bin.
+Follow steps mentioned in [Running Infrap4d on Intel E2100](https://github.com/ipdk-io/networking-recipe/blob/main/docs/guides/es2k/running-infrap4d.md) for starting `infrap4d` process and creating protobuf binary for `fxp-net_linux-networking-v2` p4 program.
+
+### Port Mapping
+
+These VSI values can be checked with `/usr/bin/cli_client -q -c` command on IMC. This command provides VSI ID, Vport ID, and corresponding MAC addresses for all
+
+- IDPF netdevs on ACC
+- VFs on HOST
+- IDPF netdevs on HOST (if IDPF driver loaded by you on HOST)
+- Netdevs on IMC
+
+| Overlay VFs | Overlay VFs VSI ID | ACC port representer | ACC port representer VSI ID |
+| ------------| ------------------ | -------------------- | --------------------------- |
+| ens802f0v0  | (0x1b) 27 | enp0s1f0d1 | (0x09) 9  |
+| ens802f0v1  | (0x1c) 28 | enp0s1f0d2 | (0x0a) 10 |
+| ens802f0v4  | (0x1d) 29 | enp0s1f0d3 | (0x0b) 11 |
+| ens802f0v3  | (0x1e) 30 | enp0s1f0d4 | (0x0c) 12 |
+| ens802f0v2  | (0x1f) 31 | enp0s1f0d5 | (0x0d) 13 |
+| ens802f0v11 | (0x20) 32 | enp0s1f0d6 | (0x0e) 14 |
+| ens802f0v10 | (0x21) 33 | enp0s1f0d7 | (0x0f) 15 |
+| ens802f0v9  | (0x22) 34 | enp0s1f0d8 | (0x10) 16 |
+
+| Physical port | Physical port ID  | ACC Port presenter   | ACC Port presenter VSI ID |
+| ------------- | ----------------- | -------------------- | ------------------------- |
+| Phy port 0    | (0x0) 0 | enp0s1f0d9  | (0x11) 17 |
+| Phy port 1    | (0x1) 1 | enp0s1f0d11 | (0x13) 19 |
+
+| APF netdev    | APF netdev VSI ID | ACC Port presenter   | ACC Port presenter VSI ID |
+| ------------- | ----------------- | -------------------- | ------------------------- |
+| ens802f0d1    | (0x18) 24 | enp0s1f0d10 | (0x12) 18 |
+| ens802f0d2    | (0x19) 25 | enp0s1f0d12 | (0x14) 20 |
+
+(NOTE: Above port names and its VSI ID's may different from setup to setup, configure accordingly)
 
 ### Set the forwarding pipeline
 
@@ -50,243 +99,264 @@ Once the application is started, set the forwarding pipeline config using
 P4Runtime Client `p4rt-ctl` set-pipe command
 
 ```bash
-$P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/linux_networking.pb.bin \
-    $OUTPUT_DIR/linux_networking.p4info.txt
+$P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/fxp-net_linux-networking-v2.pb.bin \
+    $OUTPUT_DIR/p4info.txt
 ```
 
-Note: Assuming `linux_networking.pb.bin` and `linux_networking.p4info.txt`
-along with other P4 artifacts are created as per the steps mentioned in previous section.
+Note: Assuming `fxp-net_linux-networking-v2.pb.bin` and `p4info.txt`
+along with other P4 artifacts are created as per the steps mentioned in the previous section.
 
 ### Configure VSI Group and add a netdev
 
-Use one of the IPDF netdevs on ACC to receive all control packets from overlay
-VM's by assigning to a VSI group. VSI group 3 is dedicated for this configuration,
+Add all ACC port representers to VSI group 1. VSI group 1 is dedicated for this configuration,
 execute below devmem commands on IMC.
 
 ```bash
 # SEM_DIRECT_MAP_PGEN_CTRL: LSB 11-bit is for vsi which need to map into vsig
-devmem 0x20292002a0 64 0x8000050000000008
+devmem 0x20292002a0 64 0x8000050000000009
 
 # SEM_DIRECT_MAP_PGEN_DATA_VSI_GROUP : This will set vsi
-# (set in SEM_DIRECT_MAP_PGEN_CTRL register LSB) into VSIG-3.
-devmem 0x2029200388 64 0x3
+# (set in SEM_DIRECT_MAP_PGEN_CTRL register LSB) into VSIG-1.
+devmem 0x2029200388 64 0x1
 
 # SEM_DIRECT_MAP_PGEN_CTRL: LSB 11-bit is for vsi which need to map into vsig
-devmem 0x20292002a0 64 0xA000050000000008
+devmem 0x20292002a0 64 0xA000050000000009
 ```
 
-Note: Here VSI 8 has been used for receiving all control packets and added to VSI group 3. This refers to HOST netdev VSIG 3 as per the topology diagram. Modify this VSI based on your configuration.
-
-### Create Overlay network
-
-Option 1: Create VF's on HOST and spawn VM's on top of those VF's.
-Example to create 4 VF's:  echo 4 > /sys/devices/pci0000:ae/0000:ae:00.0/0000:af:00.0/sriov_numvfs
-
-```bash
-# VM1 configuration
-telnet <VM1 IP> <VM1 port>
-ip addr add 99.0.0.1/24 dev <Netdev connected to VF1>
-ifconfig <Netdev connected to VF> up
-
-# VM2 configuration
-telnet <VM2 IP> <VM2 port>
-ip addr add 99.0.0.2/24 dev <Netdev connected to VF2>
-ifconfig <Netdev connected to VF> up
-```
-
-Option 2: If we are unable to spawn VM's on top of the VF's, we can leverage kernel network namespaces.
-Move each VF to a network namespace and assign IP addresses:
-
-```bash
-ip netns add VM0
-ip link set <VF1 port> netns VM0
-ip netns exec VM0 ip addr add 99.0.0.1/24 dev <VF1 port>
-ip netns exec VM0  ifconfig <VF1 port> up
-
-ip netns add VM1
-ip link set <VF2 port> netns VM1
-ip netns exec VM1 ip addr add 99.0.0.2/24 dev <VF2 port>
-ip netns exec VM1 ifconfig <VF2 port> up
-```
+Note: Here VSI 9 has been used as one of the ACC port representers and added to VSI group 1. For this use case add all 16 IDPF interfaces created on ACC. Modify this VSI based on your configuration.
 
 ### Start OvS as a separate process
 
-Legacy OvS is used as a control plane for source MAC learning of overlay VM's. OvS should be started as a seperate process.
+Legacy OvS is used as a control plane for source MAC learning of overlay VM's. OvS should be started as a separate process.
 
 ```bash
-export RUN_OVS=/tmp
+export RUN_OVS=/opt/p4/p4-cp-nws
+
 rm -rf $RUN_OVS/etc/openvswitch
-rm -rf $RUN_OVS/var/run/openvswitch
+rm -rf $RUN_OVS/var/run/openvswitch 
 mkdir -p $RUN_OVS/etc/openvswitch/
 mkdir -p $RUN_OVS/var/run/openvswitch
 
+
 ovsdb-tool create $RUN_OVS/etc/openvswitch/conf.db \
-    /opt/p4/p4-cp-nws/share/openvswitch/vswitch.ovsschema
+        $RUN_OVS/share/openvswitch/vswitch.ovsschema
 
-ovsdb-server $RUN_OVS/etc/openvswitch/conf.db \
-    --remote=punix:$RUN_OVS/var/run/openvswitch/db.sock \
-    --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
-    --pidfile=$RUN_OVS/var/run/openvswitch/ovsdb-server.pid \
-    --unixctl=$RUN_OVS/var/run/openvswitch/ovsdb-server.ctl \
-    --detach
+ovsdb-server \
+        --remote=punix:$RUN_OVS/var/run/openvswitch/db.sock \
+        --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
+        --pidfile --detach
 
-ovs-vswitchd --detach \
-    --pidfile=$RUN_OVS/var/run/openvswitch/ovs-vswitchd.pid \
-    --no-chdir unix:$RUN_OVS/var/run/openvswitch/db.sock \
-    --unixctl=$RUN_OVS/var/run/openvswitch/ovs-vswitchd.ctl \
-    --mlockall \
-    --log-file=/tmp/ovs-vswitchd.log
+ovs-vsctl --no-wait init
 
-alias ovs-vsctl="ovs-vsctl --db unix:$RUN_OVS/var/run/openvswitch/db.sock"
+mkdir -p /tmp/logs
+ovs-vswitchd --pidfile --detach --mlockall \
+        --log-file=/tmp/logs/ovs-vswitchd.log
+
 ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=1
 ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=1
 
 ovs-vsctl  show
 ```
 
-### Create VLAN representers
+### Create Overlay network
 
-For each VM that is spawned for overlay network we need to have a port representer.
-We create VLAN netdevs on top of the IPDF netdev which is assigned to VSI group 3 in step-2 mentioned above.
+Option 1: Create VFs on HOST and spawn VMs on top of those VFs.
+Example: Below config is provided for one VM, and considering each VM is in one VLAN. Extend this to 8 VMs.
 
 ```bash
-ip link add link <VSI 8> name vlan1 type vlan id 1
-ip link add link <VSI 8> name vlan2 type vlan id 2
-ifconfig vlan1 up
-ifconfig vlan2 up
+# VM1 configuration
+telnet <VM1 IP> <VM1 port>
+ip link add link <Netdev connected to VF1> name <Netdev connected to VF1>.10 type vlan id 10
+ip addr add 101.0.0.1/24 dev <Netdev connected to VF1>.10
+ifconfig <Netdev connected to VF> up
+ifconfig <Netdev connected to VF>.10 up
 ```
 
-Note: Here the assumption is, we have created 2 overlay VM's and creating 2 port representers for those VM's.
-Port representer should always be in the format: `lowercase string 'vlan'+'vlanID'`
+Option 2: If we are unable to spawn VM's on top of the VF's, we can leverage kernel network namespaces.
+Move each VF to a network namespace and assign IP addresses.
+Example: Below config is provided for one VM, and considering each namespace is in one VLAN. Extend this to 8 namespaces.
+
+```bash
+ip netns add VM0
+ip link set <VF1 port> netns VM0
+ip netns exec VM0 ip link add link <VF1 port> name <VF1 port>.10 type vlan id 10
+ip netns exec VM0 ip addr add 101.0.0.1/24 dev <VF1 port>.10
+ip netns exec VM0  ifconfig <VF1 port> up
+ip netns exec VM0  ifconfig <VF1 port>.10 up
+```
+
+### Configure rules for mapping between Overlay VF and ACC port representer
+
+Configure rules to send overlay packets from a VM to its respective port representers.
+
+Refer above port mapping for overlay VF to ACC port representer mapping. Here sample commands are shown for a single overlay network, configure similar mapping for remaining VFs.
+
+Example:
+
+- Overlay VF1 has a VSI value 27
+- Corresponding port representer VSI value 9
+- If a VSI is used as an action, add an offset of 16 to the VSI value
+
+```bash
+# Create a source port for an overlay VF (VSI-27). Source port action can be any value.
+# For simplicity add 16 to VSI ID.
+ p4rt-ctl add-entry br0 linux_networking_control.tx_source_port_v4 \
+     "vmeta.common.vsi=27,zero_padding=0,action=linux_networking_control.set_source_port(43)"
+
+# Create a mapping between overlay VF (VSI-27/source port-43) and ACC port representer (VSI-9)
+ p4rt-ctl add-entry br0 linux_networking_control.source_port_to_pr_map \
+     "user_meta.cmeta.source_port=43,zero_padding=0,action=linux_networking_control.fwd_to_vsi(25)"
+
+ p4rt-ctl add-entry br0 linux_networking_control.tx_acc_vsi \
+     "vmeta.common.vsi=9,zero_padding=0,action=linux_networking_control.l2_fwd_and_bypass_bridge(43)"
+
+# Create a mapping for traffic to flow between VSIs (VSI-27/source port-43) and (VSI-9)
+ p4rt-ctl add-entry br0 linux_networking_control.vsi_to_vsi_loopback \
+     "vmeta.common.vsi=9,target_vsi=27,action=linux_networking_control.fwd_to_vsi(43)"
+
+ p4rt-ctl add-entry br0 linux_networking_control.vsi_to_vsi_loopback \
+     "vmeta.common.vsi=27,target_vsi=9,action=linux_networking_control.fwd_to_vsi(25)"
+
+```
+
+### Configure rules for mapping between Physical port and ACC port representer
+
+Configure rules to send ingress packets from a physical port to its respective port representers.
+
+Refer above port mapping for physical port to ACC port representer mapping. Here sample commands are shown for a single physical port, configure similar mapping for remaining physical ports.
+
+Example:
+
+- Physical port 0 port id is 0
+- Corresponding port representer VSI value 17
+- If a VSI is used as an action, add an offset of 16 to the VSI value
+
+```bash
+# Create a source port for a physical port (Phy port-0). Source port action can be any value.
+# For simplicity consider the same value as phy port id.
+ p4rt-ctl add-entry br0 linux_networking_control.rx_source_port \
+     "vmeta.common.port_id=0,zero_padding=0,action=linux_networking_control.set_source_port(0)"
+
+# Create a mapping between physical port (Phy port 0/src port 0) and ACC port representer (VSI-17)
+  p4rt-ctl add-entry br0 linux_networking_control.rx_phy_port_to_pr_map \
+      "vmeta.common.port_id=0,zero_padding=0,action=linux_networking_control.fwd_to_vsi(33)"
+
+ p4rt-ctl add-entry br0 linux_networking_control.source_port_to_pr_map \
+     "user_meta.cmeta.source_port=0,zero_padding=0,action=linux_networking_control.fwd_to_vsi(33)"
+
+ p4rt-ctl add-entry br0 linux_networking_control.tx_acc_vsi \
+     "vmeta.common.vsi=17,zero_padding=0,action=linux_networking_control.l2_fwd_and_bypass_bridge(0)"
+```
+
+### Configure rules for mapping between APF netdev on HOST and ACC port representer
+
+Configure rules to send APF netdev on HOST to its respective port representers.
+
+Refer above port mapping for APF netdev on HOST to ACC port representer mapping. Here sample commands are shown for APF netdev on HOST, configure similar mapping for remaining APF netdevs on HOST.
+
+Example:
+
+- APF netdev 1 on HOST has a VSI value 24
+- Corresponding port representer VSI value 18
+- If a VSI is used as an action, add an offset of 16 to the VSI value
+
+```bash
+# Create a source port for an overlay VF (VSI-24). Source port action can be any value.
+# For simplicity add 16 to VSI ID.
+ p4rt-ctl add-entry br0 linux_networking_control.tx_source_port_v4 \
+     "vmeta.common.vsi=24,zero_padding=0,action=linux_networking_control.set_source_port(40)"
+
+
+# Create a mapping between overlay VF (VSI-24/source port-40) and ACC port representer (VSI-18)
+ p4rt-ctl add-entry br0 linux_networking_control.source_port_to_pr_map \
+     "user_meta.cmeta.source_port=40,zero_padding=0,action=linux_networking_control.fwd_to_vsi(34)"
+
+ p4rt-ctl add-entry br0 linux_networking_control.tx_acc_vsi \
+     "vmeta.common.vsi=17,zero_padding=0,action=linux_networking_control.l2_fwd_and_bypass_bridge(0)"
+
+# Create a mapping for traffic to flow between VSIs (VSI-24/source port-40) and (VSI-18)
+ p4rt-ctl add-entry br0 linux_networking_control.vsi_to_vsi_loopback \
+      "vmeta.common.vsi=18,target_vsi=24,action=linux_networking_control.fwd_to_vsi(40)"
+
+ p4rt-ctl add-entry br0 linux_networking_control.vsi_to_vsi_loopback \
+     "vmeta.common.vsi=24,target_vsi=18,action=linux_networking_control.fwd_to_vsi(34)"
+```
+
+### Configure supporting p4 runtime tables
+
+For TCAM entry configure LPM LUT table
+
+```bash
+ p4rt-ctl add-entry br0 linux_networking_control.ipv4_lpm_root_lut \
+     "user_meta.cmeta.bit32_zeros=4/255.255.255.255,priority=65535,action=linux_networking_control.ipv4_lpm_root_lut_action(0)"
+```
+
+Create a dummy LAG bypass table for all 8 hash indexes
+
+```bash
+ p4rt-ctl add-entry br0  linux_networking_control.tx_lag_table \
+     "user_meta.cmeta.lag_group_id=0,hash=0,action=linux_networking_control.bypass"
+
+ p4rt-ctl add-entry br0  linux_networking_control.tx_lag_table \
+     "user_meta.cmeta.lag_group_id=0,hash=1,action=linux_networking_control.bypass"
+
+ p4rt-ctl add-entry br0  linux_networking_control.tx_lag_table \
+     "user_meta.cmeta.lag_group_id=0,hash=2,action=linux_networking_control.bypass"
+
+ p4rt-ctl add-entry br0  linux_networking_control.tx_lag_table \
+     "user_meta.cmeta.lag_group_id=0,hash=3,action=linux_networking_control.bypass"
+
+ p4rt-ctl add-entry br0  linux_networking_control.tx_lag_table \
+     "user_meta.cmeta.lag_group_id=0,hash=4,action=linux_networking_control.bypass"
+
+ p4rt-ctl add-entry br0  linux_networking_control.tx_lag_table \
+     "user_meta.cmeta.lag_group_id=0,hash=5,action=linux_networking_control.bypass"
+
+ p4rt-ctl add-entry br0  linux_networking_control.tx_lag_table \
+     "user_meta.cmeta.lag_group_id=0,hash=6,action=linux_networking_control.bypass"
+
+ p4rt-ctl add-entry br0  linux_networking_control.tx_lag_table \
+     "user_meta.cmeta.lag_group_id=0,hash=7,action=linux_networking_control.bypass"
+```
 
 ### Create integration bridge and add ports to the bridge
 
-Create OvS bridge, VxLAN tunnel and assign ports to the bridge.
+Create OvS bridge, VxLAN tunnel and assign overlay VFs port representer to individual bridges.
+Reference provided for single overlay network, repeat similar steps for other VFs.
+
+Each bridge has:
+
+- One overlay PR which is Native-tagged to a specific VLAN
+- One VxLAN port which is Native-untagged to the VLAN and with different remote TEP and VNI
 
 ```bash
-ovs-vsctl add-br br-int
-ifconfig br-int up
-
-ovs-vsctl add-port br-int vlan1
-ovs-vsctl add-port br-int vlan2
-ifconfig vlan1 up
-ifconfig vlan2 up
-
-ovs-vsctl add-port br-int vxlan1 -- set interface vxlan1 type=vxlan \
-    options:local_ip=40.1.1.1 options:remote_ip=40.1.1.2 options:dst_port=4789
+ovs-vsctl add-br br-1
+ovs-vsctl add-port br-1 enp0s1f0d1 tag=10 vlan_mode=native-tagged
+ovs-vsctl add-port br-1 vxlan1 tag=10 vlan_mode=native-untagged -- set interface vxlan1  type=vxlan \
+    options:local_ip=1.1.1.1 options:remote_ip=10.1.1.1 options:key=10 options:dst_port=4789
 ```
 
-Note: Here we are creating VxLAN tunnel with VNI 0, you can create any VNI for tunneling.
-
-### Configure rules for overlay control packets
-
-Configure rules to send overlay control packets from a VM to its respective port representers.
-
-Below configuration assumes
-
-- Overlay VF1 has a VSI value 14
-- Overlay VF2 has a VSI value 15
-
-These VSI values can be checked with `/usr/bin/cli_client -q -c` command on IMC. This command provides VSI ID, Vport ID, and corresponding MAC addresses for all
-
-- IDPF netdevs on ACC
-- VF's on HOST
-- IDPF netdevs on HOST (if IDPF driver loaded by you on HOST)
-- Netdevs on IMC
-
-```bash
-# Rules for control packets coming from overlay VF (VSI-14).
-# IPU will add a VLAN tag 1 and send to HOST1 (VSI-8).
-
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table \
-    "vmeta.common.vsi=14,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.add_vlan_and_send_to_port(1,24)"
-p4rt-ctl add-entry br0 linux_networking_control.handle_rx_loopback_from_host_to_ovs_table \
-    "vmeta.common.vsi=14,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(24)"
-p4rt-ctl add-entry br0 linux_networking_control.vlan_push_mod_table \
-    "vmeta.common.mod_blob_ptr=1,action=linux_networking_control.vlan_push(1,0,1)"
-
-# Rules for control packets coming from overlay VF (VSI-15).
-# IPU will add a VLAN tag 2 and send to HOST1 (VSI-8).
-
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table \
-    "vmeta.common.vsi=15,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.add_vlan_and_send_to_port(2,24)"
-p4rt-ctl add-entry br0 linux_networking_control.handle_rx_loopback_from_host_to_ovs_table \
-    "vmeta.common.vsi=15,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(24)"
-p4rt-ctl add-entry br0 linux_networking_control.vlan_push_mod_table \
-    "vmeta.common.mod_blob_ptr=2,action=linux_networking_control.vlan_push(1,0,2)"
-
-# Rules for control packets coming from HOST1 (VSI-8).
-# IPU will remove the VLAN tag 1 and send to overlay VF (VSI-14).
-
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_ovs_to_host_table \
-    "vmeta.common.vsi=8,hdrs.dot1q_tag[vmeta.common.depth].hdr.vid=1,action=linux_networking_control.remove_vlan_and_send_to_port(1,30)"
-p4rt-ctl add-entry br0 linux_networking_control.handle_rx_loopback_from_ovs_to_host_table \
-    "vmeta.misc_internal.vm_to_vm_or_port_to_port[27:17]=14,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(30)"
-p4rt-ctl add-entry br0 linux_networking_control.vlan_pop_mod_table \
-    "vmeta.common.mod_blob_ptr=1,action=linux_networking_control.vlan_pop"
-
-# Rules for control packets coming from HOST1 (VSI-8).
-# IPU will remove the VLAN tag 2 and send to overlay VF (VSI-15).
-
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_ovs_to_host_table \
-    "vmeta.common.vsi=8,hdrs.dot1q_tag[vmeta.common.depth].hdr.vid=2,action=linux_networking_control.remove_vlan_and_send_to_port(2,31)"
-p4rt-ctl add-entry br0 linux_networking_control.handle_rx_loopback_from_ovs_to_host_table \
-    "vmeta.misc_internal.vm_to_vm_or_port_to_port[27:17]=15,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(31)"
-p4rt-ctl add-entry br0 linux_networking_control.vlan_pop_mod_table \
-    "vmeta.common.mod_blob_ptr=2,action=linux_networking_control.vlan_pop"
-```
-
-### Configure rules for underlay control packets
-
-Configure rules to send underlay control packets from IDPF netdev to physical port.
-
-Below configuration assumes
-
-- Underlay IDPF netdev has a VSI value 10
-- First physical port will have a port ID of 0
-
-```bash
-# Configuration for control packets between physical port 0 to underlay IDPF netdev VSI-10
-p4rt-ctl add-entry br0 linux_networking_control.handle_rx_from_wire_to_ovs_table \
-    "vmeta.common.port_id=0,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(26)"
-
-# Configuration for control packets between underlay IDPF netdev VSI-10 to physical port 0
-p4rt-ctl add-entry br0 linux_networking_control.handle_tx_from_host_to_ovs_and_ovs_to_wire_table \
-    "vmeta.common.vsi=10,user_meta.cmeta.bit32_zeros=0,action=linux_networking_control.set_dest(0)"
-```
+Note: Here we are creating a VxLAN tunnel with VNI 0, you can create any VNI for tunneling.
 
 ### Underlay configuration
 
-Configure underlay IP addresses, and add static routes.
-
-Below configuration assumes
-
-- Underlay IDPF netdev has a VSI value 10
+Create TEP termination bridge, add physical port's port representer and APF netdev port representer.
+Reference provided for underlay network, repeat similar steps for multiple underlay networks.
 
 ```bash
-p4rt-ctl add-entry br0 linux_networking_control.ecmp_lpm_root_lut \
-    "user_meta.cmeta.bit32_zeros=4/255.255.255.255,priority=2,action=linux_networking_control.ecmp_lpm_root_lut_action(0)"
+ovs-vsctl add-br br-tun-1
+ovs-vsctl add-port br-tun-1 enp0s1f0d9
+ovs-vsctl add-port br-tun-1 enp0s1f0d10
+```
 
-nmcli device set <IDPF netdev for VSI 10> managed no
-ifconfig <IDPF netdev for VSI 10> 40.1.1.1/24 up
-ip route show
-ip route change 40.1.1.0/24 via 40.1.1.2 dev <IDPF netdev for VSI 10>
+Configure underlay IP address on the TEP termination bridge, and add static routes to reach remote IP.
+
+```bash
+ifconfig br-tun-1 1.1.1.1/24
+ip route add 10.1.1.0/24 via 1.1.1.2 dev br-tun-1
 ```
 
 ### Test the ping scenarios
 
-- Ping between VM's on the same host
 - Underlay ping
 - Overlay ping: Ping between VM's on different hosts
-
-## Limitations
-
-Current Linux Networking support for the networking recipe has following limitations:
-
-- All VLAN interfaces created on top of IDPF netdev, should always be in lowercase format "vlan+vlan_id"
-Ex: vlan1, vlan2, vlan3 ... vlan4094.
-- Set the pipeline before adding br-int port, vxlan0 port, and adding vlan ports to br-int bridge.
-- VxLAN destination port should always be standard port. i.e., 4789. (limitation by p4 parser)
-- We do not support any ofproto rules that would prevent FDB learning on OvS.
-- VLAN Tagged packets are not supported.
-- For VxLAN tunneled packets only IPv4-in-IPv4 is supported.
