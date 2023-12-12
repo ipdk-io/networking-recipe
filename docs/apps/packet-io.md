@@ -19,7 +19,7 @@ A P4runtime client/controller can send packets to the PacketIO port as a PacketO
 
 ## Enabling Packet-IO
 
-To enable the Packet-IO feature, the `pktio-args` configuration must be added to the following files:
+To enable the Packet-IO feature, add the `pktio-args` configuration to the following files:
 - The configuration file used by the `infrap4d` process.
 - The configuration file used by `tdi_pipeline_builder`.
 
