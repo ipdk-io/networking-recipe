@@ -35,7 +35,7 @@ docker run --privileged --cap-add=ALL -it --name infrap4d --network host -d ubun
 Clone IPDK networking-recipe:
 
 ```bash
-git clone --recursive git@github.com:ipdk-io/networking-recipe.git ipdk.recipe
+git clone --recursive git@github.com:ipdk-io/networking-recipe.git p4cp.recipe
 ```
 
 Clone the repository used to build the Stratum dependencies:

@@ -33,17 +33,17 @@ If you have not already done so, you will need to get a copy of the IPDK
 networking-recipe repository and its submodules:
 
 ```bash
-git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
+git clone --recursive https://github.com/ipdk-io/networking-recipe.git p4cp.recipe
 ```
 
-You may substitute your own local directory name for `ipdk.recipe`.
+You may substitute your own local directory name for `p4cp.recipe`.
 
 ## Define the Environment
 
 First, change to the source directory:
 
 ```bash
-cd ipdk.recipe
+cd p4cp.recipe
 ```
 
 Source the file that defines the
