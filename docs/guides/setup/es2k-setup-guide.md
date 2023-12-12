@@ -157,7 +157,6 @@ the range with cfgqs-idx parameter. Total number of queues split between process
 ### Run the infrap4d daemon
 
 ```bash
-cd $P4CP_RECIPE
 sudo $P4CP_INSTALL/sbin/infrap4d
 ```
 

@@ -76,8 +76,7 @@ export P4CP_RECIPE=`pwd`
 ### Compile the recipe
 
 ```bash
-cd $P4CP_RECIPE
-./make-all.sh --target=dpdk --rpath
+$P4CP_RECIPE/make-all.sh --target=dpdk --rpath
 ```
 
 By default, make-all.sh will create an `install` folder in the networking-recipe
