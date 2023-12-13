@@ -5,17 +5,27 @@ for the DPDK target.
 
 ## Prerequisites
 
+It is assumed that the DPDK SDE dependencies have been installed on the
+system. The list of SDE's dependencies can be found
+in `sde/tools/setup/install_dep.py` file.
+
+Prerequisites and dependencies from stratum-deps are assumed to be
+installed, since some of those dependencies also apply to this
+module, networking-recipe.
+
+Install the following dependencies for building networking-recipe.
+
 For Fedora:
 
 ```bash
-yum install libatomic libnl3-devel
+yum install libnl3-devel
 pip3 install -r requirements.txt
 ```
 
 For Ubuntu:
 
 ```bash
-apt install libatomic1 libnl-route-3-dev
+apt install libnl-route-3-dev
 pip3 install -r requirements.txt
 ```
 
