@@ -20,8 +20,8 @@ ES2K
 .. toctree::
    :maxdepth: 1
 
-   es2k/es2k-lnw-overview
    es2k/es2k-linux-networking
+   es2k/es2k-lnw-overlay-vms
    es2k/es2k-linux-networking-ipv6
    es2k/es2k-linux-networking-ecmp
    es2k/es2k-linux-networking-frr
