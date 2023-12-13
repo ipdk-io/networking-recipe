@@ -549,6 +549,23 @@ Examples:
 
    p4rt-ctl get-packet-mod-meter br0 my_control.meter1 "meter_id=2244878476,meter_index=10"
 
+Start Packet I/O
+~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   p4rt-ctl start-pktio SWITCH
+
+Arguments:
+
+* ``SWITCH``: Bridge name. Maps internally to device name.
+
+Examples:
+
+.. code-block:: bash
+
+   p4rt-ctl start-pktio br0
+
 Known Issues
 ------------
 
