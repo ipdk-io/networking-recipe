@@ -12,9 +12,9 @@ This feature can run in two modes:
 
 To enable this feature we have,
 
-- `Infrap4d`: This process has p4runtime intelligence and acts as a gRPC server. Calls TDI front end to program IPU E2100.
+- `Infrap4d`: This process includes a p4runtime server. Calls TDI front end to program IPU E2100.
 - `ovs-vswitchd`: This process is integrated with p4runtime intelligence and acts as a gRPC client. Programs IPU E2100 with control plane configuration and forwarding tables by communicating with gRPC server.
-- `p4rt-ctl`: This python CLI has p4runtime intelligence and acts as a gRPC client. Programs IPU E2100 with runtime rules by communicating with gRPC server.
+- `p4rt-ctl`: This python CLI includes a p4runtime client. Programs IPU E2100 with runtime rules by communicating with gRPC server.
 - `Kernel stack`: All underlay related configurations are picked by `kernel monitor` thread via netlink events in `infrap4d` and these are programmed in IPU E2100 by calling TDI front end calls.
 
 ## Topology
@@ -293,11 +293,11 @@ Current Linux Networking support for the networking recipe has the following lim
 - Only OvS bridges are supported.
 - Configure p4rt-ctl runtime rules before OvS configuration.
 - Double vlan tag is NOT supported.
-- Refer LNW-V2 README_P4_CP_NWS which comes along with the p4 program for limitation with router_interface_id action in nexthop_table (Bug created for this)
 - Add all ACC PR's to VSI group 1
-- On ACC firewalld need to be disabled, this process is blocking tunnel packets.
+- On ACC firewalld need to be disabled, this service is blocking tunnel packets.
   - systemctl stop firewalld
-- Manually modify context.json to remove NOP hardware action for in context.json from "set_nexthop " action in "nexthop_table". Open defect is present in p4-sde to fix this issue.
+- Refer LNW-V2 README_P4_CP_NWS which comes along with the p4 program for limitation with router_interface_id action in nexthop_table (Bug created for this)
+  - Manually modify context.json to remove NOP hardware action for in context.json from "set_nexthop " action in "nexthop_table". Open defect is present in p4-sde to fix this issue.
 
 ```text
 Content to be removed under hardware action is 

@@ -333,7 +333,7 @@ Each bridge has:
 ovs-vsctl add-br br-1
 ovs-vsctl add-port br-1 enp0s1f0d1 tag=10 vlan_mode=native-tagged
 ovs-vsctl add-port br-1 vxlan1 tag=10 vlan_mode=native-untagged -- set interface vxlan1  type=vxlan \
-    options:local_ip=1.1.1.1 options:remote_ip=10.1.1.1 options:key=10 options:dst_port=4789
+    options:local_ip=10.1.1.1 options:remote_ip=10.1.1.2 options:key=10 options:dst_port=4789
 ```
 
 Note: Here we are creating a VxLAN tunnel with VNI 0, you can create any VNI for tunneling.
@@ -349,11 +349,16 @@ ovs-vsctl add-port br-tun-1 enp0s1f0d9
 ovs-vsctl add-port br-tun-1 enp0s1f0d10
 ```
 
-Configure underlay IP address on the TEP termination bridge, and add static routes to reach remote IP.
+Configure underlay IP address on the TEP termination port, route to reach remote IP is on termination bridge, and add change routes to reach remote IP.
 
 ```bash
-ifconfig br-tun-1 1.1.1.1/24
-ip route add 10.1.1.0/24 via 1.1.1.2 dev br-tun-1
+# Create a dummy port and add TEP local IP
+ip link add dev TEP10 type dummy
+ifconfig  TEP10 10.1.1.1/24 up
+
+# On termiantion bridge, configure an IP to reach remote TEP, and modify route to include nexthop details.
+ifconfig br-tun-1 1.1.1.1/24 up
+ip route change 10.1.1.0/24 via 1.1.1.2 dev br-tun-1
 ```
 
 ### Test the ping scenarios
