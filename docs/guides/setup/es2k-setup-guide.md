@@ -84,8 +84,8 @@ the build system and helper scripts.
 Clone the repository used to build P4 Control Plane:
 
 ```bash
-git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
-cd ipdk.recipe
+git clone --recursive https://github.com/ipdk-io/networking-recipe.git p4cp.recipe
+cd p4cp.recipe
 export P4CP_RECIPE=`pwd`
 ```
 
@@ -157,16 +157,15 @@ the range with cfgqs-idx parameter. Total number of queues split between process
 ### Run the infrap4d daemon
 
 ```bash
-cd $P4CP_RECIPE
 sudo $P4CP_INSTALL/sbin/infrap4d
 ```
 
 *Note*: By default, infrap4d runs in detached mode. If you want to run in
-attached mode, specify the --nodetach command-line option.
+attached mode, specify the `--nodetach` command-line option.
 
 - All infrap4d logs are by default logged under `/var/log/stratum`.
 - All P4SDE logs are logged in `p4_driver.log` under `$P4CP_RECIPE`.
-*-All OVS logs are logged under `/tmp/ovs-vswitchd.log`.
+- All OVS logs are logged under `/tmp/ovs-vswitchd.log`.
 
 ### Run a sample program
 

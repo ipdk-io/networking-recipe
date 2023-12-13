@@ -68,16 +68,15 @@ the build system and helper scripts.
 Clone the repository used to build P4 Control Plane:
 
 ```bash
-git clone --recursive https://github.com/ipdk-io/networking-recipe.git ipdk.recipe
-cd ipdk.recipe
+git clone --recursive https://github.com/ipdk-io/networking-recipe.git p4cp.recipe
+cd p4cp.recipe
 export P4CP_RECIPE=`pwd`
 ```
 
 ### Compile the recipe
 
 ```bash
-cd $P4CP_RECIPE
-./make-all.sh --target=dpdk --rpath
+$P4CP_RECIPE/make-all.sh --target=dpdk --rpath
 ```
 
 By default, make-all.sh will create an `install` folder in the networking-recipe
