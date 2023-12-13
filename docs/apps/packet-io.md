@@ -54,8 +54,8 @@ The Packet I/O configuration is per device and should be added under the
 ```json
   "pktio-args": {
     "ports"         // list of ports to receive and transmit packetIO packets
-    "nb_rxqs"   // number of rx queues per port
-    "nb_txqs"   // number of tx queues per port
+    "nb_rxqs"       // number of rx queues per port
+    "nb_txqs"       // number of tx queues per port
   },
 ```
 
@@ -84,7 +84,7 @@ packetIn and packetOut messages.
 To start `infrap4d` process with Packet I/O, the
 /usr/share/stratum/es2k/es2k_skip_p4.conf file must include Packet IO
 configuration.
-Instructions to run infrap4d can be found at [running infrap4d](/docs/guides/es2k/running-infrap4d.md)
+Instructions to run infrap4d can be found at [running infrap4d](/guides/es2k/running-infrap4d.md)
 
 Ensure you update this configuration before starting `infrap4d`.
 
@@ -93,12 +93,12 @@ Ensure you update this configuration before starting `infrap4d`.
 The Packet IO configuration mentioned above should also be present in the
 configuration file provided with the `p4c_conf_file` option for building
 the pipeline.
-Instructions to build and set pipeline can be found at [set pipeline](/docs/guides/setup/es2k-setup-guide.md)
+Instructions to build and set pipeline can be found at [set pipeline](/guides/setup/es2k-setup-guide.md)
 
 ## Reference client
 
 The `p4rt-ctl` client can be used to exercise the Packet I/O feature.
-See "Start Packet I/O" in the [p4rt-ctl guide](/docs/clients/p4rt-ctl.rst) for instructions.
+See "Start Packet I/O" in the [p4rt-ctl guide](/clients/p4rt-ctl.rst) for instructions.
 
 In Packet I/O mode, the following steps take place:
 
