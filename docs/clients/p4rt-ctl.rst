@@ -550,7 +550,7 @@ Examples:
    p4rt-ctl get-packet-mod-meter br0 my_control.meter1 "meter_id=2244878476,meter_index=10"
 
 Start Packet I/O
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
