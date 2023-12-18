@@ -1,4 +1,3 @@
-
 # Linux Networking with Overlay VMs
 
 This document explains how to run the Linux networking scenario on ES2K with 8 overlay VMs.
@@ -14,11 +13,12 @@ Prerequisites:
 
 - Download `hw-p4-programs` TAR file specific to the build and extract it to get `fxp-net_linux-networking-v2` p4 artifacts. Go through `Limitations` specified in `README` and bringup the setup accordingly.
 - Follow steps mentioned in [Deploying P4 Programs for E2100](/guides/es2k/deploying-p4-programs) for bringing up IPU with a custom P4 package.
-  - Modify `load_custom_pkg.sh` with following parameters for linux_networking package.
+Modify `load_custom_pkg.sh` with following parameters for linux_networking package:
 ```text
     sed -i 's/sem_num_pages = 1;/sem_num_pages = 25;/g' $CP_INIT_CFG
     sed -i 's/lem_num_pages = 1;/lem_num_pages = 10;/g' $CP_INIT_CFG
     sed -i 's/acc_apf = 4;/acc_apf = 16;/g' $CP_INIT_CFG
+
 ```
 - Download `IPU_Documentation` TAR file specific to the build and refer to `Getting Started Guide` on how to install compatible `IDPF driver` on host. Once an IDPF driver is installed, bring up SRIOV VF by modifying the `sriov_numvfs` file present under one of the IDPF network devices. Example as below
 
@@ -28,7 +28,7 @@ Prerequisites:
 
 Notes about topology:
 
-- VMs are spawned on top of each VFs. Each VF will have a respective port representor in ACC. P4 runtime rules are configured to map VFs and its corresponding port representors.
+- VMs are spawned on top of each VF. Each VF will have a port representor in ACC. P4 runtime rules are configured to map VFs and their corresponding port representors.
 - Each physical port will have a port representor in ACC. P4 runtime rules are configured to map VFs and its corresponding port representors.
 - Each physical port will have a corresponding APF netdev on HOST. Create port representors in ACC for each HOST APF netdev. These APF netdev on HOST will receive unknown traffic for applications to act on.
 - All port representors should be part of an OvS bridge. Based on topology, these OvS bridges will just perform bridging or TEP termination bridges which are used to enable underlay connectivity for VxLAN traffic.
