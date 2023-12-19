@@ -7,52 +7,40 @@ running on the Host to communicate with infrap4d running on the ACC.
 
 Ports used for communication channels are defined by the node policy on IMC.
 
-## 1. Interrupt default start-up routine
+## 1 Modify the custom package config script on IMC
 
-Reboot IMC and type ``N`` when the following message is shown on IMC console::
-
-```text
-start ipumgmtd and auxiliary script [Y/N] \
-(default start both automatically after 10 seconds)?
-```
-
-## 2. Specify communication channel ports
-
-The config file uses the function numbers that are defined as below:
-
-|     Function number    |     Definition    |
-|------------------------|-------------------|
-|     0                  |     Xeon Host     |
-|     4                  |     ACC           |
-|     5                  |     IMC           |
-
-Format used to indicate communication channels:
-`(([function number, vport_index],[pf_num, vport_index]),...)`
-
-Modify `/etc/dpcp/cfg/cp_init.cfg` to change the value of `comm_vports`.
-
-```text
-/* IMC_LAN_APF_VPORT_0 ([5,0]) <--> ACC_APF_VPORT_0 ([4,0]) */
-/* HOST0_LAN_APF_VPORT_3 ([0, 3]) <--> ACC_LAN_APF_VPORT_3 [(4,2)]*/
-comm_vports = (([5,0],[4,0]),([0,3],[4,2]));
-```
-
-This will enable communication between IMC-ACC and Host-ACC.
-
-Note: Changes made to `cp_init.cfg` are not persistent across IMC reboots.
-
-## 3. Start the IMC
-
-Run the IMC start-up script.
+Modify the `load_custom_pkg.sh` script to specify comm_vports.
 
 ```bash
-root@mev-imc:~# /etc/init.d/run_default_init_app
+[root@ipu-imc /]# cd /work/scripts
+[root@ipu-imc scripts]# cat load_custom_pkg.sh
+#!/bin/sh
+CP_INIT_CFG=/etc/dpcp/cfg/cp_init.cfg
+echo "Checking for custom package..."
+if [ -e p4_custom.pkg ]; then
+    echo "Custom package p4_custom.pkg found. Overriding default package"
+    cp  p4_custom.pkg /etc/dpcp/package/
+    rm -rf /etc/dpcp/package/default_pkg.pkg
+    ln -s /etc/dpcp/package/ p4_custom.pkg /etc/dpcp/package/default_pkg.pkg
+    sed -i 's/sem_num_pages = 1;/sem_num_pages = 25;/g' $CP_INIT_CFG
+    sed -i "s/comm_vports = ((\[5,0\],\[4,0\]))\;/comm_vports = ((\[5,0\],\[4,0\]),(\[0,3\],\[4,2\]))\;/g" $CP_INIT_CFG
+else
+    echo "No custom package found. Continuing with default package"
+    sed -i "s/comm_vports = ((\[5,0\],\[4,0\]))\;/comm_vports = ((\[5,0\],\[4,0\]),(\[0,3\],\[4,2\]))\;/g" $CP_INIT_CFG
+
+fi
+```
+This will enable communication between IMC-ACC and Host-ACC.
+
+## 2. Reboot the IMC
+
+```bash
+root@mev-imc:~# reboot
 ```
 
-By default, `cpf_host` parameter in `/etc/dpcp/cfg/cp_init.cfg` is set to 4 which
-enables ACC. If the start-up script is executed successfully, ACC comes up with a
-statically assigned IP address `192.168.0.2` to the eth0 network interface.
-You can access ACC from IMC over an SSH session using this IP address.
+If IMC is rebooted successfully, ACC comes up with a statically assigned IP address
+ `192.168.0.2` to the eth0 network interface. You can access ACC from IMC over an
+SSH session using this IP address.
 
 ## 3. Load the IDPF driver on Host
 
