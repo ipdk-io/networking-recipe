@@ -1,6 +1,6 @@
 # Linux Networking for ES2K
 
-Linux Networking provides support for offloading various networking functions, such as L2 forwarding, L3 forwarding, ECMP, and VxLAN encapsulation and decapsulation intelligence to the IPU. This capability empowers overlay services to establish communication with endpoints through VxLAN tunnels, thereby extending the L2 segment across the underlay network. To achieve Linux networking support, we have used legacy OvS for overlay source MAC learning and VxLAN configurations, while relying on the kernel for underlay neighbor discovery, route management, and next-hop information.
+Linux Networking provides support for offloading various networking functions, such as L2 forwarding, L3 forwarding, ECMP, and VxLAN encapsulation and decapsulation intelligence to the IPU. This capability empowers overlay services to establish communication with endpoints through VxLAN tunnels, thereby extending the L2 segment across the underlay network. To achieve Linux networking support, we have enhanced OvS for overlay source MAC learning and VxLAN configurations, while relying on the kernel for underlay neighbor discovery, route management, and next-hop information.
 
 ## Feature Overview
 
@@ -14,7 +14,7 @@ To enable this feature we have,
 - `Infrap4d`: This process includes a p4runtime server. Calls TDI front end to program IPU E2100.
 - `ovs-vswitchd`: This process is integrated with p4runtime intelligence and acts as a gRPC client. Programs IPU E2100 with control plane configuration and forwarding tables by communicating with gRPC server.
 - `p4rt-ctl`: This python CLI includes a p4runtime client. Programs IPU E2100 with runtime rules by communicating with gRPC server.
-- `Kernel stack`: All underlay related configurations are picked by `kernel monitor` thread via netlink events in `infrap4d` and these are programmed in IPU E2100 by calling TDI front end calls.
+- `Kernel stack`: All underlay related configurations are picked by `kernel monitor` thread via netlink events in `infrap4d` and these are programmed in IPU E2100 by calling TDI front end APIs.
 
 ## Topology
 
@@ -24,11 +24,11 @@ This topology breakdown and configuration assumes all VMs are spawned on HOST VF
 
 ### Topology breakdown
 
-- Every VM spawned on top of a VF will have a corresponding port representer in ACC.
-- Every physical port will have a corresponding port representer in ACC.
-- Every physical port will have an uplink (APF netdev) in HOST and this uplink will have a corresponding port representer in ACC.
-- All port representers are associated with an OvS bridge.
-- For VxLAN egress traffic, the underlay port should be associated with a termination bridge and IP to reach the underlay network should be configured on top of this bridge.
+- Every VM spawned on top of a VF will have a corresponding port representor in ACC.
+- Every physical port will have a corresponding port representor in ACC.
+- Every physical port will have an uplink (APF netdev) in HOST and this uplink will have a corresponding port representor in ACC.
+- All port representors are associated with an OvS bridge.
+- For VxLAN egress traffic, the underlay port should be associated with a termination bridge. The IP address to reach the underlay network should be configured on this bridge.
 
 ## Detailed Design
 
@@ -39,8 +39,7 @@ To enable slow path mode:
 - Start the infrap4d process with the Kernel Monitor disabled. Command: `infrap4d -disable-krnlmon`
 - Set environment variable `OVS_P4_OFFLOAD=false` before starting the `ovs-vswitchd` process.
 
-In this mode, we need to associate VFs on top of which VMs are created and its port representers, also physical ports with its port representers.
-Configure tables:
+In this mode, VMs are spawned on top of VFs and associated with their port representors. Also, physical ports are associated with their port representors. Configure the following tables to map these in IPU:
 
 ```text
 - rx_source_port
@@ -51,15 +50,13 @@ Configure tables:
 - rx_phy_port_to_pr_map
 ```
 
-All port representers (PRs) in ACC should be associated with an OvS bridge. Mapping between PRs and bridges need to be programmed in IPU as well.
-Configure table:
+All port representors (PRs) in ACC should be associated with an OvS bridge. Configure table below to program the mapping between PRs and bridges in IPU:
 
 ```text
 - source_port_to_bridge_map
 ```
 
-For egress VxLAN traffic, an OvS VxLAN port needs to be created in ACC and associated to the integration bridge that handles overlay traffic.
-Configure table:
+For egress VxLAN traffic, an OvS VxLAN port needs to be created in ACC with associated integration bridge that handles overlay traffic. Configure following tables to map these in IPU:
 
 ```text
 - rx_ipv4_tunnel_source_port/rx_ipv6_tunnel_source_port
@@ -70,14 +67,14 @@ Once these tables are configured refer to packet flow as mentioned below.
 
 #### For Tx
 
-##### Egress traffic without VxLAN encap
+##### Egress traffic without VxLAN encapsulation
 
 Packets coming from overlay network:
 
 - Determine the source port of the packet based on which overlay VSI the packet has landed on.
 - Validate if the source port is part of the bridge, else drop the packet.
 - If valid bridge configuration is found, find the PR associated with the bridge and forward the packet to the PR in ACC.
-- OvS control plane receives the packet and forwards the packets to destined PR if MAC is already learnt, else flood the packet in the respective bridge.
+- OvS control plane receives the packet and forwards the packet to destined PR if MAC is already learnt, else floods the packet in the valid bridge found.
 - Sample OvS config:
 
     ```bash
@@ -86,37 +83,38 @@ Packets coming from overlay network:
     ovs-vsctl add-port br-int <Physical port PR>
     ```
 
-##### Egress traffic with VxLAN encap
+##### Egress traffic with VxLAN encapsulation
 
 Packets coming from overlay network:
 
 - Determine the source port of the packet based on which overlay VSI the packet has landed on.
 - Validate if the source port is part of the bridge, else drop the packet.
 - If valid bridge configuration is found, find the PR associated with the bridge and forward the packet to the PR in ACC.
-- OvS control plane receives the packet and forwards the packets to the destined VxLAN port if MAC is already learnt, else flood the packet in the respective bridge.
+- OvS control plane receives the packet and forwards the packet to the destined VxLAN port if MAC is already learnt, else flood the packet in the valid bridge found.
 - Once the packet reaches the VxLAN port, here the kernel checks the routing table to reach `remote_ip` that is configured for the OvS VxLAN tunnel.
-- Underlay network to reach `remote_ip` is configured on a TEP termination bridge. Here, the kernel resolves ARP of the underlay network.
-- Once ARP is resolved, kernel encapsulates the packet and this packet will be forwarded to the destined PR of the physical port if MAC is already learnt, else flood the packet in the respective TEP termination bridge.
+- Underlay network to reach `remote_ip` is configured on a TEP termination bridge. The kernel resolves the ARP for underlay network.
+- Once ARP is resolved, the kernel encapsulates the packet. It then forwards the packet to the PR of the physical port if the MAC is already learnt, or floods it to the TEP termination bridge if not.
 - Sample OvS config:
 
     ```bash
     ovs-vsctl add-br br-int
     ovs-vsctl add-port br-int <Overlay VMs PR>
     ovs-vsctl add-port br-int <VxLAN port with VxLAN config>
-    ovs-vsctl add-br br-tep-termination             ## this bridge has IP to reach remote TEP
+    ovs-vsctl add-br br-tep-termination
+    # Configure bridge with IP address to reach remote TEP
     ovs-vsctl add-port br-tep-termination <Physical port PR>
     ```
 
 #### For Rx
 
-##### Ingress non VxLAN packet
+##### Ingress traffic without VxLAN encapsulation
 
-If the packets coming from a remote machine to the physical port are not VxLAN tunnel packets:
+If the packet coming from a remote machine to the physical port is not VxLAN encapsulated packet:
 
 - Determine the source port of the packet based on which physical port the packet has landed on.
 - Validate if the source port is part of the bridge, else drop the packet.
 - If valid bridge configuration is found, find the PR associated with the bridge and forward the packet to the PR in ACC.
-- OvS control plane receives the packet and forwards the packets to destined PR if MAC is already learnt, else flood the packet in the respective bridge.
+- OvS control plane receives the packet and forwards it to destined PR if MAC is already learnt, else floods the packet in the valid bridge found.
 - Sample OvS config:
 
     ```bash
@@ -125,15 +123,15 @@ If the packets coming from a remote machine to the physical port are not VxLAN t
     ovs-vsctl add-port br-int <Physical port PR>
     ```
 
-##### Ingress VxLAN packet
+##### Ingress traffic with VxLAN encapsulation
 
-If the packets coming from a remote machine to the physical port are not VxLAN tunnel packets:
+If the packet coming from a remote machine to the physical port is VxLAN encapsulated packet:
 
-- Determine the source port of the packet based on which physical port the packet has landed
+- Determine the source port of the packet based on which physical port the packet has landed on.
 - Validate if the source port is part of the bridge, else drop the packet.
 - If valid bridge configuration is found, find the PR associated with the physical port and forward the packet to the PR in ACC.
 - OvS control plane receives the packet on a TEP termination bridge, packet gets decapped and sent to VxLAN port.
-- Since VxLAN port and overlay VMs PR are in the same bridge, if the overlay MAC is already learnt the packet will be forwarded to destined PR else packet will be flooded in the respective bridge.
+- Since VxLAN port and overlay VMs PR are in the same bridge, if the overlay MAC is already learnt the packet will be forwarded to destined PR else packet will be flooded in the valid bridge found.
 - Sample OvS config:
 
     ```bash
@@ -148,10 +146,10 @@ If the packets coming from a remote machine to the physical port are not VxLAN t
 
 To enable fast path mode:
 
-- Start the infrap4d process.
+- Start the infrap4d process. Command: `infrap4d`
 - Remove the environment variable `OVS_P4_OFFLOAD=false` before starting the `ovs-vswitchd` process.
 
-In this mode, we need to associate VFs on top which VMs are created and its port representers and also physical ports with its port representers.
+In this mode, we need to associate VFs with the VMs and its port representors along with physical ports and its port representors.
 Configure tables:
 
 ```text
@@ -204,7 +202,7 @@ Once these tables are configured refer to packet flow as mentioned below.
 
 #### For Tx
 
-##### Egress traffic without VxLAN encap
+##### Egress traffic without VxLAN encapsulation
 
 Packets coming from overlay network:
 
@@ -220,7 +218,7 @@ Packets coming from overlay network:
     ovs-vsctl add-port br-int <Physical port PR>
     ```
 
-##### Egress traffic with VxLAN encap
+##### Egress traffic with VxLAN encapsulation
 
 Packets coming from overlay network:
 
@@ -243,9 +241,9 @@ Packets coming from overlay network:
 
 #### For Rx
 
-##### Ingress non VxLAN packet
+##### Ingress traffic without VxLAN encapsulation
 
-If the packets coming from a remote machine to the physical port are not VxLAN tunnel packets:
+If the packet coming from a remote machine to the physical port is not VxLAN encapsulated packet:
 
 - Determine the source port of the packet based on which physical port the packet has landed on.
 - Validate if the source port is part of the bridge, else drop the packet.
@@ -259,9 +257,9 @@ If the packets coming from a remote machine to the physical port are not VxLAN t
     ovs-vsctl add-port br-int <Physical port PR>
     ```
 
-##### Ingress VxLAN packet
+##### Ingress traffic with VxLAN encapsulation
 
-If the packets coming from a remote machine to the physical port are not VxLAN tunnel packets:
+If the packet coming from a remote machine to the physical port are VxLAN encapsulated packet:
 
 - Determine the source port of the packet based on which physical port the packet has landed
 - Validate if the source port is part of the bridge, else drop the packet.
@@ -279,27 +277,25 @@ If the packets coming from a remote machine to the physical port are not VxLAN t
 
 ## Summary
 
-- Verification of source port and Associated L2 Bridge: The P4 Control Plane (P4 CP) must ensure the validation of the source port and its corresponding L2 bridge before initiating any further regulation of datapath packet classification.
-- Exception Packet Handling for All Protocols: The P4 Control Plane (P4 CP) shall incorporate exception packet handling logic, not limited to ARP but applicable to the first packet of any protocol.
-- Offloading of Networking Functions: The P4 Control Plane (P4 CP) software shall provide support for the offloading of various networking functions as specified in the Linux Networking use case. These networking functions include Layer 2 (L2) and Layer 3 (L3) forwarding, Equal-Cost Multi-Path (ECMP) routing, Link Aggregation Group (LAG), as well as Virtual Extensible LAN (VXLAN) encapsulation and decapsulation. These functions shall support both single and multiple Open vSwitch (OvS) bridges.
+- Verification of source port and associated L2 Bridge: The P4 Control Plane (P4 CP) must ensure the validation of the source port and its corresponding L2 bridge before initiating any further regulation of datapath packet classification.
+- Exception packet handling for all protocols: The P4 Control Plane (P4 CP) shall incorporate exception packet handling logic, not limited to ARP but applicable to the first packet of any protocol.
+- Offloading of networking functions: The P4 Control Plane (P4 CP) software shall provide support for the offloading of various networking functions as specified in the Linux Networking use case. These networking functions include Layer 2 (L2) and Layer 3 (L3) forwarding, Equal-Cost Multi-Path (ECMP) routing, Link Aggregation Group (LAG), as well as Virtual Extensible LAN (VXLAN) encapsulation and decapsulation. These functions shall support both single and multiple Open vSwitch (OvS) bridges.
 
 ## Limitations
 
 Current Linux Networking support for the networking recipe has the following limitations:
 
 - VLAN configuration on OvS is supported only for NATIVE-TAG and NATIVE-UNTAG modes.
-- Physical port's port representer should be added as the 1st port in Tunnel TEP bridge (br-tep-termination).
+- Physical port's port representor should be added as the first port in tunnel TEP bridge (br-tep-termination).
 - Only OvS bridges are supported.
 - Configure p4rt-ctl runtime rules before OvS configuration.
 - Double vlan tag is NOT supported.
-- Add all ACC PR's to VSI group 1
-- On ACC firewalld need to be disabled, this service is blocking tunnel packets.
+- Add all ACC PR's to VSI group 1.
+- On ACC, firewall needs to be disabled. Otherwise, this service will block encapsulated packets.
   - systemctl stop firewalld
-- Refer LNW-V2 README_P4_CP_NWS which comes along with the p4 program for limitation with router_interface_id action in nexthop_table (Bug created for this)
-  - Manually modify context.json to remove NOP hardware action for in context.json from "set_nexthop " action in "nexthop_table". Open defect is present in p4-sde to fix this issue.
-
+- See LNW-V2 README_P4_CP_NWS, which comes with the P4 program for more information about limitations in router_interface_id action in nexthop_table(Defect filed).
+  - Manually modify context.json to remove NOP hardware action for in context.json from "set_nexthop " action in "nexthop_table". Open defect is present in p4-sde to fix this issue. Content to be removed under hardware action in context.json is
 ```text
-Content to be removed under hardware action is 
 {
     "prec": 0,
     "action_code": "NOP",
