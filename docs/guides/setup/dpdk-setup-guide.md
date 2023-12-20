@@ -17,14 +17,14 @@ Install the following packages for building networking-recipe.
 For Fedora:
 
 ```bash
-yum install libnl3-devel
+yum install libatomic libnl3-devel
 pip3 install -r requirements.txt
 ```
 
 For Ubuntu:
 
 ```bash
-apt install libnl-route-3-dev
+apt install libatomic1 libnl-route-3-dev
 pip3 install -r requirements.txt
 ```
 
