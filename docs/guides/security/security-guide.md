@@ -61,7 +61,7 @@ issue requests to port 9339.
 To launch infrap4d in insecure mode:
 
 ```bash
-$IPDK_RECIPE/install/sbin/infrap4d -grpc_open_insecure_mode=true
+infrap4d -grpc_open_insecure_mode=true
 ```
 
 To launch clients in insecure mode:
@@ -69,13 +69,11 @@ To launch clients in insecure mode:
 For DPDK target:
 
 ```bash
-$IPDK_RECIPE/install/bin/gnmi-ctl set <COMMAND> \
-    -grpc_use_insecure_mode=true
+gnmi-ctl set <COMMAND> -grpc_use_insecure_mode=true
 ```
 
 For Intel IPU E2100 target:
 
 ```bash
-$IPDK_RECIPE/install/bin/sgnmi_cli set <COMMAND> \
-    -grpc_use_insecure_mode=true
+sgnmi_cli set <COMMAND> -grpc_use_insecure_mode=true
 ```

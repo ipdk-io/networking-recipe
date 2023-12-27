@@ -78,6 +78,7 @@ for P4Runtime switches:
   add-meter-config SWITCH MTR_TBL MTR_FLOW     add packet mod meter config table entry
   get-packet-mod-meter SWITCH MTR_TBL MTR_FLOW     gets packet mod meter table entry
   get-direct-pkt-mod-meter SWITCH MTR_TBL MTR_FLOW     gets direct packet mod meter table entry
+  del-meter-config SWITCH MTR_TBL MTR_FLOW  delete packet mod meter config table entry
 """
 
 def usage():
@@ -1898,7 +1899,7 @@ def p4ctl_get_direct_pkt_mod_meter_entry(client, bridge, tbl_name, flow):
         raise Exception("Cannot find direct_meter_entry field in entity")
 
     te = helper.buildTableEntry(
-         table_name=cnt_tbl_name,
+         table_name=tbl_name,
          match_fields=key
      )
 
@@ -1908,6 +1909,34 @@ def p4ctl_get_direct_pkt_mod_meter_entry(client, bridge, tbl_name, flow):
         for entry in response.entities:
             if entity.direct_meter_entry.table_entry.table_id == ce.table_entry.table_id:
                 print(_format_dme(entry.direct_meter_entry))
+
+@with_client
+def p4ctl_del_meter_config(client, bridge, tbl_name, flow):
+    """
+    del-meter-config SWITCH MTR_TBL MTR_FLOW
+    Example:
+        p4rt-ctl del-meter-config br0 my_control.meter1 "meter_id=2244878476,meter_index=10"
+    """
+    p4info = client.get_p4info()
+    if not p4info:
+        raise Exception("cannot retrieve P4Info from device {}".format(bridge))
+    
+    helper = P4InfoHelper(p4info)
+    entity = p4runtime_pb2.Entity()
+    ce = entity.meter_entry
+
+    if ce is None:
+        raise Exception("Cannot find meter_entry field in entity")
+    
+    meter_id, index = parse_get_meter_flow(flow)
+    ce.index.index = int(index)
+    ce.meter_id = int(meter_id)
+    
+    update = p4runtime_pb2.Update()
+    update.type = p4runtime_pb2.Update.DELETE
+    update.entity.meter_entry.CopyFrom(ce)
+
+    client.write_update(update)
 
 all_commands = {
     "show": (p4ctl_show, 1),
@@ -1933,6 +1962,7 @@ all_commands = {
     "add-meter-config" : (p4ctl_add_meter_config, 3),
     "get-packet-mod-meter" : (p4ctl_get_packet_mod_meter_entry, 2),
     "get-direct-pkt-mod-meter" : (p4ctl_get_direct_pkt_mod_meter_entry, 2)
+    "del-meter-config" : (p4ctl_del_meter_config, 2)
 }
 
 

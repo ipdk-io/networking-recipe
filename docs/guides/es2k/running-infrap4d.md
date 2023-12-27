@@ -51,19 +51,23 @@ for step by step guide for generating and installing TLS certificates
 
 ## 4. Generate forwarding pipeline binary
 
-### Create tofino.bin
-
-```bash
-export OUTPUT_DIR=/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna
-cd $OUTPUT_DIR
-touch tofino.bin
-```
+Download `hw-p4-programs` TAR file specific to the release build and extract it to get p4 artifacts.
+This document explains with `l3-fwd_sem` as a reference P4 program and the P4 artifacts are copied to `/opt/p4/l3-fwd_sem`
 
 ### Copy P4 artifacts to ACC
 
-Copy `bfrt.json`, `context.json`, `p4info.txt` to the ACC. See
+Copy `bf-rt.json`, `context.json`, `p4info.txt` to the ACC. See
 [Compiling P4 programs](compiling-p4-programs.md)
-for instructions on generating these files.
+for instructions on generating these files manually without downloading from
+release build.
+
+### Create ipu.bin
+
+```bash
+export OUTPUT_DIR=/opt/p4/l3-fwd_sem
+cd $OUTPUT_DIR
+touch ipu.bin
+```
 
 ### Prepare configuration file
 
@@ -115,31 +119,31 @@ with the following parameters:
 
 - `program-name`
 
-   Specify the name of P4 program. For simple_l3_l4_pna example, replace
-   `P4-PROGRAM-NAME` with `simple_l3_l4_pna`
+   Specify the name of P4 program. For l3-fwd_sem example, replace
+   `P4-PROGRAM-NAME` with `l3-fwd_sem`
 
 - `p4_pipeline_name`
 
-   Specify the name of P4 pipeline. For simple_l3_l4_pna example, replace
+   Specify the name of P4 pipeline. For l3-fwd_sem example, replace
    `P4-PIPELINE-NAME` with `main`
 
 - `bfrt-config`,  `context`, `config` and `path`
 
-   Specify the absolute paths for the files. For simple_l3_l4_pna sample program:
+   Specify the absolute paths for the files. For l3-fwd_sem sample program:
 
    Replace `ABSOLUTE-PATH-TO-BFRT-JSON-FILE` with
-   `/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/simple_l3_l4_pna.bf-rt.json`
+   `/opt/p4/l3-fwd_sem/bf-rt.json`
 
    Replace `ABSOLUTE-PATH-TO-CONTEXT-JSON-FILE` with
-   `/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/simple_l3_l4_pna.context.json`
+   `/opt/p4/l3-fwd_sem/context.json`
 
    Replace `ABSOLUTE-PATH-TO-TOFINO-BIN-FILE` with
-   `/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/tofino.bin`
+   `/opt/p4/l3-fwd_sem/ipu.bin`
 
    Replace `ABSOLUTE-PATH-FOR-JSON-FILES` with
-   `/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna`
+   `/opt/p4/l3-fwd_sem`
 
-The final es2k_skip_p4.conf for simple_l3_l4_pna sample program will look like:
+The final es2k_skip_p4.conf for l3-fwd_sem sample program will look like:
 
 ```text
 {
@@ -161,20 +165,20 @@ The final es2k_skip_p4.conf for simple_l3_l4_pna sample program will look like:
         "eal-args": "--lcores=1-2 -a 00:01.6,vport=[0-1] -- -i --rxq=1 --txq=1 --hairpinq=1 --hairpin-mode=0x0",
         "p4_programs": [
         {
-            "program-name": "simple_l3_l4_pna",
-            "bfrt-config": "/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/simple_l3_l4_pna.bf-rt.json",
+            "program-name": "l3-fwd_sem",
+            "bfrt-config": "/opt/p4/l3-fwd_sem/bf-rt.json",
             "p4_pipelines": [
             {
                 "p4_pipeline_name": "main",
-                "context": "/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/simple_l3_l4_pna.context.json",
-                "config": "/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna/tofino.bin",
+                "context": "/opt/p4/l3-fwd_sem/context.json",
+                "config": "/opt/p4/l3-fwd_sem/ipu.bin",
                 "pipe_scope": [
                     0,
                     1,
                     2,
                     3
                 ],
-                "path": "/opt/p4/p4sde/share/mev_reference_p4_files/simple_l3_l4_pna"
+                "path": "/opt/p4/l3-fwd_sem"
             }
             ]
         }
@@ -194,7 +198,7 @@ forwarding pipeline binary.
 ```bash
 $P4CP_INSTALL/bin/tdi_pipeline_builder \
     --p4c_conf_file=/usr/share/stratum/es2k/es2k_skip_p4.conf \
-    --bf_pipeline_config_binary_file=$OUTPUT_DIR/simple_l3_l4_pna.pb.bin
+    --bf_pipeline_config_binary_file=$OUTPUT_DIR/l3-fwd_sem.pb.bin
 ```
 
 ## 5. Start Infrap4d
@@ -229,8 +233,8 @@ Once the application is started, set the forwarding pipeline config using
 P4Runtime Client `p4rt-ctl` set-pipe command
 
 ```bash
-$P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/simple_l3_l4_pna.pb.bin \
-    $OUTPUT_DIR/simple_l3_l4_pna.p4info.txt
+$P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/l3-fwd_sem.pb.bin \
+    $OUTPUT_DIR/l3-fwd_sem.p4info.txt
 ```
 
 ## 7. Configure forwarding rule

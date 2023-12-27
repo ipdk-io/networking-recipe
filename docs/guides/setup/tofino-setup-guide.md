@@ -35,7 +35,9 @@ docker run --privileged --cap-add=ALL -it --name infrap4d --network host -d ubun
 Clone IPDK networking-recipe:
 
 ```bash
-git clone --recursive git@github.com:ipdk-io/networking-recipe.git ipdk.recipe
+git clone --recursive git@github.com:ipdk-io/networking-recipe.git p4cp.recipe
+cd p4cp.recipe
+export P4CP_RECIPE=`pwd`
 ```
 
 Clone the repository used to build the Stratum dependencies:
@@ -101,19 +103,18 @@ Not that `bsp-path` is not required for tofino-model.
 ### Build Networking Recipe
 
 ```bash
-cd $IPDK_RECIPE
-./make-all.sh --target=tofino --deps=/usr/local
+$P4CP_RECIPE/make-all.sh --target=tofino --deps=/usr/local
 ```
 
 ## Run
 
 ```bash
-cd IPDK_RECIPE
-cp $SDE_INSTALL/share/bf_switchd/zlog-cfg $IPDK_RECIPE/zlog-cfg-cur
+cd P4CP_RECIPE
+cp $SDE_INSTALL/share/bf_switchd/zlog-cfg $P4CP_RECIPE/zlog-cfg-cur
 mkdir -p /etc/stratum/
 mkdir -p /var/log/stratum/
 
-LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib \
+LD_LIBRARY_PATH=$P4CP_RECIPE/install/lib/:$SDE_INSTALL/lib \
     ./install/sbin/infrap4d \
     -chassis_config_file=./stratum/stratum/stratum/hal/config/x86-64-accton-wedge100bf-32x-r0/chassis_config.pb.txt \
     -tdi_switchd_cfg=$SDE_INSTALL/share/p4/targets/tofino/tofino_skip_p4.conf \
@@ -161,8 +162,8 @@ To generate the bin file for the controller.
 
 ```bash
 cd $SDE_INSTALL
-LD_LIBRARY_PATH=$IPDK_RECIPE/install/lib/:$SDE_INSTALL/lib \
-    $IPDK_RECIPE/install/bin/tdi_pipeline_builder \
+LD_LIBRARY_PATH=$P4CP_RECIPE/install/lib/:$SDE_INSTALL/lib \
+    $P4CP_RECIPE/install/bin/tdi_pipeline_builder \
     -p4c_conf_file=$SDE_INSTALL/share/p4/targets/tofino/tna_exact_match.conf \
-    -bf_pipeline_config_binary_file=$IPDK_RECIPE/tna_exact_match.pb.bin
+    -bf_pipeline_config_binary_file=$P4CP_RECIPE/tna_exact_match.pb.bin
 ```

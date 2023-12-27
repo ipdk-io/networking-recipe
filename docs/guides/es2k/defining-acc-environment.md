@@ -43,7 +43,7 @@ In the listing above, you will need to provide values for these variables:
 - `ACC_SDK` - install path of the ACC-RL SDK (for example,
   `$HOME/p4cp-dev/acc_sdk`)
 - `P4CPBASE` - path to the local networking-recipe directory (for example,
-  `$HOME/p4cp-dev/ipdk.recipe`)
+  `$HOME/p4cp-dev/p4cp.recipe`)
 
 From these paths, the setup script derives:
 
