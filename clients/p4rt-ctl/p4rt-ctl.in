@@ -1961,7 +1961,7 @@ all_commands = {
     "reset-counter" : (p4ctl_reset_counter_entry, 2),
     "add-meter-config" : (p4ctl_add_meter_config, 3),
     "get-packet-mod-meter" : (p4ctl_get_packet_mod_meter_entry, 2),
-    "get-direct-pkt-mod-meter" : (p4ctl_get_direct_pkt_mod_meter_entry, 2)
+    "get-direct-pkt-mod-meter" : (p4ctl_get_direct_pkt_mod_meter_entry, 2),
     "del-meter-config" : (p4ctl_del_meter_config, 2)
 }
 
