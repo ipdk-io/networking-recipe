@@ -30,8 +30,7 @@ unset(_path)
 # Find the host Protobuf compiler.
 find_package(HostProtoc)
 
-set(GRPC_OUT_ENABLED FALSE CACHE BOOL "Generate grpc_out directory")
-set(WHEEL_ENABLED TRUE CACHE BOOL "Generate Python wheel")
+set(GEN_PY_WHEEL TRUE CACHE BOOL "Generate Python wheel")
 
 # Generation of the Go protobuf files may be enabled/disabled explicitly
 # through the GEN_GO_PROTOBUFS option. If the option is undefined,
@@ -52,13 +51,6 @@ endif()
 set(CPP_OUT ${CMAKE_BINARY_DIR}/cpp_out CACHE PATH "C++ protobuf files")
 file(MAKE_DIRECTORY ${CPP_OUT})
 
-if(GRPC_OUT_ENABLED)
-  set(GRPC_OUT ${CMAKE_BINARY_DIR}/grpc_out CACHE PATH "C++ gRPC files")
-  file(MAKE_DIRECTORY ${GRPC_OUT})
-else()
-  set(GRPC_OUT ${CPP_OUT})
-endif()
-
 # Directory for generated Python files.
 set(PY_OUT ${CMAKE_BINARY_DIR}/py_out CACHE PATH "Python protobuf files")
 file(MAKE_DIRECTORY ${PY_OUT})
@@ -67,9 +59,7 @@ file(MAKE_DIRECTORY ${PY_OUT})
 if(GEN_GO_PROTOBUFS)
   set(GO_OUT ${CMAKE_BINARY_DIR}/go_out CACHE PATH "Go protobuf files")
   file(MAKE_DIRECTORY ${GO_OUT})
-else(GEN_GO_PROTOBUFS)
-  set(_sink ${GO_OUT}) # suppress cmake warning
-endif(GEN_GO_PROTOBUFS)
+endif()
 
 # Where to find the .proto files.
 set(GOOGLE_SOURCE_DIR "../stratum/googleapis")
@@ -78,6 +68,6 @@ set(P4RT_PROTO_DIR "../stratum/p4runtime/proto")
 include(google.cmake)
 include(p4runtime.cmake)
 include(tarballs.cmake)
-if(WHEEL_ENABLED)
+if(GEN_PY_WHEEL)
   include(wheel.cmake)
 endif()
