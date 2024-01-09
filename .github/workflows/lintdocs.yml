@@ -1,0 +1,108 @@
+name: "Lint P4CP Documentation"
+
+on:
+  push:
+    branches:
+      - main
+      - ipdk_v*
+  pull_request:
+    branches:
+      - main
+      - ipdk_v*
+
+permissions: read-all
+
+jobs:
+  #---------------------------------------------------------------------
+  # 1-markdownlint
+  #---------------------------------------------------------------------
+  markdownlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed markdown files
+        id: changed
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            **.md
+
+#     - name: List all changed markdown files
+#       if: steps.changed.outputs.any_changed == 'true'
+#       env:
+#         CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
+#       run: |
+#         for file in "$CHANGED_FILES"; do
+#           echo "$file was changed"
+#         done
+
+      - name: Lint markdown files
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: nosborn/github-action-markdown-cli@v3.3.0
+        with:
+          files: ${{ steps.changed.outputs.all_changed_files }}
+          config_file: .markdownlint.json
+
+  #---------------------------------------------------------------------
+  # 2-rstdoc8
+  #---------------------------------------------------------------------
+  rstdoc8:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install linter
+        run: |
+          pip3 install doc8
+
+      - name: Get changed restructured text files
+        id: changed
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            **.rst
+
+      - name: Lint restructured text files
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          doc8 --ignore D001 ${{ steps.changed.outputs.all_changed_files }}
+
+  #---------------------------------------------------------------------
+  # 3-rstcheck
+  #---------------------------------------------------------------------
+  rstcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install linter
+        run: |
+          pip3 install rstcheck
+
+      - name: Get changed restructured text files
+        id: changed
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            **.rst
+
+      - name: Check restructured text files
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          rstcheck ${{ steps.changed.outputs.all_changed_files }}
