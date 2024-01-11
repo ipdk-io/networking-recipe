@@ -1,7 +1,5 @@
 # Compiling P4 Programs for ES2K
 
-## 1. Overview
-
 This document explains how to install and use the Intel&reg; IPU E2100 P4 Compiler
 (`p4c`) to compile a P4 program to build artifacts including the .pkg that can be 
 deployed on ES2K. 
@@ -10,7 +8,7 @@ The list of supported host OSes are listed in "Supported Operating Systems"
 section in the  IPU Software User Guide henceforth referred to as IPU SWG.
 
 
-## 2. Build and run the P4 Tools container
+##  Build and run the P4 Tools container
 
 The p4 tools required to compile and build a custom p4 package
 can be installed by building and running the P4 Tools Container. 
@@ -18,7 +16,7 @@ Refer to "Getting Started Guide with P4 on P4 Tools Container" in the
 IPU SWG for instructions on building the P4 Tools container and launching it.
 Once <your_p4_tools_container> is sucessfully built, proceed to next step.
 
-### 2.1 Launch the P4Tools container and confirm the tool versions
+### Launch the P4Tools container and confirm the tool versions
 
 ```bash
 # Launch the P4Tools container on the host.
@@ -36,7 +34,7 @@ SDK, cpt had to be invoked seperately, it is no longer needed to do so.
  It will be invoked automatically by specifying cpt flags to `p4c`.`
 
 
-## 3. Build Reference P4 programs
+## Build Reference P4 programs
 
 The `p4-programs` directory in the SDK folder contains a number of sample P4
 programs. The SDK is contained in a tar file 
@@ -60,11 +58,11 @@ drwxr-xr-x.  2 user user    131 Dec 13 15:54 testsuite
 Each P4 program has its own directory and an accompanying README file that
 provides instructions on how to configure the IPU pipeline.
 
-### 3.1 Compiling a P4 Program
+### Compiling a P4 Program
 
 Use `p4c` i.e the compiler driver to compile and build packages. 
 We will be using one of the reference programs mentioned above as an 
-example - p4-programs/layer-3-forwarding/l3-fwd_p2p. 
+example: `p4-programs/layer-3-forwarding/l3-fwd_p2p``. 
 The Makefile contains the exact commands to build the artifacts and pkg for all the reference programs.
 
 ```bash
