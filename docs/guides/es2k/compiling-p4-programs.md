@@ -6,35 +6,42 @@ This document explains how to install and use the Intel&reg; IPU E2100 P4 Compil
 (`p4c`) to compile a P4 program to build artifacts including the .pkg that can be 
 deployed on ES2K. 
 
-The list of supported host OS'es are listed in "Supported Operating Systems" section in the IPU SWG.
+The list of supported host OSes are listed in "Supported Operating Systems" 
+section in the  IPU Software User Guide henceforth referred to as IPU SWG.
+
 
 ## 2. Build and run the P4 Tools container
-The p4 compiler and cpt are p4 tools which can be installed by installing the 
-prebuilt RPMs for P4 tools for Rocky Linux 9.2. Refer to 
-"Getting Started Guide with P4 on P4 Tools Container" in the IPU SWG for 
-instructions on building the P4Tools container and launching it.
-The p4 tools will be available inside the container.
 
+The p4 tools required to compile and build a custom p4 package
+can be installed by building and running the P4 Tools Container. 
+Refer to "Getting Started Guide with P4 on P4 Tools Container" in the
+IPU SWG for instructions on building the P4 Tools container and launching it.
+Once <your_p4_tools_container> is sucessfully built, proceed to next step.
 
 ### 2.1 Launch the P4Tools container and confirm the tool versions
 
 ```bash
-Launch the P4Tools container on the host.
-[user@host P4Tools]$ sudo  docker exec -it /<p4_tools_container_name> /bin/bash
+# Launch the P4Tools container on the host.
 
-Inside the container, verify the compiler version.
+[user@host P4Tools]$ sudo  docker exec -it <your_p4_tools_container> /bin/bash
+
+# Inside the container, verify the p4 compiler version.
 [root@a54d354e447e /]# p4c --version
 p4c 1.2.3.7 (SHA:  BUILD: release)
 
 ```
 
-The compiler should now be ready for use.
+The compiler `p4c` should now be ready for use. In previous versions of the
+SDK, cpt had to be invoked seperately, it is no longer needed to do so.
+ It will be invoked automatically by specifying cpt flags to `p4c`.`
+
 
 ## 3. Build Reference P4 programs
 
-The `p4-programs` directory in the SDK folder contains a number of sample
-P4 programs. The SDK is contained in a tar file intel-ipu-sdk-source-code-<$VERSION>.tgz.
-Extract the p4-programs from the tarball.
+The `p4-programs` directory in the SDK folder contains a number of sample P4
+programs. The SDK is contained in a tar file 
+intel-ipu-sdk-source-code-<$VERSION>.tgz. Extract the p4-programs from the
+tarball.
 
 ```bash
 [root@host ~]# ls -l $INTEL-IPU-SDK-<VERSION>/tools/pipeline/p4-programs
@@ -53,17 +60,20 @@ drwxr-xr-x.  2 user user    131 Dec 13 15:54 testsuite
 Each P4 program has its own directory and an accompanying README file that
 provides instructions on how to configure the IPU pipeline.
 
-## 3.1 Compiling a P4 Program
+### 3.1 Compiling a P4 Program
 
 Use `p4c` i.e the compiler driver to compile and build packages. 
-We will be using one of the reference programs mentioned above as an example -
-p4-programs/layer-3-forwarding/l3-fwd_p2p. The Makefile contains 
-the exact commands to  build the artifacts and .pkg for all the reference programs.
+We will be using one of the reference programs mentioned above as an 
+example - p4-programs/layer-3-forwarding/l3-fwd_p2p. 
+The Makefile contains the exact commands to build the artifacts and pkg for all the reference programs.
 
 ```bash
 # 
+
 1. Copy the entire p4-programs directory from the host to the P4Tools container
-#sudo docker cp p4-programs/ <p4Tools container id>:/opt/
+    
+    $  sudo docker cp p4-programs/ <p4Tools container id>:/opt/
+
 
 2. Set environment variables in the container.
 # Set the following env variables  in the container prior to building
@@ -76,17 +86,20 @@ export LD_LIBRARY_PATH=$P4C_PATH/../lib:/usr/local/lib:$LD_LIBRARY_PATH
 export PREV_ARTIFACT_DIR=
 
 
-
 3. Compile l3-fwd_p2p,  all artifacts will be generated in artifacts directory.
 [root@a54d354e447e ~]# cd /opt/p4-programs
+
+# Compiling the /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
+and generating the runtime files and assembly...
 [root@a54d354e447e p4-programs]# make l3-fwd_p2p
-# Compiling the /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4 and generating the runtime files and assembly...
-/opt/p4-tools/p4c/bin/p4c --target idpf --arch pna -I/opt/p4-tools/p4c/bin/../lib -I/opt/p4-tools/p4c/bin/../share/p4c/p4include 
--I/opt/p4-tools/p4c/bin/../share/p4c/idpf-lib --package-by-domain --p4runtime-files ./artifacts/l3-fwd_p2p/p4Info.txt --save-temps -Xp4c 
-"--Wdisable --no-pedantic --context ./artifacts/l3-fwd_p2p/context.json --bfrt ./artifacts/l3-fwd_p2p/bf-rt.json" 
+/opt/p4-tools/p4c/bin/p4c --target idpf --arch pna 
+-I/opt/p4-tools/p4c/bin/../lib -I/opt/p4-tools/p4c/bin/../share/p4c/p4include 
+-I/opt/p4-tools/p4c/bin/../share/p4c/idpf-lib --package-by-domain
+--p4runtime-files ./artifacts/l3-fwd_p2p/p4Info.txt --save-temps -Xp4c 
+"--Wdisable --no-pedantic --context ./artifacts/l3-fwd_p2p/context.json 
+--bfrt ./artifacts/l3-fwd_p2p/bf-rt.json" 
 --save-temps --npic --format csr --pkg-version 1.2 --pkg-name "FXP Package" 
--Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4 
--o artifacts/l3-fwd_p2p
+-Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4  -o artifacts/l3-fwd_p2p
 
  4. All the artifacts including the .pkg will be in the artifacts directory.
 [root@a54d354e447e p4-programs]# ls -lrt artifacts/l3-fwd_p2p/
