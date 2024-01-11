@@ -16,6 +16,68 @@ To enable this feature we have,
 - `p4rt-ctl`: This python CLI includes a p4runtime client. Programs IPU E2100 with runtime rules by communicating with gRPC server.
 - `Kernel stack`: All underlay related configurations are picked by `kernel monitor` thread via netlink events in `infrap4d` and these are programmed in IPU E2100 by calling TDI front end APIs.
 
+### P4 program changes in 24.01
+
+Modify p4 programm with below changes, to enable support for
+
+- IPv6 traffic with VxLAN support.
+- VxLAN traffic fails when remote overlay VMs MAC is learnt on OvS, before DUTs overlay VMs MAC address.
+
+```text
+diff --git
+a/mev_reference_p4_programs/fxp-net-scenarios/fxp-net_linux-networking-v2/fxp-net_linux-networking-v2.p4
+b/mev_reference_p4_programs/fxp-net-scenarios/fxp-net_linux-networking-v2/fxp-net_linux-networking-v2.p4
+index c343f4f..0043a50 100644
+---
+a/mev_reference_p4_programs/fxp-net-scenarios/fxp-net_linux-networking-v2/fxp-net_linux-networking-v2.p4
++++
+b/mev_reference_p4_programs/fxp-net-scenarios/fxp-net_linux-networking-v2/fxp-net_linux-networking-v2.p4
+@@ -670,10 +670,10 @@ control linux_networking_control(inout  parsed_headers_t
+hdrs,
+
+   action set_tunnel_v6(bit<32> ipv6_1, bit<32> ipv6_2, bit<32> ipv6_3, bit<32>
+ipv6_4) {
+     @intel_byte_order("NETWORK") {
+-    user_meta.cmeta.ip_dst_match[31:0] = ipv6_1;
+-    user_meta.cmeta.ip_dst_match[63:32] = ipv6_2;
+-    user_meta.cmeta.ip_dst_match[95:64] = ipv6_3;
+-    user_meta.cmeta.ip_dst_match[127:96] = ipv6_4;
++    user_meta.cmeta.ip_dst_match[31:0] = ipv6_4;
++    user_meta.cmeta.ip_dst_match[63:32] = ipv6_3;
++    user_meta.cmeta.ip_dst_match[95:64] = ipv6_2;
++    user_meta.cmeta.ip_dst_match[127:96] = ipv6_1;
+     }
+     user_meta.cmeta.is_tunnel_v6 = 1;
+     //user_meta.cmeta.bit32_zeros[2:0] = 6; // ipv6
+@@ -1110,7 +1110,7 @@ control linux_networking_control(inout  parsed_headers_t
+hdrs,
+   table source_port_to_pr_map {
+     key = {
+       user_meta.cmeta.source_port : exact;
+-      user_meta.cmeta.bit32_zeros[15:0] : exact @name("zero_padding");
++      user_meta.cmeta.bit32_zeros[31:16] : exact @name("zero_padding");
+     }
+
+     actions = {
+diff --git
+a/mev_reference_p4_programs/fxp-net-scenarios/fxp-net_linux-networking-v2/fxp-net_linux-networking-v2_hints.p4
+b/mev_reference_p4_programs/fxp-net-scenarios/fxp-net_linux-networking-v2/fxp-net_linux-networking-v2_hints.p4
+index 587de70..56975d9 100644
+---
+a/mev_reference_p4_programs/fxp-net-scenarios/fxp-net_linux-networking-v2/fxp-net_linux-networking-v2_hints.p4
++++
+b/mev_reference_p4_programs/fxp-net-scenarios/fxp-net_linux-networking-v2/fxp-net_linux-networking-v2_hints.p4
+@@ -92,7 +92,7 @@
+ #define MOD_INVALID 0x39000000
+
+ //SET1B_24 [prec=7, index=0, type_id=4, offset=0, mask=0x1, value=0x1]
+-#define TRAP_MD_SET 0xE8400101
++#define TRAP_MD_SET 0xEC400101
+
+ //=============================================================================
+ //            TABLE HINTS
+```
+
 ## Topology
 
 This topology breakdown and configuration assumes all VMs are spawned on HOST VFs and the control plane is running on ACC.
