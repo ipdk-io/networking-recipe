@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-add_subdirectory(gnmi-ctl)
+#add_subdirectory(gnmi-ctl)
 add_subdirectory(p4rt-ctl)
-add_subdirectory(sgnmi_cli)
+#add_subdirectory(sgnmi_cli)
 add_subdirectory(p4rt_perf_test)
