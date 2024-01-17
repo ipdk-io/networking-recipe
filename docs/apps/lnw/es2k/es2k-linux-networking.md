@@ -16,6 +16,11 @@ To enable this feature we have,
 - `p4rt-ctl`: This python CLI includes a p4runtime client. Programs IPU E2100 with runtime rules by communicating with gRPC server.
 - `Kernel stack`: All underlay related configurations are picked by `kernel monitor` thread via netlink events in `infrap4d` and these are programmed in IPU E2100 by calling TDI front end APIs.
 
+## P4 program changes in 24.01
+
+- Modify `fxp-net_linux-networking-v2.p4` P4 program with [IPv6 overlay encap patch](es2k-ipv6-overlay-traffic.patch) changes, to fix issue for VxLAN encap packet where outer SMAC and DMAC are not populated.
+- Modify `fxp-net_linux-networking-v2.p4` P4 program with [VxLAN overlay MAC learn patch](es2k-vxlan-overlay-traffic.patch) changes, to fix issue for VxLAN traffic, when remote overlay VMs MAC is learnt on OvS, before DUTs overlay VMs MAC address.
+
 ## Topology
 
 This topology breakdown and configuration assumes all VMs are spawned on HOST VFs and the control plane is running on ACC.
@@ -294,13 +299,3 @@ Current Linux Networking support for the networking recipe has the following lim
 - On ACC, firewall needs to be disabled. Otherwise, this service will block encapsulated packets.
   - systemctl stop firewalld
 - See LNW-V2 README_P4_CP_NWS, which comes with the P4 program for more information about limitations in router_interface_id action in nexthop_table(Defect filed).
-  - Manually modify context.json to remove NOP hardware action for in context.json from "set_nexthop " action in "nexthop_table". Open defect is present in p4-sde to fix this issue. Content to be removed under hardware action in context.json is
-```text
-{
-    "prec": 0,
-    "action_code": "NOP",
-    "index": 0,
-    "value": 0,
-    "mask": 0
-},
-```
