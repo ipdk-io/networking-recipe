@@ -1,6 +1,6 @@
 # Builds protobuf object libraries
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -177,3 +177,18 @@ add_library(stratum_proto SHARED
 target_link_libraries(stratum_proto PUBLIC protobuf::libprotobuf)
 
 install(TARGETS stratum_proto LIBRARY)
+
+########################
+# Build p4_role_config #
+########################
+
+generate_proto_files("stratum/public/proto/p4_role_config.proto" "${STRATUM_SOURCE_DIR}")
+
+add_library(p4_role_config SHARED
+    ${PB_OUT_DIR}/stratum/public/proto/p4_role_config.pb.cc
+    ${PB_OUT_DIR}/stratum/public/proto/p4_role_config.pb.h
+)
+
+target_include_directories(p4_role_config PRIVATE ${PB_OUT_DIR})
+
+install(TARGETS p4_role_config LIBRARY)
