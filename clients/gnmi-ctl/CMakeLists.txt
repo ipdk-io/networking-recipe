@@ -1,6 +1,6 @@
 # Build file for gnmi-ctl.
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -15,6 +15,8 @@ add_executable(gnmi-ctl
 )
 
 set_install_rpath(gnmi-ctl ${EXEC_ELEMENT} ${DEP_ELEMENT})
+
+target_link_libraries(gnmi-ctl PRIVATE client_cert_options)
 
 target_link_libraries(gnmi-ctl
     PUBLIC

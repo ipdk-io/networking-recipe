@@ -1,5 +1,5 @@
 // Copyright 2019-present Open Networking Foundation
-// Copyright 2022-2023 Intel Corp
+// Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include <csignal>
@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "../client_cert_options.h"
 #include "absl/cleanup/cleanup.h"
 #include "gflags/gflags.h"
 #include "gnmi/gnmi.grpc.pb.h"
@@ -22,8 +23,6 @@
 #include "stratum/lib/macros.h"
 #include "stratum/lib/security/credentials_manager.h"
 #include "stratum/lib/utils.h"
-
-#define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
 DEFINE_bool(grpc_use_insecure_mode, false,
             "grpc communication in insecure mode");
@@ -244,11 +243,7 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
 
 ::util::Status Main(int argc, char** argv) {
   // Default certificate file location for TLS-mode
-  FLAGS_ca_cert_file = DEFAULT_CERTS_DIR "ca.crt";
-  FLAGS_server_key_file = DEFAULT_CERTS_DIR "stratum.key";
-  FLAGS_server_cert_file = DEFAULT_CERTS_DIR "stratum.crt";
-  FLAGS_client_key_file = DEFAULT_CERTS_DIR "client.key";
-  FLAGS_client_cert_file = DEFAULT_CERTS_DIR "client.crt";
+  set_client_cert_defaults();
 
   // Parse command line flags
   gflags::ParseCommandLineFlags(&argc, &argv, true);
