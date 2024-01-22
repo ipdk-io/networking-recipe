@@ -28,7 +28,7 @@ jobs:
 
       - name: Get changed markdown files
         id: changed
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             **.md
@@ -68,7 +68,7 @@ jobs:
 
       - name: Get changed restructured text files
         id: changed
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             **.rst
@@ -97,7 +97,7 @@ jobs:
 
       - name: Get changed restructured text files
         id: changed
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             **.rst
