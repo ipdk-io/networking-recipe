@@ -662,6 +662,10 @@ absl::Status ConfigFdbTunnelTableEntry(
     table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
   }
 
+#if defined(DPDK_TARGET)
+  PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
+                                       insert_entry);
+#elif defined(ES2K_TARGET)
   if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_VXLAN) {
     PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
                                          insert_entry);
@@ -671,7 +675,9 @@ absl::Status ConfigFdbTunnelTableEntry(
   } else {
     return absl::UnknownError("Unsupported tunnel type");
   }
-
+#else
+  return absl::UnknownError("Unsupported platform");
+#endif
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
 
@@ -735,6 +741,7 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 
+#if defined(ES2K_TARGET)
 /* GENEVE_ENCAP_MOD_TABLE */
 void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
                                   const struct tunnel_info& tunnel_info,
@@ -791,6 +798,7 @@ void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
 
   return;
 }
+#endif
 
 void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
                             const struct tunnel_info& tunnel_info,
@@ -1504,7 +1512,7 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt::OvsP4rtSession* session,
     }
   }
 #else
-  return absl::UnknownError("Unsupported platform")
+  return absl::UnknownError("Unsupported platform");
 #endif
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
@@ -1895,6 +1903,9 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
 
   table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
 
+#if defined(DPDK_TARGET)
+  PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info, false);
+#elif defined(ES2K_TARGET)
   if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_VXLAN) {
     PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
                                          false);
@@ -1904,6 +1915,9 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
   } else {
     return absl::UnknownError("Unsupported tunnel type");
   }
+#else
+  return absl::UnknownError("Unsupported platform");
+#endif
 
   return ovs_p4rt::SendReadRequest(session, read_request);
 }
@@ -2001,7 +2015,7 @@ absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                   insert_entry);
   }
 #else
-  return absl::UnknownError("Unsupported platform")
+  return absl::UnknownError("Unsupported platform");
 #endif
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
