@@ -1,8 +1,9 @@
 # Compiling P4 Programs for ES2K
 
-This document explains how to install and use the Intel&reg; IPU E2100 P4 Compiler
-(`p4c`) to compile a P4 program to build artifacts including the .pkg that can be
-deployed on ES2K.
+
+This document explains how to install and use the Intel&reg; IPU E2100 P4Tools
+Container to compile a P4 program to build artifacts, including the `.pkg`
+file, that can be deployed on ES2K.
 
 The list of supported host OSes are listed in the "Supported Operating Systems"
 section of the IPU Software User Guide (RDC Doc#778226), henceforth referred to 
