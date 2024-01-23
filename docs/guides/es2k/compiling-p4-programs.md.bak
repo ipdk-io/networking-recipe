@@ -108,8 +108,7 @@ for all the reference programs.
 	"--Wdisable --no-pedantic --context ./artifacts/l3-fwd_p2p/context.json 
 	--bfrt ./artifacts/l3-fwd_p2p/bf-rt.json" 
 	--save-temps --npic --format csr --pkg-version 1.2 --pkg-name "FXP Package" 
-	-Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4  
-	-o artifacts/l3-fwd_p2p
+	-Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4  -o artifacts/l3-fwd_p2p
    ```
 
 4. All output files, including the `.pkg` file, will be in the artifacts
