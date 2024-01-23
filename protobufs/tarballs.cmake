@@ -6,15 +6,13 @@
 #
 
 set(tarball_suffix ${CMAKE_PROJECT_VERSION}.tar.gz)
-set(cpp_tarball_name p4runtime-cpp-${tarball_suffix})
-set(go_tarball_name p4runtime-go-${tarball_suffix})
-
-get_filename_component(cpp_dir ${CPP_OUT} NAME_WE)
-get_filename_component(go_dir "${GO_OUT}" NAME_WE)
-
 set(tar_flags -z --owner=ipdk --group=ipdk --sort=name)
 
 # C++ tarball
+set(cpp_tarball_name p4runtime-cpp-${tarball_suffix})
+set(cpp_tarball ${CMAKE_CURRENT_BINARY_DIR}/${cpp_tarball_name})
+get_filename_component(cpp_dir ${CPP_OUT} NAME_WE)
+
 add_custom_target(cpp-tarball ALL
   COMMAND
     tar -cf ${cpp_tarball_name}
@@ -26,7 +24,7 @@ add_custom_target(cpp-tarball ALL
     p4rt_cpp_out
     p4rt_grpc_out
   BYPRODUCTS
-    ${CMAKE_CURRENT_BINARY_DIR}/${cpp_tarball_name}
+    ${cpp_tarball}
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT
@@ -38,6 +36,10 @@ add_custom_target(cpp-tarball ALL
 
 # Go tarball
 if(GEN_GO_PROTOBUFS)
+  set(go_tarball_name p4runtime-go-${tarball_suffix})
+  set(go_tarball ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name})
+  get_filename_component(go_dir ${GO_OUT} NAME_WE)
+
   add_custom_target(go-tarball ALL
     COMMAND
       tar -cf ${go_tarball_name}
@@ -48,25 +50,20 @@ if(GEN_GO_PROTOBUFS)
       google_go_out
       p4rt_go_out
     BYPRODUCTS
-      ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name}
+      ${go_tarball}
     WORKING_DIRECTORY
       ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT
       "Generating Go tarball"
     VERBATIM
   )
-  set(go_tarball ${CMAKE_CURRENT_BINARY_DIR}/${go_tarball_name})
-else(GEN_GO_PROTOBUFS)
-  add_custom_target(go-tarball ALL
-    COMMAND ""
-    COMMENT "go-tarball is disabled"
-  )
+else()
   set(go_tarball "")
-endif(GEN_GO_PROTOBUFS)
+endif()
 
 install(
   FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/${cpp_tarball_name}
+    ${cpp_tarball}
     ${go_tarball}
   DESTINATION
     ${CMAKE_INSTALL_DATAROOTDIR}/p4runtime

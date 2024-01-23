@@ -26,3 +26,13 @@ of the ES2K target.
 
    make-cross-ovs
    config-cross-recipe
+
+Setup
+-----
+
+This script generates files that define cmake build parameters.
+
+.. toctree::
+   :maxdepth: 1
+
+   p4cpconfig

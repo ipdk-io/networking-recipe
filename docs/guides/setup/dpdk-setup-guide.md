@@ -5,6 +5,15 @@ for the DPDK target.
 
 ## Prerequisites
 
+It is assumed that the DPDK SDE dependencies have been installed on the
+system. The list of dependencies can be found
+in `sde/tools/setup/install_dep.py` file.
+
+Prerequisites for stratum-deps are assumed to be
+installed. Some of them also apply to networking-recipe.
+
+Install the following packages for building networking-recipe.
+
 For Fedora:
 
 ```bash
