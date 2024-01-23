@@ -1,17 +1,17 @@
 # Compiling P4 Programs for ES2K
 
 This document explains how to install and use the Intel&reg; IPU E2100 P4 Compiler
-(`p4c`) to compile a P4 program to build artifacts including the .pkg that can be 
-deployed on ES2K. 
+(`p4c`) to compile a P4 program to build artifacts including the .pkg that can be
+deployed on ES2K.
 
-The list of supported host OSes are listed in the "Supported Operating Systems" 
+The list of supported host OSes are listed in the "Supported Operating Systems"
 section of the IPU Software User Guide (RDC Doc#778226), henceforth referred to 
 as the "IPU SWG".
 
 ## Build and run the P4 Tools container
 
 The tools required to compile and build a custom p4 package
-can be installed by building and running the P4 Tools Container. 
+can be installed by building and running the P4 Tools Container.
 
 See "Getting Started Guide with P4 on P4 Tools Container" in the
 IPU SWG for instructions on building and launching the P4 Tools container.
@@ -29,7 +29,7 @@ Once <your_p4_tools_container> is sucessfully built, proceed to next step.
 p4c 1.2.3.7 (SHA:  BUILD: release)
 ```
 
-The `p4c` compiler should now be ready for use. 
+The `p4c` compiler should now be ready for use.
 
 In previous versions of the SDK, `cpt` had to be invoked seperately.
 It is no longer necessary to do so.
@@ -39,7 +39,7 @@ It is no longer necessary to do so.
 
 The `p4-programs` directory in the SDK folder contains a number of sample P4
 programs. The SDK is contained in a tar file named
-intel-ipu-sdk-source-code-<$VERSION>.tgz. 
+intel-ipu-sdk-source-code-<$VERSION>.tgz.
 
 Extract the p4-programs from the tarball.
 
@@ -61,9 +61,9 @@ provides instructions on how to configure the IPU pipeline.
 
 ### Compiling a P4 Program
 
-Use the `p4c` i.e the compiler driver to compile and build packages. 
+Use the `p4c` i.e the compiler driver to compile and build packages.
 We will be using one of the reference programs mentioned above as an 
-example: `p4-programs/layer-3-forwarding/l3-fwd_p2p``. 
+example: `p4-programs/layer-3-forwarding/l3-fwd_p2p``.
 
 The Makefile contains the exact commands to build the artifacts 
 for all the reference programs.
@@ -90,26 +90,24 @@ for all the reference programs.
    export PREV_ARTIFACT_DIR=
    ```
 
-
-3. Compile l3-fwd_p2p,  all artifacts will be generated in artifacts 
-   directory.
+3. Compile l3-fwd_p2p,  all artifacts will be generated in artifacts directory.
    
     ```bash
    [root@a54d354e447e ~] cd /opt/p4-programs
    
-	# Compiling the /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
-	# and generating the runtime files and assembly...
+   # Compiling the /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
+   # and generating the runtime files and assembly...
 	
-	[root@a54d354e447e p4-programs]# make l3-fwd_p2p
-	/opt/p4-tools/p4c/bin/p4c --target idpf --arch pna 
-	-I/opt/p4-tools/p4c/bin/../lib -I/opt/p4-tools/p4c/bin/../share/p4c/p4include 
-	-I/opt/p4-tools/p4c/bin/../share/p4c/idpf-lib --package-by-domain
-	--p4runtime-files ./artifacts/l3-fwd_p2p/p4Info.txt --save-temps -Xp4c 
-	"--Wdisable --no-pedantic --context ./artifacts/l3-fwd_p2p/context.json 
-	--bfrt ./artifacts/l3-fwd_p2p/bf-rt.json" 
-	--save-temps --npic --format csr --pkg-version 1.2 --pkg-name "FXP Package" 
-	-Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4  
-	-o artifacts/l3-fwd_p2p
+   [root@a54d354e447e p4-programs]# make l3-fwd_p2p
+    /opt/p4-tools/p4c/bin/p4c --target idpf --arch pna 
+    -I/opt/p4-tools/p4c/bin/../lib -I/opt/p4-tools/p4c/bin/../share/p4c/p4include 
+    -I/opt/p4-tools/p4c/bin/../share/p4c/idpf-lib --package-by-domain
+    --p4runtime-files ./artifacts/l3-fwd_p2p/p4Info.txt --save-temps -Xp4c 
+    "--Wdisable --no-pedantic --context ./artifacts/l3-fwd_p2p/context.json 
+    --bfrt ./artifacts/l3-fwd_p2p/bf-rt.json" 
+    --save-temps --npic --format csr --pkg-version 1.2 --pkg-name "FXP Package" 
+    -Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4  
+    -o artifacts/l3-fwd_p2p
    ```
 
 4. All output files, including the `.pkg` file, will be in the artifacts
@@ -127,9 +125,8 @@ for all the reference programs.
    -rw-r--r--. 1 root root 950608 Dec 23 00:18 l3-fwd_p2p.pkg 
    ```
 
-   These files are called _P4 artifacts_.
+ These files are called _P4 artifacts_.
    
-
 ## Deploying P4 programs
 
 Please see [Deploying P4 Programs](deploying-p4-programs.md)
