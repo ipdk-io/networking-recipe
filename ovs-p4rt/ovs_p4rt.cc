@@ -278,7 +278,7 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 }
 #endif
 
-void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
+void PrepareFdbTableEntryforV4VxlanTunnel(p4::v1::TableEntry* table_entry,
                                      const struct mac_learning_info& learn_info,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
@@ -332,60 +332,158 @@ void PrepareFdbTableEntryforV4Tunnel(p4::v1::TableEntry* table_entry,
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
-    action->set_action_id(
-        GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY));
-
-    auto param1 = action->add_params();
-    param1->set_param_id(
-        GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY,
-                   ACTION_SET_TUNNEL_UNDERLAY_PARAM_TUNNEL_ID));
-    param1->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
-
-    auto param2 = action->add_params();
-    param2->set_param_id(
-        GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY,
-                   ACTION_SET_TUNNEL_UNDERLAY_PARAM_TUNNEL_TYPE));
 
     if (learn_info.tnl_info.local_ip.family == AF_INET &&
         learn_info.tnl_info.remote_ip.family == AF_INET) {
-      if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_VXLAN) {
-        if (learn_info.vlan_info.port_vlan_mode ==
-            P4_PORT_VLAN_NATIVE_UNTAGGED) {
-          param2->set_value(
-              EncodeByteValue(1, static_cast<uint8_t>(VXLAN_ENCAP_VLAN_POP)));
-        } else {
-          param2->set_value(
-              EncodeByteValue(1, static_cast<uint8_t>(VXLAN_ENCAP)));
+      if (learn_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+        action->set_action_id(GetActionId(
+            p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V4));
+        {
+          auto param = action->add_params();
+          param->set_param_id(GetParamId(
+              p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V4,
+              ACTION_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
         }
-      } else if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_GENEVE) {
-        if (learn_info.vlan_info.port_vlan_mode ==
-            P4_PORT_VLAN_NATIVE_UNTAGGED) {
-          param2->set_value(
-              EncodeByteValue(1, static_cast<uint8_t>(GENEVE_ENCAP_VLAN_POP)));
-        } else {
-          param2->set_value(
-              EncodeByteValue(1, static_cast<uint8_t>(GENEVE_ENCAP)));
+      } else {
+        action->set_action_id(
+            GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V4));
+        {
+          auto param = action->add_params();
+          param->set_param_id(
+              GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V4,
+                         ACTION_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
         }
       }
     } else if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
                learn_info.tnl_info.remote_ip.family == AF_INET6) {
-      if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_VXLAN) {
-        if (learn_info.vlan_info.port_vlan_mode ==
-            P4_PORT_VLAN_NATIVE_UNTAGGED) {
-          param2->set_value(EncodeByteValue(
-              1, static_cast<uint8_t>(VXLAN_ENCAP_V6_VLAN_POP)));
-        } else {
-          param2->set_value(
-              EncodeByteValue(1, static_cast<uint8_t>(VXLAN_ENCAP_V6)));
+      if (learn_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+        action->set_action_id(GetActionId(
+            p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V6));
+        {
+          auto param = action->add_params();
+          param->set_param_id(GetParamId(
+              p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V6,
+              ACTION_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
         }
-      } else if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_GENEVE) {
-        if (learn_info.vlan_info.port_vlan_mode ==
-            P4_PORT_VLAN_NATIVE_UNTAGGED) {
-          param2->set_value(EncodeByteValue(
-              1, static_cast<uint8_t>(GENEVE_ENCAP_V6_VLAN_POP)));
-        } else {
-          param2->set_value(
-              EncodeByteValue(1, static_cast<uint8_t>(GENEVE_ENCAP_V6)));
+      } else {
+        action->set_action_id(
+            GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V6));
+        {
+          auto param = action->add_params();
+          param->set_param_id(
+              GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V6,
+                         ACTION_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+        }
+      }
+    }
+  }
+#endif
+  return;
+}
+
+void PrepareFdbTableEntryforV4GeneveTunnel(p4::v1::TableEntry* table_entry,
+                                     const struct mac_learning_info& learn_info,
+                                     const ::p4::config::v1::P4Info& p4info,
+                                     bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(
+      GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_DST_MAC));
+
+  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
+  match->mutable_exact()->set_value(mac_addr);
+#if defined(ES2K_TARGET)
+  // Based on p4 program for ES2K, we need to provide a match key Bridge ID
+  auto match1 = table_entry->add_match();
+  match1->set_field_id(
+      GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_BRIDGE_ID));
+
+  match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
+
+  // Based on p4 program for ES2K, we need to provide a match key SMAC flag
+  auto match2 = table_entry->add_match();
+  match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
+                                       L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
+
+  match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
+
+#endif
+
+#if defined(DPDK_TARGET)
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(
+        GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL,
+                                     ACTION_SET_TUNNEL_PARAM_TUNNEL_ID));
+      param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+    }
+
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL,
+                                     ACTION_SET_TUNNEL_PARAM_DST_ADDR));
+      std::string ip_address =
+          CanonicalizeIp(learn_info.tnl_info.remote_ip.ip.v4addr.s_addr);
+      param->set_value(ip_address);
+    }
+  }
+#elif defined(ES2K_TARGET)
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+
+    if (learn_info.tnl_info.local_ip.family == AF_INET &&
+        learn_info.tnl_info.remote_ip.family == AF_INET) {
+      if (learn_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+        action->set_action_id(GetActionId(
+            p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V4));
+        {
+          auto param = action->add_params();
+          param->set_param_id(GetParamId(
+              p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V4,
+              ACTION_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+        }
+      } else {
+        action->set_action_id(
+            GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V4));
+        {
+          auto param = action->add_params();
+          param->set_param_id(
+              GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V4,
+                         ACTION_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+        }
+      }
+    } else if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
+               learn_info.tnl_info.remote_ip.family == AF_INET6) {
+      if (learn_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
+        action->set_action_id(GetActionId(
+            p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V6));
+        {
+          auto param = action->add_params();
+          param->set_param_id(GetParamId(
+              p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V6,
+              ACTION_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+        }
+      } else {
+        action->set_action_id(
+            GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V6));
+        {
+          auto param = action->add_params();
+          param->set_param_id(
+              GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V6,
+                         ACTION_PARAM_TUNNEL_ID));
+          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
         }
       }
     }
@@ -564,8 +662,16 @@ absl::Status ConfigFdbTunnelTableEntry(
     table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
   }
 
-  PrepareFdbTableEntryforV4Tunnel(table_entry, learn_info, p4info,
-                                  insert_entry);
+  if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_VXLAN) {
+    PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
+                                         insert_entry);
+  } else if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_GENEVE) {
+    PrepareFdbTableEntryforV4GeneveTunnel(table_entry, learn_info, p4info,
+                                          insert_entry);
+  } else {
+    return absl::UnknownError("Unsupported tunnel type");
+  }
+
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
 
@@ -699,7 +805,7 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
     PrepareGeneveEncapTableEntry(table_entry, tunnel_info, p4info,
                                  insert_entry);
   } else {
-    // unsupported tunnel type
+    std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
 #endif
 
@@ -833,7 +939,7 @@ void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
     PrepareV6GeneveEncapTableEntry(table_entry, tunnel_info, p4info,
                                            insert_entry);
   } else {
-    // unsupported tunnel type
+    std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
 
   return;
@@ -972,7 +1078,7 @@ void PrepareEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
     PrepareGeneveEncapAndVlanPopTableEntry(table_entry, tunnel_info, p4info,
                                            insert_entry);
   } else {
-    // unsupported tunnel type
+    std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
 
   return;
@@ -1114,7 +1220,7 @@ void PrepareV6EncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
     PrepareV6GeneveEncapAndVlanPopTableEntry(table_entry, tunnel_info, p4info,
                                              insert_entry);
   } else {
-    // unsupported tunnel type
+    std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
 
   return;
@@ -1264,7 +1370,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
         param2->set_value(EncodeByteValue(1, GENEVE_DECAP_OUTER_HDR_VLAN_PUSH));
       } else {
-        // Unsupported tunnel type
+        std::cout << "ERROR: Unsupported tunnel type" << std::endl;
         return;
       }
 
@@ -1274,7 +1380,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
         param2->set_value(EncodeByteValue(1, GENEVE_DECAP_OUTER_HDR));
       } else {
-        // Unsupported tunnel type
+        std::cout << "ERROR: Unsupported tunnel type" << std::endl;
         return;
       }
     }
@@ -1326,7 +1432,7 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
         param2->set_value(EncodeByteValue(1, GENEVE_DECAP_OUTER_HDR_VLAN_PUSH));
       } else {
-        // Unsupported tunnel type
+        std::cout << "ERROR: Unsupported tunnel type" << std::endl;
         return;
       }
     } else {
@@ -1335,7 +1441,7 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
         param2->set_value(EncodeByteValue(1, GENEVE_DECAP_OUTER_HDR));
       } else {
-        // Unsupported tunnel type
+        std::cout << "ERROR: Unsupported tunnel type" << std::endl;
         return;
       }
     }
@@ -1437,7 +1543,7 @@ void PrepareDecapModTableEntry(p4::v1::TableEntry* table_entry,
     PrepareGeneveDecapModTableEntry(table_entry, tunnel_info, p4info,
                                              insert_entry);
   } else {
-    // unsupported tunnel type
+    std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
 
   return;
@@ -1535,7 +1641,7 @@ void PrepareDecapModAndVlanPushTableEntry(
     PrepareGeneveDecapModAndVlanPushTableEntry(table_entry, tunnel_info, p4info,
                                     insert_entry);
   } else {
-    // unsupported tunnel type
+    std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
 
   return;
@@ -1770,7 +1876,15 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
 
   table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
 
-  PrepareFdbTableEntryforV4Tunnel(table_entry, learn_info, p4info, false);
+  if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_VXLAN) {
+    PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
+                                         false);
+  } else if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_GENEVE) {
+    PrepareFdbTableEntryforV4GeneveTunnel(table_entry, learn_info, p4info,
+                                          false);
+  } else {
+    return absl::UnknownError("Unsupported tunnel type");
+  }
 
   return ovs_p4rt::SendReadRequest(session, read_request);
 }
@@ -1880,7 +1994,7 @@ absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
 // Functions with C interfaces
 //----------------------------------------------------------------------
 
-enum OvsTunnelType TunnelTypeStrtoEnum(const char* tnl_type) {
+enum ovs_tunnel_type TunnelTypeStrtoEnum(const char* tnl_type) {
   if (tnl_type) {
     if (strcmp(tnl_type, "vxlan") == 0) {
       return OVS_TUNNEL_VXLAN;

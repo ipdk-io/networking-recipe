@@ -156,7 +156,7 @@ extern "C" {
 #define IPV4_TUNNEL_TERM_TABLE_KEY_BRIDGE_ID "user_meta.pmeta.bridge_id"
 #define IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_SRC "ipv4_src"
 #define IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_DST "ipv4_dst"
-#define IPV4_TUNNEL_TERM_TABLE_KEY_VNI "user_meta.pmeta.vni"
+#define IPV4_TUNNEL_TERM_TABLE_KEY_VNI "vni"
 
 #define ACTION_DECAP_OUTER_HDR "linux_networking_control.decap_outer_hdr"
 #define ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_ID "tunnel_id"
@@ -167,7 +167,7 @@ extern "C" {
 
 #define IPV6_TUNNEL_TERM_TABLE_KEY_BRIDGE_ID "user_meta.pmeta.bridge_id"
 #define IPV6_TUNNEL_TERM_TABLE_KEY_IPV6_SRC "ipv6_src"
-#define IPV6_TUNNEL_TERM_TABLE_KEY_VNI "user_meta.pmeta.vni"
+#define IPV6_TUNNEL_TERM_TABLE_KEY_VNI "vni"
 
 /* VXLAN_DECAP_MOD TABLE */
 #define VXLAN_DECAP_MOD_TABLE "linux_networking_control.vxlan_decap_mod_table"
@@ -242,11 +242,31 @@ extern "C" {
 
 #define L2_FWD_TX_TABLE_ACTION_L2_FWD "linux_networking_control.l2_fwd"
 
-#define L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY \
-  "linux_networking_control.set_tunnel_underlay"
+#define L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V4 \
+  "linux_networking_control.set_vxlan_underlay_v4"
 
-#define ACTION_SET_TUNNEL_UNDERLAY_PARAM_TUNNEL_ID "tunnel_id"
-#define ACTION_SET_TUNNEL_UNDERLAY_PARAM_TUNNEL_TYPE "tunnel_type"
+#define L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V4 \
+  "linux_networking_control.set_geneve_underlay_v4"
+
+#define L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V6 \
+  "linux_networking_control.set_vxlan_underlay_v6"
+
+#define L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V6 \
+  "linux_networking_control.set_geneve_underlay_v6"
+
+#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V4 \
+  "linux_networking_control.pop_vlan_set_vxlan_underlay_v4"
+
+#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V4 \
+  "linux_networking_control.pop_vlan_set_geneve_underlay_v4"
+
+#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V6 \
+  "linux_networking_control.pop_vlan_set_vxlan_underlay_v6"
+
+#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V6 \
+  "linux_networking_control.pop_vlan_set_geneve_underlay_v6"
+
+#define ACTION_PARAM_TUNNEL_ID "tunnel_id"
 
 #define L2_FWD_TX_TABLE_ACTION_ADD_VLAN_AND_FWD \
   "linux_networking_control.add_vlan_and_fwd"
@@ -314,7 +334,7 @@ extern "C" {
 
 #define RX_IPV4_TUNNEL_SOURCE_PORT_TABLE_KEY_IPV4_SRC "ipv4_src"
 
-#define RX_IPV4_TUNNEL_SOURCE_PORT_TABLE_KEY_VNI "user_meta.pmeta.vni"
+#define RX_IPV4_TUNNEL_SOURCE_PORT_TABLE_KEY_VNI "vni"
 
 #define RX_IPV4_TUNNEL_SOURCE_PORT_TABLE_ACTION_SET_SRC_PORT \
   "linux_networking_control.set_source_port"
@@ -327,7 +347,7 @@ extern "C" {
 
 #define RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_KEY_IPV6_SRC "ipv6_src"
 
-#define RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_KEY_VNI "user_meta.pmeta.vni"
+#define RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_KEY_VNI "vni"
 
 #define RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_ACTION_SET_SRC_PORT \
   "linux_networking_control.set_source_port"
