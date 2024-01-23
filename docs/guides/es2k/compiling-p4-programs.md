@@ -5,7 +5,7 @@ Container to compile a P4 program to build artifacts, including the `.pkg`
 file, that can be deployed on ES2K.
 
 The list of supported host OSes are listed in the "Supported Operating Systems"
-section of the IPU Software User Guide (RDC Doc#778226), henceforth referred to 
+section of the IPU Software User Guide (RDC Doc#778226), henceforth referred to
 as the "IPU SWG".
 
 ## Build and run the P4 Tools container
@@ -62,10 +62,10 @@ provides instructions on how to configure the IPU pipeline.
 ### Compiling a P4 Program
 
 Use the `p4c` i.e the compiler driver to compile and build packages.
-We will be using one of the reference programs mentioned above as an 
+We will be using one of the reference programs mentioned above as an
 example: `p4-programs/layer-3-forwarding/l3-fwd_p2p``.
 
-The Makefile contains the exact commands to build the artifacts 
+The Makefile contains the exact commands to build the artifacts
 for all the reference programs.
 
 1. Copy the entire p4-programs directory from the host to the P4Tools
@@ -91,7 +91,7 @@ for all the reference programs.
    ```
 
 3. Compile l3-fwd_p2p,  all artifacts will be generated in artifacts directory.
-   
+
     ```bash
    [root@a54d354e447e ~] cd /opt/p4-programs
    
@@ -126,7 +126,7 @@ for all the reference programs.
    ```
 
  These files are called _P4 artifacts_.
-   
+    
 ## Deploying P4 programs
 
 Please see [Deploying P4 Programs](deploying-p4-programs.md)
