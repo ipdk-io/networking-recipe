@@ -158,9 +158,14 @@ extern "C" {
 #define IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_DST "ipv4_dst"
 #define IPV4_TUNNEL_TERM_TABLE_KEY_VNI "vni"
 
-#define ACTION_DECAP_OUTER_HDR "linux_networking_control.decap_outer_hdr"
-#define ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_ID "tunnel_id"
-#define ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_TYPE "tunnel_type"
+#define ACTION_SET_VXLAN_DECAP_OUTER_HDR \
+  "linux_networking_control.set_vxlan_decap_outer_hdr"
+#define ACTION_SET_VXLAN_DECAP_OUTER_HDR_AND_PUSH_VLAN \
+  "linux_networking_control.set_vxlan_decap_outer_and_push_vlan"
+#define ACTION_SET_GENEVE_DECAP_OUTER_HDR \
+  "linux_networking_control.set_geneve_decap_outer_hdr"
+#define ACTION_SET_GENEVE_DECAP_OUTER_HDR_AND_PUSH_VLAN \
+  "linux_networking_control.set_geneve_decap_outer_and_push_vlan"
 
 /* IPV6_TUNNEL_TERM_TABLE */
 #define IPV6_TUNNEL_TERM_TABLE "linux_networking_control.ipv6_tunnel_term_table"

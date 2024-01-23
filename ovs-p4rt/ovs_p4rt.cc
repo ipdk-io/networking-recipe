@@ -1354,37 +1354,47 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
-    action->set_action_id(GetActionId(p4info, ACTION_DECAP_OUTER_HDR));
-    auto param1 = action->add_params();
-    param1->set_param_id(GetParamId(p4info, ACTION_DECAP_OUTER_HDR,
-                                    ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_ID));
-    param1->set_value(EncodeByteValue(1, tunnel_info.vni));
-
-    auto param2 = action->add_params();
-    param2->set_param_id(GetParamId(p4info, ACTION_DECAP_OUTER_HDR,
-                                    ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_TYPE));
-
     if (tunnel_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
       if (tunnel_info.tunnel_type == OVS_TUNNEL_VXLAN) {
-        param2->set_value(EncodeByteValue(1, VXLAN_DECAP_OUTER_HDR_VLAN_PUSH));
+        action->set_action_id(GetActionId(
+            p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR_AND_PUSH_VLAN));
+        auto param = action->add_params();
+        param->set_param_id(
+            GetParamId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR_AND_PUSH_VLAN,
+                       ACTION_PARAM_TUNNEL_ID));
+        param->set_value(EncodeByteValue(1, tunnel_info.vni));
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
-        param2->set_value(EncodeByteValue(1, GENEVE_DECAP_OUTER_HDR_VLAN_PUSH));
+        action->set_action_id(GetActionId(
+            p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR_AND_PUSH_VLAN));
+        auto param = action->add_params();
+        param->set_param_id(
+            GetParamId(p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR_AND_PUSH_VLAN,
+                       ACTION_PARAM_TUNNEL_ID));
+        param->set_value(EncodeByteValue(1, tunnel_info.vni));
       } else {
-        std::cout << "ERROR: Unsupported tunnel type" << std::endl;
-        return;
+        std::cout << "Unsupported tunnel type" << std::endl;
       }
-
     } else {
       if (tunnel_info.tunnel_type == OVS_TUNNEL_VXLAN) {
-        param2->set_value(EncodeByteValue(1, VXLAN_DECAP_OUTER_HDR));
+        action->set_action_id(
+            GetActionId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR));
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR,
+                                       ACTION_PARAM_TUNNEL_ID));
+        param->set_value(EncodeByteValue(1, tunnel_info.vni));
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
-        param2->set_value(EncodeByteValue(1, GENEVE_DECAP_OUTER_HDR));
+        action->set_action_id(
+            GetActionId(p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR));
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(
+            p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR, ACTION_PARAM_TUNNEL_ID));
+        param->set_value(EncodeByteValue(1, tunnel_info.vni));
       } else {
-        std::cout << "ERROR: Unsupported tunnel type" << std::endl;
-        return;
+        std::cout << "Unsupported tunnel type" << std::endl;
       }
     }
   }
+
 #endif
 
   return;
@@ -1415,34 +1425,43 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
-
-    action->set_action_id(GetActionId(p4info, ACTION_DECAP_OUTER_HDR));
-    auto param1 = action->add_params();
-    param1->set_param_id(GetParamId(p4info, ACTION_DECAP_OUTER_HDR,
-                                    ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_ID));
-    param1->set_value(EncodeByteValue(1, tunnel_info.vni));
-
-    auto param2 = action->add_params();
-    param2->set_param_id(GetParamId(p4info, ACTION_DECAP_OUTER_HDR,
-                                    ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_TYPE));
-
     if (tunnel_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_UNTAGGED) {
       if (tunnel_info.tunnel_type == OVS_TUNNEL_VXLAN) {
-        param2->set_value(EncodeByteValue(1, VXLAN_DECAP_OUTER_HDR_VLAN_PUSH));
+        action->set_action_id(GetActionId(
+            p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR_AND_PUSH_VLAN));
+        auto param = action->add_params();
+        param->set_param_id(
+            GetParamId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR_AND_PUSH_VLAN,
+                       ACTION_PARAM_TUNNEL_ID));
+        param->set_value(EncodeByteValue(1, tunnel_info.vni));
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
-        param2->set_value(EncodeByteValue(1, GENEVE_DECAP_OUTER_HDR_VLAN_PUSH));
+        action->set_action_id(GetActionId(
+            p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR_AND_PUSH_VLAN));
+        auto param = action->add_params();
+        param->set_param_id(
+            GetParamId(p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR_AND_PUSH_VLAN,
+                       ACTION_PARAM_TUNNEL_ID));
+        param->set_value(EncodeByteValue(1, tunnel_info.vni));
       } else {
-        std::cout << "ERROR: Unsupported tunnel type" << std::endl;
-        return;
+        std::cout << "Unsupported tunnel type" << std::endl;
       }
     } else {
       if (tunnel_info.tunnel_type == OVS_TUNNEL_VXLAN) {
-        param2->set_value(EncodeByteValue(1, VXLAN_DECAP_OUTER_HDR));
+        action->set_action_id(
+            GetActionId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR));
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR,
+                                       ACTION_PARAM_TUNNEL_ID));
+        param->set_value(EncodeByteValue(1, tunnel_info.vni));
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
-        param2->set_value(EncodeByteValue(1, GENEVE_DECAP_OUTER_HDR));
+        action->set_action_id(
+            GetActionId(p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR));
+        auto param = action->add_params();
+        param->set_param_id(GetParamId(
+            p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR, ACTION_PARAM_TUNNEL_ID));
+        param->set_value(EncodeByteValue(1, tunnel_info.vni));
       } else {
-        std::cout << "ERROR: Unsupported tunnel type" << std::endl;
-        return;
+        std::cout << "Unsupported tunnel type" << std::endl;
       }
     }
   }
