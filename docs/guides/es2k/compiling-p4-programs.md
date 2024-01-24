@@ -75,10 +75,9 @@ for all the reference programs.
    sudo docker cp p4-programs/ <p4Tools container id>:/opt/
    ```
 
-2. Set environment variables in the container.
+2. Set environment variables in the container prior to building.
 
    ```bash
-   # Set the following env variables in the container prior to building
    [root@a54d354e447e p4-programs] which p4c
    /opt/p4-tools/p4c/bin/p4c
    [root@a54d354e447e p4-programs] export P4C_PATH=/opt/p4-tools/p4c/bin
@@ -96,9 +95,8 @@ for all the reference programs.
 
    # Compiling /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
    # and generating the runtime files and assembly...
-
    [root@a54d354e447e p4-programs] make l3-fwd_p2p
-    /opt/p4-tools/p4c/bin/p4c --target idpf --arch pna
+   /opt/p4-tools/p4c/bin/p4c --target idpf --arch pna
        -I/opt/p4-tools/p4c/bin/../lib -I/opt/p4-tools/p4c/bin/../share/p4c/p4include
        -I/opt/p4-tools/p4c/bin/../share/p4c/idpf-lib --package-by-domain
        --p4runtime-files ./artifacts/l3-fwd_p2p/p4Info.txt --save-temps 
@@ -107,7 +105,7 @@ for all the reference programs.
        --save-temps --npic --format csr --pkg-version 1.2 --pkg-name "FXP Package"
        -Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
        -o artifacts/l3-fwd_p2p
-   ```
+    ```
 
 4. All output files, including the `.pkg` file, will be in the artifacts
    directory.
