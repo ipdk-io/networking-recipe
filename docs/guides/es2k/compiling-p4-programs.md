@@ -4,7 +4,7 @@ This document explains how to install and use the Intel&reg; IPU E2100 P4Tools
 Container to compile a P4 program to build artifacts, including the `.pkg`
 file, that can be deployed on ES2K.
 
-The list of supported host OSes are listed in the "Supported Operating Systems"
+The supported host OSes are listed in the "Supported Operating Systems"
 section of the IPU Software User Guide (RDC Doc#778226), henceforth referred to
 as the "IPU SWG".
 
@@ -14,7 +14,7 @@ The tools required to compile and build a custom p4 package
 can be installed by building and running the P4 Tools Container.
 
 See "Getting Started Guide with P4 on P4 Tools Container" in the
-IPU SWG for instructions on building and launching the P4 Tools container.
+IPU SWG for instructions on building the P4 Tools container.
 
 Once <your_p4_tools_container> is sucessfully built, proceed to next step.
 
@@ -25,15 +25,15 @@ Once <your_p4_tools_container> is sucessfully built, proceed to next step.
 [user@host P4Tools]$ sudo  docker exec -it <your_p4_tools_container> /bin/bash
 
 # Inside the container, verify the p4 compiler version.
-[root@a54d354e447e /]# p4c --version
+[root@a54d354e447e /] p4c --version
 p4c 1.2.3.7 (SHA:  BUILD: release)
 ```
 
 The `p4c` compiler should now be ready for use.
 
-In previous versions of the SDK, `cpt` had to be invoked seperately.
+In previous versions of the SDK, `cpt` had to be invoked separately.
 It is no longer necessary to do so.
-`cpt` will be invoked automatically by specifying cpt flags to `p4c`.`
+`cpt` will be invoked automatically by specifying cpt flags to `p4c`.
 
 ## Build Reference P4 programs
 
@@ -44,7 +44,7 @@ intel-ipu-sdk-source-code-<$VERSION>.tgz.
 Extract the p4-programs from the tarball.
 
 ```bash
-[root@host ~]# ls -l $INTEL-IPU-SDK-<VERSION>/tools/pipeline/p4-programs
+[root@host ~] ls -l $INTEL-IPU-SDK-<VERSION>/tools/pipeline/p4-programs
 total 1100
 -rw-r--r--.  1 user user     79 Dec 13 15:54 CONTENTS
 drwxr-xr-x. 10 user user   4096 Dec 13 15:54 fxp-cxp-features
@@ -98,12 +98,12 @@ for all the reference programs.
    # Compiling the /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
    # and generating the runtime files and assembly...
 
-   [root@a54d354e447e p4-programs]# make l3-fwd_p2p
+   [root@a54d354e447e p4-programs] make l3-fwd_p2p
     /opt/p4-tools/p4c/bin/p4c --target idpf --arch pna
     -I/opt/p4-tools/p4c/bin/../lib -I/opt/p4-tools/p4c/bin/../share/p4c/p4include
     -I/opt/p4-tools/p4c/bin/../share/p4c/idpf-lib --package-by-domain
-    --p4runtime-files ./artifacts/l3-fwd_p2p/p4Info.txt --save-temps -Xp4c
-    "--Wdisable --no-pedantic --context ./artifacts/l3-fwd_p2p/context.json
+    --p4runtime-files ./artifacts/l3-fwd_p2p/p4Info.txt --save-temps 
+    -Xp4c "--Wdisable --no-pedantic --context ./artifacts/l3-fwd_p2p/context.json
     --bfrt ./artifacts/l3-fwd_p2p/bf-rt.json"
     --save-temps --npic --format csr --pkg-version 1.2 --pkg-name "FXP Package"
     -Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
