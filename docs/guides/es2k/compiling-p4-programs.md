@@ -11,10 +11,10 @@ as the "IPU SWG".
 ## Build and run the P4Tools container
 
 The tools required to compile and build a custom p4 package
-can be installed by building and running the P4 Tools Container.
+can be installed by building the P4 Tools Container.
 
 See "Getting Started Guide with P4 on P4 Tools Container" in the
-IPU SWG for instructions on building the P4 Tools container.
+IPU SWG for instructions on building and launching the P4Tools container.
 
 Once <your_p4_tools_container> is sucessfully built, proceed to next step.
 
@@ -22,7 +22,7 @@ Once <your_p4_tools_container> is sucessfully built, proceed to next step.
 
 ```bash
 # Launch the P4Tools container on the host.
-[user@host P4Tools] sudo  docker exec -it <your_p4_tools_container> /bin/bash
+[user@host P4Tools] sudo docker exec -it <your_p4_tools_container> /bin/bash
 
 # Inside the container, verify the p4 compiler version.
 [root@a54d354e447e /] p4c --version
@@ -75,14 +75,12 @@ for all the reference programs.
    sudo docker cp p4-programs/ <p4Tools container id>:/opt/
    ```
 
-2. Set environment variables in the container.
+2. # Set the following env variables in the container prior to building
 
    ```bash
-   # Check where p4c is installed in the container.
    [root@a54d354e447e p4-programs] which p4c
    /opt/p4-tools/p4c/bin/p4c
    
-   # Set the following env variables in the container prior to building
    [root@a54d354e447e p4-programs] export P4C_PATH=/opt/p4-tools/p4c/bin
    export CPT_PATH=/opt/p4-tools/cpt/bin
    export PATH=$P4C_PATH:$CPT_PATH:$PATH
@@ -90,7 +88,7 @@ for all the reference programs.
    export PREV_ARTIFACT_DIR=
    ```
 
-3. Compile l3-fwd_p2p. All artifacts will be generated in artifacts directory.
+3. Compile l3-fwd_p2p.All artifacts will be generated in artifacts directory.
 
     ```bash
    [root@a54d354e447e ~] cd /opt/p4-programs
@@ -125,7 +123,7 @@ for all the reference programs.
    -rw-r--r--. 1 root root 950608 Dec 23 00:18 l3-fwd_p2p.pkg
    ```
 
- These files are called _P4 artifacts_.
+    These files are called _P4 artifacts_.
 
 ## Deploying P4 programs
 
