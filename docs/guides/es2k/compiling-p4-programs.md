@@ -88,24 +88,24 @@ for all the reference programs.
    export PREV_ARTIFACT_DIR=
    ```
 
-3. Compile l3-fwd_p2p. All artifacts will be generated in artifacts directory.
+3. Compile l3-fwd_p2p. All artifacts will be generated in the artifacts directory.
 
    ```bash
    [root@a54d354e447e ~] cd /opt/p4-programs
-   
+
    # Compiling /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
    # and generating the runtime files and assembly...
 
    [root@a54d354e447e p4-programs] make l3-fwd_p2p
     /opt/p4-tools/p4c/bin/p4c --target idpf --arch pna
-    -I/opt/p4-tools/p4c/bin/../lib -I/opt/p4-tools/p4c/bin/../share/p4c/p4include
-    -I/opt/p4-tools/p4c/bin/../share/p4c/idpf-lib --package-by-domain
-    --p4runtime-files ./artifacts/l3-fwd_p2p/p4Info.txt --save-temps 
-    -Xp4c "--Wdisable --no-pedantic --context ./artifacts/l3-fwd_p2p/context.json
-    --bfrt ./artifacts/l3-fwd_p2p/bf-rt.json"
-    --save-temps --npic --format csr --pkg-version 1.2 --pkg-name "FXP Package"
-    -Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
-    -o artifacts/l3-fwd_p2p
+       -I/opt/p4-tools/p4c/bin/../lib -I/opt/p4-tools/p4c/bin/../share/p4c/p4include
+       -I/opt/p4-tools/p4c/bin/../share/p4c/idpf-lib --package-by-domain
+       --p4runtime-files ./artifacts/l3-fwd_p2p/p4Info.txt --save-temps 
+       -Xp4c "--Wdisable --no-pedantic --context ./artifacts/l3-fwd_p2p/context.json
+       --bfrt ./artifacts/l3-fwd_p2p/bf-rt.json"
+       --save-temps --npic --format csr --pkg-version 1.2 --pkg-name "FXP Package"
+       -Xassembler ".cpt_ver.s" /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
+       -o artifacts/l3-fwd_p2p
    ```
 
 4. All output files, including the `.pkg` file, will be in the artifacts
@@ -120,7 +120,7 @@ for all the reference programs.
    -rw-r--r--. 1 root root  30390 Dec 23 00:18 context.json
    -rw-r--r--. 1 root root  37269 Dec 23 00:18 l3-fwd_p2p.s
    -rw-r--r--. 1 root root 950608 Dec 23 00:18 l3-fwd_p2p_b222a542c1474685bd70a36994d16101.pkgo
-   -rw-r--r--. 1 root root 950608 Dec 23 00:18 l3-fwd_p2p.pkg
+   -rw-r--r--. 1 root root 950608 Dec 23 00:18 l3-fwd_p2p.pkg 
    ```
 
    These files are called _P4 artifacts_.
