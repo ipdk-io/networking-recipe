@@ -88,7 +88,8 @@ for all the reference programs.
    export PREV_ARTIFACT_DIR=
    ```
 
-3. Compile l3-fwd_p2p. All artifacts will be generated in the artifacts directory.
+3. Compile l3-fwd_p2p. All artifacts will be generated in the artifacts
+   directory.
 
    ```bash
    [root@a54d354e447e ~] cd /opt/p4-programs
