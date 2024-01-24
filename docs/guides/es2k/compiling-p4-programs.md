@@ -8,7 +8,7 @@ The supported host OSes are listed in the "Supported Operating Systems"
 section of the IPU Software User Guide (RDC Doc#778226), henceforth referred to
 as the "IPU SWG".
 
-## Build and run the P4 Tools container
+## Build and run the P4Tools container
 
 The tools required to compile and build a custom p4 package
 can be installed by building and running the P4 Tools Container.
@@ -22,7 +22,7 @@ Once <your_p4_tools_container> is sucessfully built, proceed to next step.
 
 ```bash
 # Launch the P4Tools container on the host.
-[user@host P4Tools]$ sudo  docker exec -it <your_p4_tools_container> /bin/bash
+[user@host P4Tools] sudo  docker exec -it <your_p4_tools_container> /bin/bash
 
 # Inside the container, verify the p4 compiler version.
 [root@a54d354e447e /] p4c --version
@@ -35,11 +35,11 @@ In previous versions of the SDK, `cpt` had to be invoked separately.
 It is no longer necessary to do so.
 `cpt` will be invoked automatically by specifying cpt flags to `p4c`.
 
-## Build Reference P4 programs
+## Build reference P4 programs
 
 The `p4-programs` directory in the SDK folder contains a number of sample P4
 programs. The SDK is contained in a tar file named
-intel-ipu-sdk-source-code-<$VERSION>.tgz.
+`intel-ipu-sdk-source-code-<$VERSION>.tgz`.
 
 Extract the p4-programs from the tarball.
 
@@ -61,9 +61,9 @@ provides instructions on how to configure the IPU pipeline.
 
 ### Compiling a P4 Program
 
-Use the `p4c` i.e the compiler driver to compile and build packages.
+Use the `p4c` compiler driver to compile and build packages.
 We will be using one of the reference programs mentioned above as an
-example: `p4-programs/layer-3-forwarding/l3-fwd_p2p``.
+example: `p4-programs/layer-3-forwarding/l3-fwd_p2p`.
 
 The Makefile contains the exact commands to build the artifacts
 for all the reference programs.
@@ -90,12 +90,12 @@ for all the reference programs.
    export PREV_ARTIFACT_DIR=
    ```
 
-3. Compile l3-fwd_p2p,  all artifacts will be generated in artifacts directory.
+3. Compile l3-fwd_p2p. All artifacts will be generated in artifacts directory.
 
     ```bash
    [root@a54d354e447e ~] cd /opt/p4-programs
    
-   # Compiling the /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
+   # Compiling /opt/p4-programs/layer-3-forwarding/l3-fwd_p2p/l3-fwd_p2p.p4
    # and generating the runtime files and assembly...
 
    [root@a54d354e447e p4-programs] make l3-fwd_p2p
