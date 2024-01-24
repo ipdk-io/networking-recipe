@@ -212,3 +212,30 @@ jobs:
           cmake -B build
           cmake --build build
           cmake --install build --prefix install
+
+  #---------------------------------------------------------------------
+  # 5-clang_format_check
+  #---------------------------------------------------------------------
+  clang_format_check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get list of changed files
+        id: changed
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            **.c
+            **.cc
+            **.h
+
+      - name: Check for formatting errors
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          clang-format -n -Werror ${{ steps.changed.outputs.all_changed_files }}
