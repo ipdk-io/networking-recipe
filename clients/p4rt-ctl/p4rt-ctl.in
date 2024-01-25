@@ -467,24 +467,25 @@ class P4InfoHelper(object):
         table_entry = p4runtime_pb2.TableEntry()
         table_entry.table_id = self.get_tables_id(table_name)
 
-        for mfn, value in match_fields.items():
-            # A table can contain more than one match filed and in such cases
-            # if one match_type has ternary and other filed is of any type
-            # it is considered as ternary match_type.
-            # In these cases we expect priority field from the user.
-            p4info_match = self.get_match_field(table_name, mfn)
+        if match_fields:
+            for mfn, value in match_fields.items():
+                # A table can contain more than one match filed and in such cases
+                # if one match_type has ternary and other filed is of any type
+                # it is considered as ternary match_type.
+                # In these cases we expect priority field from the user.
+                p4info_match = self.get_match_field(table_name, mfn)
 
-            if p4info_match.match_type == p4info_pb2.MatchField.TERNARY:
-                one_match_type_is_ternary = True
-                # If match_type is ternary, then priority field is expected
-                if priority == None:
-                    print("For ternary match_type, priority field is needed")
-                    sys.exit(1)
+                if p4info_match.match_type == p4info_pb2.MatchField.TERNARY:
+                    one_match_type_is_ternary = True
+                    # If match_type is ternary, then priority field is expected
+                    if priority == None:
+                        print("For ternary match_type, priority field is needed")
+                        sys.exit(1)
 
-            if match_fields:
-                table_entry.match.extend([
-                    self.get_match_field_pb(table_name, mfn, value)
-                ])
+                if match_fields:
+                    table_entry.match.extend([
+                        self.get_match_field_pb(table_name, mfn, value)
+                    ])
 
         if priority is not None and one_match_type_is_ternary:
             table_entry.priority = int(priority)
@@ -1240,8 +1241,10 @@ def p4ctl_mod_entry(client, bridge, tbl_name, flow):
 def p4ctl_set_default_entry(client, bridge, tbl_name, action):
     """
     set-default-entry SWITCH TABLE ACTION
-    Example:
-        p4rt-ctl set-default-entry br0 pipe.filter_tbl pipe.push_mpls(10)
+    Example of setting to valid action:
+        p4rt-ctl set-default-entry br0 pipe.filter_tbl "pipe.push_mpls(10)"
+    Example of resetting to default action:
+        p4rt-ctl set-default-entry br0 pipe.filter_tbl ""
     """
 
     p4info = client.get_p4info()
@@ -1249,12 +1252,14 @@ def p4ctl_set_default_entry(client, bridge, tbl_name, action):
         raise Exception("cannot retrieve P4Info from device {}".format(bridge))
     helper = P4InfoHelper(p4info)
 
-    action_name, action_data = parse_action(action)
+    action_name, action_data = parse_action(action, helper)
     te = helper.buildTableEntry(
         table_name=tbl_name,
         default_action=True,
         action_name=action_name,
-        action_params={a.name: int(action_data[idx]) for idx,
+        action_params=action_data
+                       if (action_data==None or action_data==[''])
+                       else {a.name: int(action_data[idx]) for idx,
                        a in enumerate(helper.get_action_params(action_name))})
 
     update = p4runtime_pb2.Update()
