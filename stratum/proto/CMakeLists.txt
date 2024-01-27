@@ -189,6 +189,6 @@ add_library(p4_role_config SHARED
     ${PB_OUT_DIR}/stratum/public/proto/p4_role_config.pb.h
 )
 
-target_include_directories(p4_role_config PRIVATE ${PB_OUT_DIR})
+target_include_directories(p4_role_config PUBLIC ${PB_OUT_DIR})
 
 install(TARGETS p4_role_config LIBRARY)
