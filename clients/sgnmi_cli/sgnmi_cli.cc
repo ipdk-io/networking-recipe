@@ -32,7 +32,7 @@ DEFINE_string(int_val, "", "Integer value to be set (64-bit)");
 DEFINE_string(uint_val, "", "Unsigned integer value to be set (64-bit)");
 DEFINE_string(string_val, "", "String value to be set");
 DEFINE_string(float_val, "", "Floating point value to be set");
-DEFINE_string(proto_bytes, "", "Protobytes value to be set");
+DEFINE_string(proto_bytes, "", "Protobuf value to be set");
 DEFINE_string(bytes_val_file, "", "A file to be sent as bytes value");
 
 DEFINE_bool(replace, false, "Use replace instead of update");
@@ -70,13 +70,16 @@ Secure gNMI CLI
 
 positional arguments:
   COMMAND                  gNMI command
+                           (get,set,cap,del,sub-onchange,sub-sample)
   PATH                     gNMI path
 
 optional arguments:
+  --helpshort              show help message and exit
+  --help                   show help on all flags and exit
   --grpc_addr GRPC_ADDR    gNMI server address
-  --ca-cert                CA certificate
-  --client-cert            gRPC Client certificate
-  --client-key             gRPC Client key
+  --ca_cert_file FILE      CA certificate
+  --client_cert_file FILE  gRPC Client certificate
+  --client_key_file FILE   gRPC Client key
   --grpc_use_insecure_mode Insecure mode (default: false)
 
 [get request only]
@@ -89,20 +92,12 @@ optional arguments:
   --uint_val UINT_VAL      Set uint value (64-bit)
   --string_val STRING_VAL  Set string value
   --float_val FLOAT_VAL    Set float value
-  --proto_bytes BYTES_VAL  Set proto_bytes value
-  --bytes_val_file FILE    File to be sent as bytes value
+  --proto_bytes PROTO_VAL  Set protobuf bytes value
+  --bytes_val_file FILE    Send file as bytes value
   --replace                Replace instead of updating
 
 [sample subscribe only]
   --interval INTERVAL      Sample subscribe poll interval in ms
-
-commands:
-  get                      Get Request
-  set                      Set Request
-  cap                      Capability Request
-  del                      Delete Request
-  sub-onchange             Subscribe On Change Request
-  sub-sample               Subscribe Sampled Request
 )USAGE";
 
 // Pipe file descriptors used to transfer signals from the handler to the cancel
@@ -244,10 +239,6 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
 ::util::Status Main(int argc, char** argv) {
   // Default certificate file location for TLS-mode
   set_client_cert_defaults();
-
-  // Parse command line flags
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
-
   ::gflags::SetUsageMessage(kUsage);
   InitGoogle(argv[0], &argc, &argv, true);
   stratum::InitStratumLogging();
