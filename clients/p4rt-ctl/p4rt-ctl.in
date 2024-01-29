@@ -478,7 +478,7 @@ class P4InfoHelper(object):
                 if p4info_match.match_type == p4info_pb2.MatchField.TERNARY:
                     one_match_type_is_ternary = True
                     # If match_type is ternary, then priority field is expected
-                    if priority == None:
+                    if priority is None:
                         print("For ternary match_type, priority field is needed")
                         sys.exit(1)
 
