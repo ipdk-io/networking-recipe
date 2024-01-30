@@ -9,6 +9,15 @@ For the ACC, see [Building for the ES2K ACC](/guides/building-for-es2k-acc).
 
 ## Prerequisites
 
+It is assumed that the ES2K IPU SDE dependencies have been installed on the
+system. The list of dependencies can be found
+in `sde/tools/setup/install_dep.py` file.
+
+Prerequisites for stratum-deps are assumed to be
+installed. Some of them also apply to networking-recipe.
+
+Install the following packages for building networking-recipe.
+
 For Fedora:
 
 ```bash

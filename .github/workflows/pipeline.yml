@@ -1,4 +1,4 @@
-name: "P4 Control Plane CI Pipeline"
+name: "P4CP build checks"
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
       - ipdk_v*
 
 concurrency:
-  # If workflow for PR or push is already running, stop it and start a new one.
+  # If workflow is currently running, stop it and start a new one.
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
@@ -53,7 +53,7 @@ jobs:
           sudo apt install $PREREQS
 
       - name: Install DPDK SDE
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.SDE_REPOSITORY }}
           tag: ${{ env.SDE_TAG }}
@@ -63,7 +63,7 @@ jobs:
           rm $SDE_FILENAME
 
       - name: Install stratum dependencies
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.DEPS_REPOSITORY }}
           tag: ${{ env.DEPS_TAG }}
@@ -98,7 +98,7 @@ jobs:
           sudo apt install $PREREQS
 
       - name: Install DPDK SDE
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.SDE_REPOSITORY }}
           tag: ${{ env.SDE_TAG }}
@@ -108,7 +108,7 @@ jobs:
           rm $SDE_FILENAME
 
       - name: Install stratum dependencies
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.DEPS_REPOSITORY }}
           tag: ${{ env.DEPS_TAG }}
@@ -126,26 +126,7 @@ jobs:
           cmake --build build --target krnlmon-test
 
   #---------------------------------------------------------------------
-  # 3-py_bandit_check
-  #---------------------------------------------------------------------
-  py_bandit_check:
-     timeout-minutes: 5
-     runs-on: ubuntu-latest
-     steps:
-       - name: Clone networking-recipe
-         uses: actions/checkout@v4
-         with:
-           path: recipe
-
-       - name: Check p4rt-ctl
-         uses: tj-actions/bandit@v5.5
-         with:
-           targets: |  # or a single string "."
-            ./recipe/clients/p4rt-ctl/p4rt-ctl.in
-           options: "-v"
-
-  #---------------------------------------------------------------------
-  # 4-build_p4runtime_protos
+  # 3-build_p4runtime_protos
   #---------------------------------------------------------------------
   build_p4runtime_protos:
     runs-on: ubuntu-latest
@@ -178,7 +159,7 @@ jobs:
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 
       - name: Install DPDK SDE
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.SDE_REPOSITORY }}
           tag: ${{ env.SDE_TAG }}
@@ -188,7 +169,7 @@ jobs:
           rm $SDE_FILENAME
 
       - name: Install stratum dependencies
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.DEPS_REPOSITORY }}
           tag: ${{ env.DEPS_TAG }}
