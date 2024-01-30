@@ -673,7 +673,12 @@ absl::Status ConfigFdbTunnelTableEntry(
     PrepareFdbTableEntryforV4GeneveTunnel(table_entry, learn_info, p4info,
                                           insert_entry);
   } else {
-    return absl::UnknownError("Unsupported tunnel type");
+    if (!insert_entry) {
+      // Tunnel type doesn't matter for delete. So calling one of the functions
+      // to prepare the entry
+      PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
+                                           insert_entry);
+    }
   }
 #else
   return absl::UnknownError("Unsupported platform");
