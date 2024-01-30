@@ -469,10 +469,10 @@ class P4InfoHelper(object):
 
         if match_fields:
             for mfn, value in match_fields.items():
-                # A table can contain more than one match filed and in such cases
-                # if one match_type has ternary and other filed is of any type
+                # A table can contain more than one match field, and in such cases,
+                # if one match_type has ternary and other field is of any type,
                 # it is considered as ternary match_type.
-                # In these cases we expect priority field from the user.
+                # In these cases, we expect a priority field from the user.
                 p4info_match = self.get_match_field(table_name, mfn)
 
                 if p4info_match.match_type == p4info_pb2.MatchField.TERNARY:
