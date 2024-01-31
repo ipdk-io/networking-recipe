@@ -1921,7 +1921,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
     return absl::UnknownError("Unsupported tunnel type");
   }
 #else
-  return absl::UnknownError("Unsupported platform");
+#error "Unsupported target"
 #endif
 
   return ovs_p4rt::SendReadRequest(session, read_request);
