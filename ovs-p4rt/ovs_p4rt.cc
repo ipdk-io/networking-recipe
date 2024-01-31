@@ -681,7 +681,7 @@ absl::Status ConfigFdbTunnelTableEntry(
     }
   }
 #else
-  return absl::UnknownError("Unsupported platform");
+#error "Unsupported target"
 #endif
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
