@@ -1517,7 +1517,7 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt::OvsP4rtSession* session,
     }
   }
 #else
-  return absl::UnknownError("Unsupported platform");
+#error "Unsupported target"
 #endif
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
