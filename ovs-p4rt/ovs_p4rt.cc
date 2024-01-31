@@ -278,10 +278,9 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 }
 #endif
 
-void PrepareFdbTableEntryforV4VxlanTunnel(p4::v1::TableEntry* table_entry,
-                                     const struct mac_learning_info& learn_info,
-                                     const ::p4::config::v1::P4Info& p4info,
-                                     bool insert_entry) {
+void PrepareFdbTableEntryforV4VxlanTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -385,10 +384,9 @@ void PrepareFdbTableEntryforV4VxlanTunnel(p4::v1::TableEntry* table_entry,
   return;
 }
 
-void PrepareFdbTableEntryforV4GeneveTunnel(p4::v1::TableEntry* table_entry,
-                                     const struct mac_learning_info& learn_info,
-                                     const ::p4::config::v1::P4Info& p4info,
-                                     bool insert_entry) {
+void PrepareFdbTableEntryforV4GeneveTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -688,9 +686,9 @@ absl::Status ConfigFdbTunnelTableEntry(
 
 /* VXLAN_ENCAP_MOD_TABLE */
 void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
-                            const struct tunnel_info& tunnel_info,
-                            const ::p4::config::v1::P4Info& p4info,
-                            bool insert_entry) {
+                                 const struct tunnel_info& tunnel_info,
+                                 const ::p4::config::v1::P4Info& p4info,
+                                 bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, VXLAN_ENCAP_MOD_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -744,7 +742,6 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
 
   return;
 }
-
 
 #if defined(ES2K_TARGET)
 /* GENEVE_ENCAP_MOD_TABLE */
@@ -829,9 +826,9 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
 
 /* VXLAN_ENCAP_V6_MOD_TABLE */
 void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
-                              const struct tunnel_info& tunnel_info,
-                              const ::p4::config::v1::P4Info& p4info,
-                              bool insert_entry) {
+                                   const struct tunnel_info& tunnel_info,
+                                   const ::p4::config::v1::P4Info& p4info,
+                                   bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, VXLAN_ENCAP_V6_MOD_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -886,9 +883,9 @@ void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
 
 /* GENEVE_ENCAP_V6_MOD_TABLE */
 void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
-                              const struct tunnel_info& tunnel_info,
-                              const ::p4::config::v1::P4Info& p4info,
-                              bool insert_entry) {
+                                    const struct tunnel_info& tunnel_info,
+                                    const ::p4::config::v1::P4Info& p4info,
+                                    bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, GENEVE_ENCAP_V6_MOD_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -947,10 +944,10 @@ void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
                               bool insert_entry) {
   if (tunnel_info.tunnel_type == OVS_TUNNEL_VXLAN) {
     PrepareV6VxlanEncapTableEntry(table_entry, tunnel_info, p4info,
-                                          insert_entry);
+                                  insert_entry);
   } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
     PrepareV6GeneveEncapTableEntry(table_entry, tunnel_info, p4info,
-                                           insert_entry);
+                                   insert_entry);
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
@@ -959,10 +956,9 @@ void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 /* VXLAN_ENCAP_VLAN_POP_MOD_TABLE */
-void PrepareVxlanEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
-                                      const struct tunnel_info& tunnel_info,
-                                      const ::p4::config::v1::P4Info& p4info,
-                                      bool insert_entry) {
+void PrepareVxlanEncapAndVlanPopTableEntry(
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, VXLAN_ENCAP_VLAN_POP_MOD_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(
@@ -1020,11 +1016,11 @@ void PrepareVxlanEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 /* GENEVE_ENCAP_VLAN_POP_MOD_TABLE */
-void PrepareGeneveEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
-                                      const struct tunnel_info& tunnel_info,
-                                      const ::p4::config::v1::P4Info& p4info,
-                                      bool insert_entry) {
-  table_entry->set_table_id(GetTableId(p4info, GENEVE_ENCAP_VLAN_POP_MOD_TABLE));
+void PrepareGeneveEncapAndVlanPopTableEntry(
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
+  table_entry->set_table_id(
+      GetTableId(p4info, GENEVE_ENCAP_VLAN_POP_MOD_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(
       p4info, GENEVE_ENCAP_VLAN_POP_MOD_TABLE,
@@ -1098,10 +1094,9 @@ void PrepareEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 /* VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE */
-void PrepareV6VxlanEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
-                                        const struct tunnel_info& tunnel_info,
-                                        const ::p4::config::v1::P4Info& p4info,
-                                        bool insert_entry) {
+void PrepareV6VxlanEncapAndVlanPopTableEntry(
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE));
   auto match = table_entry->add_match();
@@ -1158,7 +1153,6 @@ void PrepareV6VxlanEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
 
   return;
 }
-
 
 /* GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE */
 void PrepareV6GeneveEncapAndVlanPopTableEntry(
@@ -1525,9 +1519,9 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt::OvsP4rtSession* session,
 
 #if defined(ES2K_TARGET)
 void PrepareVxlanDecapModTableEntry(p4::v1::TableEntry* table_entry,
-                               const struct tunnel_info& tunnel_info,
-                               const ::p4::config::v1::P4Info& p4info,
-                               bool insert_entry) {
+                                    const struct tunnel_info& tunnel_info,
+                                    const ::p4::config::v1::P4Info& p4info,
+                                    bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, VXLAN_DECAP_MOD_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, VXLAN_DECAP_MOD_TABLE,
@@ -1545,9 +1539,9 @@ void PrepareVxlanDecapModTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 void PrepareGeneveDecapModTableEntry(p4::v1::TableEntry* table_entry,
-                               const struct tunnel_info& tunnel_info,
-                               const ::p4::config::v1::P4Info& p4info,
-                               bool insert_entry) {
+                                     const struct tunnel_info& tunnel_info,
+                                     const ::p4::config::v1::P4Info& p4info,
+                                     bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, GENEVE_DECAP_MOD_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, GENEVE_DECAP_MOD_TABLE,
@@ -1570,10 +1564,10 @@ void PrepareDecapModTableEntry(p4::v1::TableEntry* table_entry,
                                bool insert_entry) {
   if (tunnel_info.tunnel_type == OVS_TUNNEL_VXLAN) {
     PrepareVxlanDecapModTableEntry(table_entry, tunnel_info, p4info,
-                                            insert_entry);
+                                   insert_entry);
   } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
     PrepareGeneveDecapModTableEntry(table_entry, tunnel_info, p4info,
-                                             insert_entry);
+                                    insert_entry);
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
@@ -1668,10 +1662,10 @@ void PrepareDecapModAndVlanPushTableEntry(
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   if (tunnel_info.tunnel_type == OVS_TUNNEL_VXLAN) {
     PrepareVxlanDecapModAndVlanPushTableEntry(table_entry, tunnel_info, p4info,
-                                   insert_entry);
+                                              insert_entry);
   } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
     PrepareGeneveDecapModAndVlanPushTableEntry(table_entry, tunnel_info, p4info,
-                                    insert_entry);
+                                               insert_entry);
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
