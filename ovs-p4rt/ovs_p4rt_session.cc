@@ -1,6 +1,6 @@
 // Copyright 2020 Google LLC
 // Copyright 2021-present Open Networking Foundation
-// Copyright 2022-2023 Intel Corporation
+// Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include "ovs_p4rt_session.h"
@@ -13,6 +13,14 @@
 #include "grpcpp/create_channel.h"
 #include "p4/v1/p4runtime.grpc.pb.h"
 #include "p4/v1/p4runtime.pb.h"
+#include "stratum/glue/status/status.h"
+#include "stratum/glue/status/status_macros.h"
+#include "stratum/lib/utils.h"
+#include "stratum/public/proto/p4_role_config.pb.h"
+
+// TODO: Use ABS_FLAG for file location
+#define DEFAULT_OVS_P4RT_ROLE_CONFIG_FILE \
+  "/usr/share/stratum/networking_role_config.pb.txt"
 
 namespace ovs_p4rt {
 
@@ -38,6 +46,11 @@ absl::Status GrpcStatusToAbslStatus(const grpc::Status& status) {
                       status.error_message());
 }
 
+absl::Status StratumStatusToAbslStatus(const ::util::Status& status) {
+  return absl::Status(static_cast<absl::StatusCode>(status.error_code()),
+                      std::string(status.error_message()));
+}
+
 // Create P4Runtime Stub.
 std::unique_ptr<P4Runtime::Stub> CreateP4RuntimeStub(
     const std::string& address,
@@ -51,14 +64,25 @@ std::unique_ptr<P4Runtime::Stub> CreateP4RuntimeStub(
 // destructed.
 absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
     std::unique_ptr<P4Runtime::Stub> stub, uint32_t device_id,
-    absl::uint128 election_id) {
+    const std::string& role_name, absl::uint128 election_id) {
   std::unique_ptr<OvsP4rtSession> session = absl::WrapUnique(
-      new OvsP4rtSession(device_id, std::move(stub), election_id));
+      new OvsP4rtSession(device_id, role_name, std::move(stub), election_id));
 
   // Send arbitration request.
   p4::v1::StreamMessageRequest arbt_request;
   auto arbitration = arbt_request.mutable_arbitration();
   arbitration->set_device_id(device_id);
+  arbitration->mutable_role()->set_name(role_name);
+  if (stratum::PathExists(DEFAULT_OVS_P4RT_ROLE_CONFIG_FILE)) {
+    // Configuration file, if present, should be parsed & processed
+    stratum::P4RoleConfig role_config;
+    ::util::Status status = stratum::ReadProtoFromTextFile(
+        DEFAULT_OVS_P4RT_ROLE_CONFIG_FILE, &role_config);
+    if (!status.ok()) {
+      return StratumStatusToAbslStatus(status);
+    }
+    arbitration->mutable_role()->mutable_config()->PackFrom(role_config);
+  }
   *arbitration->mutable_election_id() = session->election_id_;
   if (!session->stream_channel_->Write(arbt_request)) {
     session->stream_channel_->Finish();
@@ -88,7 +112,8 @@ absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
 absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
     const std::string& address,
     const std::shared_ptr<grpc::ChannelCredentials>& credentials,
-    uint32_t device_id, absl::uint128 election_id) {
+    uint32_t device_id, const std::string& role_name,
+    absl::uint128 election_id) {
   /* OVS spawns multiple revalidator threads and handler threads to handle
    * datapath Notifications.
    * When multiple L2 MAC's are learnt at the same time, the learn information
@@ -102,7 +127,7 @@ absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
    * time.
    */
   election_id = election_id + (absl::uint128)pthread_self();
-  return Create(CreateP4RuntimeStub(address, credentials), device_id,
+  return Create(CreateP4RuntimeStub(address, credentials), device_id, role_name,
                 election_id);
 }
 

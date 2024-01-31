@@ -1,4 +1,4 @@
-// Copyright 2022-2023 Intel Corporation
+// Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 // TODO: ovs-p4rt logging
 
@@ -15,9 +15,13 @@
 #include "es2k/p4_name_mapping.h"
 #endif
 
+#define DEFAULT_OVS_P4RT_ROLE_NAME "ovs-p4rt"
+
 ABSL_FLAG(std::string, grpc_addr, "localhost:9559",
           "P4Runtime server address.");
 ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
+ABSL_FLAG(std::string, role_name, DEFAULT_OVS_P4RT_ROLE_NAME,
+          "P4 config role name.");
 
 namespace ovs_p4rt {
 
@@ -2046,7 +2050,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id));
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2174,7 +2178,7 @@ void ConfigIpTunnelTermTableEntry(struct tunnel_info tunnel_info,
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id));
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2198,7 +2202,7 @@ void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id));
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2225,7 +2229,7 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id));
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2259,7 +2263,7 @@ void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id));
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2318,7 +2322,7 @@ void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry) {
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id));
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2348,7 +2352,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id));
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2408,7 +2412,7 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry) {
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
       absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id));
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
