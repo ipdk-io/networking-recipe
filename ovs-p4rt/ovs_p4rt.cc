@@ -2020,7 +2020,7 @@ absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                   insert_entry);
   }
 #else
-  return absl::UnknownError("Unsupported platform");
+#error "Unsupported target"
 #endif
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
