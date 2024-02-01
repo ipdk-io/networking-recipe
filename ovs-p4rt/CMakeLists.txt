@@ -113,8 +113,6 @@ target_link_libraries(ovs-vswitchd PUBLIC
 
 target_link_libraries(ovs-vswitchd PUBLIC stratum_static p4_role_config)
 
-target_link_libraries(ovs-vswitchd PUBLIC stratum_static)
-
 target_link_libraries(ovs-vswitchd PUBLIC
     stratum_proto
     p4runtime_proto
@@ -166,8 +164,6 @@ target_link_libraries(ovs-testcontroller PUBLIC
 )
 
 target_link_libraries(ovs-testcontroller PUBLIC stratum_static p4_role_config)
-
-target_link_libraries(ovs-testcontroller PUBLIC stratum_static)
 
 target_link_libraries(ovs-testcontroller PUBLIC
     stratum_proto
