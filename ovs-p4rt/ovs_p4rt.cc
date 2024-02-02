@@ -1301,7 +1301,8 @@ void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
       param->set_param_id(GetParamId(
           p4info, RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_ACTION_SET_SRC_PORT,
           ACTION_SET_SRC_PORT));
-      param->set_value(EncodeByteValue(1, tunnel_info.src_port));
+      param->set_value(EncodeByteValue(2, ((tunnel_info.src_port >> 8) & 0xff),
+                                       (tunnel_info.src_port & 0xff)));
     }
   }
 
