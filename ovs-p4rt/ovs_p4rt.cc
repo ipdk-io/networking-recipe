@@ -459,7 +459,7 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
                                      L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
                                      ACTION_SET_TUNNEL_V6_PARAM_IPV6_3));
       std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[0]);
+          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[2]);
       param->set_value(ip_address);
     }
 
@@ -469,7 +469,7 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
                                      L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
                                      ACTION_SET_TUNNEL_V6_PARAM_IPV6_4));
       std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[0]);
+          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[3]);
       param->set_value(ip_address);
     }
   }
@@ -1465,10 +1465,15 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
       learn_info.is_tunnel = true;
     }
 
-    status_or_read_response =
-        GetL2ToTunnelV6TableEntry(session.get(), learn_info, p4info);
-    if (status_or_read_response.ok()) {
-      learn_info.is_tunnel = true;
+    /* If learn_info.is_tunnel is true, then we dont need to check for v6 table
+     * entry. as the entry can be either in V4 or V6 tunnel table.
+     */
+    if (!learn_info.is_tunnel) {
+      status_or_read_response =
+          GetL2ToTunnelV6TableEntry(session.get(), learn_info, p4info);
+      if (status_or_read_response.ok()) {
+        learn_info.is_tunnel = true;
+      }
     }
   }
 
@@ -1477,6 +1482,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
       auto status_or_read_response =
           GetFdbTunnelTableEntry(session.get(), learn_info, p4info);
       if (status_or_read_response.ok()) {
+        printf("TUNNEL: read FDB L2_FWD_TX_TABLE entry present\n");
         return;
       }
     }
@@ -1503,6 +1509,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
       auto status_or_read_response =
           GetFdbVlanTableEntry(session.get(), learn_info, p4info);
       if (status_or_read_response.ok()) {
+        printf("Non TUNNEL: read FDB L2_FWD_TX_TABLE entry present\n");
         return;
       }
 
@@ -1551,6 +1558,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
     if (!status.ok())
       printf("%s: Failed to program l2_fwd_rx_table\n",
              insert_entry ? "ADD" : "DELETE");
+
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok())
@@ -1558,30 +1566,6 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
              insert_entry ? "ADD" : "DELETE");
   }
   if (!status.ok()) return;
-  return;
-}
-
-void ConfigIpTunnelTermTableEntry(struct tunnel_info tunnel_info,
-                                  bool insert_entry) {
-  using namespace ovs_p4rt;
-
-  // Start a new client session.
-  auto status_or_session = OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id));
-  if (!status_or_session.ok()) return;
-
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<OvsP4rtSession> session =
-      std::move(status_or_session).value();
-  ::p4::config::v1::P4Info p4info;
-  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
-  if (!status.ok()) return;
-
-  status = ConfigTunnelTermTableEntry(session.get(), tunnel_info, p4info,
-                                      insert_entry);
-  if (!status.ok()) return;
-
   return;
 }
 
@@ -1642,6 +1626,8 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
   status = ovs_p4rt::SendWriteRequest(session.get(), write_request);
 
   if (!status.ok()) return;
+
+  return;
 }
 
 void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
@@ -1765,12 +1751,6 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
                                        insert_entry);
     if (!status.ok()) return;
   }
-  return;
-}
-
-void ConfigIpTunnelTermTableEntry(struct tunnel_info tunnel_info,
-                                  bool insert_entry) {
-  /* Unimplemented for DPDK target */
   return;
 }
 
