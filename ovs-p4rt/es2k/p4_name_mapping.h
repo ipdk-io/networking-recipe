@@ -87,8 +87,6 @@ extern "C" {
 
 #define GENEVE_ENCAP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR \
   "vmeta.common.mod_blob_ptr"
-#define GENEVE_ENCAP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR \
-  "vmeta.common.mod_blob_ptr"
 
 #define ACTION_GENEVE_ENCAP "linux_networking_control.geneve_encap"
 #define ACTION_GENEVE_ENCAP_PARAM_SRC_ADDR "src_addr"
