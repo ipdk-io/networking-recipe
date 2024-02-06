@@ -11,11 +11,11 @@
 # Define SDE_INCLUDE_DIR
 #-----------------------------------------------------------------------
 find_path(SDE_INCLUDE_DIR
-    NAMES "bf_switchd/bf_switchd.h"
+    NAMES "ipu_p4d/ipu_p4d.h"
     PATHS ${SDE_INSTALL_DIR}/include
 )
 if(NOT SDE_INCLUDE_DIR)
-  message(STATUS "bf_switchd.h not found")
+  message(STATUS "ipu_p4d.h not found")
   message("---------------------------------------------")
   message("Your SDE_INSTALL_DIR appears to be incorrect.")
   message("Its current value is '${SDE_INSTALL_DIR}'.")
@@ -36,11 +36,11 @@ endif()
 #-----------------------------------------------------------------------
 # Find libraries
 #-----------------------------------------------------------------------
-find_library(LIBBF_SWITCHD bf_switchd_lib)
-if(NOT LIBBF_SWITCHD)
-  message(FATAL_ERROR "sde::bf_switchd_lib library not found")
+find_library(LIBIPU_P4D ipu_p4d_lib)
+if(NOT LIBIPU_P4D)
+  message(FATAL_ERROR "sde::ipu_p4d_lib library not found")
 endif()
-mark_as_advanced(LIBBF_SWITCHD)
+mark_as_advanced(LIBIPU_P4D)
 
 find_library(LIBDRIVER driver)
 if(NOT LIBDRIVER)
@@ -88,9 +88,9 @@ endif()
 #-----------------------------------------------------------------------
 # Define library targets
 #-----------------------------------------------------------------------
-add_library(sde::bf_switchd UNKNOWN IMPORTED)
-set_target_properties(sde::bf_switchd PROPERTIES
-    IMPORTED_LOCATION ${LIBBF_SWITCHD}
+add_library(sde::ipu_p4d UNKNOWN IMPORTED)
+set_target_properties(sde::ipu_p4d PROPERTIES
+	IMPORTED_LOCATION ${LIBIPU_P4D}
     INTERFACE_INCLUDE_DIRECTORIES ${SDE_INCLUDE_DIR}
     IMPORTED_LINK_INTERFACE_LANGUAGES C)
 
@@ -154,7 +154,7 @@ _define_es2k_library_dirs(SDE_LIBRARY_DIRS)
 #-----------------------------------------------------------------------
 function(add_es2k_target_libraries TGT)
   target_link_libraries(${TGT} PUBLIC
-      sde::bf_switchd
+      sde::ipu_p4d
       sde::driver
       sde::target_sys
       sde::target_utils
