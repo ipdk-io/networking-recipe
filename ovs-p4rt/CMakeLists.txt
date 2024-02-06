@@ -67,7 +67,7 @@ add_dependencies(ovs_sidecar_o
     p4runtime_proto
 )
 
-target_link_libraries(ovs_sidecar_o PUBLIC p4_role_config)
+target_link_libraries(ovs_sidecar_o PUBLIC stratum_static p4_role_config)
 
 ################
 # ovs-vswitchd #
