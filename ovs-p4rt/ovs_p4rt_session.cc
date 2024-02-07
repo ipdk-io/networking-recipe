@@ -20,7 +20,7 @@
 
 // TODO: Use ABS_FLAG for file location
 #define DEFAULT_OVS_P4RT_ROLE_CONFIG_FILE \
-  "/usr/share/stratum/networking_role_config.pb.txt"
+  "/usr/share/stratum/ovs_p4rt_role_config.pb.txt"
 
 namespace ovs_p4rt {
 
