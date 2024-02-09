@@ -74,7 +74,7 @@ absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
   arbitration->set_device_id(device_id);
   arbitration->mutable_role()->set_name(role_name);
   if (stratum::PathExists(DEFAULT_OVS_P4RT_ROLE_CONFIG_FILE)) {
-    // Configuration file, if present, should be parsed & processed
+    // If configuration file is present, it should be parsed & processed
     stratum::P4RoleConfig role_config;
     ::util::Status status = stratum::ReadProtoFromTextFile(
         DEFAULT_OVS_P4RT_ROLE_CONFIG_FILE, &role_config);
