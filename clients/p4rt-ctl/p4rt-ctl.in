@@ -1848,7 +1848,6 @@ def _format_me(ce):
     return output_buffer
 
 def _format_dme(ce):
-    pdb.set_trace()
     output_buffer = 'table_id={}'.format(ce.table_entry.table_id)
     output_buffer += ', direct_meter_counter_data_green=(bytes={},packets={})'.format(ce.counter_data.green.byte_count, ce.counter_data.green.packet_count)
     output_buffer += ', direct_meter_counter_data_yellow=(bytes={},packets={})'.format(ce.counter_data.yellow.byte_count, ce.counter_data.yellow.packet_count)
