@@ -1,6 +1,6 @@
 # CMake build file for ovs-p4rt
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -58,12 +58,16 @@ target_include_directories(ovs_sidecar_o PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+target_include_directories(ovs_sidecar_o PRIVATE ${STRATUM_SOURCE_DIR})
+
 target_include_directories(ovs_sidecar_o PRIVATE ${PROTO_INCLUDES})
 
 add_dependencies(ovs_sidecar_o
     stratum_proto
     p4runtime_proto
 )
+
+target_link_libraries(ovs_sidecar_o PUBLIC stratum_static p4_role_config)
 
 ################
 # ovs-vswitchd #
@@ -107,7 +111,7 @@ target_link_libraries(ovs-vswitchd PUBLIC
     absl::flags
 )
 
-target_link_libraries(ovs-vswitchd PUBLIC stratum_static)
+target_link_libraries(ovs-vswitchd PUBLIC stratum_static p4_role_config)
 
 target_link_libraries(ovs-vswitchd PUBLIC
     stratum_proto
@@ -159,7 +163,7 @@ target_link_libraries(ovs-testcontroller PUBLIC
     absl::flags
 )
 
-target_link_libraries(ovs-testcontroller PUBLIC stratum_static)
+target_link_libraries(ovs-testcontroller PUBLIC stratum_static p4_role_config)
 
 target_link_libraries(ovs-testcontroller PUBLIC
     stratum_proto
