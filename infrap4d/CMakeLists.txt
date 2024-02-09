@@ -1,6 +1,6 @@
 # Builds infrap4d daemon
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -30,6 +30,8 @@ target_link_libraries(infrap4d PRIVATE
     stratum_static
     -Wl,--no-whole-archive
 )
+
+target_link_libraries(infrap4d PRIVATE p4_role_config)
 
 if(DPDK_TARGET)
     add_dpdk_target_libraries(infrap4d)

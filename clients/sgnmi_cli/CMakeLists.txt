@@ -1,6 +1,6 @@
 # Build file for sgnmi_cli.
 #
-# Copyright 2023 Intel Corporation
+# Copyright 2023-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -13,6 +13,8 @@ add_executable(sgnmi_cli
 )
 
 set_install_rpath(sgnmi_cli ${EXEC_ELEMENT} ${DEP_ELEMENT})
+
+target_link_libraries(sgnmi_cli PRIVATE client_cert_options)
 
 target_link_libraries(sgnmi_cli
     PUBLIC
