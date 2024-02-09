@@ -25,6 +25,12 @@ ABSL_FLAG(std::string, role_name, DEFAULT_OVS_P4RT_ROLE_NAME,
 
 namespace ovs_p4rt {
 
+#if defined(ES2K_TARGET)
+static const std::string tunnel_v6_param_name[] = {
+    ACTION_SET_TUNNEL_V6_PARAM_IPV6_1, ACTION_SET_TUNNEL_V6_PARAM_IPV6_2,
+    ACTION_SET_TUNNEL_V6_PARAM_IPV6_3, ACTION_SET_TUNNEL_V6_PARAM_IPV6_4};
+#endif
+
 using OvsP4rtStream = ::grpc::ClientReaderWriter<p4::v1::StreamMessageRequest,
                                                  p4::v1::StreamMessageResponse>;
 
@@ -542,43 +548,13 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
     auto action = table_action->mutable_action();
     action->set_action_id(
         GetActionId(p4info, L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6));
-    {
+    for (unsigned int i = 0; i < 4; i++) {
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info,
                                      L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
-                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_1));
+                                     tunnel_v6_param_name[i]));
       std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[0]);
-      param->set_value(ip_address);
-    }
-
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
-                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_2));
-      std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[1]);
-      param->set_value(ip_address);
-    }
-
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
-                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_3));
-      std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[0]);
-      param->set_value(ip_address);
-    }
-
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
-                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_4));
-      std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[0]);
+          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[i]);
       param->set_value(ip_address);
     }
   }
@@ -2075,10 +2051,15 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
       learn_info.is_tunnel = true;
     }
 
-    status_or_read_response =
-        GetL2ToTunnelV6TableEntry(session.get(), learn_info, p4info);
-    if (status_or_read_response.ok()) {
-      learn_info.is_tunnel = true;
+    /* If learn_info.is_tunnel is not true, then we need to check for v6 table
+     * entry as the entry can be either in V4 or V6 tunnel table.
+     */
+    if (!learn_info.is_tunnel) {
+      status_or_read_response =
+          GetL2ToTunnelV6TableEntry(session.get(), learn_info, p4info);
+      if (status_or_read_response.ok()) {
+        learn_info.is_tunnel = true;
+      }
     }
   }
 
@@ -2087,6 +2068,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
       auto status_or_read_response =
           GetFdbTunnelTableEntry(session.get(), learn_info, p4info);
       if (status_or_read_response.ok()) {
+        printf("TUNNEL: read FDB L2_FWD_TX_TABLE entry present\n");
         return;
       }
     }
@@ -2113,6 +2095,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
       auto status_or_read_response =
           GetFdbVlanTableEntry(session.get(), learn_info, p4info);
       if (status_or_read_response.ok()) {
+        printf("Non TUNNEL: read FDB L2_FWD_TX_TABLE entry present\n");
         return;
       }
 
@@ -2161,6 +2144,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
     if (!status.ok())
       printf("%s: Failed to program l2_fwd_rx_table\n",
              insert_entry ? "ADD" : "DELETE");
+
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok())
@@ -2168,30 +2152,6 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
              insert_entry ? "ADD" : "DELETE");
   }
   if (!status.ok()) return;
-  return;
-}
-
-void ConfigIpTunnelTermTableEntry(struct tunnel_info tunnel_info,
-                                  bool insert_entry) {
-  using namespace ovs_p4rt;
-
-  // Start a new client session.
-  auto status_or_session = OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
-
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<OvsP4rtSession> session =
-      std::move(status_or_session).value();
-  ::p4::config::v1::P4Info p4info;
-  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
-  if (!status.ok()) return;
-
-  status = ConfigTunnelTermTableEntry(session.get(), tunnel_info, p4info,
-                                      insert_entry);
-  if (!status.ok()) return;
-
   return;
 }
 
@@ -2251,6 +2211,7 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
 
   status = ovs_p4rt::SendWriteRequest(session.get(), write_request);
 
+  // TODO: handle error scenarios. For now return irrespective of the status.
   if (!status.ok()) return;
 }
 
@@ -2375,12 +2336,6 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
                                        insert_entry);
     if (!status.ok()) return;
   }
-  return;
-}
-
-void ConfigIpTunnelTermTableEntry(struct tunnel_info tunnel_info,
-                                  bool insert_entry) {
-  /* Unimplemented for DPDK target */
   return;
 }
 
