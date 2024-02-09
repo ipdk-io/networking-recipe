@@ -21,6 +21,12 @@ ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
 
 namespace ovs_p4rt {
 
+#if defined(ES2K_TARGET)
+static const std::string tunnel_v6_param_name[] = {
+    ACTION_SET_TUNNEL_V6_PARAM_IPV6_1, ACTION_SET_TUNNEL_V6_PARAM_IPV6_2,
+    ACTION_SET_TUNNEL_V6_PARAM_IPV6_3, ACTION_SET_TUNNEL_V6_PARAM_IPV6_4};
+#endif
+
 using OvsP4rtStream = ::grpc::ClientReaderWriter<p4::v1::StreamMessageRequest,
                                                  p4::v1::StreamMessageResponse>;
 
@@ -538,43 +544,13 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
     auto action = table_action->mutable_action();
     action->set_action_id(
         GetActionId(p4info, L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6));
-    {
+    for (unsigned int i = 0; i < 4; i++) {
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info,
                                      L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
-                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_1));
+                                     tunnel_v6_param_name[i]));
       std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[0]);
-      param->set_value(ip_address);
-    }
-
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
-                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_2));
-      std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[1]);
-      param->set_value(ip_address);
-    }
-
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
-                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_3));
-      std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[2]);
-      param->set_value(ip_address);
-    }
-
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info,
-                                     L2_TO_TUNNEL_V6_ACTION_SET_TUNNEL_V6,
-                                     ACTION_SET_TUNNEL_V6_PARAM_IPV6_4));
-      std::string ip_address = CanonicalizeIp(
-          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[3]);
+          learn_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[i]);
       param->set_value(ip_address);
     }
   }
@@ -2071,8 +2047,8 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
       learn_info.is_tunnel = true;
     }
 
-    /* If learn_info.is_tunnel is true, then we dont need to check for v6 table
-     * entry. as the entry can be either in V4 or V6 tunnel table.
+    /* If learn_info.is_tunnel is not true, then we need to check for v6 table
+     * entry as the entry can be either in V4 or V6 tunnel table.
      */
     if (!learn_info.is_tunnel) {
       status_or_read_response =
@@ -2231,9 +2207,8 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
 
   status = ovs_p4rt::SendWriteRequest(session.get(), write_request);
 
+  // TODO: handle error scenarios. For now return irrespective of the status.
   if (!status.ok()) return;
-
-  return;
 }
 
 void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
