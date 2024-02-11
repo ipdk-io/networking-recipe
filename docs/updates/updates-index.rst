@@ -4,6 +4,7 @@
 .. toctree::
    :maxdepth: 1
 
+   development-update-24.07
    development-update-23.21
    development-update-22.50
    development-update-22.44
