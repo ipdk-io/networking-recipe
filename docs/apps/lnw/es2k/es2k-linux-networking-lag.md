@@ -261,8 +261,10 @@ The following configuration assumes that:
 - Underlay IDPF netdev has a VSI value 11 for second LAG member
 
 ```bash
-For static LAG: ip link add bond0 type bond miimon 100 mode active-backup
-For dynamic LAG: ip link add bond0 type bond miimon 100 mode 802.3ad
+# For static LAG:
+#     ip link add bond0 type bond miimon 100 mode active-backup
+# For dynamic LAG:
+#     ip link add bond0 type bond miimon 100 mode 802.3ad
 ip link set <IDPF netdev for VSI 10> down
 ip link set <IDPF netdev for VSI 10> master bond0
 ip link set <IDPF netdev for VSI 11> down
@@ -277,8 +279,10 @@ Create a LAG interface and assign IP to the LAG interface
 Assuming ens785f0np0 and ens785f1np1 ports are B2B connected to MEV.
 
 ```bash
-For static LAG: ip link add bond0 type bond miimon 100 mode active-backup
-For dynamic LAG: ip link add bond0 type bond miimon 100 mode 802.3ad
+# For static LAG:
+#     ip link add bond0 type bond miimon 100 mode active-backup
+# For dynamic LAG:
+#     ip link add bond0 type bond miimon 100 mode 802.3ad
 ip link set ens785f0np0 down
 ip link set ens785f0np0 master bond0
 ip link set ens785f1np1 down
@@ -326,4 +330,4 @@ Ex: vlan1, vlan2, vlan3 ... vlan4094.
 - LAG and ECMP are mutually exclusive. Both can't co-exist in the system configuration at the same time.
 - LAG configuration done via bonding driver is supported.
 - The supported modes are active-backup and active-active with 802.3ad (LACP).
-- Number of nexthop table entries cannot go beyond 8K, because nexthop table is now part of WCM block. 
+- Number of nexthop table entries cannot go beyond 8K, because nexthop table is now part of WCM block.
