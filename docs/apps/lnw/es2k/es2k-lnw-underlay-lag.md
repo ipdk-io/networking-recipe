@@ -54,7 +54,7 @@ Notes about topology:
 - Each physical port will have a port representor in ACC. P4 runtime rules are configured to map VFs and their corresponding port representors.
 - Each physical port will have a corresponding APF netdev on HOST. Create port representors in ACC for each HOST APF netdev. These APF netdevs on HOST will receive unknown traffic for applications to act on.
 - All port representors should be part of an OvS bridge. Based on topology, this OvS bridge will just perform bridging.
-- TEP termination on a bond interface which is used to enable underlay connectivity for VxLAN traffic.
+- TEP termination on a bond interface is used to enable underlay connectivity for VxLAN traffic.
 - OvS bridges and VxLAN ports are created using ovs-vsctl command (provided by the networking recipe).
 - Bond is created using bonding driver in kernel.
 - All port representors are attached to OvS bridge using ovs-vsctl command.
@@ -336,8 +336,8 @@ ip route change 40.1.1.0/24 via 40.1.1.2 dev bond0
 ```
 
 Sample link partner underlay configuration.
-Create a LAG interface and assign IP to the LAG interface
-Assuming ens785f0np0 and ens785f1np1 ports are B2B connected to MEV.
+Create a LAG interface and assign IP to the LAG interface.
+Assuming ens785f0np0 and ens785f1np1 ports are B2B connected to ES2K.
 
 ```bash
 # For static LAG:
@@ -364,8 +364,8 @@ For static LAG:
 
 - Verify the underlay ping is working fine via the active path.
 - Verify the overlay ping between VMs on same host is working fine via the active path.
-- Note the active link by using the command "cat /proc/net/bonding/bond0" on both MEV host and LP device.
-- Shut the active link on both MEV host and its peer Link Partner.
+- Note the active link by using the command "cat /proc/net/bonding/bond0" on both ES2K host and LP device.
+- Shut the active link on both ES2K host and its peer Link Partner.
 - Verify the switchover happened from active to backup interface.
 - Verify both underlay and overlay ping are working fine and taking a backup path.
 
