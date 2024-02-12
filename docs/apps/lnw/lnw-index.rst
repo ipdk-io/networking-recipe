@@ -25,5 +25,5 @@ ES2K
    es2k/es2k-lnw-overlay-ipv6
    es2k/es2k-lnw-underlay-ecmp
    es2k/es2k-lnw-underlay-frr
-   es2k/es2k-linux-networking-lag
+   es2k/es2k-lnw-underlay-lag
 

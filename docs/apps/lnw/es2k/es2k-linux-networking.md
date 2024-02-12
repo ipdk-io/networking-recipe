@@ -65,9 +65,9 @@ For egress VxLAN traffic, an OvS VxLAN port needs to be created in ACC with asso
 
 Once these tables are configured refer to packet flow as mentioned below.
 
-#### For Tx
+#### For slow path Tx forwarding
 
-##### Egress traffic without VxLAN encapsulation
+##### Slow path egress traffic without VxLAN encapsulation
 
 Packets coming from overlay network:
 
@@ -83,7 +83,7 @@ Packets coming from overlay network:
     ovs-vsctl add-port br-int <Physical port PR>
     ```
 
-##### Egress traffic with VxLAN encapsulation
+##### Slow path egress traffic with VxLAN encapsulation
 
 Packets coming from overlay network:
 
@@ -105,9 +105,9 @@ Packets coming from overlay network:
     ovs-vsctl add-port br-tep-termination <Physical port PR>
     ```
 
-#### For Rx
+#### For slow path Rx forwarding
 
-##### Ingress traffic without VxLAN encapsulation
+##### Slow path ingress traffic without VxLAN encapsulation
 
 If the packet coming from a remote machine to the physical port is not VxLAN encapsulated packet:
 
@@ -123,7 +123,7 @@ If the packet coming from a remote machine to the physical port is not VxLAN enc
     ovs-vsctl add-port br-int <Physical port PR>
     ```
 
-##### Ingress traffic with VxLAN encapsulation
+##### Slow path ingress traffic with VxLAN encapsulation
 
 If the packet coming from a remote machine to the physical port is VxLAN encapsulated packet:
 
@@ -200,9 +200,9 @@ When underlay network is configured and underlay neighbor is learnt we dynamical
 
 Once these tables are configured refer to packet flow as mentioned below.
 
-#### For Tx
+#### For fast path Tx forwarding
 
-##### Egress traffic without VxLAN encapsulation
+##### Fast path egress traffic without VxLAN encapsulation
 
 Packets coming from overlay network:
 
@@ -218,7 +218,7 @@ Packets coming from overlay network:
     ovs-vsctl add-port br-int <Physical port PR>
     ```
 
-##### Egress traffic with VxLAN encapsulation
+##### Fast path egress traffic with VxLAN encapsulation
 
 Packets coming from overlay network:
 
@@ -239,9 +239,9 @@ Packets coming from overlay network:
     ovs-vsctl add-port br-tep-termination <Physical port PR>
     ```
 
-#### For Rx
+#### For fast path Rx forwarding
 
-##### Ingress traffic without VxLAN encapsulation
+##### Fast path ingress traffic without VxLAN encapsulation
 
 If the packet coming from a remote machine to the physical port is not VxLAN encapsulated packet:
 
@@ -257,7 +257,7 @@ If the packet coming from a remote machine to the physical port is not VxLAN enc
     ovs-vsctl add-port br-int <Physical port PR>
     ```
 
-##### Ingress traffic with VxLAN encapsulation
+##### Fast path ingress traffic with VxLAN encapsulation
 
 If the packet coming from a remote machine to the physical port are VxLAN encapsulated packet:
 
@@ -293,14 +293,6 @@ Current Linux Networking support for the networking recipe has the following lim
 - Add all ACC PR's to VSI group 1.
 - On ACC, firewall needs to be disabled. Otherwise, this service will block encapsulated packets.
   - systemctl stop firewalld
-- See LNW-V2 README_P4_CP_NWS, which comes with the P4 program for more information about limitations in router_interface_id action in nexthop_table(Defect filed).
-  - Manually modify context.json to remove NOP hardware action for in context.json from "set_nexthop " action in "nexthop_table". Open defect is present in p4-sde to fix this issue. Content to be removed under hardware action in context.json is
-```text
-{
-    "prec": 0,
-    "action_code": "NOP",
-    "index": 0,
-    "value": 0,
-    "mask": 0
-},
-```
+- LAG and ECMP are mutually exclusive. Both can't co-exist in the system configuration at the same time.
+- LAG configuration done via bonding driver is supported.
+- The supported modes are active-backup and active-active with 802.3ad (LACP).
