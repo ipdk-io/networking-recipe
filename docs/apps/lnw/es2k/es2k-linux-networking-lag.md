@@ -296,6 +296,7 @@ ip link set bond0 up
 ### Test the ping scenarios
 
 For static LAG:
+
 - Verify the underlay ping is working fine via the active path.
 - Verify the overlay ping between VMs on same host is working fine via the active path.
 - Note the active link by using the command "cat /proc/net/bonding/bond0" on both MEV host and LP device.
@@ -304,6 +305,7 @@ For static LAG:
 - Verify both underlay and overlay ping are working fine and taking a backup path.
 
 For dynamic LAG:
+
 - Verify the underlay ping is working fine.
 - Verify the overlay ping between VMs on same host is working fine.
 - Note down the interface which is forwarding the traffic.
@@ -323,5 +325,5 @@ Ex: vlan1, vlan2, vlan3 ... vlan4094.
 - For VxLAN tunneled packets only IPv4-in-IPv4 is supported.
 - LAG and ECMP are mutually exclusive. Both can't co-exist in the system configuration at the same time.
 - LAG configuration done via bonding driver is supported.
-- The supported modes are active-backup and 802.3ad (LACP).
+- The supported modes are active-backup and active-active with 802.3ad (LACP).
 - Number of nexthop table entries cannot go beyond 8K, because nexthop table is now part of WCM block. 
