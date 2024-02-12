@@ -98,7 +98,7 @@ jobs:
 
       - name: Install linter
         run: |
-          pip3 install rstcheck
+          pip3 install rstcheck[sphinx]
 
       - name: Get changed restructured text files
         id: changed
