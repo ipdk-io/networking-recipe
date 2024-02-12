@@ -293,14 +293,6 @@ Current Linux Networking support for the networking recipe has the following lim
 - Add all ACC PR's to VSI group 1.
 - On ACC, firewall needs to be disabled. Otherwise, this service will block encapsulated packets.
   - systemctl stop firewalld
-- See LNW-V2 README_P4_CP_NWS, which comes with the P4 program for more information about limitations in router_interface_id action in nexthop_table(Defect filed).
-  - Manually modify context.json to remove NOP hardware action for in context.json from "set_nexthop " action in "nexthop_table". Open defect is present in p4-sde to fix this issue. Content to be removed under hardware action in context.json is
-```text
-{
-    "prec": 0,
-    "action_code": "NOP",
-    "index": 0,
-    "value": 0,
-    "mask": 0
-},
-```
+- LAG and ECMP are mutually exclusive. Both can't co-exist in the system configuration at the same time.
+- LAG configuration done via bonding driver is supported.
+- The supported modes are active-backup and active-active with 802.3ad (LACP).
