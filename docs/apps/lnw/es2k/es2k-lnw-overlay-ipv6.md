@@ -1,21 +1,21 @@
 <!--
-/*
- * Copyright 2024 Intel Corporation.
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at:
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
+ Copyright 2024 Intel Corporation.
+
+ SPDX-License-Identifier: Apache-2.0
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at:
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
 - -->
 
 # Linux Networking with IPv6 (ES2K)
@@ -31,7 +31,7 @@ for more details on this feature.
 
 Prerequisites:
 
-- Download `hw-p4-programs` TAR file specific to the build and extract it to get `fxp-net_linux-networking-v2` p4 artifacts. Go through `Limitations` specified in `README` and bringup the setup accordingly.
+- Download `hw-p4-programs` TAR file specific to the build and extract it to get `fxp-net_linux-networking-v2` p4 artifacts. Go through `Limitations` specified in `README` and bring up the setup accordingly.
 - Follow steps mentioned in [Deploying P4 Programs for E2100](/guides/es2k/deploying-p4-programs) for bringing up IPU with a custom P4 package.
 Modify `load_custom_pkg.sh` with following parameters for linux_networking package:
 
@@ -50,28 +50,29 @@ Modify `load_custom_pkg.sh` with following parameters for linux_networking packa
 Notes about topology:
 
 - VMs are spawned on top of each VF. Each VF will have a port representor in ACC. P4 runtime rules are configured to map VFs and their corresponding port representors.
-- Each physical port will have a port representor in ACC. P4 runtime rules are configured to map VFs and its corresponding port representors.
-- Each physical port will have a corresponding APF netdev on HOST. Create port representors in ACC for each HOST APF netdev. These APF netdev on HOST will receive unknown traffic for applications to act on.
-- All port representors should be part of an OvS bridge. Based on topology, these OvS bridges will just perform bridging or TEP termination bridges which are used to enable underlay connectivity for VxLAN traffic.
-- OvS bridges, VxLAN ports are created using ovs-vsctl command provided by the networking recipe and all the port representors are attached to OvS bridge using ovs-vsctl command.
+- Each physical port will have a port representor in ACC. P4 runtime rules are configured to map VFs and their corresponding port representors.
+- Each physical port will have a corresponding APF netdev on HOST. Create port representors in ACC for each HOST APF netdev. These APF netdevs on HOST will receive unknown traffic for applications to act on.
+- All port representors should be part of an OvS bridge. Based on topology, this OvS bridge will just perform bridging or TEP termination on a bridge which is used to enable underlay connectivity for VxLAN traffic.
+- OvS bridges and VxLAN ports are created using ovs-vsctl command (provided by the networking recipe).
+- All port representors are attached to OvS bridge using ovs-vsctl command.
 - This config has:
   - 1 Overlay VF
-  - 1 Port representors in ACC for the above 1 Overlay VF1
+  - 1 Port representors in ACC for the 1 Overlay VF
   - 2 physical ports
-  - 2 Port representors in ACC for the above 2 physical ports
-  - 2 APF netdev on HOST
-  - 2 Port representors in ACC for the above 2 HOST APF netdevs
+  - 2 Port representors in ACC for the 2 physical ports
+  - 2 APF netdevs on HOST
+  - 2 Port representors in ACC for the 2 HOST APF netdevs
   - TEP termination dummy interface
 
-System under test will have above topology running the networking recipe. Link Partner can have the networking recipe or legacy OvS or kernel VxLAN. Refer to the limitation section in [Linux Networking for E2100](es2k-linux-networking.md) before setting up the topology.
+System under test will have above topology running the networking recipe. Link Partner can have the networking recipe or legacy OvS or kernel VxLAN. Refer to the Limitations section in [Linux Networking for E2100](es2k-linux-networking.md) before setting up the topology.
 
 ## Creating the topology
 
 Follow steps mentioned in [Running Infrap4d on Intel E2100](/guides/es2k/running-infrap4d.md) for starting `infrap4d` process and creating protobuf binary for `fxp-net_linux-networking-v2` p4 program.
 
-### Port Mapping
+### Port mapping
 
-These VSI values can be checked with `/usr/bin/cli_client -q -c` command on IMC. This command provides VSI ID, Vport ID, and corresponding MAC addresses for all
+These VSI values can be checked with `/usr/bin/cli_client -q -c` command on IMC. This command provides VSI ID, Vport ID, and MAC addresses for all:
 
 - IDPF netdevs on ACC
 - VFs on HOST
@@ -92,7 +93,7 @@ These VSI values can be checked with `/usr/bin/cli_client -q -c` command on IMC.
 | ens802f0d1    | (0x18) 24 | enp0s1f0d10 | (0x12) 18 |
 | ens802f0d2    | (0x19) 25 | enp0s1f0d12 | (0x14) 20 |
 
-(NOTE: Above port names and its VSI ID's may different from setup to setup, configure accordingly)
+(NOTE: Port names and their VSI IDs may differ from setup to setup. Configure accordingly.)
 
 ### Set the forwarding pipeline
 
@@ -104,31 +105,30 @@ $P4CP_INSTALL/bin/p4rt-ctl set-pipe br0 $OUTPUT_DIR/fxp-net_linux-networking-v2.
     $OUTPUT_DIR/p4info.txt
 ```
 
-Note: Assuming `fxp-net_linux-networking-v2.pb.bin` and `p4info.txt`
-along with other P4 artifacts are created as per the steps mentioned in the previous section.
+Note: Assumes that `fxp-net_linux-networking-v2.pb.bin`, `p4info.txt` and other P4 artifacts, are created by following the steps in the previous section.
 
 ### Configure VSI Group and add a netdev
 
-Add all ACC port representors to VSI group 1. VSI group 1 is dedicated for this configuration,
-execute below devmem commands on IMC.
+Add all ACC port representors to VSI group 1. VSI group 1 is dedicated for this configuration.
+Execute the following devmem commands on IMC.
 
 ```bash
-# SEM_DIRECT_MAP_PGEN_CTRL: LSB 11-bit is for vsi which need to map into vsig
+# SEM_DIRECT_MAP_PGEN_CTRL: LSB 11-bit is for vsi which needs to map into vsig
 devmem 0x20292002a0 64 0x8000050000000009
 
 # SEM_DIRECT_MAP_PGEN_DATA_VSI_GROUP : This will set vsi
 # (set in SEM_DIRECT_MAP_PGEN_CTRL register LSB) into VSIG-1.
 devmem 0x2029200388 64 0x1
 
-# SEM_DIRECT_MAP_PGEN_CTRL: LSB 11-bit is for vsi which need to map into vsig
+# SEM_DIRECT_MAP_PGEN_CTRL: LSB 11-bit is for vsi which needs to map into vsig
 devmem 0x20292002a0 64 0xA000050000000009
 ```
 
-Note: Here VSI 9 has been used as one of the ACC port representors and added to VSI group 1. For this use case add all 5 IDPF interfaces created on ACC. Modify this VSI based on your configuration.
+Note: Here VSI 9 has been used as one of the ACC port representors and added to VSI group 1. For this use case, add all 5 IDPF interfaces created on ACC. Modify this VSI based on your configuration.
 
 ### Start OvS as a separate process
 
-Enhanced OvS is used as a control plane for source MAC learning of overlay VM's. This OvS binary is available as part of ACC build and should be started as a separate process.
+Enhanced OvS is used as a control plane for source MAC learning of overlay VMs. This OvS binary is available as part of ACC build and should be started as a separate process.
 
 ```bash
 export RUN_OVS=/opt/p4/p4-cp-nws
@@ -173,9 +173,9 @@ ifconfig <Netdev connected to VF> up
 ifconfig <Netdev connected to VF>.10 up
 ```
 
-Option 2: If we are unable to spawn VM's on top of the VF's, we can leverage kernel network namespaces.
+Option 2: If we are unable to spawn VMs on top of the VFs, we can leverage kernel network namespaces.
 Move each VF to a network namespace and assign IP addresses.
-Example: Below config is provided for one VM, and considering each namespace is in one VLAN. Extend this to other namespaces.
+Example: Below config is provided for one overlay port, and tag each port in the namespace to a single VLAN. Extend this to other namespaces.
 
 ```bash
 ip netns add VM0
@@ -188,14 +188,13 @@ ip netns exec VM0  ifconfig <VF1 port>.10 up
 
 ### Configure rules for mapping between Overlay VF and ACC port representor
 
-Configure rules to send overlay packets from a VM to its respective port representors.
+Configure rules to send overlay packets from a VM to its associated port representors.
 
-Refer above port mapping for overlay VF to ACC port representor mapping. Here sample commands are shown for a single overlay network, configure similar mapping for remaining VFs.
+Refer to above port mapping for overlay VF to ACC port representor mapping. Here, sample commands are shown for a single overlay network. Configure similar mapping for remaining VFs.
 
 Example:
 
-- Overlay VF1 has a VSI value 27
-- Corresponding port representor VSI value 9
+- Overlay VF1 has a VSI value 27, its corresponding port representor has VSI value 9
 - If a VSI is used as an action, add an offset of 16 to the VSI value
 
 ```bash
@@ -222,14 +221,13 @@ Example:
 
 ### Configure rules for mapping between Physical port and ACC port representor
 
-Configure rules to send ingress packets from a physical port to its respective port representors.
+Configure rules to send ingress packets from a physical port to its associated port representors.
 
-Refer above port mapping for physical port to ACC port representor mapping. Here sample commands are shown for a single physical port, configure similar mapping for remaining physical ports.
+Refer to above port mapping for physical port to ACC port representor mapping. Here, sample commands are shown for a single physical port. Configure similar mapping for remaining physical ports.
 
 Example:
 
-- Physical port 0 port id is 0
-- Corresponding port representor VSI value 17
+- Physical port 0 port id is 0, its corresponding port representor has VSI value 17
 - If a VSI is used as an action, add an offset of 16 to the VSI value
 
 ```bash
@@ -251,14 +249,13 @@ Example:
 
 ### Configure rules for mapping between APF netdev on HOST and ACC port representor
 
-Configure rules to send APF netdev on HOST to its respective port representors.
+Configure rules to send APF netdev on HOST to its associated port representors.
 
-Refer above port mapping for APF netdev on HOST to ACC port representor mapping. Here sample commands are shown for APF netdev on HOST, configure similar mapping for remaining APF netdevs on HOST.
+Refer to above port mapping for APF netdev on HOST to ACC port representor mapping. Here, sample commands are shown for APF netdev on HOST. Configure similar mapping for remaining APF netdevs on HOST.
 
 Example:
 
-- APF netdev 1 on HOST has a VSI value 24
-- Corresponding port representor VSI value 18
+- APF netdev 1 on HOST has a VSI value 24, its corresponding port representor has VSI value 18
 - If a VSI is used as an action, add an offset of 16 to the VSI value
 
 ```bash
