@@ -10,7 +10,7 @@ configuration files are available to assist in generating certificates and
 keys using OpenSSL. You may use other tools if you wish.
 
 The [reference files](https://github.com/ipdk-io/stratum-dev/tree/split-arch/tools/tls)
-use a simple PKI where a self-signed key and certificate.
+use a simple PKI with a self-signed key and certificate.
 The root level Certificate Authority (CA) is used to generate server-side
 key and cert files, and client-side key and cert files. This results in a
 1-depth level certificate chain, which will suffice for validation and

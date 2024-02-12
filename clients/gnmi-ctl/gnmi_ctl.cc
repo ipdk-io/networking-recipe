@@ -1,5 +1,5 @@
 // Copyright 2019-present Open Networking Foundation
-// Copyright 2021-2023 Intel Corporation
+// Copyright 2021-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include <csignal>
@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "../client_cert_options.h"
 #include "absl/cleanup/cleanup.h"
 #include "gflags/gflags.h"
 #include "gnmi/gnmi.grpc.pb.h"
@@ -28,8 +29,6 @@
 DEFINE_bool(grpc_use_insecure_mode, false,
             "grpc communication channel in insecure mode");
 DECLARE_bool(grpc_use_insecure_mode);
-
-#define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
 const char kUsage[] =
     R"USAGE(usage: gnmi-ctl [Options] {get,set,cap,sub-onchange,sub-sample} parameters
@@ -283,11 +282,7 @@ void traverse_params(char** path, char* node_path, char* config_value,
 
 ::util::Status Main(int argc, char** argv) {
   // Default certificate file location for TLS-mode
-  FLAGS_ca_cert_file = DEFAULT_CERTS_DIR "ca.crt";
-  FLAGS_server_key_file = DEFAULT_CERTS_DIR "stratum.key";
-  FLAGS_server_cert_file = DEFAULT_CERTS_DIR "stratum.crt";
-  FLAGS_client_key_file = DEFAULT_CERTS_DIR "client.key";
-  FLAGS_client_cert_file = DEFAULT_CERTS_DIR "client.crt";
+  set_client_cert_defaults();
 
   // Parse command line flags
   gflags::ParseCommandLineFlags(&argc, &argv, true);

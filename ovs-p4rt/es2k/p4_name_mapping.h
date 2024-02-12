@@ -58,7 +58,7 @@ extern "C" {
 #define ACTION_VXLAN_ENCAP_V6_PARAM_DS "ds"
 #define ACTION_VXLAN_ENCAP_V6_PARAM_ECN "ecn"
 #define ACTION_VXLAN_ENCAP_V6_PARAM_FLOW_LABEL "flow_label"
-#define ACTION_VXLAN_ENCAP_V6_PARAM_hop_limit "hop_limit"
+#define ACTION_VXLAN_ENCAP_V6_PARAM_HOP_LIMIT "hop_limit"
 #define ACTION_VXLAN_ENCAP_V6_PARAM_SRC_PORT "src_port"
 #define ACTION_VXLAN_ENCAP_V6_PARAM_DST_PORT "dst_port"
 #define ACTION_VXLAN_ENCAP_V6_PARAM_VNI "vni"
@@ -77,10 +77,76 @@ extern "C" {
 #define ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_DS "ds"
 #define ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_ECN "ecn"
 #define ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_FLOW_LABEL "flow_label"
-#define ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_hop_limit "hop_limit"
+#define ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_HOP_LIMIT "hop_limit"
 #define ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_SRC_PORT "src_port"
 #define ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_DST_PORT "dst_port"
 #define ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_VNI "vni"
+
+/* GENEVE_ENCAP_MOD_TABLE */
+#define GENEVE_ENCAP_MOD_TABLE "linux_networking_control.geneve_encap_mod_table"
+
+#define GENEVE_ENCAP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR \
+  "vmeta.common.mod_blob_ptr"
+
+#define ACTION_GENEVE_ENCAP "linux_networking_control.geneve_encap"
+#define ACTION_GENEVE_ENCAP_PARAM_SRC_ADDR "src_addr"
+#define ACTION_GENEVE_ENCAP_PARAM_DST_ADDR "dst_addr"
+#define ACTION_GENEVE_ENCAP_PARAM_DST_PORT "dst_port"
+#define ACTION_GENEVE_ENCAP_PARAM_SRC_PORT "src_port"
+#define ACTION_GENEVE_ENCAP_PARAM_VNI "vni"
+
+/* GENEVE_ENCAP_VLAN_POP_MOD_TABLE */
+#define GENEVE_ENCAP_VLAN_POP_MOD_TABLE \
+  "linux_networking_control.geneve_encap_vlan_pop_mod_table"
+
+#define GENEVE_ENCAP_VLAN_POP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR \
+  "vmeta.common.mod_blob_ptr"
+
+#define ACTION_GENEVE_ENCAP_VLAN_POP \
+  "linux_networking_control.geneve_encap_vlan_pop"
+
+#define ACTION_GENEVE_ENCAP_VLAN_POP_PARAM_SRC_ADDR "src_addr"
+#define ACTION_GENEVE_ENCAP_VLAN_POP_PARAM_DST_ADDR "dst_addr"
+#define ACTION_GENEVE_ENCAP_VLAN_POP_PARAM_DST_PORT "dst_port"
+#define ACTION_GENEVE_ENCAP_VLAN_POP_PARAM_SRC_PORT "src_port"
+#define ACTION_GENEVE_ENCAP_VLAN_POP_PARAM_VNI "vni"
+
+/* GENEVE_ENCAP_V6_MOD_TABLE */
+#define GENEVE_ENCAP_V6_MOD_TABLE \
+  "linux_networking_control.geneve_encap_v6_mod_table"
+
+#define GENEVE_ENCAP_V6_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR \
+  "vmeta.common.mod_blob_ptr"
+
+#define ACTION_GENEVE_ENCAP_V6 "linux_networking_control.geneve_encap_v6"
+#define ACTION_GENEVE_ENCAP_V6_PARAM_SRC_ADDR "src_addr"
+#define ACTION_GENEVE_ENCAP_V6_PARAM_DST_ADDR "dst_addr"
+#define ACTION_GENEVE_ENCAP_V6_PARAM_DS "ds"
+#define ACTION_GENEVE_ENCAP_V6_PARAM_ECN "ecn"
+#define ACTION_GENEVE_ENCAP_V6_PARAM_FLOW_LABEL "flow_label"
+#define ACTION_GENEVE_ENCAP_V6_PARAM_HOP_LIMIT "hop_limit"
+#define ACTION_GENEVE_ENCAP_V6_PARAM_SRC_PORT "src_port"
+#define ACTION_GENEVE_ENCAP_V6_PARAM_DST_PORT "dst_port"
+#define ACTION_GENEVE_ENCAP_V6_PARAM_VNI "vni"
+
+/* GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE */
+#define GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE \
+  "linux_networking_control.geneve_encap_v6_vlan_pop_mod_table"
+
+#define GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR \
+  "vmeta.common.mod_blob_ptr"
+
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP \
+  "linux_networking_control.geneve_encap_v6_vlan_pop"
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_SRC_ADDR "src_addr"
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_DST_ADDR "dst_addr"
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_DS "ds"
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_ECN "ecn"
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_FLOW_LABEL "flow_label"
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_HOP_LIMIT "hop_limit"
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_SRC_PORT "src_port"
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_DST_PORT "dst_port"
+#define ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_VNI "vni"
 
 /* IPV4_TUNNEL_TERM_TABLE */
 #define IPV4_TUNNEL_TERM_TABLE "linux_networking_control.ipv4_tunnel_term_table"
@@ -90,12 +156,14 @@ extern "C" {
 #define IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_DST "ipv4_dst"
 #define IPV4_TUNNEL_TERM_TABLE_KEY_VNI "vni"
 
-#define ACTION_DECAP_OUTER_HDR "linux_networking_control.decap_outer_hdr"
-#define ACTION_DECAP_OUTER_HDR_PARAM_TUNNEL_ID "tunnel_id"
-
-#define ACTION_DECAP_OUTER_HDR_AND_PUSH_VLAN \
-  "linux_networking_control.decap_outer_and_push_vlan"
-#define ACTION_DECAP_OUTER_HDR_AND_PUSH_VLAN_PARAM_TUNNEL_ID "tunnel_id"
+#define ACTION_SET_VXLAN_DECAP_OUTER_HDR \
+  "linux_networking_control.set_vxlan_decap_outer_hdr"
+#define ACTION_SET_VXLAN_DECAP_OUTER_HDR_AND_PUSH_VLAN \
+  "linux_networking_control.set_vxlan_decap_outer_and_push_vlan"
+#define ACTION_SET_GENEVE_DECAP_OUTER_HDR \
+  "linux_networking_control.set_geneve_decap_outer_hdr"
+#define ACTION_SET_GENEVE_DECAP_OUTER_HDR_AND_PUSH_VLAN \
+  "linux_networking_control.set_geneve_decap_outer_and_push_vlan"
 
 /* IPV6_TUNNEL_TERM_TABLE */
 #define IPV6_TUNNEL_TERM_TABLE "linux_networking_control.ipv6_tunnel_term_table"
@@ -121,6 +189,24 @@ extern "C" {
 #define ACTION_VXLAN_DECAP_AND_PUSH_VLAN_PARAM_PCP "pcp"
 #define ACTION_VXLAN_DECAP_AND_PUSH_VLAN_PARAM_DEI "dei"
 #define ACTION_VXLAN_DECAP_AND_PUSH_VLAN_PARAM_VLAN_ID "vlan_id"
+
+/* GENEVE_DECAP_MOD TABLE */
+#define GENEVE_DECAP_MOD_TABLE "linux_networking_control.geneve_decap_mod_table"
+#define GENEVE_DECAP_MOD_TABLE_KEY_MOD_BLOB_PTR "vmeta.common.mod_blob_ptr"
+#define ACTION_GENEVE_DECAP_OUTER_HDR \
+  "linux_networking_control.geneve_decap_outer_hdr"
+
+/* GENEVE_DECAP_AND_VLAN_PUSH_MOD TABLE */
+#define GENEVE_DECAP_AND_VLAN_PUSH_MOD_TABLE \
+  "linux_networking_control.geneve_decap_and_push_vlan_mod_table"
+#define GENEVE_DECAP_AND_VLAN_PUSH_MOD_TABLE_KEY_MOD_BLOB_PTR \
+  "vmeta.common.mod_blob_ptr"
+
+#define ACTION_GENEVE_DECAP_AND_PUSH_VLAN \
+  "linux_networking_control.geneve_decap_and_push_vlan"
+#define ACTION_GENEVE_DECAP_AND_PUSH_VLAN_PARAM_PCP "pcp"
+#define ACTION_GENEVE_DECAP_AND_PUSH_VLAN_PARAM_DEI "dei"
+#define ACTION_GENEVE_DECAP_AND_PUSH_VLAN_PARAM_VLAN_ID "vlan_id"
 
 /* L2_FWD_RX_TABLE */
 #define L2_FWD_RX_TABLE "linux_networking_control.l2_fwd_rx_table"
@@ -159,25 +245,31 @@ extern "C" {
 
 #define L2_FWD_TX_TABLE_ACTION_L2_FWD "linux_networking_control.l2_fwd"
 
-#define L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V4 \
-  "linux_networking_control.set_tunnel_underlay_v4"
+#define L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V4 \
+  "linux_networking_control.set_vxlan_underlay_v4"
 
-#define ACTION_SET_TUNNEL_UNDERLAY_V4_PARAM_TUNNEL_ID "tunnel_id"
+#define L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V4 \
+  "linux_networking_control.set_geneve_underlay_v4"
 
-#define L2_FWD_TX_TABLE_ACTION_SET_TUNNEL_UNDERLAY_V6 \
-  "linux_networking_control.set_tunnel_underlay_v6"
+#define L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V6 \
+  "linux_networking_control.set_vxlan_underlay_v6"
 
-#define ACTION_SET_TUNNEL_UNDERLAY_V6_PARAM_TUNNEL_ID "tunnel_id"
+#define L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V6 \
+  "linux_networking_control.set_geneve_underlay_v6"
 
-#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V4 \
-  "linux_networking_control.pop_vlan_set_tunnel_underlay_v4"
+#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V4 \
+  "linux_networking_control.pop_vlan_set_vxlan_underlay_v4"
 
-#define ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V4_PARAM_TUNNEL_ID "tunnel_id"
+#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V4 \
+  "linux_networking_control.pop_vlan_set_geneve_underlay_v4"
 
-#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V6 \
-  "linux_networking_control.pop_vlan_set_tunnel_underlay_v6"
+#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V6 \
+  "linux_networking_control.pop_vlan_set_vxlan_underlay_v6"
 
-#define ACTION_POP_VLAN_SET_TUNNEL_UNDERLAY_V6_PARAM_TUNNEL_ID "tunnel_id"
+#define L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V6 \
+  "linux_networking_control.pop_vlan_set_geneve_underlay_v6"
+
+#define ACTION_PARAM_TUNNEL_ID "tunnel_id"
 
 #define L2_FWD_TX_TABLE_ACTION_ADD_VLAN_AND_FWD \
   "linux_networking_control.add_vlan_and_fwd"

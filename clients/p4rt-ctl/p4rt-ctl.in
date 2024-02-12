@@ -1,6 +1,6 @@
 #! @PYTHON3@
 #
-# Copyright (c) 2021-2023 Intel Corporation.
+# Copyright (c) 2021-2024 Intel Corporation.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -590,8 +590,11 @@ class P4RuntimeClient:
 
     def __init__(self, device_id, grpc_addr='localhost:9559',
                  election_id=(1, 0)):
+        global client_role_name
+
         self.device_id = device_id
         self.election_id = election_id
+        self.role_name = client_role_name
         grpc_addr = str(grpc_server_addr)
 
         root_ca_file_path = '/usr/share/stratum/certs/ca.crt'
@@ -664,6 +667,8 @@ class P4RuntimeClient:
         election_id = arbitration.election_id
         election_id.high = self.election_id[0]
         election_id.low = self.election_id[1]
+        if self.role_name is not None:
+            arbitration.role.name = self.role_name
         self.stream_out_q.put(req)
 
         rep = self.get_stream_packet("arbitration", timeout=2)
@@ -730,6 +735,8 @@ class P4RuntimeClient:
         election_id = req.election_id
         election_id.high = self.election_id[0]
         election_id.low = self.election_id[1]
+        if self.role_name is not None:
+            req.role = self.role_name
         req.action = p4runtime_pb2.SetForwardingPipelineConfigRequest. \
             VERIFY_AND_COMMIT
         with open(p4info_path, 'r') as f1:
@@ -757,6 +764,8 @@ class P4RuntimeClient:
         election_id = req.election_id
         election_id.high = self.election_id[0]
         election_id.low = self.election_id[1]
+        if self.role_name is not None:
+            req.role = self.role_name
         return self.stub.Write(req)
 
     @parse_p4runtime_write_error
@@ -766,6 +775,8 @@ class P4RuntimeClient:
         election_id = req.election_id
         election_id.high = self.election_id[0]
         election_id.low = self.election_id[1]
+        if self.role_name is not None:
+            req.role = self.role_name
         req.updates.extend([update])
         return self.stub.Write(req)
 
@@ -1848,7 +1859,6 @@ def _format_me(ce):
     return output_buffer
 
 def _format_dme(ce):
-    pdb.set_trace()
     output_buffer = 'table_id={}'.format(ce.table_entry.table_id)
     output_buffer += ', direct_meter_counter_data_green=(bytes={},packets={})'.format(ce.counter_data.green.byte_count, ce.counter_data.green.packet_count)
     output_buffer += ', direct_meter_counter_data_yellow=(bytes={},packets={})'.format(ce.counter_data.yellow.byte_count, ce.counter_data.yellow.packet_count)
@@ -1976,16 +1986,20 @@ def validate_args(argv, command, expected_nr):
         raise Exception("p4rt-ctl: '{}' command requires at least {} "
                         "arguments".format(command, expected_nr))
 
-# Global variable
+# Global variables
 grpc_server_addr = ""
+client_role_name = None
 
 def main():
     global grpc_server_addr
+    global client_role_name
+
     if len(sys.argv) < 2:
         print("p4rt-ctl: missing command name; use --help for help")
         sys.exit(1)
     parser = argparse.ArgumentParser(usage=USAGE)
     parser.add_argument('-g', '--grpc_addr', required=False, type=str, help="P4Runtime gRPC server address, format : <server IP>:<port>")
+    parser.add_argument('-r', '--role_name', required=False, type=str, help="Role name of this client")
     parser.add_argument('command', nargs='*', help='Subcommand to run')
     args = parser.parse_args()
     if args.grpc_addr is None:
@@ -1997,6 +2011,11 @@ def main():
         else:
             print("Invalid IP address for GRPC server ")
             system.exit(1)
+    
+    # client_role_name will default to 'None' (global var) unless user sets
+    # a name using the args.role_name flag
+    client_role_name = args.role_name
+
     if args.command[0] not in all_commands.keys():
         usage()
 
