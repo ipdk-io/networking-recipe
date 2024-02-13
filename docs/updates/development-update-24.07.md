@@ -10,19 +10,19 @@ the Intel IPU E2100.
 ### Client Flags
 
 - The Stratum `CredentialsManager` class and `gnmi_cli` tool have been aligned
-  with the current upstream version, and IPDK modifications have been
-  overhauled to be more consistent with Stratum as a whole.
+  with the current upstream versions, and IPDK modifications have been
+  revised to be more consistent with Stratum as a whole.
 
   The `-grpc_client_cert_req_type` flag is now `-client_cert_req_type`, and
-  its value names have been shortened.
+  its values have been shortened. They are also now case-insensitive.
 
   | Old Name | New Name |
   | -------- | -------- |
-  | NO_REQUEST_CLIENT_CERT | NO_REQUEST |
-  | REQUEST_CLIENT_CERT_NO_VERIFY | REQUEST_NO_VERIFY |
-  | REQUEST_CLIENT_CERT_AND_VERIFY | REQUEST_AND_VERIFY |
-  | REQUIRE_CLIENT_CERT_NO_VERIFY | REQUIRE_NO_VERIFY |
-  | REQUIRE_CLIENT_CERT_AND_VERIFY | REQUIRE_AND_VERIFY |
+  | NO_REQUEST_CLIENT_CERT | no_request |
+  | REQUEST_CLIENT_CERT_NO_VERIFY | request_no_verify |
+  | REQUEST_CLIENT_CERT_AND_VERIFY | request_and_verify |
+  | REQUIRE_CLIENT_CERT_NO_VERIFY | require_no_verify |
+  | REQUIRE_CLIENT_CERT_AND_VERIFY | require_and_verify |
 
   This change affects all clients that use CredentialsManager, including
   `gnmi_cli`, `sgnmi_cli`, and `gnmi-ctl`.
@@ -48,7 +48,7 @@ there were many).
 
 Changes include:
 
-- Specifying `--test_output=errors` when running `bazel test`, so the
+- Defaulting to `--test_output=errors` when running `bazel test`, so the
   the test log becomes part of the console output if there are errors.
 
 - Adding support for the OpenConfig `/interfaces/interface[name=*]/state/id`
@@ -84,14 +84,13 @@ This can be done later, if the need arises.
 
 ## P4Runtime Fork
 
-P4 Control Plane currently uses a fork of the `p4runtime` repository to
-add provisional support for the PacketModMeter and DirectPacketModMeter
-externs.
+P4 Control Plane uses a fork of the `p4runtime` repository to add provisional
+support for the PacketModMeter and DirectPacketModMeter externs.
 
-The plan is to revert to using the standard `p4runtime` repository when
-the additions are officially adopted.
+We plan to revert to using the standard `p4runtime` repository when the
+additions become standard.
 
-Build artifacts for Python, Go, and C++ are available for download on the
+Build artifacts for Python, Go, and C++ can be downloaded from the
 [Releases page](https://github.com/ipdk-io/p4runtime-dev/releases)
 of the repository. The current version is 2023.11.0.
 
@@ -100,3 +99,8 @@ If you wish to build the protobuf artifacts yourself, see the
 for instructions.
 
 ## Coming Attractions
+
+- Combined Networking and IPsec recipe
+- LAG-in-LACP mode
+- Geneve tunnels
+- Default actions
