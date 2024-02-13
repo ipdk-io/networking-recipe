@@ -56,7 +56,7 @@ This document explains with `l3-fwd_sem` as a reference P4 program and the P4 ar
 
 ### Copy P4 artifacts to ACC
 
-Copy `bf-rt.json`, `context.json`, `p4info.txt` to the ACC. See
+Copy `tdi.json`, `context.json`, `p4info.txt` to the ACC. See
 [Compiling P4 programs](compiling-p4-programs.md)
 for instructions on generating these files manually without downloading from
 release build.
@@ -127,12 +127,12 @@ with the following parameters:
    Specify the name of P4 pipeline. For l3-fwd_sem example, replace
    `P4-PIPELINE-NAME` with `main`
 
-- `bfrt-config`,  `context`, `config` and `path`
+- `tdi-config`,  `context`, `config` and `path`
 
    Specify the absolute paths for the files. For l3-fwd_sem sample program:
 
-   Replace `ABSOLUTE-PATH-TO-BFRT-JSON-FILE` with
-   `/opt/p4/l3-fwd_sem/bf-rt.json`
+   Replace `ABSOLUTE-PATH-TO-TDI-JSON-FILE` with
+   `/opt/p4/l3-fwd_sem/tdi.json`
 
    Replace `ABSOLUTE-PATH-TO-CONTEXT-JSON-FILE` with
    `/opt/p4/l3-fwd_sem/context.json`
@@ -166,7 +166,7 @@ The final es2k_skip_p4.conf for l3-fwd_sem sample program will look like:
         "p4_programs": [
         {
             "program-name": "l3-fwd_sem",
-            "bfrt-config": "/opt/p4/l3-fwd_sem/bf-rt.json",
+            "tdi-config": "/opt/p4/l3-fwd_sem/tdi.json",
             "p4_pipelines": [
             {
                 "p4_pipeline_name": "main",
