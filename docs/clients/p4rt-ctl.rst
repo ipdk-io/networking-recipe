@@ -58,8 +58,8 @@ To generate pb.bin:
 
 .. code-block:: bash
 
-   tdi_pipeline_builder --p4c_conf_file=<path-to-input-sample-file.conf> \
-       --bf_pipeline_config_binary_file=<path-to-output-file.pb.bin>
+   tdi_pipeline_builder --p4c_conf_file="<path-to-input-sample-file.conf>" \
+       --bf_pipeline_config_binary_file="<path-to-output-file.pb.bin>"
 
 For example,
 
@@ -75,8 +75,8 @@ For example,
    of sample.conf
 
 
-p4rt-ctl
---------
+p4rt-ctl Tool
+-------------
 
 ``p4rt-ctl`` is an executable generated when P4 Control Plane is built. It
 connects to the P4Runtime server in ``infrap4d`` via gRPC for
@@ -447,9 +447,9 @@ Examples:
 
 .. code-block:: bash
 
-   p4rt-ctl get-direct-counter br0 my_control.e_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000461",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3"" // Egress(Tx)
+   p4rt-ctl get-direct-counter br0 my_control.e_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000461",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3"" // Egress/Tx
 
-   p4rt-ctl get-direct-counter br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000361",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3"" // Ingress(Rx)
+   p4rt-ctl get-direct-counter br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000361",hdrs.mac[vmeta.common.depth].sa="0x9ebace98d9d3"" // Ingress/Rx
 
 Get flow dump entries
 ~~~~~~~~~~~~~~~~~~~~~
@@ -506,7 +506,7 @@ Example:
 
 .. code-block:: bash
 
-   p4rt-ctl add-entry br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000193",hdrs.mac[vmeta.common.depth].sa="0x9ebace99d1d2",config_data=policer_meter_prof_id=0,policer_spec_cir_unit=0,policer_spec_cbs_unit=1,policer_spec_eir_unit=0,policer_spec_ebs_unit=1,policer_spec_cir=100,policer_spec_cbs=1500,policer_spec_eir=100,policer_spec_ebs=1500,action=my_control.send_with_policer_meter3(17)"   
+   p4rt-ctl add-entry br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000193",hdrs.mac[vmeta.common.depth].sa="0x9ebace99d1d2",config_data=policer_meter_prof_id=0,policer_spec_cir_unit=0,policer_spec_cbs_unit=1,policer_spec_eir_unit=0,policer_spec_ebs_unit=1,policer_spec_cir=100,policer_spec_cbs=1500,policer_spec_eir=100,policer_spec_ebs=1500,action=my_control.send_with_policer_meter3(17)"
 
 Get direct meter value
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -526,7 +526,7 @@ Examples:
 
 .. code-block:: bash
 
-   p4rt-ctl get-direct-meter br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000193",hdrs.mac[vmeta.common.depth].sa="0x9ebace99d1d2" 
+   p4rt-ctl get-direct-meter br0 my_control.i_fwd "hdrs.mac[vmeta.common.depth].da="0x000000000193",hdrs.mac[vmeta.common.depth].sa="0x9ebace99d1d2""
 
 Get indirect meter value
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -540,7 +540,7 @@ Arguments:
 * ``SWITCH``: Bridge name. Maps internally to device name.
 * ``METER_TABLE``: Specifies meter table entry from the p4 file.
 * ``METER_FLOW``: Meter ID (generated ID by p4c; see tdi.json file)
-  and meter table index. 
+  and meter table index.
   Format: "meter_id=<number>,meter_index=<number>".
 
 Examples:
