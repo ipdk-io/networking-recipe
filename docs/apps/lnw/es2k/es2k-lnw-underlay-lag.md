@@ -293,6 +293,18 @@ For TCAM entry configure LPM LUT table
      "user_meta.cmeta.bit32_zeros=4/255.255.255.255,priority=65535,action=linux_networking_control.ipv4_lpm_root_lut_action(0)"
 ```
 
+Create a map between source port and bridge ID 0.
+
+```bash
+ p4rt-ctl add-entry br0 linux_networking_control.source_port_to_bridge_map \
+     "user_meta.cmeta.source_port=0/0xffff,hdrs.vlan_ext[vmeta.common.depth].hdr.vid=0/0xfff,priority=1,action=linux_networking_control.set_bridge_id(0)"
+
+ p4rt-ctl add-entry br0 linux_networking_control.source_port_to_bridge_map \
+     "user_meta.cmeta.source_port=1/0xffff,hdrs.vlan_ext[vmeta.common.depth].hdr.vid=0/0xfff,priority=1,action=linux_networking_control.set_bridge_id(0)"
+```
+
+Note: Configuration mapping between source port of physical port and bridge ID 0 will be removed when support for the Bond interface being added to an OvS bridge is enabled.
+
 ### Create integration bridge and add ports to the bridge
 
 Create OvS bridge, VxLAN tunnel and assign overlay VFs port representor to individual bridges.
