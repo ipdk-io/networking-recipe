@@ -19,7 +19,7 @@ P4 build artifacts for sample.p4:
 
 * sample.conf
 * p4info.txt
-* bf-rt.json
+* tdi.json
 * pipe/context.json
 * pipe/sample.spec
 
@@ -51,7 +51,7 @@ tdi_pipeline_builder
 
 tdi_pipeline_builder is an executable generated when P4 Control Plane is
 built. It is used to generate a protobuf-based bin file. This pb.bin
-contains information of bfrt-config, context and config which are extracted
+contains information of tdi-config, context and config which are extracted
 from sample.conf which is generated via the P4 compiler.
 
 To generate pb.bin:
@@ -71,7 +71,7 @@ For example,
 .. important::
 
    You need to execute this command from the parent directory of
-   relative paths mentioned in bfrt-config/context/config parameters
+   relative paths mentioned in tdi-config/context/config parameters
    of sample.conf
 
 
@@ -396,7 +396,7 @@ Arguments:
 
 * ``SWITCH``: Bridge name. Maps internally to device name.
 * ``COUNTER_TABLE``: Specifies counter table entry from the p4 file.
-* ``COUNTER_FLOW``: Counter ID (generated ID by p4c; see bfrt.json file)
+* ``COUNTER_FLOW``: Counter ID (generated ID by p4c; see tdi.json file)
   and counter table index. Format: "counter_id=<number>,index=<number>".
   counter_id=0 will display value for all counters added up. For index=UNSET,
   all cells for specified counter_id will be displayed.
@@ -420,7 +420,7 @@ Arguments:
 
 * ``SWITCH``: Bridge name. Maps internally to device name.
 * ``COUNTER_TABLE``: counter table entry from the p4 file.
-* ``COUNTER_FLOW``: counter ID (generated ID by p4c;  see bfrt.json file)
+* ``COUNTER_FLOW``: counter ID (generated ID by p4c;  see tdi.json file)
   and counter table index. Format: "counter_id=<number>,index=<number>".
 
 Example:
@@ -539,7 +539,7 @@ Arguments:
 
 * ``SWITCH``: Bridge name. Maps internally to device name.
 * ``METER_TABLE``: Specifies meter table entry from the p4 file.
-* ``METER_FLOW``: Meter ID (generated ID by p4c; see bfrt.json file)
+* ``METER_FLOW``: Meter ID (generated ID by p4c; see tdi.json file)
   and meter table index. 
   Format: "meter_id=<number>,meter_index=<number>".
 
