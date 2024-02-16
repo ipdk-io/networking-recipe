@@ -44,7 +44,8 @@ provided to assist in extracting all table IDs from the provided input file.
 Each P4 client will need its own role configuration, so run the script twice to
 create two separate files.
 
-.. code-block:: shell
+.. code-block:: text
+
    python $P4CP_RECIPE/install/sbin/extract_table_ids_from_p4info.py \
          -i p4info.txt -o /usr/share/stratum/ovs_p4rt_role_config.pb.txt
 
@@ -59,7 +60,8 @@ for the defined client role.
 
 Following shows table IDs with comments added showing table name for clarity.
 
-.. code-block:: shell
+.. code-block:: text
+
    $ cat /usr/share/stratum/ovs_p4rt_role_config.pb.txt
 
    exclusive_p4_ids: 41667918  // table ID for linux_networking_control.ipv4_lpm_root_lut
@@ -71,7 +73,8 @@ Following shows table IDs with comments added showing table name for clarity.
    receives_packet_ins: false
    can_push_pipeline: true
 
-.. code-block:: shell
+.. code-block:: text
+
    $ cat /usr/share/stratum/ipsec_role_config.pb.txt
 
    exclusive_p4_ids: 48773578  // table ID for MainControlDecrypt.lem_exception
