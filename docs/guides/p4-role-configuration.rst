@@ -33,9 +33,8 @@ exclusive access to specified P4 tables. Clients chosen for this example are
 Linux Networking and IPsec.
 
 1. Compile P4 program
-Compile the application program according to the instructions in
-[Compiling P4 programs](/guides/es2k/compiling-p4-programs.md)
-to generate P4 artifacts for programming the pipeline.
+Compile the application program according to the instructions in Compiling P4
+programs guide to generate P4 artifacts for programming the pipeline.
 
 2. Extract table IDs
 From the P4 artifact `p4info.txt`, extract P4 table IDs. A helper script is
