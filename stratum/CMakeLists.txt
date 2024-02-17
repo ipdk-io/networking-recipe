@@ -1,6 +1,6 @@
 # CMake build file for Stratum code.
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -36,6 +36,9 @@ set(STRATUM_INCLUDES
     # Protobuf C++ header files.
     ${PB_OUT_DIR}
 )
+
+set(PB_HEADER_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/stratum/pb)
+set(DOT_PROTO_INSTALL_DIR ${CMAKE_INSTALL_DATAROOTDIR}/stratum/proto)
 
 add_subdirectory(proto)
 add_subdirectory(stratum)
