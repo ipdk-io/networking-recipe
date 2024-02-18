@@ -128,9 +128,11 @@ add_library(p4runtime_proto SHARED
 
 target_link_libraries(p4runtime_proto
     PUBLIC
+        absl::synchronization
+        gRPC::grpc
+        gRPC::grpc++
         grpc_proto
         protobuf::libprotobuf
-        absl::synchronization
 )
 
 set_install_rpath(p4runtime_proto $ORIGIN ${DEP_ELEMENT})
