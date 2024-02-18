@@ -110,6 +110,7 @@ add_library(p4runtime_proto_o OBJECT
 target_include_directories(p4runtime_proto_o PUBLIC ${PB_OUT_DIR})
 
 add_dependencies(p4runtime_proto_o
+    grpc_status_proto_o
     p4data_proto_o
     p4info_proto_o
 )
@@ -169,8 +170,6 @@ generate_proto_files("${STRATUM_BF_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
 
 # stratum_proto1_o
 add_library(stratum_proto1_o OBJECT
-    ${PB_OUT_DIR}/stratum/public/proto/p4_table_defs.pb.h
-    ${PB_OUT_DIR}/stratum/public/proto/p4_table_defs.pb.cc
     ${PB_OUT_DIR}/stratum/public/proto/p4_annotation.pb.h
     ${PB_OUT_DIR}/stratum/public/proto/p4_annotation.pb.cc
     ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_control.pb.h
@@ -189,7 +188,10 @@ add_library(stratum_proto1_o OBJECT
 
 # Ensure that the header files on which we depend have been generated
 # before we start building the current library.
-add_dependencies(stratum_proto1_o p4runtime_proto_o)
+add_dependencies(stratum_proto1_o
+    p4_table_defs_proto_o
+    p4runtime_proto_o
+)
 
 target_include_directories(stratum_proto1_o PRIVATE ${PB_OUT_DIR})
 
@@ -203,19 +205,25 @@ add_library(stratum_proto2_o OBJECT
 
 # Ensure that the header files on which we depend have been generated
 # before we start building the current library.
-add_dependencies(stratum_proto2_o error_proto_o)
-add_dependencies(stratum_proto2_o p4runtime_proto_o)
-add_dependencies(stratum_proto2_o stratum_proto1_o)
+add_dependencies(stratum_proto2_o
+    error_proto_o
+    p4runtime_proto_o
+    stratum_proto1_o
+)
 
 target_include_directories(stratum_proto2_o PRIVATE ${PB_OUT_DIR})
 
 # stratum_proto
 add_library(stratum_proto SHARED
     $<TARGET_OBJECTS:error_proto_o>
+    $<TARGET_OBJECTS:p4_table_defs_proto_o>
     $<TARGET_OBJECTS:stratum_proto1_o>
     $<TARGET_OBJECTS:stratum_proto2_o>
 )
 
-target_link_libraries(stratum_proto PUBLIC protobuf::libprotobuf)
+target_link_libraries(stratum_proto PUBLIC
+    p4runtime_proto
+    protobuf::libprotobuf
+)
 
 install(TARGETS stratum_proto LIBRARY)
