@@ -4,10 +4,6 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-#############################
-# Define Generate functions #
-#############################
-
 set(PROTO_PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 # List of directories to be searched for Protobuf inputs.
@@ -21,9 +17,9 @@ string(JOIN ":" PROTO_IMPORT_PATH
 
 include(ProtobufCompile)
 
-#######################
-# Build libgrpc_proto #
-#######################
+########################
+# Google RPC Protobufs #
+########################
 
 set(GRPC_PROTO_FILES
     google/rpc/status.proto
@@ -32,15 +28,30 @@ set(GRPC_PROTO_FILES
 
 generate_proto_files("${GRPC_PROTO_FILES}" "${GOOGLEAPIS_SOURCE_DIR}")
 
-# Internal target
-add_library(grpc_proto SHARED
-    ${PB_OUT_DIR}/google/rpc/status.pb.cc
-    ${PB_OUT_DIR}/google/rpc/status.pb.h
+# code.proto
+add_library(grpc_code_proto_o OBJECT
     ${PB_OUT_DIR}/google/rpc/code.pb.cc
     ${PB_OUT_DIR}/google/rpc/code.pb.h
 )
 
-target_include_directories(grpc_proto PRIVATE ${PB_OUT_DIR})
+target_include_directories(grpc_code_proto_o PUBLIC ${PB_OUT_DIR})
+
+# status.proto
+add_library(grpc_status_proto_o OBJECT
+    ${PB_OUT_DIR}/google/rpc/status.pb.cc
+    ${PB_OUT_DIR}/google/rpc/status.pb.h
+)
+
+target_include_directories(grpc_status_proto_o PUBLIC ${PB_OUT_DIR})
+
+#######################
+# Build libgrpc_proto #
+#######################
+
+add_library(grpc_proto SHARED
+    $<TARGET_OBJECTS:grpc_code_proto_o>
+    $<TARGET_OBJECTS:grpc_status_proto_o>
+)
 
 target_link_libraries(grpc_proto PUBLIC protobuf::libprotobuf)
 
@@ -48,9 +59,9 @@ set_install_rpath(grpc_proto ${DEP_ELEMENT})
 
 install(TARGETS grpc_proto LIBRARY)
 
-############################
-# Build libp4runtime_proto #
-############################
+#######################
+# P4Runtime Protobufs #
+#######################
 
 set(P4RT_PROTO_FILES
     p4/v1/p4data.proto
@@ -62,23 +73,57 @@ set(P4RT_PROTO_FILES
 generate_proto_files("${P4RT_PROTO_FILES}" "${P4RUNTIME_SOURCE_DIR}/proto")
 generate_grpc_files("p4/v1/p4runtime.proto" "${P4RUNTIME_SOURCE_DIR}/proto")
 
-# External target
-add_library(p4runtime_proto SHARED
-    ${PB_OUT_DIR}/p4/v1/p4runtime.pb.cc
-    ${PB_OUT_DIR}/p4/v1/p4runtime.pb.h
-    ${PB_OUT_DIR}/p4/v1/p4runtime.grpc.pb.cc
-    ${PB_OUT_DIR}/p4/v1/p4runtime.grpc.pb.h
+# p4data.proto
+add_library(p4data_proto_o OBJECT
     ${PB_OUT_DIR}/p4/v1/p4data.pb.cc
     ${PB_OUT_DIR}/p4/v1/p4data.pb.h
-    ${PB_OUT_DIR}/p4/config/v1/p4types.pb.cc
-    ${PB_OUT_DIR}/p4/config/v1/p4types.pb.h
+)
+
+target_include_directories(p4data_proto_o PUBLIC ${PB_OUT_DIR})
+
+# p4info.proto
+add_library(p4info_proto_o OBJECT
     ${PB_OUT_DIR}/p4/config/v1/p4info.pb.cc
     ${PB_OUT_DIR}/p4/config/v1/p4info.pb.h
 )
 
-#add_dependencies(p4runtime_proto grpc_proto)
+add_dependencies(p4info_proto_o p4types_proto_o)
 
-target_include_directories(p4runtime_proto PRIVATE ${PB_OUT_DIR})
+target_include_directories(p4info_proto_o PUBLIC ${PB_OUT_DIR})
+
+# p4types.proto
+add_library(p4types_proto_o OBJECT
+    ${PB_OUT_DIR}/p4/config/v1/p4types.pb.cc
+    ${PB_OUT_DIR}/p4/config/v1/p4types.pb.h
+)
+
+target_include_directories(p4types_proto_o PUBLIC ${PB_OUT_DIR})
+
+# p4runtime.proto
+add_library(p4runtime_proto_o OBJECT
+    ${PB_OUT_DIR}/p4/v1/p4runtime.pb.cc
+    ${PB_OUT_DIR}/p4/v1/p4runtime.pb.h
+    ${PB_OUT_DIR}/p4/v1/p4runtime.grpc.pb.cc
+    ${PB_OUT_DIR}/p4/v1/p4runtime.grpc.pb.h
+)
+
+target_include_directories(p4runtime_proto_o PUBLIC ${PB_OUT_DIR})
+
+add_dependencies(p4runtime_proto_o
+    p4data_proto_o
+    p4info_proto_o
+)
+
+############################
+# Build libp4runtime_proto #
+############################
+
+add_library(p4runtime_proto SHARED
+    $<TARGET_OBJECTS:p4data_proto_o>
+    $<TARGET_OBJECTS:p4info_proto_o>
+    $<TARGET_OBJECTS:p4runtime_proto_o>
+    $<TARGET_OBJECTS:p4types_proto_o>
+)
 
 target_link_libraries(p4runtime_proto
     PUBLIC
