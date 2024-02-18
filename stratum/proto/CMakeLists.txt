@@ -155,7 +155,6 @@ set(STRATUM_P4_PROTO_FILES
 )
 
 set(STRATUM_BF_PROTO_FILES
-    stratum/hal/lib/p4/p4_control.proto
     stratum/hal/lib/p4/common_flow_entry.proto
     stratum/hal/lib/p4/p4_table_map.proto
     stratum/hal/lib/p4/p4_pipeline_config.proto
@@ -167,8 +166,6 @@ generate_proto_files("${STRATUM_BF_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
 
 # stratum_proto1_o
 add_library(stratum_proto1_o OBJECT
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_control.pb.h
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_control.pb.cc
     ${PB_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.h
     ${PB_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.cc
     ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.h
@@ -185,6 +182,7 @@ add_library(stratum_proto1_o OBJECT
 # before we start building the current library.
 add_dependencies(stratum_proto1_o
     p4_annotation_proto_o
+    p4_control_proto_o
     p4_table_defs_proto_o
     p4runtime_proto_o
 )
@@ -213,6 +211,7 @@ target_include_directories(stratum_proto2_o PRIVATE ${PB_OUT_DIR})
 add_library(stratum_proto SHARED
     $<TARGET_OBJECTS:error_proto_o>
     $<TARGET_OBJECTS:p4_annotation_proto_o>
+    $<TARGET_OBJECTS:p4_control_proto_o>
     $<TARGET_OBJECTS:p4_table_defs_proto_o>
     $<TARGET_OBJECTS:stratum_proto1_o>
     $<TARGET_OBJECTS:stratum_proto2_o>
