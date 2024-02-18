@@ -189,14 +189,12 @@ add_library(stratum_proto1_o OBJECT
 
 # Ensure that the header files on which we depend have been generated
 # before we start building the current library.
-add_dependencies(stratum_proto1_o p4runtime_proto)
+add_dependencies(stratum_proto1_o p4runtime_proto_o)
 
 target_include_directories(stratum_proto1_o PRIVATE ${PB_OUT_DIR})
 
 # stratum_proto2_o
 add_library(stratum_proto2_o OBJECT
-    ${PB_OUT_DIR}/stratum/public/proto/error.pb.cc
-    ${PB_OUT_DIR}/stratum/public/proto/error.pb.h
     ${PB_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.cc
     ${PB_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.h
     ${PB_OUT_DIR}/stratum/hal/lib/phal/db.pb.cc
@@ -205,13 +203,15 @@ add_library(stratum_proto2_o OBJECT
 
 # Ensure that the header files on which we depend have been generated
 # before we start building the current library.
-add_dependencies(stratum_proto2_o p4runtime_proto)
+add_dependencies(stratum_proto2_o error_proto_o)
+add_dependencies(stratum_proto2_o p4runtime_proto_o)
 add_dependencies(stratum_proto2_o stratum_proto1_o)
 
 target_include_directories(stratum_proto2_o PRIVATE ${PB_OUT_DIR})
 
 # stratum_proto
 add_library(stratum_proto SHARED
+    $<TARGET_OBJECTS:error_proto_o>
     $<TARGET_OBJECTS:stratum_proto1_o>
     $<TARGET_OBJECTS:stratum_proto2_o>
 )
