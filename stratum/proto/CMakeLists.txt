@@ -151,7 +151,6 @@ add_subdirectory(openconfig)
 ##########################
 
 set(STRATUM_P4_PROTO_FILES
-    stratum/hal/lib/common/common.proto
     stratum/hal/lib/p4/forwarding_pipeline_configs.proto
     stratum/hal/lib/phal/db.proto
 )
@@ -174,8 +173,6 @@ add_library(stratum_proto1_o OBJECT
     ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.cc
     ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.h
     ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.cc
-    ${PB_OUT_DIR}/stratum/hal/lib/common/common.pb.cc
-    ${PB_OUT_DIR}/stratum/hal/lib/common/common.pb.h
     ${PB_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.h
     ${PB_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.cc
 )
@@ -183,6 +180,7 @@ add_library(stratum_proto1_o OBJECT
 # Ensure that the header files on which we depend have been generated
 # before we start building the current library.
 add_dependencies(stratum_proto1_o
+    common_proto_o
     p4_annotation_proto_o
     p4_control_proto_o
     p4_table_defs_proto_o
@@ -211,6 +209,7 @@ target_include_directories(stratum_proto2_o PRIVATE ${PB_OUT_DIR})
 
 # stratum_proto
 add_library(stratum_proto SHARED
+    $<TARGET_OBJECTS:common_proto_o>
     $<TARGET_OBJECTS:error_proto_o>
     $<TARGET_OBJECTS:p4_annotation_proto_o>
     $<TARGET_OBJECTS:p4_control_proto_o>
