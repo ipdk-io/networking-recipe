@@ -4,20 +4,16 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-set(STRATUM_P4_PROTO_FILES
-    stratum/hal/lib/p4/forwarding_pipeline_configs.proto
-    stratum/hal/lib/phal/db.proto
-)
-
-set(STRATUM_BF_PROTO_FILES
+set(STRATUM_PROTO_FILES
     stratum/hal/lib/p4/common_flow_entry.proto
-    stratum/hal/lib/p4/p4_table_map.proto
+    stratum/hal/lib/p4/forwarding_pipeline_configs.proto
     stratum/hal/lib/p4/p4_pipeline_config.proto
+    stratum/hal/lib/p4/p4_table_map.proto
+    stratum/hal/lib/phal/db.proto
     stratum/hal/lib/tdi/tdi.proto
 )
 
-generate_proto_files("${STRATUM_P4_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
-generate_proto_files("${STRATUM_BF_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
+generate_proto_files("${STRATUM_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
 
 ####################
 # libstratum_proto #
@@ -40,9 +36,12 @@ add_library(stratum_proto SHARED
 target_include_directories(stratum_proto PUBLIC ${PB_OUT_DIR})
 
 target_link_libraries(stratum_proto PUBLIC
+    grpc_proto
     p4runtime_proto
     protobuf::libprotobuf
 )
+
+set_install_rpath(stratum_proto $ORIGIN ${DEP_ELEMENT})
 
 install(TARGETS stratum_proto LIBRARY)
 
