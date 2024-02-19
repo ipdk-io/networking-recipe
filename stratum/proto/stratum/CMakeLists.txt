@@ -19,58 +19,25 @@ set(STRATUM_BF_PROTO_FILES
 generate_proto_files("${STRATUM_P4_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
 generate_proto_files("${STRATUM_BF_PROTO_FILES}" "${STRATUM_SOURCE_DIR}")
 
-# stratum_proto1_o
-add_library(stratum_proto1_o OBJECT
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.h
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.cc
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.h
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.cc
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.h
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.cc
-    ${PB_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.h
-    ${PB_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.cc
-)
+####################
+# libstratum_proto #
+####################
 
-# Ensure that the header files on which we depend have been generated
-# before we start building the current library.
-add_dependencies(stratum_proto1_o
-    common_proto_o
-    p4_annotation_proto_o
-    p4_control_proto_o
-    p4_table_defs_proto_o
-    p4runtime_proto_o
-)
-
-target_include_directories(stratum_proto1_o PRIVATE ${PB_OUT_DIR})
-
-# stratum_proto2_o
-add_library(stratum_proto2_o OBJECT
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.cc
-    ${PB_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.h
-    ${PB_OUT_DIR}/stratum/hal/lib/phal/db.pb.cc
-    ${PB_OUT_DIR}/stratum/hal/lib/phal/db.pb.h
-)
-
-# Ensure that the header files on which we depend have been generated
-# before we start building the current library.
-add_dependencies(stratum_proto2_o
-    error_proto_o
-    p4runtime_proto_o
-    stratum_proto1_o
-)
-
-target_include_directories(stratum_proto2_o PRIVATE ${PB_OUT_DIR})
-
-# stratum_proto
 add_library(stratum_proto SHARED
     $<TARGET_OBJECTS:common_proto_o>
+    $<TARGET_OBJECTS:common_flow_entry_proto_o>
     $<TARGET_OBJECTS:error_proto_o>
+    $<TARGET_OBJECTS:forwarding_pipeline_configs_proto_o>
     $<TARGET_OBJECTS:p4_annotation_proto_o>
     $<TARGET_OBJECTS:p4_control_proto_o>
+    $<TARGET_OBJECTS:p4_pipeline_config_proto_o>
     $<TARGET_OBJECTS:p4_table_defs_proto_o>
-    $<TARGET_OBJECTS:stratum_proto1_o>
-    $<TARGET_OBJECTS:stratum_proto2_o>
+    $<TARGET_OBJECTS:p4_table_map_proto_o>
+    $<TARGET_OBJECTS:phal_db_proto_o>
+    $<TARGET_OBJECTS:stratum_tdi_proto_o>
 )
+
+target_include_directories(stratum_proto PUBLIC ${PB_OUT_DIR})
 
 target_link_libraries(stratum_proto PUBLIC
     p4runtime_proto
@@ -78,3 +45,101 @@ target_link_libraries(stratum_proto PUBLIC
 )
 
 install(TARGETS stratum_proto LIBRARY)
+
+#############################
+# common_flow_entry_proto_o #
+#############################
+
+add_library(common_flow_entry_proto_o OBJECT
+  ${PB_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.h
+  ${PB_OUT_DIR}/stratum/hal/lib/p4/common_flow_entry.pb.cc
+)
+
+target_include_directories(common_flow_entry_proto_o PUBLIC ${PB_OUT_DIR})
+
+add_dependencies(common_flow_entry_proto_o
+  p4_table_defs_proto_o
+  p4_annotation_proto_o
+  p4runtime_proto_o
+)
+
+#######################################
+# forwarding_pipeline_configs_proto_o #
+#######################################
+
+add_library(forwarding_pipeline_configs_proto_o OBJECT
+  ${PB_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.h
+  ${PB_OUT_DIR}/stratum/hal/lib/p4/forwarding_pipeline_configs.pb.cc
+)
+
+target_include_directories(forwarding_pipeline_configs_proto_o PUBLIC ${PB_OUT_DIR})
+
+add_dependencies(forwarding_pipeline_configs_proto_o
+  p4runtime_proto_o
+)
+
+##############################
+# p4_pipeline_config_proto_o #
+##############################
+
+add_library(p4_pipeline_config_proto_o OBJECT
+  ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.h
+  ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_pipeline_config.pb.cc
+)
+
+target_include_directories(p4_pipeline_config_proto_o PUBLIC ${PB_OUT_DIR})
+
+add_dependencies(p4_pipeline_config_proto_o
+  p4_annotation_proto_o
+  p4_control_proto_o
+  p4_table_map_proto_o
+  p4runtime_proto_o
+)
+
+########################
+# p4_table_map_proto_o #
+########################
+
+add_library(p4_table_map_proto_o OBJECT
+  ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.h
+  ${PB_OUT_DIR}/stratum/hal/lib/p4/p4_table_map.pb.cc
+)
+
+target_include_directories(p4_table_map_proto_o PUBLIC ${PB_OUT_DIR})
+
+add_dependencies(p4_table_map_proto_o
+  common_flow_entry_proto_o
+  p4_annotation_proto_o
+  p4_table_defs_proto_o
+  p4info_proto_o
+)
+
+###################
+# phal_db_proto_o #
+###################
+
+add_library(phal_db_proto_o OBJECT
+  ${PB_OUT_DIR}/stratum/hal/lib/phal/db.pb.cc
+  ${PB_OUT_DIR}/stratum/hal/lib/phal/db.pb.h
+)
+
+target_include_directories(phal_db_proto_o PUBLIC ${PB_OUT_DIR})
+
+add_dependencies(phal_db_proto_o
+  common_proto_o
+)
+
+#######################
+# stratum_tdi_proto_o #
+#######################
+
+add_library(stratum_tdi_proto_o OBJECT
+  ${PB_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.h
+  ${PB_OUT_DIR}/stratum/hal/lib/tdi/tdi.pb.cc
+)
+
+target_include_directories(stratum_tdi_proto_o PUBLIC ${PB_OUT_DIR})
+
+add_dependencies(stratum_tdi_proto_o
+  p4info_proto_o
+)
