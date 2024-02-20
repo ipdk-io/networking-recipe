@@ -218,15 +218,15 @@ p4c-pna-xxp -I/usr/lib -I/usr/share/p4c/p4include -I/usr/share/p4c/idpf-lib \
             $OUTPUT_DIR/simple_l3_l4_pna.p4 -o $OUTPUT_DIR/simple_l3_l4_pna.s \
             --p4runtime-files $OUTPUT_DIR/simple_l3_l4_pna.p4info.txt \
             --context $OUTPUT_DIR/simple_l3_l4_pna.context.json \
-            --bfrt $OUTPUT_DIR/simple_l3_l4_pna.bfrt.json
+            --bfrt $OUTPUT_DIR/simple_l3_l4_pna.tdi.json
 ```
 
 *Note*: The above commands will generate three files
-(`simple_l3_l4_pna.p4info.txt`, `simple_l3_l4_pna.bfrt.json`, and
+(`simple_l3_l4_pna.p4info.txt`, `simple_l3_l4_pna.tdi.json`, and
 `simple_l3_l4_pna.context.json`).
 
 - Modify `simple_l3_l4_pna.conf` to specify the correct paths for
-  bfrt-config, context, and config.
+  tdi-config, context, and config.
 
 - Create a dummy tofino.bin file, which is needed by tdi_pipeline_builder.
 
