@@ -47,6 +47,7 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(NDEBUG_OPTION --enable-ndebug)
 endif()
 
+set(LIBCAPNG_OPTION --disable-libcapng)
 set(SSL_OPTION --disable-ssl)
 
 #######################
@@ -170,12 +171,14 @@ ExternalProject_Add(ovs
     ${RUNDIR_OPTIONS}
     ${P4OVS_OPTION}
     ${NDEBUG_OPTION}
+    ${LIBCAPNG_OPTION}
     ${SSL_OPTION}
     # Cross-compile variables
     "${CC_VARIABLE}"
     "${CFLAGS_VARIABLE}"
     "${LD_VARIABLE}"
     "${LDFLAGS_VARIABLE}"
+    --disable-libcapng
   BINARY_DIR
     ${CMAKE_CURRENT_BINARY_DIR}
   BUILD_COMMAND
