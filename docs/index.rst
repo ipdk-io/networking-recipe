@@ -39,6 +39,12 @@ P4 Control Plane User Guide
 
 .. toctree::
    :maxdepth: 1
+   :caption: Features
+
+   guides/p4-role-configuration.rst
+
+.. toctree::
+   :maxdepth: 1
    :caption: P4 Programs
 
    guides/es2k/compiling-p4-programs
