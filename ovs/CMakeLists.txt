@@ -178,7 +178,6 @@ ExternalProject_Add(ovs
     "${CFLAGS_VARIABLE}"
     "${LD_VARIABLE}"
     "${LDFLAGS_VARIABLE}"
-    --disable-libcapng
   BINARY_DIR
     ${CMAKE_CURRENT_BINARY_DIR}
   BUILD_COMMAND
