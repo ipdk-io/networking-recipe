@@ -59,6 +59,7 @@ file(MAKE_DIRECTORY ${PB_OUT_DIR})
 # Feature toggles #
 ###################
 
+option(IPDK_ROLE_FIX "Enable IPDK role config changes" ON)
 option(SET_RPATH    "Set RPATH in libraries and executables" OFF)
 option(WITH_KRNLMON "Enable Kernel Monitor support" ON)
 option(WITH_OVSP4RT "Enable OVS support" ON)
