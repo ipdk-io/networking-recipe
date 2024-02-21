@@ -33,12 +33,12 @@ partitioning the pipeline into non-overlapping sections giving each client
 exclusive access to specified P4 tables. Clients chosen for this example are
 Linux Networking and IPsec.
 
-1. Compile P4 program
+* Compile P4 program
 
 Compile the application program according to the instructions in the Compiling
 P4 Programs guide to generate P4 artifacts for programming the pipeline.
 
-1. Extract table IDs
+* Extract table IDs
 
 From the P4 artifact ``p4info.txt``, extract P4 table IDs. A helper script is
 provided to assist in extracting all table IDs from the provided input file.
@@ -54,7 +54,7 @@ each of them.
    python $P4CP_RECIPE/install/sbin/extract_table_ids_from_p4info.py \
          -i p4info.txt -o /usr/share/stratum/ipsec_role_config.pb.txt
 
-1. Edit role config files to partition the roles
+* Edit role config files to partition the roles
 
 You will need to compare the table IDs from input file ``p4info.txt`` and the
 extracted list in the output role configuration file. For each table ID, define
@@ -88,7 +88,7 @@ Following shows table IDs with comments added showing table name for clarity.
    can_push_pipeline: false
 
 
-1. Connect P4 client to infrap4d
+* Connect P4 client to infrap4d
 
 Once the configuration is complete, the P4 clients will push a role name and
 the role configuration file to infrap4d with a ``MasterArbitrationUpdate``
