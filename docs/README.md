@@ -1,3 +1,4 @@
+<!-- markdownlint-disable-next-line no-trailing-punctuation -->
 # We've moved!
 
 The files used to build the P4 Control Plane User Guide
