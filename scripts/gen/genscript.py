@@ -16,6 +16,8 @@ from jinja2 import FileSystemLoader
 # Templates are in the same directory as this script.
 TEMPLATE_PATH = os.path.dirname(__file__)
 
+SCRIPT_NAME = 'genscript.py'
+
 VALID_TARGETS = ['dpdk', 'es2k', 'tofino']
 
 logger = logging.getLogger('genscript')
@@ -52,14 +54,14 @@ def parse_cmd_line():
 
 def create_parser():
     parser = argparse.ArgumentParser(
-        prog='genfile.py',
+        prog=SCRIPT_NAME,
         description='Generates a script from a template file.')
 
     parser.add_argument('--template', '-t', type=str,
-                        help='template file')
+                        help='template file (in same directory as {})'.format(SCRIPT_NAME))
     parser.add_argument('--output', '-o', help='output file')
     parser.add_argument('--target', type=str,
-                        help='target to build {}'.format('|'.join(VALID_TARGETS)))
+                        help='target to build ({})'.format('|'.join(VALID_TARGETS)))
 
     return parser
 
