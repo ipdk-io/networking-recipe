@@ -38,15 +38,6 @@ jobs:
           files: |
             **.md
 
-#     - name: List all changed markdown files
-#       if: steps.changed.outputs.any_changed == 'true'
-#       env:
-#         CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
-#       run: |
-#         for file in "$CHANGED_FILES"; do
-#           echo "$file was changed"
-#         done
-
       - name: Lint markdown files
         if: steps.changed.outputs.any_changed == 'true'
         uses: nosborn/github-action-markdown-cli@v3.3.0
@@ -98,7 +89,7 @@ jobs:
 
       - name: Install linter
         run: |
-          pip3 install rstcheck[sphinx]
+          pip3 install rstcheck
 
       - name: Get changed restructured text files
         id: changed
