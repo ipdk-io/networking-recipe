@@ -6,6 +6,8 @@
 #
 
 set(p4rt_proto_sources
+  ${P4RT_PROTO_DIR}/idpf/p4info.proto
+  ${P4RT_PROTO_DIR}/idpf/p4runtime.proto
   ${P4RT_PROTO_DIR}/p4/v1/p4data.proto
   ${P4RT_PROTO_DIR}/p4/v1/p4runtime.proto
   ${P4RT_PROTO_DIR}/p4/config/v1/p4info.proto
@@ -13,6 +15,8 @@ set(p4rt_proto_sources
 )
 
 set(p4rt_proto_cpp_sources
+  ${CPP_OUT}/idpf/p4info.pb.cc
+  ${CPP_OUT}/idpf/p4runtime.pb.cc
   ${CPP_OUT}/p4/v1/p4data.pb.cc
   ${CPP_OUT}/p4/v1/p4runtime.pb.cc
   ${CPP_OUT}/p4/config/v1/p4info.pb.cc
@@ -20,6 +24,8 @@ set(p4rt_proto_cpp_sources
 )
 
 set(p4rt_proto_headers
+  ${CPP_OUT}/idpf/p4info.pb.h
+  ${CPP_OUT}/idpf/p4runtime.pb.h
   ${CPP_OUT}/p4/v1/p4data.pb.h
   ${CPP_OUT}/p4/v1/p4runtime.pb.h
   ${CPP_OUT}/p4/config/v1/p4info.pb.h

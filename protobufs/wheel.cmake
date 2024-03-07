@@ -28,6 +28,8 @@ add_custom_target(py-wheel ALL
   COMMAND
     cp -pr ${PY_OUT}/p4 ${WHEELGEN}
   COMMAND
+    cp -pr ${PY_OUT}/idpf ${WHEELGEN}
+  COMMAND
     env -C ${WHEELGEN} python -m build
   DEPENDS
     google_py_out

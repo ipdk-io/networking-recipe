@@ -5,6 +5,8 @@
 #
 
 set(P4RT_PROTO_FILES
+    idpf/p4info.proto
+    idpf/p4runtime.proto
     p4/v1/p4data.proto
     p4/v1/p4runtime.proto
     p4/config/v1/p4info.proto
@@ -24,6 +26,8 @@ target_include_directories(p4data_proto_o PUBLIC ${PB_OUT_DIR})
 
 # p4info.proto
 add_library(p4info_proto_o OBJECT
+    ${PB_OUT_DIR}/idpf/p4info.pb.cc
+    ${PB_OUT_DIR}/idpf/p4info.pb.h
     ${PB_OUT_DIR}/p4/config/v1/p4info.pb.cc
     ${PB_OUT_DIR}/p4/config/v1/p4info.pb.h
 )
@@ -42,6 +46,8 @@ target_include_directories(p4types_proto_o PUBLIC ${PB_OUT_DIR})
 
 # p4runtime.proto
 add_library(p4runtime_proto_o OBJECT
+    ${PB_OUT_DIR}/idpf/p4runtime.pb.cc
+    ${PB_OUT_DIR}/idpf/p4runtime.pb.h
     ${PB_OUT_DIR}/p4/v1/p4runtime.pb.cc
     ${PB_OUT_DIR}/p4/v1/p4runtime.pb.h
     ${PB_OUT_DIR}/p4/v1/p4runtime.grpc.pb.cc
