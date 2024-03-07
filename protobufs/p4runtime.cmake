@@ -85,6 +85,8 @@ add_custom_target(p4rt_py_out ALL
     ${PROTOFLAGS}
   COMMAND
     find ${PY_OUT}/p4 -type d -exec touch {}/__init__.py \;
+  COMMAND
+    find ${PY_OUT}/idpf -type d -exec touch {}/__init__.py \;
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM
