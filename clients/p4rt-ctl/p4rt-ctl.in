@@ -48,7 +48,7 @@ try:
     from idpf import p4info_pb2 as idpf_p4info
     from idpf import p4runtime_pb2 as idpf_p4runtime
 except:
-    print("Unable to import the 'idpf' modules. The meter commands will not work. \n"
+    print("Unable to import the 'idpf' modules. The meter commands will not work.\n"
           "To fix the problem, install an updated version of the python p4runtime package.")
 
 from p4.v1 import p4runtime_pb2
