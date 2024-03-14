@@ -1,0 +1,4 @@
+ptf
+paramiko
+scapy==2.5.0
+pyang==2.5.2
