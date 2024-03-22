@@ -271,7 +271,7 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
   });
 
   std::shared_ptr<::grpc::Channel> channel;
-  if (FLAGS_grpc_use_insecure_mode) {
+  if (!FLAGS_grpc_use_insecure_mode) {
     ASSIGN_OR_RETURN(auto credentials_manager,
                      CredentialsManager::CreateInstance(true));
     channel = ::grpc::CreateChannel(
