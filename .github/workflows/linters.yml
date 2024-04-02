@@ -33,7 +33,7 @@ jobs:
 
       - name: Get changed markdown files
         id: changed
-        uses: tj-actions/changed-files@v43
+        uses: tj-actions/changed-files@v44
         with:
           files: |
             **.md
@@ -64,7 +64,7 @@ jobs:
 
       - name: Get changed restructured text files
         id: changed
-        uses: tj-actions/changed-files@v43
+        uses: tj-actions/changed-files@v44
         with:
           files: |
             **.rst
@@ -93,7 +93,7 @@ jobs:
 
       - name: Get changed restructured text files
         id: changed
-        uses: tj-actions/changed-files@v43
+        uses: tj-actions/changed-files@v44
         with:
           files: |
             **.rst
@@ -136,7 +136,7 @@ jobs:
 
       - name: Get list of changed files
         id: changed
-        uses: tj-actions/changed-files@v43
+        uses: tj-actions/changed-files@v44
         with:
           files: |
             **.c
