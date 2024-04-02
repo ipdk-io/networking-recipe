@@ -464,7 +464,8 @@ extern "C" {
 
 #define ACTION_SET_DST_MAC_LOW "dmac_low"
 #ifdef __cplusplus
-};  // extern "C"
+}  // extern "C"
+
 #endif
 
 #endif /* __P4_NAME_MAPPING__ */

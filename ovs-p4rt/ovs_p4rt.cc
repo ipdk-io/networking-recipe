@@ -165,8 +165,8 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
 
   return;
 }
-#endif
-#endif
+#endif  // LNW_V2
+#endif  // ES2K_TARGET
 
 void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
@@ -2172,7 +2172,7 @@ absl::Status ConfigSrcIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
-#endif
+#endif  // ES2K_TARGET
 }  // namespace ovs_p4rt
 
 //----------------------------------------------------------------------
@@ -2616,4 +2616,4 @@ void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info,
 
   return;
 }
-#endif
+#endif  // ES2K_TARGET
