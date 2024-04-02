@@ -272,15 +272,15 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
 
   std::shared_ptr<::grpc::Channel> channel;
   if (FLAGS_grpc_use_insecure_mode) {
+    std::shared_ptr<::grpc::ChannelCredentials> channel_credentials =
+        ::grpc::InsecureChannelCredentials();
+    channel = ::grpc::CreateChannel(FLAGS_grpc_addr, channel_credentials);
+  } else {
     ASSIGN_OR_RETURN(auto credentials_manager,
                      CredentialsManager::CreateInstance(true));
     channel = ::grpc::CreateChannel(
         FLAGS_grpc_addr,
         credentials_manager->GenerateExternalFacingClientCredentials());
-  } else {
-    std::shared_ptr<::grpc::ChannelCredentials> channel_credentials =
-        ::grpc::InsecureChannelCredentials();
-    channel = ::grpc::CreateChannel(FLAGS_grpc_addr, channel_credentials);
   }
 
   auto stub = ::gnmi::gNMI::NewStub(channel);
