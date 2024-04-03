@@ -4,6 +4,8 @@
 
 #include <arpa/inet.h>
 
+#include <string>
+
 #include "absl/flags/flag.h"
 #include "openvswitch/ovs-p4rt.h"
 #include "ovs_p4rt_session.h"
@@ -16,6 +18,8 @@
 #endif
 
 #define DEFAULT_OVS_P4RT_ROLE_NAME "ovs-p4rt"
+#define ANY_INADDR 0x00000000
+#define LOOPBACK_INADDR 0x7f000001
 
 ABSL_FLAG(std::string, grpc_addr, "localhost:9559",
           "P4Runtime server address.");
@@ -111,6 +115,7 @@ int GetMatchFieldId(const ::p4::config::v1::P4Info& p4info,
 }
 
 #if defined(ES2K_TARGET)
+#ifdef LNW_V2
 void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const struct mac_learning_info& learn_info,
                               const ::p4::config::v1::P4Info& p4info,
@@ -134,7 +139,34 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
 
   return;
 }
-#endif
+#else
+void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
+                              const struct mac_learning_info& learn_info,
+                              const ::p4::config::v1::P4Info& p4info,
+                              bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, L2_FWD_SMAC_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(
+      GetMatchFieldId(p4info, L2_FWD_SMAC_TABLE, L2_FWD_SMAC_TABLE_KEY_SA));
+  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
+  match->mutable_exact()->set_value(mac_addr);
+
+  auto match1 = table_entry->add_match();
+  match1->set_field_id(GetMatchFieldId(p4info, L2_FWD_SMAC_TABLE,
+                                       L2_FWD_SMAC_TABLE_KEY_BRIDGE_ID));
+  match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(
+        GetActionId(p4info, L2_FWD_SMAC_TABLE_ACTION_NO_ACTION));
+  }
+
+  return;
+}
+#endif  // LNW_V2
+#endif  // ES2K_TARGET
 
 void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
@@ -156,12 +188,14 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
+#ifdef LNW_V2
   // Based on p4 program for ES2K, we need to provide a match key SMAC flag
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
                                        L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
 
   match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
+#endif
 
   if (insert_entry) {
     /* Action param configured by user in TX_ACC_VSI_TABLE is used as port_id
@@ -236,22 +270,24 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
+#ifdef LNW_V2
   // Based on p4 program for ES2K, we need to provide a match key Bridge ID
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_RX_TABLE,
                                        L2_FWD_RX_TABLE_KEY_SMAC_LEARNED));
 
   match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
+#endif
 
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
-    action->set_action_id(GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD));
+    action->set_action_id(GetActionId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD));
     {
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD,
                                      ACTION_L2_FWD_PARAM_PORT));
-      auto port_id = learn_info.src_port;
+      auto port_id = learn_info.rx_src_port;
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
@@ -306,13 +342,14 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
+#ifdef LNW_V2
   // Based on p4 program for ES2K, we need to provide a match key SMAC flag
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
                                        L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
 
   match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-
+#endif
 #endif
 
 #if defined(DPDK_TARGET)
@@ -412,13 +449,14 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
+#ifdef LNW_V2
   // Based on p4 program for ES2K, we need to provide a match key SMAC flag
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
                                        L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
 
   match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-
+#endif
 #endif
 
 #if defined(DPDK_TARGET)
@@ -1826,6 +1864,103 @@ void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
   return;
 }
 
+void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
+                                  struct ip_mac_map_info& ip_info,
+                                  const ::p4::config::v1::P4Info& p4info,
+                                  bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, SRC_IP_MAC_MAP_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(GetMatchFieldId(p4info, SRC_IP_MAC_MAP_TABLE,
+                                      SRC_IP_MAC_MAP_TABLE_KEY_SRC_IP));
+  match->mutable_exact()->set_value(
+      CanonicalizeIp((ip_info.src_ip_addr.ip.v4addr.s_addr)));
+
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(
+        GetActionId(p4info, SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP,
+                                     ACTION_SET_SRC_MAC_HIGH));
+      std::string mac_high =
+          EncodeByteValue(2, (ip_info.src_mac_addr[0] & 0xff),
+                          (ip_info.src_mac_addr[1] & 0xff));
+      param->set_value(mac_high);
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP,
+                                     ACTION_SET_SRC_MAC_MID));
+      std::string mac_mid = EncodeByteValue(2, (ip_info.src_mac_addr[2] & 0xff),
+                                            (ip_info.src_mac_addr[3] & 0xff));
+      param->set_value(mac_mid);
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     SRC_IP_MAC_MAP_TABLE_ACTION_SMAC_MAP,
+                                     ACTION_SET_SRC_MAC_LOW));
+      std::string mac_low = EncodeByteValue(2, (ip_info.src_mac_addr[4] & 0xff),
+                                            (ip_info.src_mac_addr[5] & 0xff));
+      param->set_value(mac_low);
+    }
+  }
+
+  return;
+}
+
+void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
+                                  struct ip_mac_map_info& ip_info,
+                                  const ::p4::config::v1::P4Info& p4info,
+                                  bool insert_entry) {
+  table_entry->set_table_id(GetTableId(p4info, DST_IP_MAC_MAP_TABLE));
+  auto match = table_entry->add_match();
+  match->set_field_id(GetMatchFieldId(p4info, DST_IP_MAC_MAP_TABLE,
+                                      DST_IP_MAC_MAP_TABLE_KEY_DST_IP));
+  match->mutable_exact()->set_value(
+      CanonicalizeIp((ip_info.dst_ip_addr.ip.v4addr.s_addr)));
+  if (insert_entry) {
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(
+        GetActionId(p4info, DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP));
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP,
+                                     ACTION_SET_DST_MAC_HIGH));
+      std::string mac_high =
+          EncodeByteValue(2, (ip_info.dst_mac_addr[0] & 0xff),
+                          (ip_info.dst_mac_addr[1] & 0xff));
+      param->set_value(mac_high);
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP,
+                                     ACTION_SET_DST_MAC_MID));
+      std::string mac_mid = EncodeByteValue(2, (ip_info.dst_mac_addr[2] & 0xff),
+                                            (ip_info.dst_mac_addr[3] & 0xff));
+      param->set_value(mac_mid);
+    }
+    {
+      auto param = action->add_params();
+      param->set_param_id(GetParamId(p4info,
+                                     DST_IP_MAC_MAP_TABLE_ACTION_DMAC_MAP,
+                                     ACTION_SET_DST_MAC_LOW));
+      std::string mac_low = EncodeByteValue(2, (ip_info.dst_mac_addr[4] & 0xff),
+                                            (ip_info.dst_mac_addr[5] & 0xff));
+      param->set_value(mac_low);
+    }
+  }
+
+  return;
+}
+
 void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
                                const ::p4::config::v1::P4Info& p4info) {
   table_entry->set_table_id(GetTableId(p4info, TX_ACC_VSI_TABLE));
@@ -2001,6 +2136,43 @@ absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
 
+#if defined(ES2K_TARGET)
+absl::Status ConfigDstIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
+                                         struct ip_mac_map_info& ip_info,
+                                         const ::p4::config::v1::P4Info& p4info,
+                                         bool insert_entry) {
+  ::p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
+
+  PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, insert_entry);
+
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+}
+
+absl::Status ConfigSrcIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
+                                         struct ip_mac_map_info& ip_info,
+                                         const ::p4::config::v1::P4Info& p4info,
+                                         bool insert_entry) {
+  ::p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  if (insert_entry) {
+    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
+  } else {
+    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
+  }
+
+  PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, insert_entry);
+
+  return ovs_p4rt::SendWriteRequest(session, write_request);
+}
+#endif  // ES2K_TARGET
 }  // namespace ovs_p4rt
 
 //----------------------------------------------------------------------
@@ -2099,9 +2271,17 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
         return;
       }
 
+      status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
+                                         insert_entry);
+      if (!status.ok())
+        printf("%s: Failed to program l2_fwd_rx_table\n",
+               insert_entry ? "ADD" : "DELETE");
+
       status_or_read_response =
           GetTxAccVsiTableEntry(session.get(), learn_info.src_port, p4info);
-      if (!status_or_read_response.ok()) return;
+      if (!status_or_read_response.ok()) {
+        return;
+      }
 
       ::p4::v1::ReadResponse read_response =
           std::move(status_or_read_response).value();
@@ -2139,17 +2319,14 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
       printf("%s: Failed to program l2_fwd_tx_table\n",
              insert_entry ? "ADD" : "DELETE");
 
-    status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
-                                       insert_entry);
-    if (!status.ok())
-      printf("%s: Failed to program l2_fwd_rx_table\n",
-             insert_entry ? "ADD" : "DELETE");
-
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok())
-      printf("%s: Failed to program l2_fwd_smac_table\n",
-             insert_entry ? "ADD" : "DELETE");
+      printf("%s: Failed to program l2_fwd_smac_table with %x:%x:%x:%x:%x:%x\n",
+             insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
+             learn_info.mac_addr[1], learn_info.mac_addr[2],
+             learn_info.mac_addr[3], learn_info.mac_addr[4],
+             learn_info.mac_addr[5]);
   }
   if (!status.ok()) return;
   return;
@@ -2359,6 +2536,13 @@ void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
   /* Unimplemented for DPDK target */
   return;
 }
+
+void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info,
+                              bool insert_entry) {
+  /* Unimplemented for DPDK target */
+  return;
+}
+
 #endif
 
 void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry) {
@@ -2392,3 +2576,44 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry) {
 
   return;
 }
+
+#if defined(ES2K_TARGET)
+void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info,
+                              bool insert_entry) {
+  using namespace ovs_p4rt;
+
+  // Start a new client session.
+  auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
+      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+  if (!status_or_session.ok()) return;
+
+  // Unwrap the session from the StatusOr object.
+  std::unique_ptr<ovs_p4rt::OvsP4rtSession> session =
+      std::move(status_or_session).value();
+  ::p4::config::v1::P4Info p4info;
+  ::absl::Status status =
+      ovs_p4rt::GetForwardingPipelineConfig(session.get(), &p4info);
+  if (!status.ok()) return;
+
+  if (ip_info.src_ip_addr.ip.v4addr.s_addr != ANY_INADDR &&
+      ip_info.src_ip_addr.ip.v4addr.s_addr != htonl(LOOPBACK_INADDR)) {
+    status = ConfigSrcIpMacMapTableEntry(session.get(), ip_info, p4info,
+                                         insert_entry);
+    if (!status.ok()) {
+      // TODO: print some log once logging support is added
+    }
+  }
+
+  if (ip_info.dst_ip_addr.ip.v4addr.s_addr != ANY_INADDR &
+      ip_info.dst_ip_addr.ip.v4addr.s_addr != htonl(LOOPBACK_INADDR)) {
+    status = ConfigDstIpMacMapTableEntry(session.get(), ip_info, p4info,
+                                         insert_entry);
+    if (!status.ok()) {
+      // TODO: print some log once logging support is added
+    }
+  }
+
+  return;
+}
+#endif  // ES2K_TARGET
