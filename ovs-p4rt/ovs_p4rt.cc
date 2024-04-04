@@ -114,6 +114,11 @@ int GetMatchFieldId(const ::p4::config::v1::P4Info& p4info,
   return -1;
 }
 
+static inline int32_t ValidIpAddr(uint32_t nw_addr) {
+  return (nw_addr && nw_addr != INADDR_ANY && nw_addr != INADDR_LOOPBACK &&
+          nw_addr != 0xffffffff);
+}
+
 #if defined(ES2K_TARGET)
 #ifdef LNW_V2
 void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
@@ -2051,6 +2056,32 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbVlanTableEntry(
   return ovs_p4rt::SendReadRequest(session, read_request);
 }
 
+absl::StatusOr<::p4::v1::ReadResponse> GetVmSrcTableEntry(
+    ovs_p4rt::OvsP4rtSession* session, struct ip_mac_map_info ip_info,
+    const ::p4::config::v1::P4Info& p4info) {
+  ::p4::v1::ReadRequest read_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
+
+  PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, false);
+
+  return ovs_p4rt::SendReadRequest(session, read_request);
+}
+
+absl::StatusOr<::p4::v1::ReadResponse> GetVmDstTableEntry(
+    ovs_p4rt::OvsP4rtSession* session, struct ip_mac_map_info ip_info,
+    const ::p4::config::v1::P4Info& p4info) {
+  ::p4::v1::ReadRequest read_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
+
+  PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, false);
+
+  return ovs_p4rt::SendReadRequest(session, read_request);
+}
+
 absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
     ovs_p4rt::OvsP4rtSession* session, uint32_t sp,
     const ::p4::config::v1::P4Info& p4info) {
@@ -2596,8 +2627,14 @@ void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info,
       ovs_p4rt::GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
 
-  if (ip_info.src_ip_addr.ip.v4addr.s_addr != ANY_INADDR &&
-      ip_info.src_ip_addr.ip.v4addr.s_addr != htonl(LOOPBACK_INADDR)) {
+  if (insert_entry) {
+    auto status_or_read_response =
+        GetVmSrcTableEntry(session.get(), ip_info, p4info);
+    if (status_or_read_response.ok()) {
+      goto try_dstip;
+    }
+  }
+  if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
     status = ConfigSrcIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
@@ -2605,8 +2642,15 @@ void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info,
     }
   }
 
-  if (ip_info.dst_ip_addr.ip.v4addr.s_addr != ANY_INADDR &
-      ip_info.dst_ip_addr.ip.v4addr.s_addr != htonl(LOOPBACK_INADDR)) {
+try_dstip:
+  if (insert_entry) {
+    auto status_or_read_response =
+        GetVmDstTableEntry(session.get(), ip_info, p4info);
+    if (status_or_read_response.ok()) {
+      return;
+    }
+  }
+  if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
     status = ConfigDstIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
