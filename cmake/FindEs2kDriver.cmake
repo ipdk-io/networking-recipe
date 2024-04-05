@@ -128,11 +128,11 @@ set_target_properties(sde::target_utils PROPERTIES
 # Define SDE_LIBRARY_DIRS
 #-----------------------------------------------------------------------
 function(_define_es2k_library_dirs DIRS)
-  set(dirs ${SDE_INCLUDE_DIR}/lib)
+  set(dirs ${SDE_INSTALL_DIR}/lib)
 
   set(candidates
-      ${SDE_INCLUDE_DIR}/lib/x86_64-linux-gnu
-      ${SDE_INCLUDE_DIR}/lib64
+      ${SDE_INSTALL_DIR}/lib/x86_64-linux-gnu
+      ${SDE_INSTALL_DIR}/lib64
   )
 
   # Find the auxiliary directory that contains the RTE libraries
