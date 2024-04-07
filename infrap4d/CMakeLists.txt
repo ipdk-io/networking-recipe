@@ -31,7 +31,7 @@ target_link_libraries(infrap4d PRIVATE
     -Wl,--no-whole-archive
 )
 
-target_link_libraries(infrap4d PRIVATE p4_role_config)
+target_link_libraries(infrap4d PRIVATE p4_role_config_proto)
 
 if(DPDK_TARGET)
     add_dpdk_target_libraries(infrap4d)
