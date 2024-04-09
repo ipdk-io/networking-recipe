@@ -1,4 +1,5 @@
 .vscode
 .vslick
-/build
-/install
+.p4cpconfig
+build
+install

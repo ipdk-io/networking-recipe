@@ -1,0 +1,149 @@
+name: "P4CP lint checks"
+
+on:
+  push:
+    branches:
+      - main
+      - ipdk_v*
+  pull_request:
+    branches:
+      - main
+      - ipdk_v*
+
+concurrency:
+  # If workflow is currently running, stop it and start a new one.
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+jobs:
+  #---------------------------------------------------------------------
+  # 1-markdownlint
+  #---------------------------------------------------------------------
+  markdownlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed markdown files
+        id: changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **.md
+
+      - name: Lint markdown files
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: nosborn/github-action-markdown-cli@v3.3.0
+        with:
+          files: ${{ steps.changed.outputs.all_changed_files }}
+          config_file: .markdownlint.json
+
+  #---------------------------------------------------------------------
+  # 2-rstdoc8
+  #---------------------------------------------------------------------
+  rstdoc8:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install linter
+        run: |
+          pip3 install doc8
+
+      - name: Get changed restructured text files
+        id: changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **.rst
+
+      - name: Lint restructured text files
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          doc8 --ignore D001 ${{ steps.changed.outputs.all_changed_files }}
+
+  #---------------------------------------------------------------------
+  # 3-rstcheck
+  #---------------------------------------------------------------------
+  rstcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install linter
+        run: |
+          pip3 install rstcheck
+
+      - name: Get changed restructured text files
+        id: changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **.rst
+
+      - name: Check restructured text files
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          rstcheck ${{ steps.changed.outputs.all_changed_files }}
+
+  #---------------------------------------------------------------------
+  # 4-py_bandit_check
+  #---------------------------------------------------------------------
+  py_bandit_check:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v4
+
+      - name: Check Python files
+        uses: tj-actions/bandit@v5.5
+        with:
+          targets: |  # or a single string "."
+            **/**.py
+            clients/p4rt-ctl/p4rt-ctl.in
+          options: "-v"
+
+  #---------------------------------------------------------------------
+  # 5-clang_format_check
+  #---------------------------------------------------------------------
+  clang_format_check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get list of changed files
+        id: changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **.c
+            **.cc
+            **.h
+
+      - name: Check for formatting errors
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          clang-format -n -Werror ${{ steps.changed.outputs.all_changed_files }}

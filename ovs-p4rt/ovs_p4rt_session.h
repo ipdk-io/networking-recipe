@@ -1,6 +1,6 @@
 // Copyright 2020 Google LLC
 // Copyright 2021-present Open Networking Foundation
-// Copyright 2022-2023 Intel Corporation
+// Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #ifndef OVSP4RT_SESSION_H_
@@ -37,6 +37,7 @@ class OvsP4rtSession {
   // Create the session with given P4runtime stub and device id
   static ::absl::StatusOr<std::unique_ptr<OvsP4rtSession>> Create(
       std::unique_ptr<p4::v1::P4Runtime::Stub> stub, uint32_t device_id,
+      const std::string& role_name,
       ::absl::uint128 election_id = TimeBasedElectionId());
 
   // Create the session with given grpc address, channel credentials
@@ -44,7 +45,8 @@ class OvsP4rtSession {
   static ::absl::StatusOr<std::unique_ptr<OvsP4rtSession>> Create(
       const std::string& address,
       const std::shared_ptr<grpc::ChannelCredentials>& credentials,
-      uint32_t device_id, ::absl::uint128 election_id = TimeBasedElectionId());
+      uint32_t device_id, const std::string& role_name,
+      ::absl::uint128 election_id = TimeBasedElectionId());
 
   // Disable copy semantics.
   OvsP4rtSession(const OvsP4rtSession&) = delete;
@@ -56,12 +58,14 @@ class OvsP4rtSession {
 
   uint32_t DeviceId() const { return device_id_; }
 
+  std::string RoleName() const { return role_name_; }
+
   p4::v1::Uint128 ElectionId() const { return election_id_; }
 
   p4::v1::P4Runtime::Stub& Stub() { return *stub_; }
 
  private:
-  OvsP4rtSession(uint32_t device_id,
+  OvsP4rtSession(uint32_t device_id, std::string role_name,
                  std::unique_ptr<p4::v1::P4Runtime::Stub> stub,
                  ::absl::uint128 election_id)
       : device_id_(device_id),
@@ -75,6 +79,8 @@ class OvsP4rtSession {
   uint32_t device_id_;
 
   p4::v1::Uint128 election_id_;
+
+  std::string role_name_;
 
   std::unique_ptr<p4::v1::P4Runtime::Stub> stub_;
 
@@ -109,6 +115,8 @@ std::unique_ptr<p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
 ::p4::v1::TableEntry* SetupTableEntryToDelete(OvsP4rtSession* session,
                                               ::p4::v1::WriteRequest* req);
 
+::p4::v1::TableEntry* SetupTableEntryToRead(OvsP4rtSession* session,
+                                            ::p4::v1::ReadRequest* req);
 }  // namespace ovs_p4rt
 
 #endif  // OVS_P4RT_SESSION_H_

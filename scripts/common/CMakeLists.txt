@@ -8,6 +8,7 @@
 install(
     PROGRAMS
         set_hugepages.sh
+        extract_table_ids_from_p4info.py
     TYPE
         SBIN
 )

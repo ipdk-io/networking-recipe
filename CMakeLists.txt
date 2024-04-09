@@ -1,6 +1,6 @@
 # CMake build file for superproject.
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -14,6 +14,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(CMakePrintHelpers)
 include(CompilerSettings)
 include(CTest)
+include(ExternalProject)
 include(FindPkgConfig)
 include(GNUInstallDirs)
 
@@ -58,6 +59,7 @@ file(MAKE_DIRECTORY ${PB_OUT_DIR})
 # Feature toggles #
 ###################
 
+option(IPDK_ROLE_FIX "Enable IPDK role config changes" ON)
 option(SET_RPATH    "Set RPATH in libraries and executables" OFF)
 option(WITH_KRNLMON "Enable Kernel Monitor support" ON)
 option(WITH_OVSP4RT "Enable OVS support" ON)
@@ -146,8 +148,20 @@ cmake_print_variables(CMAKE_PREFIX_PATH)
 # External packages #
 #####################
 
+# Stratum dependencies for the target system.
 include(StratumDependencies)
 
+# LNW version options.
+include(LnwVersion)
+
+# Protobuf compiler for the development system.
+find_package(HostProtoc)
+
+# TLS libraries.
+find_package(OpenSSL REQUIRED)
+mark_as_advanced(OpenSSL_DIR)
+
+# P4 SDE for the target system.
 if(DPDK_TARGET)
     find_package(DpdkDriver)
 elseif(ES2K_TARGET)
@@ -156,6 +170,7 @@ elseif(TOFINO_TARGET)
     find_package(TofinoDriver)
 endif()
 
+# Open vSwitch.
 if(WITH_OVSP4RT)
     find_package(OVS)
 endif()
@@ -242,6 +257,12 @@ function(set_install_rpath TARGET)
         # message(STATUS "${TARGET}::RPATH=\"${_rpath}\"")
     endif()
 endfunction()
+
+#####################
+# Protobufs project #
+#####################
+
+include(P4RuntimeProtobufs)
 
 ##################
 # Subdirectories #

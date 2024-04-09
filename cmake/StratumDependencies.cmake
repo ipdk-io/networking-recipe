@@ -40,6 +40,8 @@ mark_as_advanced(glog_DIR)
 find_package(Protobuf CONFIG REQUIRED)
 mark_as_advanced(Protobuf_DIR)
 
+message(STATUS "Found Protobuf version ${Protobuf_VERSION}")
+
 #-----------------------------------------------------------------------
 # Google RPC (gRPC).
 #-----------------------------------------------------------------------
@@ -48,37 +50,3 @@ mark_as_advanced(gRPC_DIR)
 mark_as_advanced(c-ares_DIR)
 
 message(STATUS "Found gRPC version ${gRPC_VERSION}")
-
-#-----------------------------------------------------------------------
-# Protobuf compiler.
-# Runs on the development system.
-#-----------------------------------------------------------------------
-find_program(HOST_PROTOC "protoc" NO_CMAKE_FIND_ROOT_PATH)
-mark_as_advanced(HOST_PROTOC)
-
-if(HOST_PROTOC)
-  message(STATUS "Found protoc: ${HOST_PROTOC}")
-else()
-  message(FATAL_ERROR "protoc not found")
-endif()
-
-#-----------------------------------------------------------------------
-# gRPC plugin for Protobuf compiler.
-# Runs on the development system.
-#-----------------------------------------------------------------------
-find_program(HOST_GRPC_CPP_PLUGIN "grpc_cpp_plugin" NO_CMAKE_FIND_ROOT_PATH)
-mark_as_advanced(HOST_GRPC_CPP_PLUGIN)
-
-if(HOST_GRPC_CPP_PLUGIN)
-  message(STATUS "Found grpc_cpp_plugin: ${HOST_GRPC_CPP_PLUGIN}")
-else()
-  message(FATAL_ERROR "grpc_cpp_plugin not found")
-endif()
-
-#-----------------------------------------------------------------------
-# SSL/TLS library (OpenSSL).
-#-----------------------------------------------------------------------
-find_package(OpenSSL REQUIRED)
-mark_as_advanced(OpenSSL_DIR)
-
-set(WITH_OPENSSL TRUE)

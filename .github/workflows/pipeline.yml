@@ -1,4 +1,4 @@
-name: "P4 Control Plane CI Pipeline"
+name: "P4CP build checks"
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
       - ipdk_v*
 
 concurrency:
-  # If workflow for PR or push is already running, stop it and start a new one.
+  # If workflow is currently running, stop it and start a new one.
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
@@ -39,10 +39,11 @@ jobs:
   #---------------------------------------------------------------------
   build_dpdk_p4cp:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Clone networking-recipe
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           path: recipe
@@ -52,23 +53,21 @@ jobs:
           sudo apt install $PREREQS
 
       - name: Install DPDK SDE
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.SDE_REPOSITORY }}
           tag: ${{ env.SDE_TAG }}
           fileName: ${{ env.SDE_FILENAME }}
-
       - run: |
           sudo tar -xzf $SDE_FILENAME -C /
           rm $SDE_FILENAME
 
       - name: Install stratum dependencies
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.DEPS_REPOSITORY }}
           tag: ${{ env.DEPS_TAG }}
           fileName: ${{ env.DEPS_FILENAME }}
-
       - run: |
           sudo tar -xzf $DEPS_FILENAME -C /
           rm $DEPS_FILENAME
@@ -85,39 +84,35 @@ jobs:
   #---------------------------------------------------------------------
   krnlmon_unit_tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Clone networking-recipe
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          submodules: recursive
           path: recipe
-
-      - name: Initialize krnlmon submodule
-        working-directory: recipe
-        run: git submodule update --init --checkout --depth 1 krnlmon
 
       - name: Install prerequisites
         run: |
           sudo apt install $PREREQS
 
       - name: Install DPDK SDE
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.SDE_REPOSITORY }}
           tag: ${{ env.SDE_TAG }}
           fileName: ${{ env.SDE_FILENAME }}
-
       - run: |
           sudo tar -xzf $SDE_FILENAME -C /
           rm $SDE_FILENAME
 
       - name: Install stratum dependencies
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.9
         with:
           repository: ${{ env.DEPS_REPOSITORY }}
           tag: ${{ env.DEPS_TAG }}
           fileName: ${{ env.DEPS_FILENAME }}
-
       - run: |
           sudo tar -xzf $DEPS_FILENAME -C /
           rm $DEPS_FILENAME
@@ -131,20 +126,70 @@ jobs:
           cmake --build build --target krnlmon-test
 
   #---------------------------------------------------------------------
-  # 3-py_bandit_check
+  # 3-build_p4runtime_protos
   #---------------------------------------------------------------------
-  py_bandit_check:
-     timeout-minutes: 10
-     runs-on: ubuntu-latest
-     steps:
-       - name: Clone networking-recipe
-         uses: actions/checkout@v3
-         with:
-           path: recipe
+  build_p4runtime_protos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
 
-       - name: Check p4rt-ctl
-         uses: tj-actions/bandit@v5.1
-         with:
-           targets: |  # or a single string "."
-            ./recipe/clients/p4rt-ctl/p4rt-ctl.in
-           options: "-v"
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          path: recipe
+
+      - name: Install prerequisites
+        run: |
+          sudo apt install $PREREQS
+
+      - name: Install python dependencies
+        working-directory: recipe
+        run: |
+          python -m pip install setuptools build wheel
+
+      - name: Set up Go environment
+        uses: actions/setup-go@v5.0.0
+        with:
+          go-version: 'stable'
+
+      - name: Install gRPC plugins
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+
+      - name: Install DPDK SDE
+        uses: robinraju/release-downloader@v1.9
+        with:
+          repository: ${{ env.SDE_REPOSITORY }}
+          tag: ${{ env.SDE_TAG }}
+          fileName: ${{ env.SDE_FILENAME }}
+      - run: |
+          sudo tar -xzf $SDE_FILENAME -C /
+          rm $SDE_FILENAME
+
+      - name: Install stratum dependencies
+        uses: robinraju/release-downloader@v1.9
+        with:
+          repository: ${{ env.DEPS_REPOSITORY }}
+          tag: ${{ env.DEPS_TAG }}
+          fileName: ${{ env.DEPS_FILENAME }}
+      - run: |
+          sudo tar -xzf $DEPS_FILENAME -C /
+          rm $DEPS_FILENAME
+
+      - name: Build protobufs in superproject
+        working-directory: recipe
+        run: |
+          export DEPEND_INSTALL=$DEPS_INSTALL_DIR
+          export SDE_INSTALL=$SDE_INSTALL_DIR
+          ./make-all.sh --target=dpdk --no-ovs --no-build
+          cmake --build build --target protobufs
+
+      - name: Build protobufs in subdirectory
+        working-directory: recipe/protobufs
+        run: |
+          export DEPEND_INSTALL=$DEPS_INSTALL_DIR
+          cmake -B build
+          cmake --build build
+          cmake --install build --prefix install

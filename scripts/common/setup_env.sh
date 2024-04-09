@@ -29,7 +29,8 @@ export DEPEND_INSTALL=$3
 
 # Get the OS and Version details
 # shellcheck source=/dev/null
-SCRIPT_DIR="$( cd "$(dirname "$( readlink -f ${BASH_SOURCE[0]} )")" >/dev/null 2>&1 && pwd)"
+SCRIPT_DIR="$( cd "$(dirname "$( readlink -f "${BASH_SOURCE[0]}" )")" >/dev/null 2>&1 && pwd)"
+# shellcheck disable=SC1090
 . "${SCRIPT_DIR}/os_ver_details.sh"
 get_os_ver_details
 echo "OS and Version details..."
@@ -37,11 +38,12 @@ echo "${OS} : ${VER}"
 
 # Update SDE libraries
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SDE_INSTALL}/lib
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SDE_INSTALL}/lib64
 
-if [ "$OS" = "Fedora" ]; then
+if [ -d "${SDE_INSTALL}/lib64" ]; then
     export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SDE_INSTALL}/lib64
-else
+fi
+
+if [ -d "${SDE_INSTALL}/lib/x86_64-linux-gnu" ]; then
     export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${SDE_INSTALL}/lib/x86_64-linux-gnu
 fi
 
