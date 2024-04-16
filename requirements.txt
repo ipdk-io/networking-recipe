@@ -1,4 +1,4 @@
-p4runtime==1.3.0
+https://github.com/ipdk-io/p4runtime-dev/releases/download/2024.3.0/p4runtime-2024.3.0-py3-none-any.whl
 Jinja2>=3.0.0
 setuptools
 build
