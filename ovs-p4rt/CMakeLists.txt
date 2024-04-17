@@ -67,7 +67,7 @@ add_dependencies(ovs_sidecar_o
     p4runtime_proto
 )
 
-target_link_libraries(ovs_sidecar_o PUBLIC stratum_static p4_role_config)
+target_link_libraries(ovs_sidecar_o PUBLIC stratum_static p4_role_config_proto)
 
 ################
 # ovs-vswitchd #
@@ -111,7 +111,7 @@ target_link_libraries(ovs-vswitchd PUBLIC
     absl::flags
 )
 
-target_link_libraries(ovs-vswitchd PUBLIC stratum_static p4_role_config)
+target_link_libraries(ovs-vswitchd PUBLIC stratum_static p4_role_config_proto)
 
 target_link_libraries(ovs-vswitchd PUBLIC
     stratum_proto
@@ -163,11 +163,12 @@ target_link_libraries(ovs-testcontroller PUBLIC
     absl::flags
 )
 
-target_link_libraries(ovs-testcontroller PUBLIC stratum_static p4_role_config)
+target_link_libraries(ovs-testcontroller PUBLIC stratum_static)
 
 target_link_libraries(ovs-testcontroller PUBLIC
-    stratum_proto
+    p4_role_config_proto
     p4runtime_proto
+    stratum_proto
 )
 
 install(TARGETS ovs-testcontroller DESTINATION bin)

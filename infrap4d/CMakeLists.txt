@@ -31,7 +31,7 @@ target_link_libraries(infrap4d PRIVATE
     -Wl,--no-whole-archive
 )
 
-target_link_libraries(infrap4d PRIVATE p4_role_config)
+target_link_libraries(infrap4d PUBLIC p4_role_config_proto)
 
 if(DPDK_TARGET)
     add_dpdk_target_libraries(infrap4d)
@@ -42,7 +42,7 @@ elseif(TOFINO_TARGET)
 endif()
 
 if(WITH_KRNLMON)
-    target_link_libraries(infrap4d PRIVATE krnlmon pthread)
+    target_link_libraries(infrap4d PUBLIC krnlmon pthread)
 endif()
 
 set_install_rpath(infrap4d ${EXEC_ELEMENT} ${SDE_ELEMENT} ${DEP_ELEMENT})
