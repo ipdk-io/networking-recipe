@@ -21,8 +21,6 @@
 #define ANY_INADDR 0x00000000
 #define LOOPBACK_INADDR 0x7f000001
 
-ABSL_FLAG(std::string, grpc_addr, "localhost:9559",
-          "P4Runtime server address.");
 ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
 ABSL_FLAG(std::string, role_name, DEFAULT_OVS_P4RT_ROLE_NAME,
           "P4 config role name.");
@@ -2222,13 +2220,13 @@ enum ovs_tunnel_type TunnelTypeStrtoEnum(const char* tnl_type) {
 }
 
 #if defined(ES2K_TARGET)
-void ConfigFdbTableEntry(struct mac_learning_info learn_info,
-                         bool insert_entry) {
+void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
+                         const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      p4rt_grpc_addr, GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
@@ -2364,12 +2362,13 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
 }
 
 void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
-                                 bool insert_entry) {
+                                 bool insert_entry,
+                                 const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
-  auto status_or_session = OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+  auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
+      p4rt_grpc_addr, GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
@@ -2388,7 +2387,8 @@ void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
 }
 
 void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
-                                   bool insert_entry) {
+                                   bool insert_entry,
+                                   const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2396,7 +2396,7 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      p4rt_grpc_addr, GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
@@ -2423,7 +2423,8 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
   if (!status.ok()) return;
 }
 
-void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
+void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
+                             const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2431,7 +2432,7 @@ void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      p4rt_grpc_addr, GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
@@ -2482,7 +2483,8 @@ void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
   return;
 }
 
-void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry) {
+void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
+                          const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2490,7 +2492,7 @@ void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry) {
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      p4rt_grpc_addr, GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
@@ -2514,13 +2516,13 @@ void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry) {
 #else
 
 // DPDK target
-void ConfigFdbTableEntry(struct mac_learning_info learn_info,
-                         bool insert_entry) {
+void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
+                         const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      p4rt_grpc_addr, GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
@@ -2548,40 +2550,45 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info,
 }
 
 void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
-                                 bool insert_entry) {
+                                 bool insert_entry,
+                                 const char* p4rt_grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
-void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry) {
+void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
+                          const char* p4rt_grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
-                                   bool insert_entry) {
+                                   bool insert_entry,
+                                   const char* p4rt_grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
-void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry) {
+void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
+                             const char* p4rt_grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
-void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info,
-                              bool insert_entry) {
+void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
+                              const char* p4rt_grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
 #endif
 
-void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry) {
+void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry,
+                            const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      p4rt_grpc_addr, GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
@@ -2609,13 +2616,13 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry) {
 }
 
 #if defined(ES2K_TARGET)
-void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info,
-                              bool insert_entry) {
+void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
+                              const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      absl::GetFlag(FLAGS_grpc_addr), GenerateClientCredentials(),
+      p4rt_grpc_addr, GenerateClientCredentials(),
       absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
@@ -2634,6 +2641,7 @@ void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info,
       goto try_dstip;
     }
   }
+
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
     status = ConfigSrcIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
@@ -2650,6 +2658,7 @@ try_dstip:
       return;
     }
   }
+
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
     status = ConfigDstIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
