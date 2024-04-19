@@ -10,6 +10,8 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt_session.h
     ovsp4rt_credentials.cc
     ovsp4rt_credentials.h
+    ovsp4rt_utils.cc
+    ovsp4rt_utils.h
 )
 
 if(DPDK_TARGET)
