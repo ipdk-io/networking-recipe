@@ -8,8 +8,8 @@
 
 #include "absl/flags/flag.h"
 #include "openvswitch/ovs-p4rt.h"
-#include "ovs_p4rt_session.h"
-#include "ovs_p4rt_tls_credentials.h"
+#include "ovsp4rt_credentials.h"
+#include "ovsp4rt_session.h"
 
 #if defined(DPDK_TARGET)
 #include "dpdk/p4_name_mapping.h"
