@@ -1,9 +1,9 @@
 // Copyright 2018 Google LLC
 // Copyright 2018-present Open Networking Foundation
-// Copyright 2023 Intel Corporation
+// Copyright 2023-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#include "ovs_p4rt_tls_credentials.h"
+#include "ovsp4rt_credentials.h"
 
 #include <sys/stat.h>
 

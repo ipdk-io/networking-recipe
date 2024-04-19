@@ -42,11 +42,11 @@ endif()
 #################
 
 add_library(ovs_sidecar_o OBJECT
-    ovs_p4rt.cc
-    ovs_p4rt_session.cc
-    ovs_p4rt_session.h
-    ovs_p4rt_tls_credentials.cc
-    ovs_p4rt_tls_credentials.h
+    ovsp4rt.cc
+    ovsp4rt_session.cc
+    ovsp4rt_session.h
+    ovsp4rt_credentials.cc
+    ovsp4rt_credentials.h
     $<TARGET_OBJECTS:ovsp4rt_p4_mapping_o>
 )
 

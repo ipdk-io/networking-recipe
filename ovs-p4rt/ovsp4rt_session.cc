@@ -3,7 +3,7 @@
 // Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#include "ovs_p4rt_session.h"
+#include "ovsp4rt_session.h"
 
 #include <string>
 
