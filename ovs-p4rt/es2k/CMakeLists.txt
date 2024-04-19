@@ -1,8 +1,8 @@
-# CMake build file for krnlmon/switchapi
+# CMake build file for ovs-p4rt/es2k
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 
-add_library(ovsp4rt_p4_mapping_o OBJECT
+target_sources(ovs_sidecar_o PRIVATE
     p4_name_mapping.h
 )
