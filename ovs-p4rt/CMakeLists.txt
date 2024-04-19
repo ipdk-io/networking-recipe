@@ -31,12 +31,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
 find_package(Unbound)
 find_package(Unwind)
 
-if(DPDK_TARGET)
-    add_subdirectory(dpdk)
-elseif(ES2K_TARGET)
-    add_subdirectory(es2k)
-endif()
-
 #################
 # ovs_sidecar_o #
 #################
@@ -47,11 +41,13 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt_session.h
     ovsp4rt_credentials.cc
     ovsp4rt_credentials.h
-    $<TARGET_OBJECTS:ovsp4rt_p4_mapping_o>
 )
 
-# Required for Ninja.
-set_target_properties(ovsp4rt_p4_mapping_o PROPERTIES LINKER_LANGUAGE "C")
+if(DPDK_TARGET)
+    add_subdirectory(dpdk)
+elseif(ES2K_TARGET)
+    add_subdirectory(es2k)
+endif()
 
 target_include_directories(ovs_sidecar_o PRIVATE
     ${OVS_INSTALL_DIR}/include
