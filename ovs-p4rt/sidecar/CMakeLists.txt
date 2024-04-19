@@ -19,7 +19,7 @@ elseif(ES2K_TARGET)
 endif()
 
 target_include_directories(ovs_sidecar_o PRIVATE
-    ${OVS_INSTALL_DIR}/include
+    ${OVS_INCLUDE_DIR}
     ${STRATUM_SOURCE_DIR}
     ${PB_OUT_DIR}
 )
