@@ -1,10 +1,10 @@
 // Copyright 2018 Google LLC
 // Copyright 2018-present Open Networking Foundation
-// Copyright 2023 Intel Corporation
+// Copyright 2023-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef OVSP4RT_TLS_CREDENTIALS_H_
-#define OVSP4RT_TLS_CREDENTIALS_H_
+#ifndef OVSP4RT_CREDENTIALS_H_
+#define OVSP4RT_CREDENTIALS_H_
 
 #include <grpcpp/grpcpp.h>
 
@@ -33,4 +33,4 @@ std::shared_ptr<::grpc::ChannelCredentials> GenerateClientCredentials();
 
 }  // namespace ovs_p4rt
 
-#endif  // OVSP4RT_TLS_CREDENTIALS_H_
+#endif  // OVSP4RT_CREDENTIALS_H_
