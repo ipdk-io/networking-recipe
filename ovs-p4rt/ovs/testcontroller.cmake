@@ -26,4 +26,6 @@ target_link_libraries(ovs-testcontroller
 
 set_ovs_target_properties(ovs-testcontroller)
 
+target_link_libraries(ovs-testcontroller PUBLIC sde::target_sys)
+
 install(TARGETS ovs-testcontroller DESTINATION bin)
