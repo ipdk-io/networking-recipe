@@ -51,4 +51,6 @@ target_link_libraries(ovs-testcontroller PUBLIC
     stratum_proto
 )
 
+target_link_libraries(ovs-testcontroller PUBLIC sde::target_sys)
+
 install(TARGETS ovs-testcontroller DESTINATION bin)

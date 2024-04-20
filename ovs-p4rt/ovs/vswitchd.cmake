@@ -49,4 +49,6 @@ target_link_libraries(ovs-vswitchd PUBLIC
     p4runtime_proto
 )
 
+target_link_libraries(ovs-vswitchd PUBLIC sde::target_sys)
+
 install(TARGETS ovs-vswitchd DESTINATION sbin)
