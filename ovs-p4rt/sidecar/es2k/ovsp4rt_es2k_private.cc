@@ -11,8 +11,8 @@
 
 #include "absl/flags/flag.h"
 #include "openvswitch/ovs-p4rt.h"
-#include "ovsp4rt.h"
 #include "ovsp4rt_credentials.h"
+#include "ovsp4rt_private.h"
 #include "ovsp4rt_session.h"
 #include "ovsp4rt_utils.h"
 #include "p4/config/v1/p4info.pb.h"

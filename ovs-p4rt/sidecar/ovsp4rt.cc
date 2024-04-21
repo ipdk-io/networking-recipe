@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // TODO: ovs-p4rt logging
 
-#include "ovsp4rt.h"
+#include "ovsp4rt_private.h"
 
 #include <arpa/inet.h>
 
@@ -94,7 +94,6 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
       }
     }
   }
-
 #elif defined(DPDK_TARGET)
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
@@ -138,7 +137,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
                                        L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
 
   match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-#endif
+#endif  // LNW_V2
 #endif  // ES2K_TARGET
 
 #if defined(DPDK_TARGET)
@@ -216,7 +215,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
       }
     }
   }
-#endif
+#endif  // ES2K_TARGET
   return;
 }
 
@@ -245,8 +244,8 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
                                        L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
 
   match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-#endif
-#endif
+#endif  // LNW_V2
+#endif  // ES2K_TARGET
 
 #if defined(DPDK_TARGET)
   if (insert_entry) {
@@ -323,7 +322,7 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
       }
     }
   }
-#endif
+#endif  // ES2K_TARGET
   return;
 }
 
@@ -503,7 +502,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                        IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_DST));
   match2->mutable_exact()->set_value(
       CanonicalizeIp(tunnel_info.local_ip.ip.v4addr.s_addr));
-#endif
+#endif  // DPDK_TARGET
 
 #if defined(DPDK_TARGET)
   if (insert_entry) {
@@ -561,7 +560,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       }
     }
   }
-#endif
+#endif  // ES2K_TARGET
 
   return;
 }
@@ -599,7 +598,7 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt::OvsP4rtSession* session,
       PrepareV6EncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
     }
   }
-#endif
+#endif  // ES2K_TARGET
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }

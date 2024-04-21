@@ -1,16 +1,15 @@
 // Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-// Non-target-specific implementations of functions defined in
-// ovs-p4rt.h
+// Target-independent functions declared in ovs-p4rt.h
 //
 
 #include <cstdbool>
 
 #include "absl/flags/flag.h"
 #include "openvswitch/ovs-p4rt.h"
-#include "ovsp4rt.h"
 #include "ovsp4rt_credentials.h"
+#include "ovsp4rt_private.h"
 #include "ovsp4rt_session.h"
 
 #if defined(ES2K_TARGET)

@@ -1,13 +1,13 @@
 // Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-// DPDK-specific implementations of functions declared in ovs-p4rt.h.
+// DPDK-specific functions declared in ovs-p4rt.h.
 //
 
 #include "absl/flags/flag.h"
 #include "openvswitch/ovs-p4rt.h"
-#include "ovsp4rt.h"
 #include "ovsp4rt_credentials.h"
+#include "ovsp4rt_private.h"
 #include "ovsp4rt_session.h"
 #include "ovsp4rt_utils.h"
 
