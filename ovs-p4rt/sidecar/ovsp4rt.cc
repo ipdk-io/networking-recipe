@@ -19,6 +19,8 @@
 #elif defined(ES2K_TARGET)
 #include "es2k/ovsp4rt_es2k_private.h"
 #include "es2k/p4_name_mapping.h"
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 #define DEFAULT_OVS_P4RT_ROLE_NAME "ovs-p4rt"
@@ -106,6 +108,8 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return;
@@ -214,8 +218,9 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
       }
     }
   }
-#endif  // ES2K_TARGET
-  return;
+#else
+#error "ASSERT: Unknown TARGET type!"
+#endif
 }
 
 void PrepareFdbTableEntryforV4GeneveTunnel(
@@ -321,8 +326,9 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
       }
     }
   }
-#endif  // ES2K_TARGET
-  return;
+#else
+#error "ASSERT: Unknown TARGET type!"
+#endif
 }
 
 absl::Status ConfigFdbTxVlanTableEntry(
@@ -385,6 +391,8 @@ absl::Status ConfigFdbTunnelTableEntry(
                                            insert_entry);
     }
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
@@ -463,6 +471,8 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return;
@@ -559,7 +569,9 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       }
     }
   }
-#endif  // ES2K_TARGET
+#else
+#error "ASSERT: Unknown TARGET type!"
+#endif
 
   return;
 }
@@ -597,7 +609,9 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt::OvsP4rtSession* session,
       PrepareV6EncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
     }
   }
-#endif  // ES2K_TARGET
+#else
+#error "ASSERT: Unknown TARGET type!"
+#endif
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
@@ -625,6 +639,8 @@ absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
     PrepareV6TunnelTermTableEntry(table_entry, tunnel_info, p4info,
                                   insert_entry);
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return ovs_p4rt::SendWriteRequest(session, write_request);

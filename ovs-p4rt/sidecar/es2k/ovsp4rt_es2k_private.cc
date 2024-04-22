@@ -65,7 +65,9 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
     action->set_action_id(
         GetActionId(p4info, L2_FWD_SMAC_TABLE_ACTION_NO_ACTION));
   }
-#endif  // LNW_V3
+#else
+#error "ASSERT: Unknown LNW version!"
+#endif
 }
 
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
