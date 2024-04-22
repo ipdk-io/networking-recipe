@@ -8,6 +8,7 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt.cc
     ovsp4rt_credentials.cc
     ovsp4rt_credentials.h
+    ovsp4rt_logging.h
     ovsp4rt_private.h
     ovsp4rt_public.cc
     ovsp4rt_session.cc
@@ -37,5 +38,6 @@ add_dependencies(ovs_sidecar_o
 target_link_libraries(ovs_sidecar_o PUBLIC
     stratum_static
     p4_role_config_proto
+    absl::strings
 )
 

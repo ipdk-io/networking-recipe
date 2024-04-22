@@ -8,10 +8,30 @@
 #include "openvswitch/ovs-p4rt.h"
 #include "ovsp4rt_credentials.h"
 #include "ovsp4rt_es2k_private.h"
+#include "ovsp4rt_logging.h"
 #include "ovsp4rt_private.h"
 #include "ovsp4rt_session.h"
 #include "ovsp4rt_utils.h"
 #include "p4_name_mapping.h"
+
+namespace {
+
+const std::string TableErrorMessage(bool inserting, const char* table) {
+  if (inserting) {
+    return absl::StrCat("Error adding entry to ", table);
+  } else {
+    return absl::StrCat("Error deleting entry from ", table);
+  }
+}
+
+const std::string FormatMac(const uint8_t* mac_addr) {
+  char buf[32];
+  snprintf(buf, sizeof(buf), "%x:%x:%x:%x:%x:%x", mac_addr[0], mac_addr[1],
+           mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+  return buf;
+}
+
+}  // namespace
 
 //----------------------------------------------------------------------
 // Functions with C interfaces
@@ -66,42 +86,43 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
       auto status_or_read_response =
           GetFdbTunnelTableEntry(session.get(), learn_info, p4info);
       if (status_or_read_response.ok()) {
-        printf("TUNNEL: read FDB L2_FWD_TX_TABLE entry present\n");
+        LOG(ERROR) << "Error adding to FDB Tunnel Table: entry already exists";
         return;
       }
     }
 
     status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
-    if (!status.ok())
-      printf("%s: Failed to program l2_fwd_tx_table for tunnel\n",
-             insert_entry ? "ADD" : "DELETE");
+    if (!status.ok()) {
+      LOG(ERROR) << TableErrorMessage(insert_entry, "FDB Tunnel Table");
+      // TODO(derek): Most of the error cases don't return. Should they?
+    }
 
     status = ConfigL2TunnelTableEntry(session.get(), learn_info, p4info,
                                       insert_entry);
-    if (!status.ok())
-      printf("%s: Failed to program l2_tunnel_to_v4_table for tunnel\n",
-             insert_entry ? "ADD" : "DELETE");
+    if (!status.ok()) {
+      LOG(ERROR) << TableErrorMessage(insert_entry, "L2 Tunnel Table");
+    }
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
-    if (!status.ok())
-      printf("%s: Failed to program l2_fwd_smac_table\n",
-             insert_entry ? "ADD" : "DELETE");
+    if (!status.ok()) {
+      LOG(ERROR) << TableErrorMessage(insert_entry, "FDB Source MAC Table");
+    }
   } else {
     if (insert_entry) {
       auto status_or_read_response =
           GetFdbVlanTableEntry(session.get(), learn_info, p4info);
       if (status_or_read_response.ok()) {
-        printf("Non TUNNEL: read FDB L2_FWD_TX_TABLE entry present\n");
+        LOG(WARNING) << "Error adding to FDB Vlan Table: entry already exists";
         return;
       }
 
       status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
                                          insert_entry);
-      if (!status.ok())
-        printf("%s: Failed to program l2_fwd_rx_table\n",
-               insert_entry ? "ADD" : "DELETE");
+      if (!status.ok()) {
+        LOG(ERROR) << TableErrorMessage(insert_entry, "FDB Rx Vlan Table");
+      }
 
       status_or_read_response =
           GetTxAccVsiTableEntry(session.get(), learn_info.src_port, p4info);
@@ -141,18 +162,16 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
 
     status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
-    if (!status.ok())
-      printf("%s: Failed to program l2_fwd_tx_table\n",
-             insert_entry ? "ADD" : "DELETE");
+    if (!status.ok()) {
+      LOG(ERROR) << TableErrorMessage(insert_entry, "FDB Tx Vlan Table");
+    }
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
-    if (!status.ok())
-      printf("%s: Failed to program l2_fwd_smac_table with %x:%x:%x:%x:%x:%x\n",
-             insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
-             learn_info.mac_addr[1], learn_info.mac_addr[2],
-             learn_info.mac_addr[3], learn_info.mac_addr[4],
-             learn_info.mac_addr[5]);
+    if (!status.ok()) {
+      LOG(ERROR) << TableErrorMessage(insert_entry, "FDB Source MAC Table")
+                 << " for " << FormatMac(learn_info.mac_addr);
+    }
   }
   if (!status.ok()) return;
   return;
@@ -341,7 +360,7 @@ void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
     status = ConfigSrcIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
-      // TODO: print some log once logging support is added
+      LOG(ERROR) << TableErrorMessage(insert_entry, "SRC_IP_MAC_MAP_TABLE");
     }
   }
 
@@ -358,7 +377,7 @@ try_dstip:
     status = ConfigDstIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
-      // TODO: print some log once logging support is added
+      LOG(ERROR) << TableErrorMessage(insert_entry, "DST_IP_MAC_MAP_TABLE");
     }
   }
 
