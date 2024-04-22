@@ -20,4 +20,4 @@ using ::google::FATAL;
 using ::google::INFO;
 using ::google::WARNING;
 
-#endif // OVSP4RT_LOGGING_H_
+#endif  // OVSP4RT_LOGGING_H_
