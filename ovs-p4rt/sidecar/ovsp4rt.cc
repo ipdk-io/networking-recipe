@@ -511,7 +511,9 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                        IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_DST));
   match2->mutable_exact()->set_value(
       CanonicalizeIp(tunnel_info.local_ip.ip.v4addr.s_addr));
-#endif  // DPDK_TARGET
+#else
+#error "ASSERT: Unknown TARGET type!"
+#endif
 
 #if defined(DPDK_TARGET)
   if (insert_entry) {
