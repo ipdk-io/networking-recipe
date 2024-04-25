@@ -34,5 +34,5 @@ target_link_libraries(ovs_sidecar_o PUBLIC
     sde::target_sys
     stratum_static
     p4_role_config_proto
+    absl::strings
 )
-
