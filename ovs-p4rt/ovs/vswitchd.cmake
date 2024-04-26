@@ -20,33 +20,11 @@ target_link_libraries(ovs-vswitchd
         ovs::sflow
     PUBLIC
         atomic
-        rt m pthread
+        m
+        pthread
+        rt
 )
 
-if(TARGET ovs::avx512)
-    target_link_libraries(ovs-vswitchd PUBLIC ovs::avx512)
-endif()
-
-if(TARGET unbound)
-    target_link_libraries(ovs-vswitchd PUBLIC unbound)
-endif()
-
-if(TARGET unwind::unwind)
-    target_link_libraries(ovs-vswitchd PUBLIC unwind::unwind)
-endif()
-
-target_link_libraries(ovs-vswitchd PUBLIC
-    absl::strings
-    absl::statusor
-    absl::flags_private_handle_accessor
-    absl::flags
-)
-
-target_link_libraries(ovs-vswitchd PUBLIC stratum_static p4_role_config_proto)
-
-target_link_libraries(ovs-vswitchd PUBLIC
-    stratum_proto
-    p4runtime_proto
-)
+set_ovs_target_properties(ovs-vswitchd)
 
 install(TARGETS ovs-vswitchd DESTINATION sbin)

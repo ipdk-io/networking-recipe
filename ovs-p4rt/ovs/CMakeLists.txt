@@ -19,5 +19,41 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
 find_package(Unbound)
 find_package(Unwind)
 
+# =====================
+# Set common properties
+# =====================
+
+function(set_ovs_target_properties ARTIFACT)
+  if(TARGET ovs::avx512)
+      target_link_libraries(${ARTIFACT} PUBLIC ovs::avx512)
+  endif()
+
+  if(TARGET unbound)
+      target_link_libraries(${ARTIFACT} PUBLIC unbound)
+  endif()
+
+  if(TARGET unwind::unwind)
+      target_link_libraries(${ARTIFACT} PUBLIC unwind::unwind)
+  endif()
+
+  target_link_libraries(${ARTIFACT} PUBLIC
+      absl::strings
+      absl::statusor
+      absl::flags_private_handle_accessor
+      absl::flags
+  )
+
+  target_link_libraries(${ARTIFACT} PUBLIC
+      stratum_static
+      p4_role_config_proto
+      stratum_proto
+      p4runtime_proto
+  )
+endfunction()
+
+# =================
+# Build executables
+# =================
+
 include(vswitchd.cmake)
 include(testcontroller.cmake)
