@@ -16,7 +16,9 @@
 
 namespace ovs_p4rt {
 
-// Config functions
+//----------------------------------------------------------------------
+// 'Config' functions
+//----------------------------------------------------------------------
 
 extern absl::Status ConfigDecapTableEntry(
     ovs_p4rt::OvsP4rtSession* session, const struct tunnel_info& tunnel_info,
@@ -56,7 +58,9 @@ extern absl::Status ConfigureVsiSrcPortTableEntry(
     ovs_p4rt::OvsP4rtSession* session, const struct src_port_info& sp,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
 
-// Get functions
+//----------------------------------------------------------------------
+// 'Get' functions
+//----------------------------------------------------------------------
 
 extern absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
     ovs_p4rt::OvsP4rtSession* session,
@@ -94,7 +98,9 @@ extern absl::StatusOr<::p4::v1::ReadResponse> GetVlanPushTableEntry(
     ovs_p4rt::OvsP4rtSession* session, const uint16_t vlan_id,
     const ::p4::config::v1::P4Info& p4info);
 
-// Prepare functions
+//----------------------------------------------------------------------
+// 'Prepare' functions
+//----------------------------------------------------------------------
 
 extern void PrepareDecapModTableEntry(p4::v1::TableEntry* table_entry,
                                       const struct tunnel_info& tunnel_info,

@@ -20,21 +20,12 @@ ABSL_DECLARE_FLAG(std::string, role_name);
 
 namespace ovs_p4rt {
 
-extern void PrepareFdbTxVlanTableEntry(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
+//----------------------------------------------------------------------
+// 'Config' functions
+//----------------------------------------------------------------------
 
-extern void PrepareFdbTableEntryforV4VxlanTunnel(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
-
-extern void PrepareFdbTableEntryforV4GeneveTunnel(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
-
-extern absl::Status ConfigFdbTxVlanTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
-    const struct mac_learning_info& learn_info,
+extern absl::Status ConfigEncapTableEntry(
+    ovs_p4rt::OvsP4rtSession* session, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
 
 extern absl::Status ConfigFdbRxVlanTableEntry(
@@ -42,9 +33,34 @@ extern absl::Status ConfigFdbRxVlanTableEntry(
     const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
 
+extern absl::Status ConfigFdbTxVlanTableEntry(
+    ovs_p4rt::OvsP4rtSession* session,
+    const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
+
 extern absl::Status ConfigFdbTunnelTableEntry(
     ovs_p4rt::OvsP4rtSession* session,
     const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
+
+extern absl::Status ConfigTunnelTermTableEntry(
+    ovs_p4rt::OvsP4rtSession* session, const struct tunnel_info& tunnel_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
+
+//----------------------------------------------------------------------
+// 'Prepare' functions
+//----------------------------------------------------------------------
+
+extern void PrepareFdbTableEntryforV4GeneveTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
+
+extern void PrepareFdbTableEntryforV4VxlanTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
+
+extern void PrepareFdbTxVlanTableEntry(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
 
 extern void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
@@ -61,13 +77,5 @@ extern void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
                                         bool insert_entry);
-
-extern absl::Status ConfigEncapTableEntry(
-    ovs_p4rt::OvsP4rtSession* session, const struct tunnel_info& tunnel_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
-
-extern absl::Status ConfigTunnelTermTableEntry(
-    ovs_p4rt::OvsP4rtSession* session, const struct tunnel_info& tunnel_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry);
 
 }  // namespace ovs_p4rt
