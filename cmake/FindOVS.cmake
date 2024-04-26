@@ -1,6 +1,6 @@
 # FindOVS.cmake - find Open vSwitch package.
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -106,6 +106,8 @@ elseif(EXISTS "${OVS_INCLUDE_DIR}/openvswitch/version.h")
     mark_as_advanced(OVS_VERSION)
     unset(_version_string)
 endif()
+
+message(STATUS "Found openvswitch version ${OVS_VERSION}")
 
 #-----------------------------------------------------------------------
 # Handle REQUIRED and QUIET arguments
