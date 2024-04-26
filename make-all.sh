@@ -15,6 +15,7 @@ set -e
 
 _DEPS_DIR=${DEPEND_INSTALL}
 _HOST_DIR=${HOST_INSTALL}
+_LNW_VERSION=
 _NJOBS=8
 _OVS_DIR="${OVS_INSTALL:-ovs/install}"
 _PREFIX="install"
@@ -54,6 +55,7 @@ print_help() {
     echo "  --coverage           Instrument build to measure code coverage"
     echo "  --cxx-std=STD        C++ standard (11|14|17) [$_CXX_STD])"
     echo "  --jobs=NJOBS     -j  Number of build threads [${_NJOBS}]"
+    echo "  --lnw-version=VER    Linux networking version [${_LNW_VERSION}]"
     echo "  --no-build           Configure without building"
     echo "  --no-krnlmon         Exclude Kernel Monitor"
     echo "  --no-ovs             Exclude OVS support"
@@ -90,6 +92,7 @@ print_cmake_params() {
     [ -n "${_HOST_DEPEND_DIR}" ] && echo "${_HOST_DEPEND_DIR:2}"
     echo "OVS_INSTALL_DIR=${_OVS_DIR}"
     echo "SDE_INSTALL_DIR=${_SDE_DIR}"
+    [ -n "${_LNW_VERSION}" ] && echo "${_LNW_VERSION:2}"
     [ -n "${_WITH_KRNLMON}" ] && echo "${_WITH_KRNLMON:2}"
     [ -n "${_WITH_OVSP4RT}" ] && echo "${_WITH_OVSP4RT:2}"
     [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
@@ -143,6 +146,7 @@ config_recipe() {
         ${_HOST_DEPEND_DIR} \
         -DOVS_INSTALL_DIR="${_OVS_DIR}" \
         -DSDE_INSTALL_DIR="${_SDE_DIR}" \
+        ${_LNW_VERSION} \
         ${_WITH_KRNLMON} \
         ${_WITH_OVSP4RT} \
         ${_COVERAGE} \
@@ -166,7 +170,7 @@ SHORTOPTS=D:H:O:P:S:T:
 SHORTOPTS=${SHORTOPTS}hj:n
 
 LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,toolchain:
-LONGOPTS=${LONGOPTS},cxx-std:,jobs:,staging:,target:
+LONGOPTS=${LONGOPTS},cxx-std:,jobs:,lnw-version:,staging:,target:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
 LONGOPTS=${LONGOPTS},dry-run,help
 LONGOPTS=${LONGOPTS},coverage,ninja,rpath
@@ -228,6 +232,9 @@ while true ; do
     --jobs|-j)
         _NJOBS=$2
         shift 2 ;;
+    --lnw-version)
+        _LNW_VERSION=$2
+        shift 2 ;;
     --ninja)
         _GENERATOR="-G Ninja"
         shift 1 ;;
@@ -276,6 +283,7 @@ fi
 [ -n "${_STAGING}" ] && _STAGING_PREFIX="-DCMAKE_STAGING_PREFIX=${_STAGING}"
 [ -n "${_TGT_TYPE}" ] && _TARGET_TYPE="-DTDI_TARGET=${_TGT_TYPE}"
 [ -n "${_TOOLFILE}" ] && _TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
+[ -n "${_LNW_VERSION}" ] && _LNW_VERSION="-DLNW_VERSION=${_LNW_VERSION}"
 [ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON="-DWITH_KRNLMON=${_WITH_KRNLMON}"
 [ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT="-DWITH_OVSP4RT=${_WITH_OVSP4RT}"
 
