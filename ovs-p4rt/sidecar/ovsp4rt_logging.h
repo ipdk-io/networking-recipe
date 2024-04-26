@@ -20,6 +20,12 @@
 
 #include "target-sys/bf_sal/bf_sys_log.h"
 
+// There's a syntax error in the definition of OVSP4RT in bf_sys_log.h,
+// which is in target-sysutils. Work around the problem by replacing
+// the defective definition with a valid one.
+#undef OVSP4RT
+#define OVSP4RT (BF_MOD_START + 23)
+
 #define ovsp4rt_log_critical(...) \
   bf_sys_log_and_trace(OVSP4RT, BF_LOG_CRIT, __VA_ARGS__)
 
