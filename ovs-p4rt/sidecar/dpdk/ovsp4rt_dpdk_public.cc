@@ -16,13 +16,13 @@
 //----------------------------------------------------------------------
 
 void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
-                         const char* p4rt_grpc_addr) {
+                         const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -48,22 +48,16 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
 }
 
 void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
-                                 bool insert_entry,
-                                 const char* p4rt_grpc_addr) {
-}
+                                 bool insert_entry, const char* grpc_addr) {}
 
 void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
-                          const char* p4rt_grpc_addr) {
-}
+                          const char* grpc_addr) {}
+
 void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
-                                   bool insert_entry,
-                                   const char* p4rt_grpc_addr) {
-}
+                                   bool insert_entry, const char* grpc_addr) {}
 
 void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
-                             const char* p4rt_grpc_addr) {
-}
+                             const char* grpc_addr) {}
 
 void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
-                              const char* p4rt_grpc_addr) {
-}
+                              const char* grpc_addr) {}
