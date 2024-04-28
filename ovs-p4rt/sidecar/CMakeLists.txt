@@ -52,7 +52,3 @@ target_link_libraries(ovs_sidecar PUBLIC
 add_dependencies(ovs_sidecar ovs_sidecar_o)
 
 set_install_rpath(ovs_sidecar $ORIGIN ${SDE_ELEMENT} ${DEP_ELEMENT})
-
-if(TARGET ovs_sidecar)
-  install(TARGETS ovs_sidecar LIBRARY)
-endif()
