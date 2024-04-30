@@ -14,6 +14,7 @@
 #include "openvswitch/ovs-p4rt.h"
 
 #if defined(DPDK_TARGET)
+#include "dpdk/ovsp4rt_dpdk_private.h"
 #include "dpdk/p4_name_mapping.h"
 #elif defined(ES2K_TARGET)
 #include "es2k/p4_name_mapping.h"
@@ -210,33 +211,7 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
     }
   }
 }
-
-#elif defined(DPDK_TARGET)
-void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
-                                const struct mac_learning_info& learn_info,
-                                const ::p4::config::v1::P4Info& p4info,
-                                bool insert_entry) {
-  table_entry->set_table_id(GetTableId(p4info, L2_FWD_RX_WITH_TUNNEL_TABLE));
-  auto match = table_entry->add_match();
-  match->set_field_id(GetMatchFieldId(p4info, L2_FWD_RX_WITH_TUNNEL_TABLE,
-                                      L2_FWD_TX_TABLE_KEY_DST_MAC));
-  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
-  match->mutable_exact()->set_value(mac_addr);
-
-  if (insert_entry) {
-    auto table_action = table_entry->mutable_action();
-    auto action = table_action->mutable_action();
-    action->set_action_id(GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD));
-    {
-      auto param = action->add_params();
-      param->set_param_id(GetParamId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD,
-                                     ACTION_L2_FWD_PARAM_PORT));
-      auto port_id = learn_info.vln_info.vlan_id - 1;
-      param->set_value(EncodeByteValue(1, port_id));
-    }
-  }
-}
-#endif
+#endif  // ES2K_TARGET
 
 void PrepareFdbTableEntryforV4VxlanTunnel(
     ::p4::v1::TableEntry* table_entry,
