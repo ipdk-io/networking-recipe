@@ -7,9 +7,9 @@
 #include <string>
 
 #include "absl/flags/flag.h"
+#include "common/ovsp4rt_credentials.h"
+#include "common/ovsp4rt_session.h"
 #include "openvswitch/ovs-p4rt.h"
-#include "ovsp4rt_credentials.h"
-#include "ovsp4rt_session.h"
 
 #if defined(DPDK_TARGET)
 #include "dpdk/p4_name_mapping.h"
