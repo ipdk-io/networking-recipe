@@ -1,7 +1,7 @@
 // Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-// Private functions defined by ovsp4rt.cc.
+// Prototypes for private common functions.
 //
 
 #include <cstdbool>
@@ -10,7 +10,7 @@
 
 #include "absl/flags/declare.h"
 #include "absl/status/status.h"
-#include "common/ovsp4rt_session.h"
+#include "lib/ovsp4rt_session.h"
 #include "openvswitch/ovs-p4rt.h"
 #include "p4/config/v1/p4info.pb.h"
 #include "p4/v1/p4runtime.pb.h"
@@ -52,28 +52,31 @@ extern absl::Status ConfigTunnelTermTableEntry(
 //----------------------------------------------------------------------
 
 extern void PrepareFdbTableEntryforV4GeneveTunnel(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    ::p4::v1::TableEntry* table_entry,
+    const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
 
 extern void PrepareFdbTableEntryforV4VxlanTunnel(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    ::p4::v1::TableEntry* table_entry,
+    const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
 
 extern void PrepareFdbTxVlanTableEntry(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    ::p4::v1::TableEntry* table_entry,
+    const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
 
-extern void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
+extern void PrepareVxlanEncapTableEntry(::p4::v1::TableEntry* table_entry,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
                                         bool insert_entry);
 
-extern void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
+extern void PrepareEncapTableEntry(::p4::v1::TableEntry* table_entry,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry);
 
-extern void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
+extern void PrepareTunnelTermTableEntry(::p4::v1::TableEntry* table_entry,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
                                         bool insert_entry);
