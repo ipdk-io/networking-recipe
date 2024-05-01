@@ -16,11 +16,11 @@
 #include "dpdk/p4_name_mapping.h"
 #elif defined(ES2K_TARGET)
 #include "es2k/p4_name_mapping.h"
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 #define DEFAULT_OVS_P4RT_ROLE_NAME "ovs-p4rt"
-#define ANY_INADDR 0x00000000
-#define LOOPBACK_INADDR 0x7f000001
 
 ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
 ABSL_FLAG(std::string, role_name, DEFAULT_OVS_P4RT_ROLE_NAME,
@@ -34,11 +34,8 @@ static const std::string tunnel_v6_param_name[] = {
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_3, ACTION_SET_TUNNEL_V6_PARAM_IPV6_4};
 #endif
 
-using OvsP4rtStream = ::grpc::ClientReaderWriter<p4::v1::StreamMessageRequest,
-                                                 p4::v1::StreamMessageResponse>;
-
 #if defined(ES2K_TARGET)
-#ifdef LNW_V2
+#if defined(LNW_V2)
 void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const struct mac_learning_info& learn_info,
                               const ::p4::config::v1::P4Info& p4info,
@@ -59,10 +56,8 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
     action->set_action_id(
         GetActionId(p4info, L2_FWD_SMAC_TABLE_ACTION_SMAC_LEARN));
   }
-
-  return;
 }
-#else
+#elif defined(LNW_V3)
 void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const struct mac_learning_info& learn_info,
                               const ::p4::config::v1::P4Info& p4info,
@@ -85,10 +80,10 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
     action->set_action_id(
         GetActionId(p4info, L2_FWD_SMAC_TABLE_ACTION_NO_ACTION));
   }
-
-  return;
 }
-#endif  // LNW_V2
+#else
+#error "ASSERT: Unknown LNW version!"
+#endif
 #endif  // ES2K_TARGET
 
 void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
@@ -111,7 +106,7 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
-#ifdef LNW_V2
+#if defined(LNW_V2)
   // Based on p4 program for ES2K, we need to provide a match key SMAC flag
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
@@ -155,8 +150,7 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
       }
     }
   }
-
-#else
+#elif defined(DPDK_TARGET)
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
@@ -169,9 +163,9 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -193,7 +187,7 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
-#ifdef LNW_V2
+#if defined(LNW_V2)
   // Based on p4 program for ES2K, we need to provide a match key Bridge ID
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_RX_TABLE,
@@ -214,8 +208,6 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
-
-  return;
 }
 
 #elif defined(DPDK_TARGET)
@@ -242,13 +234,12 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
-
-  return;
 }
 #endif
 
 void PrepareFdbTableEntryforV4VxlanTunnel(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    ::p4::v1::TableEntry* table_entry,
+    const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
@@ -265,15 +256,15 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
-#ifdef LNW_V2
+#if defined(LNW_V2)
   // Based on p4 program for ES2K, we need to provide a match key SMAC flag
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
                                        L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
 
   match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-#endif
-#endif
+#endif  // LNW_V2
+#endif  // ES2K_TARGET
 
 #if defined(DPDK_TARGET)
   if (insert_entry) {
@@ -350,12 +341,14 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
       }
     }
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
-  return;
 }
 
 void PrepareFdbTableEntryforV4GeneveTunnel(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    ::p4::v1::TableEntry* table_entry,
+    const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
@@ -372,15 +365,15 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
-#ifdef LNW_V2
+#if defined(LNW_V2)
   // Based on p4 program for ES2K, we need to provide a match key SMAC flag
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
                                        L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
 
   match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-#endif
-#endif
+#endif  // LNW_V2
+#endif  // ES2K_TARGET
 
 #if defined(DPDK_TARGET)
   if (insert_entry) {
@@ -457,8 +450,9 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
       }
     }
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -489,7 +483,6 @@ void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
       param->set_value(ip_address);
     }
   }
-  return;
 }
 
 void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
@@ -519,7 +512,6 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
       param->set_value(ip_address);
     }
   }
-  return;
 }
 
 absl::Status ConfigFdbSmacTableEntry(ovs_p4rt::OvsP4rtSession* session,
@@ -620,7 +612,7 @@ absl::Status ConfigFdbTunnelTableEntry(
     }
   }
 #else
-#error "Unsupported target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
@@ -680,8 +672,6 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -738,8 +728,6 @@ void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 #endif
 
@@ -758,9 +746,9 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -818,8 +806,6 @@ void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 /* GENEVE_ENCAP_V6_MOD_TABLE */
@@ -875,8 +861,6 @@ void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
@@ -892,13 +876,11 @@ void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 /* VXLAN_ENCAP_VLAN_POP_MOD_TABLE */
 void PrepareVxlanEncapAndVlanPopTableEntry(
-    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, VXLAN_ENCAP_VLAN_POP_MOD_TABLE));
   auto match = table_entry->add_match();
@@ -952,13 +934,11 @@ void PrepareVxlanEncapAndVlanPopTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 /* GENEVE_ENCAP_VLAN_POP_MOD_TABLE */
 void PrepareGeneveEncapAndVlanPopTableEntry(
-    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, GENEVE_ENCAP_VLAN_POP_MOD_TABLE));
@@ -1013,8 +993,6 @@ void PrepareGeneveEncapAndVlanPopTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 void PrepareEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
@@ -1030,13 +1008,11 @@ void PrepareEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 /* VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE */
 void PrepareV6VxlanEncapAndVlanPopTableEntry(
-    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE));
@@ -1091,13 +1067,11 @@ void PrepareV6VxlanEncapAndVlanPopTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 /* GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE */
 void PrepareV6GeneveEncapAndVlanPopTableEntry(
-    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE));
@@ -1153,8 +1127,6 @@ void PrepareV6GeneveEncapAndVlanPopTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 void PrepareV6EncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
@@ -1170,8 +1142,6 @@ void PrepareV6EncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 void PrepareRxTunnelTableEntry(p4::v1::TableEntry* table_entry,
@@ -1208,8 +1178,6 @@ void PrepareRxTunnelTableEntry(p4::v1::TableEntry* table_entry,
                                        (tunnel_info.src_port & 0xff)));
     }
   }
-
-  return;
 }
 
 void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
@@ -1246,8 +1214,6 @@ void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
                                        (tunnel_info.src_port & 0xff)));
     }
   }
-
-  return;
 }
 #endif
 
@@ -1272,8 +1238,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
   match2->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
                                        IPV4_TUNNEL_TERM_TABLE_KEY_VNI));
   match2->mutable_exact()->set_value(EncodeByteValue(1, tunnel_info.vni));
-#else
-
+#elif defined(DPDK_TARGET)
   table_entry->set_table_id(GetTableId(p4info, IPV4_TUNNEL_TERM_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
@@ -1285,6 +1250,8 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                        IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_DST));
   match2->mutable_exact()->set_value(
       CanonicalizeIp(tunnel_info.local_ip.ip.v4addr.s_addr));
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 #if defined(DPDK_TARGET)
@@ -1343,10 +1310,9 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       }
     }
   }
-
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -1414,7 +1380,6 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       }
     }
   }
-  return;
 }
 #endif
 
@@ -1422,7 +1387,7 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1433,7 +1398,6 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt::OvsP4rtSession* session,
 
 #if defined(DPDK_TARGET)
   PrepareEncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
-
 #elif defined(ES2K_TARGET)
   if (tunnel_info.local_ip.family == AF_INET &&
       tunnel_info.remote_ip.family == AF_INET) {
@@ -1453,7 +1417,7 @@ absl::Status ConfigEncapTableEntry(ovs_p4rt::OvsP4rtSession* session,
     }
   }
 #else
-#error "Unsupported target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
@@ -1477,7 +1441,6 @@ void PrepareVxlanDecapModTableEntry(p4::v1::TableEntry* table_entry,
       action->set_action_id(GetActionId(p4info, ACTION_VXLAN_DECAP_OUTER_HDR));
     }
   }
-  return;
 }
 
 void PrepareGeneveDecapModTableEntry(p4::v1::TableEntry* table_entry,
@@ -1497,7 +1460,6 @@ void PrepareGeneveDecapModTableEntry(p4::v1::TableEntry* table_entry,
       action->set_action_id(GetActionId(p4info, ACTION_GENEVE_DECAP_OUTER_HDR));
     }
   }
-  return;
 }
 
 void PrepareDecapModTableEntry(p4::v1::TableEntry* table_entry,
@@ -1513,12 +1475,10 @@ void PrepareDecapModTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 void PrepareVxlanDecapModAndVlanPushTableEntry(
-    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, VXLAN_DECAP_AND_VLAN_PUSH_MOD_TABLE));
@@ -1555,11 +1515,10 @@ void PrepareVxlanDecapModAndVlanPushTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vlan_info.port_vlan));
     }
   }
-  return;
 }
 
 void PrepareGeneveDecapModAndVlanPushTableEntry(
-    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, GENEVE_DECAP_AND_VLAN_PUSH_MOD_TABLE));
@@ -1596,11 +1555,10 @@ void PrepareGeneveDecapModAndVlanPushTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vlan_info.port_vlan));
     }
   }
-  return;
 }
 
 void PrepareDecapModAndVlanPushTableEntry(
-    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   if (tunnel_info.tunnel_type == OVS_TUNNEL_VXLAN) {
     PrepareVxlanDecapModAndVlanPushTableEntry(table_entry, tunnel_info, p4info,
@@ -1611,15 +1569,13 @@ void PrepareDecapModAndVlanPushTableEntry(
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 absl::Status ConfigDecapTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1675,7 +1631,6 @@ void PrepareVlanPushTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, vlan_id));
     }
   }
-  return;
 }
 
 void PrepareVlanPopTableEntry(p4::v1::TableEntry* table_entry,
@@ -1694,14 +1649,13 @@ void PrepareVlanPopTableEntry(p4::v1::TableEntry* table_entry,
     auto action = table_action->mutable_action();
     action->set_action_id(GetActionId(p4info, VLAN_POP_MOD_ACTION_VLAN_POP));
   }
-  return;
 }
 
 absl::Status ConfigVlanPushTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                       const uint16_t vlan_id,
                                       const ::p4::config::v1::P4Info& p4info,
                                       bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1732,7 +1686,7 @@ absl::Status ConfigVlanPopTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                      const uint16_t vlan_id,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1783,8 +1737,6 @@ void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, sp.bridge_id));
     }
   }
-
-  return;
 }
 
 void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
@@ -1832,8 +1784,6 @@ void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(mac_low);
     }
   }
-
-  return;
 }
 
 void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
@@ -1880,8 +1830,6 @@ void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(mac_low);
     }
   }
-
-  return;
 }
 
 void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
@@ -1901,7 +1849,6 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
 
   match->mutable_exact()->set_value(EncodeByteValue(1, 0));
 #endif
-  return;
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
@@ -1954,7 +1901,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
     return absl::UnknownError("Unsupported tunnel type");
   }
 #else
-#error "Unsupported target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return ovs_p4rt::SendReadRequest(session, read_request);
@@ -2016,7 +1963,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
 absl::Status ConfigureVsiSrcPortTableEntry(
     ovs_p4rt::OvsP4rtSession* session, const struct src_port_info& sp,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -2033,7 +1980,7 @@ absl::Status ConfigureVsiSrcPortTableEntry(
 absl::Status ConfigRxTunnelSrcPortTableEntry(
     ovs_p4rt::OvsP4rtSession* session, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -2058,7 +2005,7 @@ absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
                                         bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -2068,7 +2015,6 @@ absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
   }
 #if defined(DPDK_TARGET)
   PrepareTunnelTermTableEntry(table_entry, tunnel_info, p4info, insert_entry);
-
 #elif defined(ES2K_TARGET)
   if (tunnel_info.local_ip.family == AF_INET &&
       tunnel_info.remote_ip.family == AF_INET) {
@@ -2079,7 +2025,7 @@ absl::Status ConfigTunnelTermTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                   insert_entry);
   }
 #else
-#error "Unsupported target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return ovs_p4rt::SendWriteRequest(session, write_request);
@@ -2122,6 +2068,7 @@ absl::Status ConfigSrcIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
 #endif  // ES2K_TARGET
+
 }  // namespace ovs_p4rt
 
 //----------------------------------------------------------------------
@@ -2141,13 +2088,13 @@ enum ovs_tunnel_type TunnelTypeStrtoEnum(const char* tnl_type) {
 
 #if defined(ES2K_TARGET)
 void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
-                         const char* p4rt_grpc_addr) {
+                         const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2244,7 +2191,7 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
 
       uint32_t host_sp = 0;
       for (const auto& entity : read_response.entities()) {
-        p4::v1::TableEntry table_entry_1 = entity.table_entry();
+        ::p4::v1::TableEntry table_entry_1 = entity.table_entry();
         auto* table_action = table_entry_1.mutable_action();
         auto* action = table_action->mutable_action();
         for (const auto& param : action->params()) {
@@ -2278,18 +2225,16 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
              learn_info.mac_addr[5]);
   }
   if (!status.ok()) return;
-  return;
 }
 
 void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
-                                 bool insert_entry,
-                                 const char* p4rt_grpc_addr) {
+                                 bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2302,22 +2247,19 @@ void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
   status = ConfigRxTunnelSrcPortTableEntry(session.get(), tunnel_info, p4info,
                                            insert_entry);
   if (!status.ok()) return;
-
-  return;
 }
 
 void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
-                                   bool insert_entry,
-                                   const char* p4rt_grpc_addr) {
+                                   bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2344,16 +2286,16 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
 }
 
 void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
-                             const char* p4rt_grpc_addr) {
+                             const char* grpc_addr) {
   using namespace ovs_p4rt;
 
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2379,7 +2321,7 @@ void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
 
   uint32_t host_sp = 0;
   for (const auto& entity : read_response.entities()) {
-    p4::v1::TableEntry table_entry_1 = entity.table_entry();
+    ::p4::v1::TableEntry table_entry_1 = entity.table_entry();
     auto* table_action = table_entry_1.mutable_action();
     auto* action = table_action->mutable_action();
     for (const auto& param : action->params()) {
@@ -2399,21 +2341,19 @@ void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
   status = ConfigureVsiSrcPortTableEntry(session.get(), vsi_sp, p4info,
                                          insert_entry);
   if (!status.ok()) return;
-
-  return;
 }
 
 void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
-                          const char* p4rt_grpc_addr) {
+                          const char* grpc_addr) {
   using namespace ovs_p4rt;
 
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2430,20 +2370,16 @@ void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
   status =
       ConfigVlanPopTableEntry(session.get(), vlan_id, p4info, insert_entry);
   if (!status.ok()) return;
-
-  return;
 }
-#else
-
-// DPDK target
+#elif defined(DPDK_TARGET)
 void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
-                         const char* p4rt_grpc_addr) {
+                         const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2466,50 +2402,43 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
                                        insert_entry);
     if (!status.ok()) return;
   }
-  return;
 }
 
 void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
-                                 bool insert_entry,
-                                 const char* p4rt_grpc_addr) {
+                                 bool insert_entry, const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
 
 void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
-                          const char* p4rt_grpc_addr) {
+                          const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
 void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
-                                   bool insert_entry,
-                                   const char* p4rt_grpc_addr) {
+                                   bool insert_entry, const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
 
 void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
-                             const char* p4rt_grpc_addr) {
+                             const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
 
 void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
-                              const char* p4rt_grpc_addr) {
+                              const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
-
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry,
-                            const char* p4rt_grpc_addr) {
+                            const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2531,19 +2460,17 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry,
   status = ConfigTunnelTermTableEntry(session.get(), tunnel_info, p4info,
                                       insert_entry);
   if (!status.ok()) return;
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
 void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
-                              const char* p4rt_grpc_addr) {
+                              const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2586,7 +2513,5 @@ try_dstip:
       // TODO: print some log once logging support is added
     }
   }
-
-  return;
 }
 #endif  // ES2K_TARGET
