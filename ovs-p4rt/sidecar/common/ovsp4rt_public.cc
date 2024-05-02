@@ -60,6 +60,4 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry,
   status = ConfigTunnelTermTableEntry(session.get(), tunnel_info, p4info,
                                       insert_entry);
   if (!status.ok()) return;
-
-  return;
 }
