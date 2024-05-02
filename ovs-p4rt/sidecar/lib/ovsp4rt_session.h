@@ -36,7 +36,7 @@ class OvsP4rtSession {
  public:
   // Create the session with given P4runtime stub and device id
   static ::absl::StatusOr<std::unique_ptr<OvsP4rtSession>> Create(
-      std::unique_ptr<p4::v1::P4Runtime::Stub> stub, uint32_t device_id,
+      std::unique_ptr<::p4::v1::P4Runtime::Stub> stub, uint32_t device_id,
       const std::string& role_name,
       ::absl::uint128 election_id = TimeBasedElectionId());
 
@@ -66,7 +66,7 @@ class OvsP4rtSession {
 
  private:
   OvsP4rtSession(uint32_t device_id, std::string role_name,
-                 std::unique_ptr<p4::v1::P4Runtime::Stub> stub,
+                 std::unique_ptr<::p4::v1::P4Runtime::Stub> stub,
                  ::absl::uint128 election_id)
       : device_id_(device_id),
         stub_(std::move(stub)),
@@ -82,22 +82,22 @@ class OvsP4rtSession {
 
   std::string role_name_;
 
-  std::unique_ptr<p4::v1::P4Runtime::Stub> stub_;
+  std::unique_ptr<::p4::v1::P4Runtime::Stub> stub_;
 
   std::unique_ptr<grpc::ClientContext> stream_channel_context_;
 
-  std::unique_ptr<grpc::ClientReaderWriter<p4::v1::StreamMessageRequest,
+  std::unique_ptr<grpc::ClientReaderWriter<::p4::v1::StreamMessageRequest,
                                            ::p4::v1::StreamMessageResponse>>
       stream_channel_;
 };
 
-std::unique_ptr<p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
+std::unique_ptr<::p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
     const std::string& address,
     const std::shared_ptr<grpc::ChannelCredentials>& credentials);
 
 // Functions that operate on a OvsP4rtSession.
 
-::absl::StatusOr<p4::v1::ReadResponse> SendReadRequest(
+::absl::StatusOr<::p4::v1::ReadResponse> SendReadRequest(
     OvsP4rtSession* session, const ::p4::v1::ReadRequest& read_request);
 
 ::absl::Status SendWriteRequest(OvsP4rtSession* session,
