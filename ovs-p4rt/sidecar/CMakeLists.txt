@@ -4,17 +4,10 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-#################
-# ovs_sidecar_o #
-#################
+add_library(ovs_sidecar_o OBJECT)
 
-add_library(ovs_sidecar_o OBJECT
-    ovsp4rt.cc
-    ovsp4rt_credentials.cc
-    ovsp4rt_credentials.h
-    ovsp4rt_session.cc
-    ovsp4rt_session.h
-)
+add_subdirectory(common)
+add_subdirectory(lib)
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
@@ -23,8 +16,9 @@ elseif(ES2K_TARGET)
 endif()
 
 target_include_directories(ovs_sidecar_o PUBLIC
-    ${STRATUM_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${OVS_INCLUDE_DIR}
+    ${STRATUM_SOURCE_DIR}
 )
 
 target_link_libraries(ovs_sidecar_o PUBLIC
@@ -50,5 +44,3 @@ target_link_libraries(ovs_sidecar PUBLIC
 )
 
 add_dependencies(ovs_sidecar ovs_sidecar_o)
-
-set_install_rpath(ovs_sidecar $ORIGIN ${SDE_ELEMENT} ${DEP_ELEMENT})
