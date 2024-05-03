@@ -1,3 +1,9 @@
+# CMake build file for ovs-p4rt/sidecar/testing
+#
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
+
 add_library(ovsp4rt_logging_o OBJECT
   ${SIDECAR_SOURCE_DIR}/common/ovsp4rt_logutils.cc
   ${SIDECAR_SOURCE_DIR}/common/ovsp4rt_logutils.h
