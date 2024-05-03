@@ -7,6 +7,7 @@
 add_library(ovs_sidecar_o OBJECT)
 
 add_subdirectory(common)
+add_subdirectory(lib)
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
