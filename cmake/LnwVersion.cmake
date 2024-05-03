@@ -16,7 +16,8 @@ if(ES2K_TARGET)
   elseif(LNW_VERSION STREQUAL "")
     set(LNW_VERSION "3" CACHE STRING "" FORCE)
   else()
-    message(FATAL_ERROR "Invalid LNW_VERSION: '${LNW_VERSION}'")
+    message(FATAL_ERROR
+      "LNW_VERSION accepts values {2,3} but was set to \"${LNW_VERSION}\"")
   endif()
 
   set(lnw_flag "LNW_V${LNW_VERSION}")
