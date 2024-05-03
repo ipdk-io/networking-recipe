@@ -1,4 +1,6 @@
 add_library(ovsp4rt_logging_o OBJECT
+  ${SIDECAR_SOURCE_DIR}/common/ovsp4rt_logutils.cc
+  ${SIDECAR_SOURCE_DIR}/common/ovsp4rt_logutils.h
   ${SIDECAR_SOURCE_DIR}/lib/ovsp4rt_logging.cc
   ${SIDECAR_SOURCE_DIR}/lib/ovsp4rt_logging.h
 )
