@@ -11,7 +11,7 @@
 #include "common/ovsp4rt_utils.h"
 #include "lib/ovsp4rt_credentials.h"
 #include "lib/ovsp4rt_session.h"
-#include "openvswitch/ovs-p4rt.h"
+#include "ovsp4rt/ovs-p4rt.h"
 
 #if defined(DPDK_TARGET)
 #include "dpdk/ovsp4rt_dpdk_defs.h"

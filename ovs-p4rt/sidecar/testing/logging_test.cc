@@ -13,7 +13,7 @@
 
 #include "common/ovsp4rt_logutils.h"
 #include "lib/ovsp4rt_logging.h"
-#include "openvswitch/ovs-p4rt.h"
+#include "ovsp4rt/ovs-p4rt.h"
 
 using namespace ovs_p4rt;
 

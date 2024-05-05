@@ -10,7 +10,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "lib/ovsp4rt_session.h"
-#include "openvswitch/ovs-p4rt.h"
+#include "ovsp4rt/ovs-p4rt.h"
 #include "p4/config/v1/p4info.pb.h"
 #include "p4/v1/p4runtime.pb.h"
 

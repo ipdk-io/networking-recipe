@@ -10,7 +10,7 @@
 #include "common/ovsp4rt_private.h"
 #include "lib/ovsp4rt_credentials.h"
 #include "lib/ovsp4rt_session.h"
-#include "openvswitch/ovs-p4rt.h"
+#include "ovsp4rt/ovs-p4rt.h"
 
 #if defined(ES2K_TARGET)
 #include "es2k/ovsp4rt_es2k_private.h"
