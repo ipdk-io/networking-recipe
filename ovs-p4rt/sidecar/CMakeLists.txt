@@ -44,3 +44,11 @@ target_link_libraries(ovs_sidecar PUBLIC
 )
 
 add_dependencies(ovs_sidecar ovs_sidecar_o)
+
+###########
+# testing #
+###########
+
+set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_subdirectory(testing EXCLUDE_FROM_ALL)

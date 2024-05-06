@@ -1,6 +1,5 @@
 // Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
-// TODO: ovs-p4rt logging
 
 #include "common/ovsp4rt_private.h"
 
