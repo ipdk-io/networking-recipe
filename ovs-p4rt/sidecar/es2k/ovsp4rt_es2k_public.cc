@@ -11,7 +11,7 @@
 #include "lib/ovsp4rt_credentials.h"
 #include "lib/ovsp4rt_logging.h"
 #include "lib/ovsp4rt_session.h"
-#include "openvswitch/ovs-p4rt.h"
+#include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_es2k_defs.h"
 #include "ovsp4rt_es2k_private.h"
 

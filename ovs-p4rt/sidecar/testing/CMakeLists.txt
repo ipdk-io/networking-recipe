@@ -26,7 +26,7 @@ target_include_directories(logging_test PUBLIC
   ${SIDECAR_SOURCE_DIR}
   ${DEPEND_INSTALL_DIR}/include
   ${SDE_INSTALL_DIR}/include
-  ${OVS_INCLUDE_DIR}
+  ${OVSP4RT_INCLUDE_DIR}
 )
 
 target_link_libraries(logging_test PUBLIC

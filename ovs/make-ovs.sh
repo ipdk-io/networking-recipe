@@ -1,4 +1,5 @@
 rm -fr build install
 
-cmake -S . -B build -DOVS_INSTALL_PREFIX=install
+# ${_OVS_BLD} ${_OVS_DIR} ${_TOOLCHAIN_FILE}
+cmake -S . -B build -DOVS_INSTALL_PREFIX=install -DP4OVS=ON
 cmake --build build -j6 -- V=0

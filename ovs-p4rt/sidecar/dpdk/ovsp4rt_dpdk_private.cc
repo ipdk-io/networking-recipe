@@ -10,7 +10,7 @@
 #include <string>
 
 #include "common/ovsp4rt_utils.h"
-#include "openvswitch/ovs-p4rt.h"
+#include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_dpdk_defs.h"
 #include "p4/config/v1/p4info.pb.h"
 #include "p4/v1/p4runtime.pb.h"
