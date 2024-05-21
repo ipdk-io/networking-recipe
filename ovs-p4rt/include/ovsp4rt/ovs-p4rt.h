@@ -127,30 +127,33 @@ struct ip_mac_map_info {
 // Function prototypes
 //----------------------------------------------------------------------
 
-extern void ConfigFdbTableEntry(struct mac_learning_info learn_info,
-                                bool insert_entry, const char* grpc_addr);
-
-extern void ConfigIpMacMapTableEntry(struct ip_mac_map_info learn_info,
+extern void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                                      bool insert_entry, const char* grpc_addr);
 
-extern void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
-                                        bool insert_entry,
-                                        const char* grpc_addr);
+extern void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info learn_info,
+                                            bool insert_entry,
+                                            const char* grpc_addr);
 
-extern void ConfigSrcPortTableEntry(struct src_port_info vsi_sp,
-                                    bool insert_entry, const char* grpc_addr);
+extern void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
+                                               bool insert_entry,
+                                               const char* grpc_addr);
 
-extern void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
+extern void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
                                           bool insert_entry,
                                           const char* grpc_addr);
 
-extern void ConfigTunnelTableEntry(struct tunnel_info tunnel_info,
-                                   bool insert_entry, const char* grpc_addr);
+extern void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
+                                                 bool insert_entry,
+                                                 const char* grpc_addr);
 
-extern void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
-                                 const char* grpc_addr);
+extern void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
+                                        bool insert_entry,
+                                        const char* grpc_addr);
 
-extern enum ovs_tunnel_type TunnelTypeStrtoEnum(const char* tnl_type);
+extern void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
+                                      const char* grpc_addr);
+
+extern enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type);
 
 #ifdef __cplusplus
 }  // extern "C"

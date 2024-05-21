@@ -20,7 +20,7 @@
 // Functions with C interfaces
 //----------------------------------------------------------------------
 
-enum ovs_tunnel_type TunnelTypeStrtoEnum(const char* tnl_type) {
+enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
   if (tnl_type) {
     if (strcmp(tnl_type, "vxlan") == 0) {
       return OVS_TUNNEL_VXLAN;
@@ -31,8 +31,8 @@ enum ovs_tunnel_type TunnelTypeStrtoEnum(const char* tnl_type) {
   return OVS_TUNNEL_UNKNOWN;
 }
 
-void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry,
-                            const char* grpc_addr) {
+void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
+                                 bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
