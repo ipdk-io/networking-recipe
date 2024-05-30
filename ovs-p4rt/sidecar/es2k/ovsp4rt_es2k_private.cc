@@ -100,12 +100,20 @@ void PrepareFdbRxVlanTableEntry(::p4::v1::TableEntry* table_entry,
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
+#if defined(LNW_V2)
+    action->set_action_id(GetActionId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD));
+#else
     action->set_action_id(GetActionId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD));
+#endif
     {
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD,
                                      ACTION_L2_FWD_PARAM_PORT));
+#if defined(LNW_V2)
+      auto port_id = learn_info.src_port;
+#else
       auto port_id = learn_info.rx_src_port;
+#endif
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
