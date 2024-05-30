@@ -19,8 +19,8 @@
 // Functions with C interfaces
 //----------------------------------------------------------------------
 
-void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
-                         const char* grpc_addr) {
+void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
+                              bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
@@ -162,8 +162,9 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
   if (!status.ok()) return;
 }
 
-void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
-                                 bool insert_entry, const char* grpc_addr) {
+void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
+                                        bool insert_entry,
+                                        const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
@@ -184,8 +185,9 @@ void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
   if (!status.ok()) return;
 }
 
-void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
-                                   bool insert_entry, const char* grpc_addr) {
+void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
+                                          bool insert_entry,
+                                          const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   ::p4::v1::WriteRequest write_request;
@@ -220,8 +222,8 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
   if (!status.ok()) return;
 }
 
-void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
-                             const char* grpc_addr) {
+void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
+                                   bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   ::p4::v1::WriteRequest write_request;
@@ -278,8 +280,8 @@ void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
   if (!status.ok()) return;
 }
 
-void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
-                          const char* grpc_addr) {
+void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
+                               const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   ::p4::v1::WriteRequest write_request;
@@ -307,8 +309,8 @@ void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
   if (!status.ok()) return;
 }
 
-void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
-                              const char* grpc_addr) {
+void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
+                                     bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.

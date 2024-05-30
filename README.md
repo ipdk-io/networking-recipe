@@ -21,11 +21,24 @@ section of the User Guide for a description of the components.
 
 ## Major changes
 
-The Stratum dependencies component has formally moved from the `setup`
-directory to a new <https://github.com/ipdk-io/stratum-deps> repository.
+### ovs-p4rt interface
 
-See the [README file](setup/README.md) in the `setup` directory
-for more information.
+The functions that ovs-p4rt publishes for use by OVS have been renamed
+to make them more consistent with C programming conventions.
+
+### Setup directory
+
+The Stratum dependencies have moved from the `setup` directory
+to a new <https://github.com/ipdk-io/stratum-deps> repository.
+
+This change allows the dependencies to be downloaded and built independently
+of the Networking Recipe (P4 Control Plane).
+It also makes them easier to maintain.
+
+See the [README file](https://github.com/ipdk-io/stratum-deps/blob/main/README.md)
+and
+[Transition Guide](https://github.com/ipdk-io/stratum-deps/blob/main/docs/transition-guide.md)
+in the `stratum-deps` repository for more information.
 
 ## Source code
 
