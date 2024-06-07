@@ -69,7 +69,7 @@ absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
       new OvsP4rtSession(device_id, role_name, std::move(stub), election_id));
 
   // Send arbitration request.
-  ::p4::v1::StreamMessageRequest arbt_request;
+  p4::v1::StreamMessageRequest arbt_request;
   auto arbitration = arbt_request.mutable_arbitration();
   arbitration->set_device_id(device_id);
   arbitration->mutable_role()->set_name(role_name);
@@ -92,12 +92,12 @@ absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
   }
 
   // Wait for arbitration response from P4RT server.
-  ::p4::v1::StreamMessageResponse response;
+  p4::v1::StreamMessageResponse response;
   if (!session->stream_channel_->Read(&response)) {
     session->stream_channel_->Finish();
     return ::absl::InternalError("No arbitration response received");
   }
-  if (response.update_case() != ::p4::v1::StreamMessageResponse::kArbitration) {
+  if (response.update_case() != p4::v1::StreamMessageResponse::kArbitration) {
     return ::absl::InternalError("No arbitration update received");
   }
   if (response.arbitration().device_id() != session->device_id_) {
@@ -132,7 +132,7 @@ absl::StatusOr<std::unique_ptr<OvsP4rtSession>> OvsP4rtSession::Create(
 }
 
 absl::Status GetForwardingPipelineConfig(OvsP4rtSession* session,
-                                         ::p4::config::v1::P4Info* p4info) {
+                                         p4::config::v1::P4Info* p4info) {
   GetForwardingPipelineConfigRequest request;
   request.set_device_id(session->DeviceId());
   request.set_response_type(
