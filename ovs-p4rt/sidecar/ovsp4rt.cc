@@ -2207,7 +2207,7 @@ absl::Status ConfigSrcIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
 // Functions with C interfaces
 //----------------------------------------------------------------------
 
-enum ovs_tunnel_type TunnelTypeStrtoEnum(const char* tnl_type) {
+enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
   if (tnl_type) {
     if (strcmp(tnl_type, "vxlan") == 0) {
       return OVS_TUNNEL_VXLAN;
@@ -2219,8 +2219,8 @@ enum ovs_tunnel_type TunnelTypeStrtoEnum(const char* tnl_type) {
 }
 
 #if defined(ES2K_TARGET)
-void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
-                         const char* p4rt_grpc_addr) {
+void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
+                              bool insert_entry, const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
@@ -2360,9 +2360,9 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
   return;
 }
 
-void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
-                                 bool insert_entry,
-                                 const char* p4rt_grpc_addr) {
+void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
+                                        bool insert_entry,
+                                        const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
@@ -2385,9 +2385,9 @@ void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
   return;
 }
 
-void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
-                                   bool insert_entry,
-                                   const char* p4rt_grpc_addr) {
+void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
+                                          bool insert_entry,
+                                          const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2422,8 +2422,9 @@ void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
   if (!status.ok()) return;
 }
 
-void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
-                             const char* p4rt_grpc_addr) {
+void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
+                                   bool insert_entry,
+                                   const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2482,8 +2483,8 @@ void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
   return;
 }
 
-void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
-                          const char* p4rt_grpc_addr) {
+void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
+                               const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2515,8 +2516,8 @@ void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
 #else
 
 // DPDK target
-void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
-                         const char* p4rt_grpc_addr) {
+void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
+                              bool insert_entry, const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
@@ -2548,41 +2549,44 @@ void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
   return;
 }
 
-void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
-                                 bool insert_entry,
-                                 const char* p4rt_grpc_addr) {
+void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
+                                        bool insert_entry,
+                                        const char* p4rt_grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
-void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
-                          const char* p4rt_grpc_addr) {
+void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
+                               const char* p4rt_grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
-void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
+void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
+                                          bool insert_entry,
+                                          const char* p4rt_grpc_addr) {
+  /* Unimplemented for DPDK target */
+  return;
+}
+
+void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
                                    bool insert_entry,
                                    const char* p4rt_grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
-void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
-                             const char* p4rt_grpc_addr) {
-  /* Unimplemented for DPDK target */
-  return;
-}
-
-void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
-                              const char* p4rt_grpc_addr) {
+void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
+                                     bool insert_entry,
+                                     const char* p4rt_grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
 #endif
 
-void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry,
-                            const char* p4rt_grpc_addr) {
+void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
+                                 bool insert_entry,
+                                 const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
@@ -2615,8 +2619,9 @@ void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry,
 }
 
 #if defined(ES2K_TARGET)
-void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
-                              const char* p4rt_grpc_addr) {
+void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
+                                     bool insert_entry,
+                                     const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
