@@ -2346,7 +2346,65 @@ void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
       ConfigVlanPopTableEntry(session.get(), vlan_id, p4info, insert_entry);
   if (!status.ok()) return;
 }
-#endif  // ES2K_TARGET
+#elif defined(DPDK_TARGET)
+void ConfigFdbTableEntry(struct mac_learning_info learn_info, bool insert_entry,
+                         const char* grpc_addr) {
+  using namespace ovs_p4rt;
+
+  // Start a new client session.
+  auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
+  if (!status_or_session.ok()) return;
+
+  // Unwrap the session from the StatusOr object.
+  std::unique_ptr<ovs_p4rt::OvsP4rtSession> session =
+      std::move(status_or_session).value();
+  ::p4::config::v1::P4Info p4info;
+  ::absl::Status status =
+      ovs_p4rt::GetForwardingPipelineConfig(session.get(), &p4info);
+  if (!status.ok()) return;
+
+  if (learn_info.is_tunnel) {
+    status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
+                                       insert_entry);
+  } else if (learn_info.is_vlan) {
+    status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
+                                       insert_entry);
+    if (!status.ok()) return;
+
+    status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
+                                       insert_entry);
+    if (!status.ok()) return;
+  }
+}
+
+void ConfigRxTunnelSrcTableEntry(struct tunnel_info tunnel_info,
+                                 bool insert_entry, const char* grpc_addr) {
+  /* Unimplemented for DPDK target */
+}
+
+void ConfigVlanTableEntry(uint16_t vlan_id, bool insert_entry,
+                          const char* grpc_addr) {
+  /* Unimplemented for DPDK target */
+}
+void ConfigTunnelSrcPortTableEntry(struct src_port_info tnl_sp,
+                                   bool insert_entry, const char* grpc_addr) {
+  /* Unimplemented for DPDK target */
+}
+
+void ConfigSrcPortTableEntry(struct src_port_info vsi_sp, bool insert_entry,
+                             const char* grpc_addr) {
+  /* Unimplemented for DPDK target */
+}
+
+void ConfigIpMacMapTableEntry(struct ip_mac_map_info ip_info, bool insert_entry,
+                              const char* grpc_addr) {
+  /* Unimplemented for DPDK target */
+}
+#else
+#error "ASSERT: Unknown TARGET type!"
+#endif
 
 void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry,
                             const char* grpc_addr) {
