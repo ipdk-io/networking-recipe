@@ -7,10 +7,10 @@
 #include <cstdbool>
 
 #include "absl/flags/flag.h"
+#include "common/ovsp4rt_credentials.h"
 #include "common/ovsp4rt_private.h"
-#include "lib/ovsp4rt_credentials.h"
-#include "lib/ovsp4rt_session.h"
-#include "ovsp4rt/ovs-p4rt.h"
+#include "common/ovsp4rt_session.h"
+#include "openvswitch/ovs-p4rt.h"
 
 #if defined(ES2K_TARGET)
 #include "es2k/ovsp4rt_es2k_private.h"
@@ -31,14 +31,14 @@ enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
   return OVS_TUNNEL_UNKNOWN;
 }
 
-void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
-                                 bool insert_entry, const char* grpc_addr) {
+void ConfigTunnelTableEntry(struct tunnel_info tunnel_info, bool insert_entry,
+                            const char* p4rt_grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
+      p4rt_grpc_addr, GenerateClientCredentials(),
+      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.

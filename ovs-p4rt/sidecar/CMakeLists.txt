@@ -17,7 +17,6 @@ target_include_directories(ovs_sidecar_o
 )
 
 add_subdirectory(common)
-add_subdirectory(lib)
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)

@@ -10,14 +10,14 @@
 #include <string>
 
 #include "absl/flags/flag.h"
+#include "common/ovsp4rt_credentials.h"
 #include "common/ovsp4rt_private.h"
+#include "common/ovsp4rt_session.h"
 #include "common/ovsp4rt_utils.h"
-#include "lib/ovsp4rt_credentials.h"
-#include "lib/ovsp4rt_session.h"
-#include "ovsp4rt/ovs-p4rt.h"
-#include "ovsp4rt_es2k_defs.h"
+#include "openvswitch/ovs-p4rt.h"
 #include "p4/config/v1/p4info.pb.h"
 #include "p4/v1/p4runtime.pb.h"
+#include "p4_name_mapping.h"
 
 namespace ovs_p4rt {
 
@@ -25,7 +25,7 @@ static const std::string tunnel_v6_param_name[] = {
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_1, ACTION_SET_TUNNEL_V6_PARAM_IPV6_2,
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_3, ACTION_SET_TUNNEL_V6_PARAM_IPV6_4};
 
-void PrepareFdbSmacTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const struct mac_learning_info& learn_info,
                               const ::p4::config::v1::P4Info& p4info,
                               bool insert_entry) {
@@ -70,7 +70,7 @@ void PrepareFdbSmacTableEntry(::p4::v1::TableEntry* table_entry,
 #endif
 }
 
-void PrepareFdbRxVlanTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
                                 bool insert_entry) {
@@ -119,7 +119,7 @@ void PrepareFdbRxVlanTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareL2ToTunnelV4(::p4::v1::TableEntry* table_entry,
+void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
                          const ::p4::config::v1::P4Info& p4info,
                          bool insert_entry) {
@@ -148,7 +148,7 @@ void PrepareL2ToTunnelV4(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareL2ToTunnelV6(::p4::v1::TableEntry* table_entry,
+void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
                          const ::p4::config::v1::P4Info& p4info,
                          bool insert_entry) {
@@ -214,7 +214,7 @@ absl::Status ConfigL2TunnelTableEntry(
 }
 
 /* GENEVE_ENCAP_MOD_TABLE */
-void PrepareGeneveEncapTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
                                   const struct tunnel_info& tunnel_info,
                                   const ::p4::config::v1::P4Info& p4info,
                                   bool insert_entry) {
@@ -269,7 +269,7 @@ void PrepareGeneveEncapTableEntry(::p4::v1::TableEntry* table_entry,
 }
 
 /* VXLAN_ENCAP_V6_MOD_TABLE */
-void PrepareV6VxlanEncapTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
@@ -324,7 +324,7 @@ void PrepareV6VxlanEncapTableEntry(::p4::v1::TableEntry* table_entry,
 }
 
 /* GENEVE_ENCAP_V6_MOD_TABLE */
-void PrepareV6GeneveEncapTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
                                     const struct tunnel_info& tunnel_info,
                                     const ::p4::config::v1::P4Info& p4info,
                                     bool insert_entry) {
@@ -378,7 +378,7 @@ void PrepareV6GeneveEncapTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareV6EncapTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
                               const struct tunnel_info& tunnel_info,
                               const ::p4::config::v1::P4Info& p4info,
                               bool insert_entry) {
@@ -395,7 +395,7 @@ void PrepareV6EncapTableEntry(::p4::v1::TableEntry* table_entry,
 
 /* VXLAN_ENCAP_VLAN_POP_MOD_TABLE */
 void PrepareVxlanEncapAndVlanPopTableEntry(
-    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, VXLAN_ENCAP_VLAN_POP_MOD_TABLE));
   auto match = table_entry->add_match();
@@ -453,7 +453,7 @@ void PrepareVxlanEncapAndVlanPopTableEntry(
 
 /* GENEVE_ENCAP_VLAN_POP_MOD_TABLE */
 void PrepareGeneveEncapAndVlanPopTableEntry(
-    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, GENEVE_ENCAP_VLAN_POP_MOD_TABLE));
@@ -510,7 +510,7 @@ void PrepareGeneveEncapAndVlanPopTableEntry(
   }
 }
 
-void PrepareEncapAndVlanPopTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
                                       const struct tunnel_info& tunnel_info,
                                       const ::p4::config::v1::P4Info& p4info,
                                       bool insert_entry) {
@@ -527,7 +527,7 @@ void PrepareEncapAndVlanPopTableEntry(::p4::v1::TableEntry* table_entry,
 
 /* VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE */
 void PrepareV6VxlanEncapAndVlanPopTableEntry(
-    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE));
@@ -586,7 +586,7 @@ void PrepareV6VxlanEncapAndVlanPopTableEntry(
 
 /* GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE */
 void PrepareV6GeneveEncapAndVlanPopTableEntry(
-    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE));
@@ -644,7 +644,7 @@ void PrepareV6GeneveEncapAndVlanPopTableEntry(
   }
 }
 
-void PrepareV6EncapAndVlanPopTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareV6EncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
                                         bool insert_entry) {
@@ -659,7 +659,7 @@ void PrepareV6EncapAndVlanPopTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareRxTunnelTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareRxTunnelTableEntry(p4::v1::TableEntry* table_entry,
                                const struct tunnel_info& tunnel_info,
                                const ::p4::config::v1::P4Info& p4info,
                                bool insert_entry) {
@@ -695,7 +695,7 @@ void PrepareRxTunnelTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareV6RxTunnelTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
                                  const struct tunnel_info& tunnel_info,
                                  const ::p4::config::v1::P4Info& p4info,
                                  bool insert_entry) {
@@ -731,7 +731,7 @@ void PrepareV6RxTunnelTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareV6TunnelTermTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
@@ -797,7 +797,7 @@ void PrepareV6TunnelTermTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareVxlanDecapModTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareVxlanDecapModTableEntry(p4::v1::TableEntry* table_entry,
                                     const struct tunnel_info& tunnel_info,
                                     const ::p4::config::v1::P4Info& p4info,
                                     bool insert_entry) {
@@ -816,7 +816,7 @@ void PrepareVxlanDecapModTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareGeneveDecapModTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareGeneveDecapModTableEntry(p4::v1::TableEntry* table_entry,
                                      const struct tunnel_info& tunnel_info,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
@@ -835,7 +835,7 @@ void PrepareGeneveDecapModTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareDecapModTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareDecapModTableEntry(p4::v1::TableEntry* table_entry,
                                const struct tunnel_info& tunnel_info,
                                const ::p4::config::v1::P4Info& p4info,
                                bool insert_entry) {
@@ -851,7 +851,7 @@ void PrepareDecapModTableEntry(::p4::v1::TableEntry* table_entry,
 }
 
 void PrepareVxlanDecapModAndVlanPushTableEntry(
-    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, VXLAN_DECAP_AND_VLAN_PUSH_MOD_TABLE));
@@ -891,7 +891,7 @@ void PrepareVxlanDecapModAndVlanPushTableEntry(
 }
 
 void PrepareGeneveDecapModAndVlanPushTableEntry(
-    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   table_entry->set_table_id(
       GetTableId(p4info, GENEVE_DECAP_AND_VLAN_PUSH_MOD_TABLE));
@@ -931,7 +931,7 @@ void PrepareGeneveDecapModAndVlanPushTableEntry(
 }
 
 void PrepareDecapModAndVlanPushTableEntry(
-    ::p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
+    p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   if (tunnel_info.tunnel_type == OVS_TUNNEL_VXLAN) {
     PrepareVxlanDecapModAndVlanPushTableEntry(table_entry, tunnel_info, p4info,
@@ -948,7 +948,7 @@ absl::Status ConfigDecapTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
-  ::p4::v1::WriteRequest write_request;
+  p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -967,7 +967,7 @@ absl::Status ConfigDecapTableEntry(ovs_p4rt::OvsP4rtSession* session,
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
 
-void PrepareVlanPushTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareVlanPushTableEntry(p4::v1::TableEntry* table_entry,
                                const uint16_t vlan_id,
                                const ::p4::config::v1::P4Info& p4info,
                                bool insert_entry) {
@@ -1006,7 +1006,7 @@ void PrepareVlanPushTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareVlanPopTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareVlanPopTableEntry(p4::v1::TableEntry* table_entry,
                               const uint16_t vlan_id,
                               const ::p4::config::v1::P4Info& p4info,
                               bool insert_entry) {
@@ -1028,7 +1028,7 @@ absl::Status ConfigVlanPushTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                       const uint16_t vlan_id,
                                       const ::p4::config::v1::P4Info& p4info,
                                       bool insert_entry) {
-  ::p4::v1::WriteRequest write_request;
+  p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1059,7 +1059,7 @@ absl::Status ConfigVlanPopTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                      const uint16_t vlan_id,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
-  ::p4::v1::WriteRequest write_request;
+  p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1073,7 +1073,7 @@ absl::Status ConfigVlanPopTableEntry(ovs_p4rt::OvsP4rtSession* session,
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
 
-void PrepareSrcPortTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
                               const struct src_port_info& sp,
                               const ::p4::config::v1::P4Info& p4info,
                               bool insert_entry) {
@@ -1112,7 +1112,7 @@ void PrepareSrcPortTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareSrcIpMacMapTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
                                   struct ip_mac_map_info& ip_info,
                                   const ::p4::config::v1::P4Info& p4info,
                                   bool insert_entry) {
@@ -1159,7 +1159,7 @@ void PrepareSrcIpMacMapTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareDstIpMacMapTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
                                   struct ip_mac_map_info& ip_info,
                                   const ::p4::config::v1::P4Info& p4info,
                                   bool insert_entry) {
@@ -1205,7 +1205,7 @@ void PrepareDstIpMacMapTableEntry(::p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareTxAccVsiTableEntry(::p4::v1::TableEntry* table_entry, uint32_t sp,
+void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
                                const ::p4::config::v1::P4Info& p4info) {
   table_entry->set_table_id(GetTableId(p4info, TX_ACC_VSI_TABLE));
   auto match = table_entry->add_match();
@@ -1330,7 +1330,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
 absl::Status ConfigureVsiSrcPortTableEntry(
     ovs_p4rt::OvsP4rtSession* session, const struct src_port_info& sp,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  ::p4::v1::WriteRequest write_request;
+  p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1347,7 +1347,7 @@ absl::Status ConfigureVsiSrcPortTableEntry(
 absl::Status ConfigRxTunnelSrcPortTableEntry(
     ovs_p4rt::OvsP4rtSession* session, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  ::p4::v1::WriteRequest write_request;
+  p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {

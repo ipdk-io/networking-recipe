@@ -5,11 +5,11 @@
 //
 
 #include "absl/flags/flag.h"
+#include "common/ovsp4rt_credentials.h"
 #include "common/ovsp4rt_private.h"
+#include "common/ovsp4rt_session.h"
 #include "common/ovsp4rt_utils.h"
-#include "lib/ovsp4rt_credentials.h"
-#include "lib/ovsp4rt_session.h"
-#include "ovsp4rt/ovs-p4rt.h"
+#include "openvswitch/ovs-p4rt.h"
 
 //----------------------------------------------------------------------
 // Functions with C interfaces

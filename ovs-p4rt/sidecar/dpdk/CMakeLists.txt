@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: Apache 2.0
 
 target_sources(ovs_sidecar_o PRIVATE
-    ovsp4rt_dpdk_defs.h
     ovsp4rt_dpdk_private.cc
     ovsp4rt_dpdk_private.h
     ovsp4rt_dpdk_public.cc
+    p4_name_mapping.h
 )

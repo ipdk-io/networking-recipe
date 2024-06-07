@@ -10,14 +10,14 @@
 #include <string>
 
 #include "common/ovsp4rt_utils.h"
-#include "ovsp4rt/ovs-p4rt.h"
-#include "ovsp4rt_dpdk_defs.h"
+#include "openvswitch/ovs-p4rt.h"
 #include "p4/config/v1/p4info.pb.h"
 #include "p4/v1/p4runtime.pb.h"
+#include "p4_name_mapping.h"
 
 namespace ovs_p4rt {
 
-void PrepareFdbRxVlanTableEntry(::p4::v1::TableEntry* table_entry,
+void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
                                 bool insert_entry) {
