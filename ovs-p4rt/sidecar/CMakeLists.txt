@@ -9,6 +9,7 @@
 #################
 
 add_library(ovs_sidecar_o OBJECT
+    ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
     ovsp4rt.cc
     ovsp4rt_credentials.cc
     ovsp4rt_credentials.h
@@ -23,8 +24,8 @@ elseif(ES2K_TARGET)
 endif()
 
 target_include_directories(ovs_sidecar_o PUBLIC
+    ${OVSP4RT_INCLUDE_DIR}
     ${STRATUM_SOURCE_DIR}
-    ${OVS_INCLUDE_DIR}
 )
 
 target_link_libraries(ovs_sidecar_o PUBLIC
@@ -50,5 +51,12 @@ target_link_libraries(ovs_sidecar PUBLIC
 )
 
 add_dependencies(ovs_sidecar ovs_sidecar_o)
+
+install(
+    DIRECTORY
+        ${OVSP4RT_INCLUDE_DIR}/ovsp4rt
+    DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
 set_install_rpath(ovs_sidecar $ORIGIN ${SDE_ELEMENT} ${DEP_ELEMENT})
