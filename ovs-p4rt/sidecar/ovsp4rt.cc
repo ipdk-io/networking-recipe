@@ -17,8 +17,6 @@
 #endif
 
 #define DEFAULT_OVS_P4RT_ROLE_NAME "ovs-p4rt"
-#define ANY_INADDR 0x00000000
-#define LOOPBACK_INADDR 0x7f000001
 
 ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
 ABSL_FLAG(std::string, role_name, DEFAULT_OVS_P4RT_ROLE_NAME,
@@ -31,9 +29,6 @@ static const std::string tunnel_v6_param_name[] = {
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_1, ACTION_SET_TUNNEL_V6_PARAM_IPV6_2,
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_3, ACTION_SET_TUNNEL_V6_PARAM_IPV6_4};
 #endif
-
-using OvsP4rtStream = ::grpc::ClientReaderWriter<p4::v1::StreamMessageRequest,
-                                                 p4::v1::StreamMessageResponse>;
 
 std::string EncodeByteValue(int arg_count...) {
   std::string byte_value;
