@@ -2220,13 +2220,13 @@ enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
 
 #if defined(ES2K_TARGET)
 void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
-                              bool insert_entry, const char* p4rt_grpc_addr) {
+                              bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2362,13 +2362,13 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
 
 void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
                                         bool insert_entry,
-                                        const char* p4rt_grpc_addr) {
+                                        const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2387,7 +2387,7 @@ void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
 
 void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
                                           bool insert_entry,
-                                          const char* p4rt_grpc_addr) {
+                                          const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2395,8 +2395,8 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2423,8 +2423,7 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
 }
 
 void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
-                                   bool insert_entry,
-                                   const char* p4rt_grpc_addr) {
+                                   bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2432,8 +2431,8 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2484,7 +2483,7 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
 }
 
 void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
-                               const char* p4rt_grpc_addr) {
+                               const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2492,8 +2491,8 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2517,13 +2516,13 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
 
 // DPDK target
 void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
-                              bool insert_entry, const char* p4rt_grpc_addr) {
+                              bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2551,33 +2550,31 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
 
 void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
                                         bool insert_entry,
-                                        const char* p4rt_grpc_addr) {
+                                        const char* grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
 void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
-                               const char* p4rt_grpc_addr) {
+                               const char* grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
                                           bool insert_entry,
-                                          const char* p4rt_grpc_addr) {
+                                          const char* grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
 void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
-                                   bool insert_entry,
-                                   const char* p4rt_grpc_addr) {
+                                   bool insert_entry, const char* grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
 
 void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
-                                     bool insert_entry,
-                                     const char* p4rt_grpc_addr) {
+                                     bool insert_entry, const char* grpc_addr) {
   /* Unimplemented for DPDK target */
   return;
 }
@@ -2585,14 +2582,13 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
 #endif
 
 void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
-                                 bool insert_entry,
-                                 const char* p4rt_grpc_addr) {
+                                 bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2620,14 +2616,13 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
 
 #if defined(ES2K_TARGET)
 void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
-                                     bool insert_entry,
-                                     const char* p4rt_grpc_addr) {
+                                     bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
