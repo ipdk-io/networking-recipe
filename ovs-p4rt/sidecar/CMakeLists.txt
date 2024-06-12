@@ -35,9 +35,9 @@ target_link_libraries(ovs_sidecar_o PUBLIC
     sde::target_sys
 )
 
-##############
-# libovsp4rt #
-##############
+#################
+# libovsp4rt.so #
+#################
 
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
@@ -71,6 +71,19 @@ install(
         ${OVSP4RT_INCLUDE_DIR}/ovsp4rt
     DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+###################
+# ovsp4rt_stubs_o #
+###################
+
+add_library(ovsp4rt_stubs_o OBJECT
+    ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
+    ovsp4rt_stubs.cc
+)
+
+target_include_directories(ovsp4rt_stubs_o PUBLIC
+    ${OVSP4RT_INCLUDE_DIR}
 )
 
 #################

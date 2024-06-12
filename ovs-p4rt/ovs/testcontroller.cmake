@@ -4,7 +4,9 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-add_executable(ovs-testcontroller dummy.cc)
+add_executable(ovs-testcontroller
+    $<TARGET_OBJECTS:ovsp4rt_stubs_o>
+)
 
 set_install_rpath(ovs-testcontroller ${EXEC_ELEMENT} ${DEP_ELEMENT})
 
@@ -19,7 +21,7 @@ target_link_libraries(ovs-testcontroller
         ovs::vswitchd
     PUBLIC
         atomic
-        ovsp4rt
+        pthread
         rt
 )
 
