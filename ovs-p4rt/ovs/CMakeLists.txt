@@ -35,20 +35,6 @@ function(set_ovs_target_properties ARTIFACT)
   if(TARGET unwind::unwind)
       target_link_libraries(${ARTIFACT} PUBLIC unwind::unwind)
   endif()
-
-  target_link_libraries(${ARTIFACT} PUBLIC
-      absl::strings
-      absl::statusor
-      absl::flags_private_handle_accessor
-      absl::flags
-  )
-
-  target_link_libraries(${ARTIFACT} PUBLIC
-      stratum_static
-      p4_role_config_proto
-      stratum_proto
-      p4runtime_proto
-  )
 endfunction()
 
 # =================
