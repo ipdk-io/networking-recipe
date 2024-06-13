@@ -2209,20 +2209,29 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok())
-      printf("%s: Failed to program l2_fwd_tx_table for tunnel\n",
-             insert_entry ? "ADD" : "DELETE");
+      printf("%s: Failed to program l2_fwd_tx_table for tunnel with mac %x:%x:%x:%x:%x:%x\n",
+             insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
+             learn_info.mac_addr[1], learn_info.mac_addr[2],
+             learn_info.mac_addr[3], learn_info.mac_addr[4],
+             learn_info.mac_addr[5]);
 
     status = ConfigL2TunnelTableEntry(session.get(), learn_info, p4info,
                                       insert_entry);
     if (!status.ok())
-      printf("%s: Failed to program l2_tunnel_to_v4_table for tunnel\n",
-             insert_entry ? "ADD" : "DELETE");
+      printf("%s: Failed to program l2_tunnel_to_v4_table for tunnel with mac %x:%x:%x:%x:%x:%x\n",
+             insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
+             learn_info.mac_addr[1], learn_info.mac_addr[2],
+             learn_info.mac_addr[3], learn_info.mac_addr[4],
+             learn_info.mac_addr[5]);
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok())
-      printf("%s: Failed to program l2_fwd_smac_table\n",
-             insert_entry ? "ADD" : "DELETE");
+      printf("%s: Failed to program l2_fwd_smac_table with mac %x:%x:%x:%x:%x:%x\n",
+             insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
+             learn_info.mac_addr[1], learn_info.mac_addr[2],
+             learn_info.mac_addr[3], learn_info.mac_addr[4],
+             learn_info.mac_addr[5]);
   } else {
     if (insert_entry) {
       auto status_or_read_response =
@@ -2235,8 +2244,11 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
                                          insert_entry);
       if (!status.ok())
-        printf("%s: Failed to program l2_fwd_rx_table\n",
-               insert_entry ? "ADD" : "DELETE");
+        printf("%s: Failed to program l2_fwd_rx_table with mac %x:%x:%x:%x:%x:%x\n",
+             insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
+             learn_info.mac_addr[1], learn_info.mac_addr[2],
+             learn_info.mac_addr[3], learn_info.mac_addr[4],
+             learn_info.mac_addr[5]);
 
       status_or_read_response =
           GetTxAccVsiTableEntry(session.get(), learn_info.src_port, p4info);
@@ -2277,8 +2289,11 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok())
-      printf("%s: Failed to program l2_fwd_tx_table\n",
-             insert_entry ? "ADD" : "DELETE");
+      printf("%s: Failed to program l2_fwd_tx_table with mac %x:%x:%x:%x:%x:%x\n",
+             insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
+             learn_info.mac_addr[1], learn_info.mac_addr[2],
+             learn_info.mac_addr[3], learn_info.mac_addr[4],
+             learn_info.mac_addr[5]);
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
