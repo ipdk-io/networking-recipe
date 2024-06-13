@@ -17,8 +17,6 @@
 #endif
 
 #define DEFAULT_OVS_P4RT_ROLE_NAME "ovs-p4rt"
-#define ANY_INADDR 0x00000000
-#define LOOPBACK_INADDR 0x7f000001
 
 ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
 ABSL_FLAG(std::string, role_name, DEFAULT_OVS_P4RT_ROLE_NAME,
@@ -31,9 +29,6 @@ static const std::string tunnel_v6_param_name[] = {
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_1, ACTION_SET_TUNNEL_V6_PARAM_IPV6_2,
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_3, ACTION_SET_TUNNEL_V6_PARAM_IPV6_4};
 #endif
-
-using OvsP4rtStream = ::grpc::ClientReaderWriter<p4::v1::StreamMessageRequest,
-                                                 p4::v1::StreamMessageResponse>;
 
 std::string EncodeByteValue(int arg_count...) {
   std::string byte_value;
@@ -138,8 +133,6 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
     action->set_action_id(
         GetActionId(p4info, L2_FWD_SMAC_TABLE_ACTION_SMAC_LEARN));
   }
-
-  return;
 }
 #else
 void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
@@ -164,8 +157,6 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
     action->set_action_id(
         GetActionId(p4info, L2_FWD_SMAC_TABLE_ACTION_NO_ACTION));
   }
-
-  return;
 }
 #endif  // LNW_V2
 #endif  // ES2K_TARGET
@@ -249,8 +240,6 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
     }
   }
 #endif
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -293,8 +282,6 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
-
-  return;
 }
 
 #elif defined(DPDK_TARGET)
@@ -321,8 +308,6 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
-
-  return;
 }
 #endif
 
@@ -430,7 +415,6 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
     }
   }
 #endif
-  return;
 }
 
 void PrepareFdbTableEntryforV4GeneveTunnel(
@@ -537,7 +521,6 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
     }
   }
 #endif
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -568,7 +551,6 @@ void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
       param->set_value(ip_address);
     }
   }
-  return;
 }
 
 void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
@@ -598,7 +580,6 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
       param->set_value(ip_address);
     }
   }
-  return;
 }
 
 absl::Status ConfigFdbSmacTableEntry(ovs_p4rt::OvsP4rtSession* session,
@@ -759,8 +740,6 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -817,8 +796,6 @@ void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 #endif
 
@@ -838,8 +815,6 @@ void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
 #endif
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -897,8 +872,6 @@ void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 /* GENEVE_ENCAP_V6_MOD_TABLE */
@@ -954,8 +927,6 @@ void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
@@ -971,8 +942,6 @@ void PrepareV6EncapTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 /* VXLAN_ENCAP_VLAN_POP_MOD_TABLE */
@@ -1031,8 +1000,6 @@ void PrepareVxlanEncapAndVlanPopTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 /* GENEVE_ENCAP_VLAN_POP_MOD_TABLE */
@@ -1092,8 +1059,6 @@ void PrepareGeneveEncapAndVlanPopTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 void PrepareEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
@@ -1109,8 +1074,6 @@ void PrepareEncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 /* VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE */
@@ -1170,8 +1133,6 @@ void PrepareV6VxlanEncapAndVlanPopTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 /* GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE */
@@ -1232,8 +1193,6 @@ void PrepareV6GeneveEncapAndVlanPopTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
-
-  return;
 }
 
 void PrepareV6EncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
@@ -1249,8 +1208,6 @@ void PrepareV6EncapAndVlanPopTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 void PrepareRxTunnelTableEntry(p4::v1::TableEntry* table_entry,
@@ -1287,8 +1244,6 @@ void PrepareRxTunnelTableEntry(p4::v1::TableEntry* table_entry,
                                        (tunnel_info.src_port & 0xff)));
     }
   }
-
-  return;
 }
 
 void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
@@ -1325,8 +1280,6 @@ void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
                                        (tunnel_info.src_port & 0xff)));
     }
   }
-
-  return;
 }
 #endif
 
@@ -1424,8 +1377,6 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
   }
 
 #endif
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
@@ -1493,7 +1444,6 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       }
     }
   }
-  return;
 }
 #endif
 
@@ -1556,7 +1506,6 @@ void PrepareVxlanDecapModTableEntry(p4::v1::TableEntry* table_entry,
       action->set_action_id(GetActionId(p4info, ACTION_VXLAN_DECAP_OUTER_HDR));
     }
   }
-  return;
 }
 
 void PrepareGeneveDecapModTableEntry(p4::v1::TableEntry* table_entry,
@@ -1576,7 +1525,6 @@ void PrepareGeneveDecapModTableEntry(p4::v1::TableEntry* table_entry,
       action->set_action_id(GetActionId(p4info, ACTION_GENEVE_DECAP_OUTER_HDR));
     }
   }
-  return;
 }
 
 void PrepareDecapModTableEntry(p4::v1::TableEntry* table_entry,
@@ -1592,8 +1540,6 @@ void PrepareDecapModTableEntry(p4::v1::TableEntry* table_entry,
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 void PrepareVxlanDecapModAndVlanPushTableEntry(
@@ -1634,7 +1580,6 @@ void PrepareVxlanDecapModAndVlanPushTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vlan_info.port_vlan));
     }
   }
-  return;
 }
 
 void PrepareGeneveDecapModAndVlanPushTableEntry(
@@ -1675,7 +1620,6 @@ void PrepareGeneveDecapModAndVlanPushTableEntry(
       param->set_value(EncodeByteValue(1, tunnel_info.vlan_info.port_vlan));
     }
   }
-  return;
 }
 
 void PrepareDecapModAndVlanPushTableEntry(
@@ -1690,8 +1634,6 @@ void PrepareDecapModAndVlanPushTableEntry(
   } else {
     std::cout << "ERROR: Unsupported tunnel type" << std::endl;
   }
-
-  return;
 }
 
 absl::Status ConfigDecapTableEntry(ovs_p4rt::OvsP4rtSession* session,
@@ -1754,7 +1696,6 @@ void PrepareVlanPushTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, vlan_id));
     }
   }
-  return;
 }
 
 void PrepareVlanPopTableEntry(p4::v1::TableEntry* table_entry,
@@ -1773,7 +1714,6 @@ void PrepareVlanPopTableEntry(p4::v1::TableEntry* table_entry,
     auto action = table_action->mutable_action();
     action->set_action_id(GetActionId(p4info, VLAN_POP_MOD_ACTION_VLAN_POP));
   }
-  return;
 }
 
 absl::Status ConfigVlanPushTableEntry(ovs_p4rt::OvsP4rtSession* session,
@@ -1862,8 +1802,6 @@ void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(EncodeByteValue(1, sp.bridge_id));
     }
   }
-
-  return;
 }
 
 void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
@@ -1911,8 +1849,6 @@ void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(mac_low);
     }
   }
-
-  return;
 }
 
 void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
@@ -1959,8 +1895,6 @@ void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
       param->set_value(mac_low);
     }
   }
-
-  return;
 }
 
 void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
@@ -1980,7 +1914,6 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
 
   match->mutable_exact()->set_value(EncodeByteValue(1, 0));
 #endif
-  return;
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
@@ -2220,13 +2153,13 @@ enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
 
 #if defined(ES2K_TARGET)
 void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
-                              bool insert_entry, const char* p4rt_grpc_addr) {
+                              bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2357,18 +2290,17 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
              learn_info.mac_addr[5]);
   }
   if (!status.ok()) return;
-  return;
 }
 
 void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
                                         bool insert_entry,
-                                        const char* p4rt_grpc_addr) {
+                                        const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2381,13 +2313,11 @@ void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
   status = ConfigRxTunnelSrcPortTableEntry(session.get(), tunnel_info, p4info,
                                            insert_entry);
   if (!status.ok()) return;
-
-  return;
 }
 
 void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
                                           bool insert_entry,
-                                          const char* p4rt_grpc_addr) {
+                                          const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2395,8 +2325,8 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2423,8 +2353,7 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
 }
 
 void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
-                                   bool insert_entry,
-                                   const char* p4rt_grpc_addr) {
+                                   bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2432,8 +2361,8 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2479,12 +2408,10 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
   status = ConfigureVsiSrcPortTableEntry(session.get(), vsi_sp, p4info,
                                          insert_entry);
   if (!status.ok()) return;
-
-  return;
 }
 
 void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
-                               const char* p4rt_grpc_addr) {
+                               const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   p4::v1::WriteRequest write_request;
@@ -2492,8 +2419,8 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2510,20 +2437,18 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
   status =
       ConfigVlanPopTableEntry(session.get(), vlan_id, p4info, insert_entry);
   if (!status.ok()) return;
-
-  return;
 }
 #else
 
 // DPDK target
 void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
-                              bool insert_entry, const char* p4rt_grpc_addr) {
+                              bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2546,53 +2471,44 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                                        insert_entry);
     if (!status.ok()) return;
   }
-  return;
 }
 
 void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
                                         bool insert_entry,
-                                        const char* p4rt_grpc_addr) {
+                                        const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
 
 void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
-                               const char* p4rt_grpc_addr) {
+                               const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
 void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
                                           bool insert_entry,
-                                          const char* p4rt_grpc_addr) {
+                                          const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
 
 void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
-                                   bool insert_entry,
-                                   const char* p4rt_grpc_addr) {
+                                   bool insert_entry, const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
 
 void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
-                                     bool insert_entry,
-                                     const char* p4rt_grpc_addr) {
+                                     bool insert_entry, const char* grpc_addr) {
   /* Unimplemented for DPDK target */
-  return;
 }
 
 #endif
 
 void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
-                                 bool insert_entry,
-                                 const char* p4rt_grpc_addr) {
+                                 bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2614,20 +2530,17 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
   status = ConfigTunnelTermTableEntry(session.get(), tunnel_info, p4info,
                                       insert_entry);
   if (!status.ok()) return;
-
-  return;
 }
 
 #if defined(ES2K_TARGET)
 void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
-                                     bool insert_entry,
-                                     const char* p4rt_grpc_addr) {
+                                     bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      p4rt_grpc_addr, GenerateClientCredentials(),
-      absl::GetFlag(FLAGS_device_id), absl::GetFlag(FLAGS_role_name));
+      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
+      absl::GetFlag(FLAGS_role_name));
   if (!status_or_session.ok()) return;
 
   // Unwrap the session from the StatusOr object.
@@ -2670,7 +2583,5 @@ try_dstip:
       // TODO: print some log once logging support is added
     }
   }
-
-  return;
 }
 #endif  // ES2K_TARGET
