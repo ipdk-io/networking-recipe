@@ -43,8 +43,9 @@ add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
 )
 
+target_link_libraries(ovsp4rt PRIVATE stratum_static)
+
 target_link_libraries(ovsp4rt PUBLIC
-    stratum_static
     p4_role_config_proto
     stratum_proto
     p4runtime_proto
