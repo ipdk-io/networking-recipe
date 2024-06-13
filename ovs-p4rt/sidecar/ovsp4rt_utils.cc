@@ -86,5 +86,5 @@ int GetMatchFieldId(const ::p4::config::v1::P4Info& p4info,
   }
   return -1;
 }
- 
-} // namespace ovs_p4rt
+
+}  // namespace ovs_p4rt
