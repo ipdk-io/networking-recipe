@@ -14,8 +14,8 @@
 #if defined(DPDK_TARGET)
 #include "dpdk/p4_name_mapping.h"
 #elif defined(ES2K_TARGET)
-#include "es2k/p4_name_mapping.h"
 #include "encode/PrepareL2ToTunnel.h"
+#include "es2k/p4_name_mapping.h"
 #endif
 
 #define DEFAULT_OVS_P4RT_ROLE_NAME "ovs-p4rt"
