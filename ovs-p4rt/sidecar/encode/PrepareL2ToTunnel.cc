@@ -10,8 +10,7 @@ namespace ovs_p4rt {
 
 static const std::string tunnel_v6_param_name[] = {
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_1, ACTION_SET_TUNNEL_V6_PARAM_IPV6_2,
-    ACTION_SET_TUNNEL_V6_PARAM_IPV6_3, ACTION_SET_TUNNEL_V6_PARAM_IPV6_4
-};
+    ACTION_SET_TUNNEL_V6_PARAM_IPV6_3, ACTION_SET_TUNNEL_V6_PARAM_IPV6_4};
 
 void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
