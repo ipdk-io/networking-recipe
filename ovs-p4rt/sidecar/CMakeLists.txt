@@ -19,6 +19,8 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt_utils.h
 )
 
+add_subdirectory(encode)
+
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
 elseif(ES2K_TARGET)
@@ -26,6 +28,7 @@ elseif(ES2K_TARGET)
 endif()
 
 target_include_directories(ovs_sidecar_o PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${OVSP4RT_INCLUDE_DIR}
     ${STRATUM_SOURCE_DIR}
 )
