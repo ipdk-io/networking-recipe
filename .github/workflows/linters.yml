@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - ipdk_v*
+      - mev-ts*
   pull_request:
     branches:
       - main
       - ipdk_v*
+      - mev-ts*
 
 concurrency:
   # If workflow is currently running, stop it and start a new one.
