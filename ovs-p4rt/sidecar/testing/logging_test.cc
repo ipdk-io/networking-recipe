@@ -11,8 +11,8 @@
 #include <iostream>
 #include <string>
 
-#include "common/ovsp4rt_logutils.h"
 #include "lib/ovsp4rt_logging.h"
+#include "lib/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
 using namespace ovs_p4rt;
@@ -23,27 +23,24 @@ void log_messages() {
 
   ovsp4rt_log_info("Error adding to FDB Tunnel Table: entry already exists");
 
-  LogTableError(insert_entry, "FDB Tunnel Table");
+  LogTableErrorWithMacAddr(insert_entry, "FDB Tunnel Table", mac_addr);
 
   insert_entry = !insert_entry;
-  LogTableError(insert_entry, "L2 Tunnel Table");
+  LogTableErrorWithMacAddr(insert_entry, "L2 Tunnel Table", mac_addr);
 
   insert_entry = !insert_entry;
-  LogTableError(insert_entry, "FDB Source MAC Table");
+  LogTableErrorWithMacAddr(insert_entry, "FDB Source Mac Table", mac_addr);
 
   ovsp4rt_log_warn("Error adding to FDB Vlan Table: entry already exists");
 
   insert_entry = !insert_entry;
-  LogTableError(insert_entry, "FDB Rx Vlan Table");
+  LogTableErrorWithMacAddr(insert_entry, "FDB Tx Vlan Table", mac_addr);
 
   insert_entry = !insert_entry;
   LogTableError(insert_entry, "FDB Tx Vlan Table");
 
   insert_entry = !insert_entry;
-  ovsp4rt_log_debug(
-      "%s for %s",
-      TableErrorMessage(insert_entry, "FDB Source MAC Table").c_str(),
-      FormatMac(mac_addr).c_str());
+  LogTableErrorWithMacAddr(insert_entry, "FDB Source Mac Table", mac_addr);
 
   insert_entry = !insert_entry;
   LogTableError(insert_entry, "SRC_IP_MAC_MAP_TABLE");
