@@ -73,6 +73,8 @@ add_library(p4runtime_proto SHARED
     $<TARGET_OBJECTS:p4types_proto_o>
 )
 
+target_include_directories(p4runtime_proto PUBLIC ${PB_OUT_DIR})
+
 target_link_libraries(p4runtime_proto
     PUBLIC
         absl::synchronization

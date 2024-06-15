@@ -11,8 +11,8 @@
 #include <iostream>
 #include <string>
 
-#include "common/ovsp4rt_logutils.h"
 #include "lib/ovsp4rt_logging.h"
+#include "lib/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
 using namespace ovs_p4rt;

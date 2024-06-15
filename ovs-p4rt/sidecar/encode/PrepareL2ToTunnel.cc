@@ -3,6 +3,8 @@
 
 #include "PrepareL2ToTunnel.h"
 
+#include <string>
+
 #include "es2k/p4_name_mapping.h"
 #include "ovsp4rt_utils.h"
 
@@ -12,7 +14,7 @@ static const std::string tunnel_v6_param_name[] = {
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_1, ACTION_SET_TUNNEL_V6_PARAM_IPV6_2,
     ACTION_SET_TUNNEL_V6_PARAM_IPV6_3, ACTION_SET_TUNNEL_V6_PARAM_IPV6_4};
 
-void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
+void PrepareL2ToTunnelV4(::p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
                          const ::p4::config::v1::P4Info& p4info,
                          bool insert_entry) {
@@ -44,7 +46,7 @@ void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
   }
 }
 
-void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
+void PrepareL2ToTunnelV6(::p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
                          const ::p4::config::v1::P4Info& p4info,
                          bool insert_entry) {
