@@ -35,9 +35,8 @@ void LogTableError(bool inserting, const char* table) {
 
 void LogTableErrorWithMacAddr(bool inserting, const char* table,
                               const uint8_t* mac_addr) {
-  ovsp4rt_log_error(
-      "%s for %s", FormatTableError(inserting, table).c_str(),
-      FormatMacAddr(mac_addr).c_str());
+  ovsp4rt_log_error("%s for %s", FormatTableError(inserting, table).c_str(),
+                    FormatMacAddr(mac_addr).c_str());
 }
 
 }  // namespace ovs_p4rt
