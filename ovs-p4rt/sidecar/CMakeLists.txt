@@ -63,7 +63,7 @@ install(
         ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-set_install_rpath(ovs_sidecar $ORIGIN ${SDE_ELEMENT} ${DEP_ELEMENT})
+set_install_rpath(ovs_sidecar $ORIGIN ${DEP_ELEMENT})
 
 ###########
 # testing #

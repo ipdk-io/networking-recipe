@@ -84,7 +84,6 @@ function(define_sidecar_unit_test TARGET)
     GTest::gtest_main
     ovs_sidecar
     p4runtime_proto
-#   stratum_static
   )
 
   if(TEST_COVERAGE)
