@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include "gtest/gtest.h"
+#include "ovsp4rt_private.h"
 #include "p4/config/v1/p4info.pb.h"
 #include "p4info_file_path.h"
 #include "stratum/lib/utils.h"

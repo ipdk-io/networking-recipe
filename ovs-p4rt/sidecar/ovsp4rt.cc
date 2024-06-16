@@ -8,6 +8,7 @@
 #include "absl/flags/flag.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_credentials.h"
+#include "ovsp4rt_private.h"
 #include "ovsp4rt_session.h"
 
 #if defined(DPDK_TARGET)
@@ -2134,6 +2135,7 @@ absl::Status ConfigSrcIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
   return ovs_p4rt::SendWriteRequest(session, write_request);
 }
 #endif  // ES2K_TARGET
+
 }  // namespace ovs_p4rt
 
 //----------------------------------------------------------------------
