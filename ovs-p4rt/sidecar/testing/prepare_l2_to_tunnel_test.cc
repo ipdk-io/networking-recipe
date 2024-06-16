@@ -21,8 +21,8 @@ class EncodeTest : public ::testing::Test {
 
 TEST_F(EncodeTest, can_initialize_p4info_from_text_file) {
   ::p4::config::v1::P4Info p4info;
-  ::util::Status status = stratum::ReadProtoFromTextFile(P4INFO_FILE_PATH,
-                                                         &p4info);
+  ::util::Status status =
+      stratum::ReadProtoFromTextFile(P4INFO_FILE_PATH, &p4info);
   ASSERT_TRUE(status.ok());
 }
 
