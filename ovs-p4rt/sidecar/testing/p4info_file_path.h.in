@@ -1,0 +1,6 @@
+#ifndef P4INFO_FILE_PATH_H_
+#define P4INFO_FILE_PATH_H_
+
+constexpr char P4INFO_FILE_PATH[] = "@P4INFO_FILE_PATH@";
+
+#endif  // P4INFO_FILE_PATH_H_

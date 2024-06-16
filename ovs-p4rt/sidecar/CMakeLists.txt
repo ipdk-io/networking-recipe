@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
+set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 #################
 # ovs_sidecar_o #
 #################
@@ -25,14 +27,13 @@ endif()
 
 target_include_directories(ovs_sidecar_o PUBLIC
     ${OVSP4RT_INCLUDE_DIR}
+    ${SIDECAR_SOURCE_DIR}
     ${STRATUM_SOURCE_DIR}
 )
 
 target_link_libraries(ovs_sidecar_o PUBLIC
-    absl::strings
     p4_role_config_proto
     p4runtime_proto
-    sde::target_sys
 )
 
 ###############
@@ -40,14 +41,17 @@ target_link_libraries(ovs_sidecar_o PUBLIC
 ###############
 
 add_library(ovs_sidecar SHARED EXCLUDE_FROM_ALL
+    $<TARGET_OBJECTS:error_proto_o>
     $<TARGET_OBJECTS:ovs_sidecar_o>
+    $<TARGET_OBJECTS:stratum_glue_status_o>
+    $<TARGET_OBJECTS:stratum_lib_utils_o>
+    $<TARGET_OBJECTS:stratum_public_lib_o>
 )
 
 target_link_libraries(ovs_sidecar PUBLIC
-    absl::strings
+    glog::glog
     p4_role_config_proto
     p4runtime_proto
-    sde::target_sys
 )
 
 add_dependencies(ovs_sidecar ovs_sidecar_o)
@@ -60,3 +64,11 @@ install(
 )
 
 set_install_rpath(ovs_sidecar $ORIGIN ${SDE_ELEMENT} ${DEP_ELEMENT})
+
+###########
+# testing #
+###########
+
+if(BUILD_TESTING)
+    add_subdirectory(testing)
+endif()
