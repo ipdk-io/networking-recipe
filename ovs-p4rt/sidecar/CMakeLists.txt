@@ -75,8 +75,6 @@ install(
         ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-set_install_rpath(ovs_sidecar $ORIGIN ${SDE_ELEMENT} ${DEP_ELEMENT})
-
 #################
 # libovsp4rt.pc #
 #################
