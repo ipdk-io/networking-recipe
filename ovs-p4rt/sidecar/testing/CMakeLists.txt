@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-add_executable(logging_test EXCLUDE_FROM_ALL
-  logging_test.cc
+add_executable(ovsp4rt_logging_test EXCLUDE_FROM_ALL
+  ovsp4rt_logging_test.cc
 )
 
-target_include_directories(logging_test PUBLIC
+target_include_directories(ovsp4rt_logging_test PUBLIC
   ${SIDECAR_SOURCE_DIR}
   ${OVSP4RT_INCLUDE_DIR}
 )
 
-target_link_libraries(logging_test PUBLIC
+target_link_libraries(ovsp4rt_logging_test PUBLIC
   ovsp4rt_logging_so
   sde::target_sys
 )
