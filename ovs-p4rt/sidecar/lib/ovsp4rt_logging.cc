@@ -26,7 +26,7 @@ const char* get_level_name(int level) {
 }  // namespace
 
 void ovsp4rt_log_message(int level, const char* format, ...) {
-  printf("OVSP4RT %s - ", get_level_name(level));
+  printf("OVSP4RT %-5s - ", get_level_name(level));
   va_list args;
   va_start(args, format);
   vprintf(format, args);
