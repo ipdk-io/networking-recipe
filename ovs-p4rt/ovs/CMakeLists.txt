@@ -36,7 +36,6 @@ function(set_ovs_target_properties ARTIFACT)
       target_link_libraries(${ARTIFACT} PUBLIC unwind::unwind)
   endif()
 
-
   if(ES2K_TARGET)
       target_link_libraries(${ARTIFACT} PUBLIC ovsp4rt_logging)
   endif()
