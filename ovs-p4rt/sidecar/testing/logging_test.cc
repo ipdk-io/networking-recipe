@@ -12,6 +12,7 @@
 #include <string>
 
 #include "lib/ovsp4rt_logging.h"
+#include "lib/ovsp4rt_logging_names.h"
 #include "lib/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
@@ -21,32 +22,34 @@ void log_messages() {
   uint8_t mac_addr[6] = {0xb, 0xe, 0xe, 0xb, 0xe, 0xe};
   bool insert_entry = false;
 
-  ovsp4rt_log_info("Error adding to FDB Tunnel Table: entry already exists");
+  ovsp4rt_log_info("Error adding to %s: entry already exists",
+                   LOG_FDB_TUNNEL_TABLE);
 
-  LogTableErrorWithMacAddr(insert_entry, "FDB Tunnel Table", mac_addr);
-
-  insert_entry = !insert_entry;
-  LogTableErrorWithMacAddr(insert_entry, "L2 Tunnel Table", mac_addr);
+  LogTableErrorWithMacAddr(insert_entry, LOG_FDB_TUNNEL_TABLE, mac_addr);
 
   insert_entry = !insert_entry;
-  LogTableErrorWithMacAddr(insert_entry, "FDB Source Mac Table", mac_addr);
-
-  ovsp4rt_log_warn("Error adding to FDB Vlan Table: entry already exists");
+  LogTableErrorWithMacAddr(insert_entry, LOG_L2_TUNNEL_TABLE, mac_addr);
 
   insert_entry = !insert_entry;
-  LogTableErrorWithMacAddr(insert_entry, "FDB Tx Vlan Table", mac_addr);
+  LogTableErrorWithMacAddr(insert_entry, LOG_FDB_SMAC_TABLE, mac_addr);
+
+  ovsp4rt_log_warn("Error adding to %s: entry already exists",
+                   LOG_FDB_TX_VLAN_TABLE);
 
   insert_entry = !insert_entry;
-  LogTableError(insert_entry, "FDB Tx Vlan Table");
+  LogTableErrorWithMacAddr(insert_entry, LOG_FDB_TX_VLAN_TABLE, mac_addr);
 
   insert_entry = !insert_entry;
-  LogTableErrorWithMacAddr(insert_entry, "FDB Source Mac Table", mac_addr);
+  LogTableError(insert_entry, LOG_FDB_TX_VLAN_TABLE);
 
   insert_entry = !insert_entry;
-  LogTableError(insert_entry, "SRC_IP_MAC_MAP_TABLE");
+  LogTableErrorWithMacAddr(insert_entry, LOG_FDB_SMAC_TABLE, mac_addr);
 
   insert_entry = !insert_entry;
-  LogTableError(insert_entry, "DST_IP_MAC_MAP_TABLE");
+  LogTableError(insert_entry, LOG_FDB_SRC_IP_MAC_MAP_TABLE);
+
+  insert_entry = !insert_entry;
+  LogTableError(insert_entry, LOG_FDB_DST_IP_MAC_MAP_TABLE);
 }
 
 constexpr char cfg_file_path[] = {"/.local/etc/ovsp4rt/ovsp4rt-zlog.cfg"};

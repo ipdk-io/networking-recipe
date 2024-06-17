@@ -23,20 +23,12 @@ add_library(ovsp4rt_logging STATIC
   $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
 
-target_link_libraries(ovsp4rt_logging PUBLIC
-  absl::strings
-)
-
 #########################
 # libovsp4rt_logging.so #
 #########################
 
 add_library(ovsp4rt_logging_so SHARED EXCLUDE_FROM_ALL
   $<TARGET_OBJECTS:ovsp4rt_logging_o>
-)
-
-target_link_libraries(ovsp4rt_logging_so PUBLIC
-  absl::strings
 )
 
 set_target_properties(ovsp4rt_logging_so PROPERTIES

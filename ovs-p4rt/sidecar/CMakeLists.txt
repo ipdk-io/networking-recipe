@@ -53,7 +53,6 @@ target_link_libraries(ovsp4rt PUBLIC
 )
 
 target_link_libraries(ovsp4rt PUBLIC
-    absl::strings
     absl::statusor
     absl::flags_private_handle_accessor
     absl::flags

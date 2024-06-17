@@ -7,6 +7,7 @@
 
 #include "absl/flags/flag.h"
 #include "lib/ovsp4rt_logging.h"
+#include "lib/ovsp4rt_logging_names.h"
 #include "lib/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_credentials.h"
@@ -2203,8 +2204,8 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       auto status_or_read_response =
           GetFdbTunnelTableEntry(session.get(), learn_info, p4info);
       if (status_or_read_response.ok()) {
-        ovsp4rt_log_error(
-            "Error adding to FDB Tunnel Table: entry already exists");
+        ovsp4rt_log_error("Error adding to %s: entry already exists",
+                          LOG_FDB_TUNNEL_TABLE);
         return;
       }
     }
@@ -2212,7 +2213,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) {
-      LogTableErrorWithMacAddr(insert_entry, "FDB Tunnel Table",
+      LogTableErrorWithMacAddr(insert_entry, LOG_FDB_TUNNEL_TABLE,
                                learn_info.mac_addr);
       // TODO(derek): Most of the error cases don't return. Should they?
     }
@@ -2220,14 +2221,14 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     status = ConfigL2TunnelTableEntry(session.get(), learn_info, p4info,
                                       insert_entry);
     if (!status.ok()) {
-      LogTableErrorWithMacAddr(insert_entry, "L2 Tunnel Table",
+      LogTableErrorWithMacAddr(insert_entry, LOG_L2_TUNNEL_TABLE,
                                learn_info.mac_addr);
     }
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok()) {
-      LogTableErrorWithMacAddr(insert_entry, "FDB Source Mac Table",
+      LogTableErrorWithMacAddr(insert_entry, LOG_FDB_SMAC_TABLE,
                                learn_info.mac_addr);
     }
   } else {
@@ -2235,15 +2236,15 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       auto status_or_read_response =
           GetFdbVlanTableEntry(session.get(), learn_info, p4info);
       if (status_or_read_response.ok()) {
-        ovsp4rt_log_error(
-            "Error adding to FDB Vlan Table: entry already exists");
+        ovsp4rt_log_error("Error adding to %: entry already exists",
+                          LOG_FDB_VLAN_TABLE);
         return;
       }
 
       status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
                                          insert_entry);
       if (!status.ok()) {
-        LogTableErrorWithMacAddr(insert_entry, "FDB Rx Vlan Table",
+        LogTableErrorWithMacAddr(insert_entry, LOG_FDB_RX_VLAN_TABLE,
                                  learn_info.mac_addr);
       }
 
@@ -2286,14 +2287,14 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) {
-      LogTableErrorWithMacAddr(insert_entry, "FDB Tx Vlan Table",
+      LogTableErrorWithMacAddr(insert_entry, LOG_FDB_TX_VLAN_TABLE,
                                learn_info.mac_addr);
     }
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok()) {
-      LogTableErrorWithMacAddr(insert_entry, "FDB Source Mac Table",
+      LogTableErrorWithMacAddr(insert_entry, LOG_FDB_SMAC_TABLE,
                                learn_info.mac_addr);
     }
   }
@@ -2571,7 +2572,7 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
     status = ConfigSrcIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
-      LogTableError(insert_entry, "SRC_IP_MAC_MAP_TABLE");
+      LogTableError(insert_entry, LOG_FDB_SRC_IP_MAC_MAP_TABLE);
     }
   }
 
@@ -2588,7 +2589,7 @@ try_dstip:
     status = ConfigDstIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
-      LogTableError(insert_entry, "DST_IP_MAC_MAP_TABLE");
+      LogTableError(insert_entry, LOG_FDB_DST_IP_MAC_MAP_TABLE);
     }
   }
 }

@@ -9,8 +9,13 @@
 #include <cstdio>
 #include <string>
 
-#include "absl/strings/str_cat.h"
 #include "ovsp4rt_logging.h"
+
+namespace {
+const char* MessagePrefix(bool inserting) {
+  return (inserting) ? "Error adding entry to" : "Error deleting entry from";
+}
+}
 
 namespace ovs_p4rt {
 
@@ -21,21 +26,13 @@ const std::string FormatMacAddr(const uint8_t* mac_addr) {
   return buf;
 }
 
-const std::string FormatTableError(bool inserting, const char* table) {
-  if (inserting) {
-    return absl::StrCat("Error adding entry to ", table);
-  } else {
-    return absl::StrCat("Error deleting entry from ", table);
-  }
-}
-
 void LogTableError(bool inserting, const char* table) {
-  ovsp4rt_log_error("%s", FormatTableError(inserting, table).c_str());
+  ovsp4rt_log_error("%s %s", MessagePrefix(inserting), table);
 }
 
 void LogTableErrorWithMacAddr(bool inserting, const char* table,
                               const uint8_t* mac_addr) {
-  ovsp4rt_log_error("%s for %s", FormatTableError(inserting, table).c_str(),
+  ovsp4rt_log_error("%s %s for %s", MessagePrefix(inserting), table,
                     FormatMacAddr(mac_addr).c_str());
 }
 
