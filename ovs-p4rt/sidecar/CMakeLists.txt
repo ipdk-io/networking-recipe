@@ -35,22 +35,37 @@ target_link_libraries(ovs_sidecar_o PUBLIC
     sde::target_sys
 )
 
-###############
-# ovs_sidecar #
-###############
+#################
+# libovsp4rt.so #
+#################
 
-add_library(ovs_sidecar SHARED EXCLUDE_FROM_ALL
+add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
 )
 
-target_link_libraries(ovs_sidecar PUBLIC
-    absl::strings
+target_link_libraries(ovsp4rt PRIVATE stratum_static)
+
+target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto
+    stratum_proto
     p4runtime_proto
-    sde::target_sys
 )
 
-add_dependencies(ovs_sidecar ovs_sidecar_o)
+target_link_libraries(ovsp4rt PUBLIC
+    absl::strings
+    absl::statusor
+    absl::flags_private_handle_accessor
+    absl::flags
+)
+
+add_dependencies(ovsp4rt ovs_sidecar_o)
+
+set_install_rpath(ovsp4rt $ORIGIN ${DEP_ELEMENT})
+
+install(
+    TARGETS ovsp4rt
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
 
 install(
     DIRECTORY
@@ -59,4 +74,15 @@ install(
         ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-set_install_rpath(ovs_sidecar $ORIGIN ${SDE_ELEMENT} ${DEP_ELEMENT})
+#################
+# libovsp4rt.pc #
+#################
+
+set(pkg_config_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt.pc)
+
+configure_file(libovsp4rt.pc.in ${pkg_config_file} @ONLY)
+
+install(
+  FILES ${pkg_config_file}
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
