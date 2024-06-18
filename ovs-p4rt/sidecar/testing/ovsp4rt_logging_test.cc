@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define _POSIX_SOURCE
+#include "lib/ovsp4rt_logging.h"
+
 #include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,7 +13,6 @@
 #include <iostream>
 #include <string>
 
-#include "lib/ovsp4rt_logging.h"
 #include "lib/ovsp4rt_logging_names.h"
 #include "lib/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
