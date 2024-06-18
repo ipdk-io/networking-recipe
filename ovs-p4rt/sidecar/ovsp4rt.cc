@@ -615,8 +615,8 @@ absl::Status ConfigFdbSmacTableEntry(ovs_p4rt::OvsP4rtSession* session,
 
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
-    LogTableErrorWithMacAddr(insert_entry, detail.getLogTableName(),
-                             learn_info.mac_addr);
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
   }
   return status;
 }
@@ -644,8 +644,8 @@ absl::Status ConfigL2TunnelTableEntry(
 
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
-    LogTableErrorWithMacAddr(insert_entry, detail.getLogTableName(),
-                             learn_info.mac_addr);
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
   }
   return status;
 }
@@ -670,8 +670,8 @@ absl::Status ConfigFdbTxVlanTableEntry(
 
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
-    LogTableErrorWithMacAddr(insert_entry, detail.getLogTableName(),
-                             learn_info.mac_addr);
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
   }
   return status;
 }
@@ -695,8 +695,8 @@ absl::Status ConfigFdbRxVlanTableEntry(
 
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
-    LogTableErrorWithMacAddr(insert_entry, detail.getLogTableName(),
-                             learn_info.mac_addr);
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
   }
   return status;
 }
@@ -738,8 +738,8 @@ absl::Status ConfigFdbTunnelTableEntry(
 #endif
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
-    LogTableErrorWithMacAddr(insert_entry, detail.getLogTableName(),
-                             learn_info.mac_addr);
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
   }
   return status;
 }
@@ -2198,7 +2198,7 @@ absl::Status ConfigDstIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
 
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
-    LogTableError(insert_entry, detail.getLogTableName());
+    LogFailure(insert_entry, detail.getLogTableName());
   }
   return status;
 }
@@ -2222,7 +2222,7 @@ absl::Status ConfigSrcIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
 
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
-    LogTableError(insert_entry, detail.getLogTableName());
+    LogFailure(insert_entry, detail.getLogTableName());
   }
   return status;
 }

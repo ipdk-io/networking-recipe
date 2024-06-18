@@ -14,10 +14,10 @@ namespace ovs_p4rt {
 
 const std::string FormatMacAddr(const uint8_t* mac_addr);
 
-void LogTableError(bool inserting, const char* table);
+void LogFailure(bool inserting, const char* table);
 
-void LogTableErrorWithMacAddr(bool inserting, const char* table,
-                              const uint8_t* mac_addr);
+void LogFailureWithMacAddr(bool inserting, const char* table,
+                           const uint8_t* mac_addr);
 
 }  // namespace ovs_p4rt
 

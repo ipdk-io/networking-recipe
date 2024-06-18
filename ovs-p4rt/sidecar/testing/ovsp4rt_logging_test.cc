@@ -1,9 +1,9 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#define _POSIX_SOURCE
 #include "lib/ovsp4rt_logging.h"
 
+#define _POSIX_SOURCE
 #include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -13,48 +13,46 @@
 #include <iostream>
 #include <string>
 
-#include "lib/ovsp4rt_logging_names.h"
+#include "lib/ovsp4rt_diag_detail.h"
 #include "lib/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
 using namespace ovs_p4rt;
 
-void log_messages() {
-  uint8_t mac_addr[6] = {0xb, 0xe, 0xe, 0xb, 0xe, 0xe};
-  bool insert_entry = false;
-
-  ovsp4rt_log_info("Error adding to %s: entry already exists",
-                   LOG_FDB_TUNNEL_TABLE);
-
-  LogTableErrorWithMacAddr(insert_entry, LOG_FDB_TUNNEL_TABLE, mac_addr);
-
-  insert_entry = !insert_entry;
-  LogTableErrorWithMacAddr(insert_entry, LOG_L2_TUNNEL_TABLE, mac_addr);
-
-  insert_entry = !insert_entry;
-  LogTableErrorWithMacAddr(insert_entry, LOG_FDB_SMAC_TABLE, mac_addr);
-
-  ovsp4rt_log_warn("Error adding to %s: entry already exists",
-                   LOG_FDB_TX_VLAN_TABLE);
-
-  insert_entry = !insert_entry;
-  LogTableErrorWithMacAddr(insert_entry, LOG_FDB_TX_VLAN_TABLE, mac_addr);
-
-  insert_entry = !insert_entry;
-  LogTableError(insert_entry, LOG_FDB_TX_VLAN_TABLE);
-
-  insert_entry = !insert_entry;
-  LogTableErrorWithMacAddr(insert_entry, LOG_FDB_SMAC_TABLE, mac_addr);
-
-  insert_entry = !insert_entry;
-  LogTableError(insert_entry, LOG_FDB_SRC_IP_MAC_MAP_TABLE);
-
-  insert_entry = !insert_entry;
-  LogTableError(insert_entry, LOG_FDB_DST_IP_MAC_MAP_TABLE);
+void adding_test() {
+  DiagDetail detail(LOG_L2_FWD_SMAC_TABLE);
+  uint8_t mac_addr[6] = {0xd, 0xe, 0xa, 0xd, 0, 0};
+  LogFailureWithMacAddr(true, detail.getLogTableName(), mac_addr);
 }
 
+void removing_test() {
+  DiagDetail detail(LOG_L2_FWD_RX_WITH_TUNNEL_TABLE);
+  uint8_t mac_addr[6] = {0xb, 0xe, 0xe, 0xf, 0, 0};
+  LogFailureWithMacAddr(false, detail.getLogTableName(), mac_addr);
+}
+
+void failure_test() {
+  DiagDetail detail(LOG_SRC_IP_MAC_MAP_TABLE);
+  LogFailure(true, detail.getLogTableName());
+}
+
+void log_messages() {
+  constexpr char MESSAGE_TEXT[] = "Error adding to %s: entry already exists";
+
+  ovsp4rt_log_debug(MESSAGE_TEXT, "DEBUG_TABLE");
+  ovsp4rt_log_error(MESSAGE_TEXT, "ERROR_TABLE");
+  ovsp4rt_log_info(MESSAGE_TEXT, "INFO_TABLE");
+  ovsp4rt_log_warn(MESSAGE_TEXT, "WARN_TABLE");
+
+  adding_test();
+  removing_test();
+  failure_test();
+}
+
+#if 0
 constexpr char cfg_file_path[] = {"/.local/etc/ovsp4rt/ovsp4rt-zlog.cfg"};
 constexpr char log_level[] = {"INFO"};
+#endif
 
 void init_logging() {
 #if 0

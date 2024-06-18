@@ -26,13 +26,13 @@ const std::string FormatMacAddr(const uint8_t* mac_addr) {
   return buf;
 }
 
-void LogTableError(bool inserting, const char* table) {
-  ovsp4rt_log_error("%s %s", MessagePrefix(inserting), table);
+void LogFailure(bool inserting, const char* table) {
+  ovsp4rt_log_debug("%s %s", MessagePrefix(inserting), table);
 }
 
-void LogTableErrorWithMacAddr(bool inserting, const char* table,
-                              const uint8_t* mac_addr) {
-  ovsp4rt_log_error("%s %s for %s", MessagePrefix(inserting), table,
+void LogFailureWithMacAddr(bool inserting, const char* table,
+                           const uint8_t* mac_addr) {
+  ovsp4rt_log_debug("%s %s for %s", MessagePrefix(inserting), table,
                     FormatMacAddr(mac_addr).c_str());
 }
 
