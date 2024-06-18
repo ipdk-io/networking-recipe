@@ -5,6 +5,8 @@
 #
 
 add_library(ovsp4rt_logging_o OBJECT
+  ovsp4rt_diag_detail.cc
+  ovsp4rt_diag_detail.h
   ovsp4rt_logging.cc
   ovsp4rt_logging.h
   ovsp4rt_logutils.cc

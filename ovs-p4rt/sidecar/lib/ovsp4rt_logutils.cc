@@ -15,7 +15,7 @@ namespace {
 const char* MessagePrefix(bool inserting) {
   return (inserting) ? "Error adding entry to" : "Error deleting entry from";
 }
-}
+}  // namespace
 
 namespace ovs_p4rt {
 
