@@ -42,6 +42,7 @@ target_link_libraries(ovs_sidecar_o PUBLIC
 
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
+    $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
 
 target_link_libraries(ovsp4rt PRIVATE stratum_static)
