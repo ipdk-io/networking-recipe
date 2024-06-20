@@ -6,6 +6,9 @@
 #include <string>
 
 #include "absl/flags/flag.h"
+#include "lib/ovsp4rt_diag_detail.h"
+#include "lib/ovsp4rt_logging.h"
+#include "lib/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_credentials.h"
 #include "ovsp4rt_session.h"
@@ -116,7 +119,8 @@ static inline int32_t ValidIpAddr(uint32_t nw_addr) {
 void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const struct mac_learning_info& learn_info,
                               const ::p4::config::v1::P4Info& p4info,
-                              bool insert_entry) {
+                              bool insert_entry, DiagDetail& detail) {
+  detail.table_id = LOG_L2_FWD_SMAC_TABLE;
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_SMAC_TABLE));
   table_entry->set_priority(1);
   auto match = table_entry->add_match();
@@ -138,7 +142,8 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
 void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const struct mac_learning_info& learn_info,
                               const ::p4::config::v1::P4Info& p4info,
-                              bool insert_entry) {
+                              bool insert_entry, DiagDetail& detail) {
+  detail.table_id = LOG_L2_FWD_SMAC_TABLE;
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_SMAC_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -164,7 +169,8 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
 void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
-                                bool insert_entry) {
+                                bool insert_entry, DiagDetail& detail) {
+  detail.table_id = LOG_L2_FWD_TX_TABLE;
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -246,7 +252,8 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
-                                bool insert_entry) {
+                                bool insert_entry, DiagDetail& detail) {
+  detail.table_id = LOG_L2_FWD_RX_TABLE;
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_RX_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -288,7 +295,8 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
-                                bool insert_entry) {
+                                bool insert_entry, DiagDetail& detail) {
+  detail.table_id = LOG_L2_FWD_RX_WITH_TUNNEL_TABLE;
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_RX_WITH_TUNNEL_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, L2_FWD_RX_WITH_TUNNEL_TABLE,
@@ -313,7 +321,9 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 
 void PrepareFdbTableEntryforV4VxlanTunnel(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
+    DiagDetail& detail) {
+  detail.table_id = LOG_L2_FWD_TX_TABLE;
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -419,7 +429,9 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
 
 void PrepareFdbTableEntryforV4GeneveTunnel(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
+    DiagDetail& detail) {
+  detail.table_id = LOG_L2_FWD_TX_TABLE;
   table_entry->set_table_id(GetTableId(p4info, L2_FWD_TX_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -527,7 +539,8 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
 void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
                          const ::p4::config::v1::P4Info& p4info,
-                         bool insert_entry) {
+                         bool insert_entry, DiagDetail& detail) {
+  detail.table_id = LOG_L2_TO_TUNNEL_V4_TABLE;
   table_entry->set_table_id(GetTableId(p4info, L2_TO_TUNNEL_V4_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -556,7 +569,8 @@ void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
 void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
                          const ::p4::config::v1::P4Info& p4info,
-                         bool insert_entry) {
+                         bool insert_entry, DiagDetail& detail) {
+  detail.table_id = LOG_L2_TO_TUNNEL_V6_TABLE;
   table_entry->set_table_id(GetTableId(p4info, L2_TO_TUNNEL_V6_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(
@@ -588,13 +602,23 @@ absl::Status ConfigFdbSmacTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                      bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
+
   if (insert_entry) {
     table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
   } else {
     table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
   }
-  PrepareFdbSmacTableEntry(table_entry, learn_info, p4info, insert_entry);
-  return ovs_p4rt::SendWriteRequest(session, write_request);
+
+  PrepareFdbSmacTableEntry(table_entry, learn_info, p4info, insert_entry,
+                           detail);
+
+  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  if (!status.ok()) {
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
+  }
+  return status;
 }
 
 absl::Status ConfigL2TunnelTableEntry(
@@ -603,6 +627,8 @@ absl::Status ConfigL2TunnelTableEntry(
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
+
   if (insert_entry) {
     table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
   } else {
@@ -611,11 +637,17 @@ absl::Status ConfigL2TunnelTableEntry(
 
   if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
       learn_info.tnl_info.remote_ip.family == AF_INET6) {
-    PrepareL2ToTunnelV6(table_entry, learn_info, p4info, insert_entry);
+    PrepareL2ToTunnelV6(table_entry, learn_info, p4info, insert_entry, detail);
   } else {
-    PrepareL2ToTunnelV4(table_entry, learn_info, p4info, insert_entry);
+    PrepareL2ToTunnelV4(table_entry, learn_info, p4info, insert_entry, detail);
   }
-  return ovs_p4rt::SendWriteRequest(session, write_request);
+
+  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  if (!status.ok()) {
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
+  }
+  return status;
 }
 #endif
 
@@ -625,13 +657,23 @@ absl::Status ConfigFdbTxVlanTableEntry(
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
+
   if (insert_entry) {
     table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
   } else {
     table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
   }
-  PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, insert_entry);
-  return ovs_p4rt::SendWriteRequest(session, write_request);
+
+  PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, insert_entry,
+                             detail);
+
+  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  if (!status.ok()) {
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
+  }
+  return status;
 }
 
 absl::Status ConfigFdbRxVlanTableEntry(
@@ -640,13 +682,23 @@ absl::Status ConfigFdbRxVlanTableEntry(
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
+
   if (insert_entry) {
     table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
   } else {
     table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
   }
-  PrepareFdbRxVlanTableEntry(table_entry, learn_info, p4info, insert_entry);
-  return ovs_p4rt::SendWriteRequest(session, write_request);
+
+  PrepareFdbRxVlanTableEntry(table_entry, learn_info, p4info, insert_entry,
+                             detail);
+
+  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  if (!status.ok()) {
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
+  }
+  return status;
 }
 
 absl::Status ConfigFdbTunnelTableEntry(
@@ -655,6 +707,8 @@ absl::Status ConfigFdbTunnelTableEntry(
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
+
   if (insert_entry) {
     table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
   } else {
@@ -663,26 +717,31 @@ absl::Status ConfigFdbTunnelTableEntry(
 
 #if defined(DPDK_TARGET)
   PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
-                                       insert_entry);
+                                       insert_entry, detail);
 #elif defined(ES2K_TARGET)
   if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_VXLAN) {
     PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
-                                         insert_entry);
+                                         insert_entry, detail);
   } else if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_GENEVE) {
     PrepareFdbTableEntryforV4GeneveTunnel(table_entry, learn_info, p4info,
-                                          insert_entry);
+                                          insert_entry, detail);
   } else {
     if (!insert_entry) {
       // Tunnel type doesn't matter for delete. So calling one of the functions
       // to prepare the entry
       PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
-                                           insert_entry);
+                                           insert_entry, detail);
     }
   }
 #else
 #error "Unsupported target"
 #endif
-  return ovs_p4rt::SendWriteRequest(session, write_request);
+  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  if (!status.ok()) {
+    LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
+                          learn_info.mac_addr);
+  }
+  return status;
 }
 
 /* VXLAN_ENCAP_MOD_TABLE */
@@ -1807,7 +1866,8 @@ void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
 void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
                                   struct ip_mac_map_info& ip_info,
                                   const ::p4::config::v1::P4Info& p4info,
-                                  bool insert_entry) {
+                                  bool insert_entry, DiagDetail& detail) {
+  detail.table_id = LOG_SRC_IP_MAC_MAP_TABLE;
   table_entry->set_table_id(GetTableId(p4info, SRC_IP_MAC_MAP_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, SRC_IP_MAC_MAP_TABLE,
@@ -1854,7 +1914,8 @@ void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
 void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
                                   struct ip_mac_map_info& ip_info,
                                   const ::p4::config::v1::P4Info& p4info,
-                                  bool insert_entry) {
+                                  bool insert_entry, DiagDetail& detail) {
+  detail.table_id = LOG_DST_IP_MAC_MAP_TABLE;
   table_entry->set_table_id(GetTableId(p4info, DST_IP_MAC_MAP_TABLE));
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, DST_IP_MAC_MAP_TABLE,
@@ -1922,11 +1983,13 @@ absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
     const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
 
   table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
 
-  PrepareL2ToTunnelV4(table_entry, learn_info, p4info, false);
+  PrepareL2ToTunnelV4(table_entry, learn_info, p4info, false, detail);
 
+  // This function does not log failed requests.
   return ovs_p4rt::SendReadRequest(session, read_request);
 }
 
@@ -1936,32 +1999,36 @@ absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV6TableEntry(
     const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
 
   table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
 
-  PrepareL2ToTunnelV6(table_entry, learn_info, p4info, false);
+  PrepareL2ToTunnelV6(table_entry, learn_info, p4info, false, detail);
 
+  // This function does not log failed requests.
   return ovs_p4rt::SendReadRequest(session, read_request);
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
     ovs_p4rt::OvsP4rtSession* session,
     const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info) {
+    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
 
   table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
 
 #if defined(DPDK_TARGET)
-  PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info, false);
+  PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info, false,
+                                       detail);
 #elif defined(ES2K_TARGET)
   if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_VXLAN) {
-    PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
-                                         false);
+    PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info, false,
+                                         detail);
   } else if (learn_info.tnl_info.tunnel_type == OVS_TUNNEL_GENEVE) {
     PrepareFdbTableEntryforV4GeneveTunnel(table_entry, learn_info, p4info,
-                                          false);
+                                          false, detail);
   } else {
     return absl::UnknownError("Unsupported tunnel type");
   }
@@ -1969,21 +2036,32 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
 #error "Unsupported target"
 #endif
 
-  return ovs_p4rt::SendReadRequest(session, read_request);
+  auto status = ovs_p4rt::SendReadRequest(session, read_request);
+  if (status.ok() && adding) {
+    ovsp4rt_log_error("Error adding to %s: entry already exists",
+                      detail.getLogTableName());
+  }
+  return status;
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetFdbVlanTableEntry(
     ovs_p4rt::OvsP4rtSession* session,
     const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info) {
+    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
 
   table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
 
-  PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, false);
+  PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, false, detail);
 
-  return ovs_p4rt::SendReadRequest(session, read_request);
+  auto status = ovs_p4rt::SendReadRequest(session, read_request);
+  if (status.ok() && adding) {
+    ovsp4rt_log_error("Error adding to %: entry already exists",
+                      detail.getLogTableName());
+  }
+  return status;
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetVmSrcTableEntry(
@@ -1991,11 +2069,13 @@ absl::StatusOr<::p4::v1::ReadResponse> GetVmSrcTableEntry(
     const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
 
   table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
 
-  PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, false);
+  PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
+  // This function does not log failed requests.
   return ovs_p4rt::SendReadRequest(session, read_request);
 }
 
@@ -2004,10 +2084,11 @@ absl::StatusOr<::p4::v1::ReadResponse> GetVmDstTableEntry(
     const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
 
   table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
 
-  PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, false);
+  PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
   return ovs_p4rt::SendReadRequest(session, read_request);
 }
@@ -2104,6 +2185,7 @@ absl::Status ConfigDstIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                          bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
 
   if (insert_entry) {
     table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
@@ -2111,9 +2193,14 @@ absl::Status ConfigDstIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
     table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
   }
 
-  PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, insert_entry);
+  PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, insert_entry,
+                               detail);
 
-  return ovs_p4rt::SendWriteRequest(session, write_request);
+  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  if (!status.ok()) {
+    LogFailure(insert_entry, detail.getLogTableName());
+  }
+  return status;
 }
 
 absl::Status ConfigSrcIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
@@ -2122,6 +2209,7 @@ absl::Status ConfigSrcIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
                                          bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
+  DiagDetail detail;
 
   if (insert_entry) {
     table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
@@ -2129,11 +2217,17 @@ absl::Status ConfigSrcIpMacMapTableEntry(ovs_p4rt::OvsP4rtSession* session,
     table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
   }
 
-  PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, insert_entry);
+  PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, insert_entry,
+                               detail);
 
-  return ovs_p4rt::SendWriteRequest(session, write_request);
+  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  if (!status.ok()) {
+    LogFailure(insert_entry, detail.getLogTableName());
+  }
+  return status;
 }
 #endif  // ES2K_TARGET
+
 }  // namespace ovs_p4rt
 
 //----------------------------------------------------------------------
@@ -2199,64 +2293,38 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   if (learn_info.is_tunnel) {
     if (insert_entry) {
       auto status_or_read_response =
-          GetFdbTunnelTableEntry(session.get(), learn_info, p4info);
+          GetFdbTunnelTableEntry(session.get(), learn_info, p4info, true);
       if (status_or_read_response.ok()) {
-        printf("TUNNEL: read FDB L2_FWD_TX_TABLE entry present\n");
         return;
       }
     }
 
     status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
-    if (!status.ok())
-      printf(
-          "%s: Failed to program l2_fwd_tx_table for tunnel with mac "
-          "%x:%x:%x:%x:%x:%x\n",
-          insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
-          learn_info.mac_addr[1], learn_info.mac_addr[2],
-          learn_info.mac_addr[3], learn_info.mac_addr[4],
-          learn_info.mac_addr[5]);
+    if (!status.ok()) {
+    }
 
     status = ConfigL2TunnelTableEntry(session.get(), learn_info, p4info,
                                       insert_entry);
-    if (!status.ok())
-      printf(
-          "%s: Failed to program l2_tunnel_to_v4_table for tunnel with mac "
-          "%x:%x:%x:%x:%x:%x\n",
-          insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
-          learn_info.mac_addr[1], learn_info.mac_addr[2],
-          learn_info.mac_addr[3], learn_info.mac_addr[4],
-          learn_info.mac_addr[5]);
+    if (!status.ok()) {
+    }
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
-    if (!status.ok())
-      printf(
-          "%s: Failed to program l2_fwd_smac_table with mac "
-          "%x:%x:%x:%x:%x:%x\n",
-          insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
-          learn_info.mac_addr[1], learn_info.mac_addr[2],
-          learn_info.mac_addr[3], learn_info.mac_addr[4],
-          learn_info.mac_addr[5]);
+    if (!status.ok()) {
+    }
   } else {
     if (insert_entry) {
       auto status_or_read_response =
-          GetFdbVlanTableEntry(session.get(), learn_info, p4info);
+          GetFdbVlanTableEntry(session.get(), learn_info, p4info, true);
       if (status_or_read_response.ok()) {
-        printf("Non TUNNEL: read FDB L2_FWD_TX_TABLE entry present\n");
         return;
       }
 
       status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
                                          insert_entry);
-      if (!status.ok())
-        printf(
-            "%s: Failed to program l2_fwd_rx_table with mac "
-            "%x:%x:%x:%x:%x:%x\n",
-            insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
-            learn_info.mac_addr[1], learn_info.mac_addr[2],
-            learn_info.mac_addr[3], learn_info.mac_addr[4],
-            learn_info.mac_addr[5]);
+      if (!status.ok()) {
+      }
 
       status_or_read_response =
           GetTxAccVsiTableEntry(session.get(), learn_info.src_port, p4info);
@@ -2296,24 +2364,14 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
 
     status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
-    if (!status.ok())
-      printf(
-          "%s: Failed to program l2_fwd_tx_table with mac %x:%x:%x:%x:%x:%x\n",
-          insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
-          learn_info.mac_addr[1], learn_info.mac_addr[2],
-          learn_info.mac_addr[3], learn_info.mac_addr[4],
-          learn_info.mac_addr[5]);
+    if (!status.ok()) {
+    }
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
-    if (!status.ok())
-      printf("%s: Failed to program l2_fwd_smac_table with %x:%x:%x:%x:%x:%x\n",
-             insert_entry ? "ADD" : "DELETE", learn_info.mac_addr[0],
-             learn_info.mac_addr[1], learn_info.mac_addr[2],
-             learn_info.mac_addr[3], learn_info.mac_addr[4],
-             learn_info.mac_addr[5]);
+    if (!status.ok()) {
+    }
   }
-  if (!status.ok()) return;
 }
 
 void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
@@ -2587,7 +2645,6 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
     status = ConfigSrcIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
-      // TODO: print some log once logging support is added
     }
   }
 
@@ -2604,7 +2661,6 @@ try_dstip:
     status = ConfigDstIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
-      // TODO: print some log once logging support is added
     }
   }
 }

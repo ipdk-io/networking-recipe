@@ -1,14 +1,38 @@
 # CMake build file for ovs-p4rt/sidecar/lib
 #
-# Copyright 2022-2024 Intel Corporation
+# Copyright 2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
-target_sources(ovs_sidecar_o PUBLIC
-    ovsp4rt_credentials.cc
-    ovsp4rt_credentials.h
-    ovsp4rt_logging.cc
-    ovsp4rt_logging.h
-    ovsp4rt_session.cc
-    ovsp4rt_session.h
+add_library(ovsp4rt_logging_o OBJECT
+  ovsp4rt_diag_detail.cc
+  ovsp4rt_diag_detail.h
+  ovsp4rt_logging.cc
+  ovsp4rt_logging.h
+  ovsp4rt_logutils.cc
+  ovsp4rt_logutils.h
+)
+
+target_include_directories(ovsp4rt_logging_o PUBLIC
+  ${SIDECAR_SOURCE_DIR}
+)
+
+########################
+# libovsp4rt_logging.a #
+########################
+
+add_library(ovsp4rt_logging STATIC
+  $<TARGET_OBJECTS:ovsp4rt_logging_o>
+)
+
+#########################
+# libovsp4rt_logging.so #
+#########################
+
+add_library(ovsp4rt_logging_so SHARED EXCLUDE_FROM_ALL
+  $<TARGET_OBJECTS:ovsp4rt_logging_o>
+)
+
+set_target_properties(ovsp4rt_logging_so PROPERTIES
+  OUTPUT_NAME ovsp4rt_logging
 )

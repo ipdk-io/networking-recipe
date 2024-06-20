@@ -17,6 +17,8 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt_session.h
 )
 
+add_subdirectory(lib)
+
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
 elseif(ES2K_TARGET)
@@ -29,7 +31,6 @@ target_include_directories(ovs_sidecar_o PUBLIC
 )
 
 target_link_libraries(ovs_sidecar_o PUBLIC
-    absl::strings
     p4_role_config_proto
     p4runtime_proto
     sde::target_sys
@@ -41,6 +42,7 @@ target_link_libraries(ovs_sidecar_o PUBLIC
 
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
+    $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
 
 target_link_libraries(ovsp4rt PRIVATE stratum_static)
@@ -52,7 +54,6 @@ target_link_libraries(ovsp4rt PUBLIC
 )
 
 target_link_libraries(ovsp4rt PUBLIC
-    absl::strings
     absl::statusor
     absl::flags_private_handle_accessor
     absl::flags
@@ -86,3 +87,11 @@ install(
   FILES ${pkg_config_file}
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
+
+###########
+# testing #
+###########
+
+set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_subdirectory(testing EXCLUDE_FROM_ALL)
