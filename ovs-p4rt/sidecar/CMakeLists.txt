@@ -20,6 +20,8 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt_session.h
 )
 
+add_subdirectory(lib)
+
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
 elseif(ES2K_TARGET)
@@ -37,25 +39,48 @@ target_link_libraries(ovs_sidecar_o PUBLIC
     p4runtime_proto
 )
 
-###############
-# ovs_sidecar #
-###############
+#################
+# libovsp4rt.so #
+#################
 
-add_library(ovs_sidecar SHARED EXCLUDE_FROM_ALL
-    $<TARGET_OBJECTS:error_proto_o>
+#add_library(ovs_sidecar SHARED EXCLUDE_FROM_ALL
+#    $<TARGET_OBJECTS:error_proto_o>
+#    $<TARGET_OBJECTS:ovs_sidecar_o>
+#    $<TARGET_OBJECTS:ovsp4rt_logging_o>
+#    $<TARGET_OBJECTS:stratum_glue_status_o>
+#    $<TARGET_OBJECTS:stratum_lib_utils_o>
+#    $<TARGET_OBJECTS:stratum_public_lib_o>
+#)
+
+add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
-    $<TARGET_OBJECTS:stratum_glue_status_o>
-    $<TARGET_OBJECTS:stratum_lib_utils_o>
-    $<TARGET_OBJECTS:stratum_public_lib_o>
+    $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
 
-target_link_libraries(ovs_sidecar PUBLIC
-    glog::glog
+target_link_libraries(ovsp4rt PRIVATE stratum_static)
+
+target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto
+    stratum_proto       # WHY?
     p4runtime_proto
 )
 
-add_dependencies(ovs_sidecar ovs_sidecar_o)
+target_link_libraries(ovsp4rt PUBLIC
+    absl::statusor
+    absl::flags_private_handle_accessor
+    absl::flags
+)
+
+set_install_rpath(ovsp4rt $ORIGIN ${DEP_ELEMENT})
+
+###########
+# install #
+###########
+
+install(
+    TARGETS ovsp4rt
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
 
 install(
     DIRECTORY
@@ -64,7 +89,18 @@ install(
         ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-set_install_rpath(ovs_sidecar $ORIGIN ${DEP_ELEMENT})
+#################
+# libovsp4rt.pc #
+#################
+
+set(pkg_config_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt.pc)
+
+configure_file(libovsp4rt.pc.in ${pkg_config_file} @ONLY)
+
+install(
+  FILES ${pkg_config_file}
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
 
 ###########
 # testing #

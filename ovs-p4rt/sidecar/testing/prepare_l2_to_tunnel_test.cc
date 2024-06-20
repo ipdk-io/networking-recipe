@@ -6,6 +6,7 @@
 
 #include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
+#include "lib/ovsp4rt_diag_detail.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
 #include "p4/config/v1/p4info.pb.h"
@@ -60,7 +61,8 @@ TEST_F(PrepareL2ToTunnelTest, insert_fdb_v4_tunnel) {
 
   // Act
   ::p4::v1::TableEntry table_entry;
-  PrepareL2ToTunnelV4(&table_entry, fdb_info, p4info, true);
+  DiagDetail detail;
+  PrepareL2ToTunnelV4(&table_entry, fdb_info, p4info, true, detail);
 
   // Assert
   DumpMessageAsJson(table_entry);
@@ -77,7 +79,8 @@ TEST_F(PrepareL2ToTunnelTest, delete_fdb_v4_tunnel) {
 
   // Act
   ::p4::v1::TableEntry table_entry;
-  PrepareL2ToTunnelV4(&table_entry, fdb_info, p4info, false);
+  DiagDetail detail;
+  PrepareL2ToTunnelV4(&table_entry, fdb_info, p4info, false, detail);
 
   // Assert
   DumpMessageAsJson(table_entry);
@@ -94,7 +97,8 @@ TEST_F(PrepareL2ToTunnelTest, insert_fdb_v6_tunnel) {
 
   // Act
   ::p4::v1::TableEntry table_entry;
-  PrepareL2ToTunnelV6(&table_entry, fdb_info, p4info, true);
+  DiagDetail detail;
+  PrepareL2ToTunnelV6(&table_entry, fdb_info, p4info, true, detail);
 
   // Assert
   DumpMessageAsJson(table_entry);
@@ -111,7 +115,8 @@ TEST_F(PrepareL2ToTunnelTest, delete_fdb_v6_tunnel) {
 
   // Act
   ::p4::v1::TableEntry table_entry;
-  PrepareL2ToTunnelV6(&table_entry, fdb_info, p4info, false);
+  DiagDetail detail;
+  PrepareL2ToTunnelV6(&table_entry, fdb_info, p4info, false, detail);
 
   // Assert
   DumpMessageAsJson(table_entry);

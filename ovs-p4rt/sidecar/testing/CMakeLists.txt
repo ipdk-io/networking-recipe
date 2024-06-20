@@ -5,46 +5,25 @@
 #
 
 #=======================================================================
-# Original contents
+# Manual tests
 #=======================================================================
 
-if(FALSE)
-
-add_library(ovsp4rt_logging_o OBJECT
-  ${SIDECAR_SOURCE_DIR}/common/ovsp4rt_logutils.cc
-  ${SIDECAR_SOURCE_DIR}/common/ovsp4rt_logutils.h
-  ${SIDECAR_SOURCE_DIR}/lib/ovsp4rt_logging.cc
-  ${SIDECAR_SOURCE_DIR}/lib/ovsp4rt_logging.h
+add_executable(ovsp4rt_logging_test EXCLUDE_FROM_ALL
+  ovsp4rt_logging_test.cc
 )
 
-target_include_directories(ovsp4rt_logging_o PRIVATE
+target_include_directories(ovsp4rt_logging_test PUBLIC
   ${SIDECAR_SOURCE_DIR}
-  ${SDE_INSTALL_DIR}/include
-)
-
-add_library(ovsp4rt_logging SHARED $<TARGET_OBJECTS:ovsp4rt_logging_o>)
-
-add_executable(logging_test EXCLUDE_FROM_ALL
-  logging_test.cc
-)
-
-target_include_directories(logging_test PUBLIC
-  ${SIDECAR_SOURCE_DIR}
-  ${DEPEND_INSTALL_DIR}/include
-  ${SDE_INSTALL_DIR}/include
   ${OVSP4RT_INCLUDE_DIR}
 )
 
-target_link_libraries(logging_test PUBLIC
-  ovsp4rt_logging
-  absl::strings
+target_link_libraries(ovsp4rt_logging_test PUBLIC
+  ovsp4rt_logging_so
   sde::target_sys
 )
 
-endif(FALSE)
-
 #=======================================================================
-# New contents
+# Unit tests (common)
 #=======================================================================
 
 include(FindGTest)
@@ -53,7 +32,7 @@ mark_as_advanced(GTest_DIR)
 option(TEST_COVERAGE OFF "Measure unit test code coverage")
 
 #-----------------------------------------------------------------------
-# p4info_file_path.h
+# p4info_file_path.h - header file specifying the path to p4Info.txt
 #-----------------------------------------------------------------------
 set(P4INFO_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/p4Info.txt")
 
@@ -68,10 +47,14 @@ configure_file(
   @ONLY
 )
 
+#=======================================================================
+# Unit tests (tests)
+#=======================================================================
+
 #-----------------------------------------------------------------------
-# define_sidecar_unit_test
+# set_ovsp4rt_unit_test_properties()
 #-----------------------------------------------------------------------
-function(define_sidecar_unit_test TARGET)
+function(set_ovsp4rt_unit_test_properties TARGET)
   target_include_directories(${TARGET} PUBLIC
     ${OVSP4RT_INCLUDE_DIR}
     ${SIDECAR_SOURCE_DIR}
@@ -82,7 +65,7 @@ function(define_sidecar_unit_test TARGET)
   target_link_libraries(${TARGET} PUBLIC
     GTest::gtest
     GTest::gtest_main
-    ovs_sidecar
+    ovsp4rt
     p4runtime_proto
   )
 
@@ -95,7 +78,7 @@ function(define_sidecar_unit_test TARGET)
   endif()
 
   add_test(NAME ${TARGET} COMMAND ${TARGET})
-endfunction(define_sidecar_unit_test)
+endfunction(set_ovsp4rt_unit_test_properties)
 
 if(ES2K_TARGET)
 
@@ -106,6 +89,6 @@ add_executable(prepare_l2_to_tunnel_test
   prepare_l2_to_tunnel_test.cc
 )
 
-define_sidecar_unit_test(prepare_l2_to_tunnel_test)
+set_ovsp4rt_unit_test_properties(prepare_l2_to_tunnel_test)
 
 endif(ES2K_TARGET)
