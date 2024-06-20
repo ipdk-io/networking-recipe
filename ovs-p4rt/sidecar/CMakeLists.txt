@@ -43,25 +43,16 @@ target_link_libraries(ovs_sidecar_o PUBLIC
 # libovsp4rt.so #
 #################
 
-#add_library(ovs_sidecar SHARED EXCLUDE_FROM_ALL
-#    $<TARGET_OBJECTS:error_proto_o>
-#    $<TARGET_OBJECTS:ovs_sidecar_o>
-#    $<TARGET_OBJECTS:ovsp4rt_logging_o>
-#    $<TARGET_OBJECTS:stratum_glue_status_o>
-#    $<TARGET_OBJECTS:stratum_lib_utils_o>
-#    $<TARGET_OBJECTS:stratum_public_lib_o>
-#)
-
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
 
-target_link_libraries(ovsp4rt PRIVATE stratum_static)
+#target_link_libraries(ovsp4rt PRIVATE stratum_static)
 
 target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto
-    stratum_proto       # WHY?
+#   stratum_proto       # WHY?
     p4runtime_proto
 )
 
