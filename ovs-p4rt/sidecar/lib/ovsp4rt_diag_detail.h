@@ -18,9 +18,14 @@ enum LogTableId {
   LOG_SRC_IP_MAC_MAP_TABLE,
 };
 
+// Parameter object to return diagnostic information from a low-level
+// function to a mid-level function. Allows the mid-level function to
+// log the name of the underlying table if the SendWriteRequest() fails.
 struct DiagDetail {
   DiagDetail(LogTableId tbl_id = LOG_UNKNOWN_TABLE) : table_id(tbl_id) {}
+  // Returns the name of the underlying table.
   const char* getLogTableName();
+  // Identifies the underlying table.
   LogTableId table_id;
 };
 
