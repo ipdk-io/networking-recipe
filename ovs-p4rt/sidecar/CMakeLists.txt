@@ -48,11 +48,8 @@ add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
 
-#target_link_libraries(ovsp4rt PRIVATE stratum_static)
-
 target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto
-#   stratum_proto       # WHY?
     p4runtime_proto
 )
 
