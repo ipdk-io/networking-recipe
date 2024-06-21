@@ -37,14 +37,6 @@ class PrepareL2ToTunnelTest : public ::testing::Test {
     }
   }
 
-#if 0
-  // Sets up the test fixture.
-  void SetUp() override {}
-
-  // Tears down the test fixture.
-  void TearDown() override {}
-#endif
-
   void DumpMessageAsJson(const google::protobuf::Message& message) {
     JsonPrintOptions options;
     options.add_whitespace = true;
@@ -61,12 +53,6 @@ uint32_t DecodeWordValue(const std::string string_value) {
     word_value = (word_value << 8) | string_value[i];
   }
   return word_value;
-}
-
-std::string HexByte(uint8_t byte_val) {
-  std::ostringstream hex_val;
-  hex_val << std::hex << std::setw(2) << std::setfill('0') << byte_val;
-  return hex_val.str();
 }
 
 //----------------------------------------------------------------------
@@ -136,7 +122,6 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV4TableEntry) {
   std::cout << std::hex << word_value << std::endl;
 }
 
-#if 1
 //----------------------------------------------------------------------
 // GetL2ToTunnelV6TableEntry
 //----------------------------------------------------------------------
@@ -207,6 +192,5 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV6TableEntry) {
               << std::endl;
   }
 }
-#endif
 
 }  // namespace ovs_p4rt
