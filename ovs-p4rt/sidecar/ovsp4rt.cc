@@ -2266,7 +2266,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   if (!status.ok()) return;
 
   /* Hack: When we delete an FDB entry based on current logic  we will not know
-   * we will not know if its an Tunnel learn FDB or regular VSI learn FDB.
+   * we will not know if it's a Tunnel learn FDB or regular VSI learn FDB.
    * This hack, during delete case check if entry is present in l2_to_tunnel_v4
    * and l2_to_tunnel_v6. if any of these 2 tables is true then go ahead and
    * delete the entry.

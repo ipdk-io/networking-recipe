@@ -4,9 +4,9 @@
 #
 
 #-----------------------------------------------------------------------
-# set_ovsp4rt_unit_test_properties()
+# set_test_properties()
 #-----------------------------------------------------------------------
-function(set_ovsp4rt_unit_test_properties TARGET)
+function(set_test_properties TARGET)
 
   target_include_directories(${TARGET} PUBLIC
     ${OVSP4RT_INCLUDE_DIR}
@@ -33,5 +33,5 @@ function(set_ovsp4rt_unit_test_properties TARGET)
 
   add_test(NAME ${TARGET} COMMAND ${TARGET})
 
-endfunction(set_ovsp4rt_unit_test_properties)
+endfunction(set_test_properties)
 

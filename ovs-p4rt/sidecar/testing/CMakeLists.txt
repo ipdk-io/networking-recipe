@@ -51,7 +51,7 @@ configure_file(
 # Unit tests (tests)
 #=======================================================================
 
-include(unit_test_properties.cmake)
+include(set_test_properties.cmake)
 
 if(ES2K_TARGET)
 
@@ -62,6 +62,6 @@ add_executable(prepare_l2_to_tunnel_test
   prepare_l2_to_tunnel_test.cc
 )
 
-set_ovsp4rt_unit_test_properties(prepare_l2_to_tunnel_test)
+set_test_properties(prepare_l2_to_tunnel_test)
 
 endif(ES2K_TARGET)
