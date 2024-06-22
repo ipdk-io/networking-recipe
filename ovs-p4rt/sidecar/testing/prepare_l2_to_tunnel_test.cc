@@ -15,6 +15,9 @@
 #include "p4info_file_path.h"
 #include "stratum/lib/utils.h"
 
+// Whether to dump TableEntry in JSON.
+#undef DUMP_JSON
+
 namespace ovs_p4rt {
 
 using google::protobuf::util::JsonPrintOptions;
@@ -59,8 +62,8 @@ uint32_t DecodeWordValue(const std::string string_value) {
 // GetL2ToTunnelV4TableEntry
 //----------------------------------------------------------------------
 constexpr uint8_t kMacAddrV4[6] = {0xd, 0xe, 0xa, 0xd, 0, 0};
-// TODO(derek): IPv4 address encoding?
 constexpr uint32_t kIpAddrV4 = 0x0a010203U;  // 10.1.2.3
+
 // TODO(derek): How stable are the table and action IDs?
 constexpr uint32_t kTableIdV4 = 43337754U;
 constexpr uint32_t kActionIdV4 = 23805991U;
@@ -68,7 +71,6 @@ constexpr uint32_t kActionIdV4 = 23805991U;
 void get_v4_fdb_info(mac_learning_info& fdb_info) {
   memcpy(fdb_info.mac_addr, kMacAddrV4, sizeof(fdb_info.mac_addr));
   fdb_info.tnl_info.remote_ip.family = AF_INET;
-  // TODO(derek): byte order?
   fdb_info.tnl_info.remote_ip.ip.v4addr.s_addr = kIpAddrV4;
 }
 
@@ -81,10 +83,11 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV4TableEntry) {
   ::p4::v1::TableEntry table_entry;
   DiagDetail detail;
   PrepareL2ToTunnelV4(&table_entry, fdb_info, p4info, true, detail);
+#ifdef DUMP_JSON
+  DumpMessageAsJson(table_entry);
+#endif
 
   // Assert
-  DumpMessageAsJson(table_entry);
-
   ASSERT_EQ(table_entry.table_id(), kTableIdV4);
 
   // match: mac_addr
@@ -117,9 +120,8 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV4TableEntry) {
   auto param_value = param.value();
   ASSERT_EQ(param_value.size(), 4);
 
-  // TODO(derek): IPv4 address byte order?
-  auto word_value = DecodeWordValue(param_value);
-  std::cout << std::hex << word_value << std::endl;
+  auto word_value = ntohl(DecodeWordValue(param_value));
+  ASSERT_EQ(word_value, kIpAddrV4);
 }
 
 //----------------------------------------------------------------------
@@ -128,6 +130,8 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV4TableEntry) {
 constexpr uint8_t kMacAddrV6[] = {0xb, 0xe, 0xe, 0xb, 0xe, 0xe};
 constexpr uint32_t kIpAddrV6[] = {0, 66, 129, 512};
 constexpr int kIpAddrV6Len = sizeof(kIpAddrV6) / sizeof(kIpAddrV6[0]);
+
+// TODO(derek): How stable are the table and action IDs?
 constexpr uint32_t kTableIdV6 = 36796227U;
 constexpr uint32_t kActionIdV6 = 23953453U;
 
@@ -148,10 +152,11 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV6TableEntry) {
   ::p4::v1::TableEntry table_entry;
   DiagDetail detail;
   PrepareL2ToTunnelV6(&table_entry, fdb_info, p4info, true, detail);
+#ifdef DUMP_JSON
+  DumpMessageAsJson(table_entry);
+#endif
 
   // Assert
-  DumpMessageAsJson(table_entry);
-
   ASSERT_EQ(table_entry.table_id(), kTableIdV6);
 
   // match: mac_addr
@@ -169,7 +174,7 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV6TableEntry) {
     ASSERT_EQ(uint8_t(match_value[i]), kMacAddrV6[i]);
   }
 
-  // action: set_tunnel_v4(dst_addr)
+  // action: set_tunnel_v6(tnl_info.remote_ip.ip.v6addr)
   ASSERT_TRUE(table_entry.has_action());
 
   auto table_action = table_entry.action();
@@ -185,11 +190,8 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV6TableEntry) {
     auto param_value = param.value();
     ASSERT_EQ(param_value.size(), 4);
 
-    // TODO(derek): IPv6 address word/byte order?
-    auto word_value = DecodeWordValue(param_value);
-    std::cout << std::hex << std::setw(8) << std::setfill('0') << word_value
-              << std::dec << std::setw(0) << " (" << word_value << ")"
-              << std::endl;
+    auto word_value = ntohl(DecodeWordValue(param_value));
+    ASSERT_EQ(word_value, kIpAddrV6[i]);
   }
 }
 
