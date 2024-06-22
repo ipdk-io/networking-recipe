@@ -23,11 +23,13 @@ target_link_libraries(ovsp4rt_logging_test PUBLIC
 )
 
 #=======================================================================
-# Unit tests (common)
+# Unit tests
 #=======================================================================
 
 include(FindGTest)
 mark_as_advanced(GTest_DIR)
+
+include(set_test_properties.cmake)
 
 option(TEST_COVERAGE OFF "Measure unit test code coverage")
 
@@ -46,12 +48,6 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/p4info_file_path.h
   @ONLY
 )
-
-#=======================================================================
-# Unit tests (tests)
-#=======================================================================
-
-include(set_test_properties.cmake)
 
 if(ES2K_TARGET)
 
