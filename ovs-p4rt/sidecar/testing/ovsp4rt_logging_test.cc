@@ -1,7 +1,7 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#include "lib/ovsp4rt_logging.h"
+#include "logging/ovsp4rt_logging.h"
 
 #define _POSIX_SOURCE
 #include <limits.h>
@@ -13,8 +13,8 @@
 #include <iostream>
 #include <string>
 
-#include "lib/ovsp4rt_diag_detail.h"
-#include "lib/ovsp4rt_logutils.h"
+#include "logging/ovsp4rt_diag_detail.h"
+#include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
 using namespace ovs_p4rt;

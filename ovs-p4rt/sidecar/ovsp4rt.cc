@@ -6,9 +6,9 @@
 #include <string>
 
 #include "absl/flags/flag.h"
-#include "lib/ovsp4rt_diag_detail.h"
-#include "lib/ovsp4rt_logging.h"
-#include "lib/ovsp4rt_logutils.h"
+#include "logging/ovsp4rt_diag_detail.h"
+#include "logging/ovsp4rt_logging.h"
+#include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_credentials.h"
 #include "ovsp4rt_session.h"
