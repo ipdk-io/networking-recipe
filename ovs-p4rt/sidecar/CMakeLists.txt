@@ -20,7 +20,7 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt_session.h
 )
 
-add_subdirectory(lib)
+add_subdirectory(logging)
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
