@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libovsp4rt_stubs
+Description: Dummy P4Runtime client library for OVS
+URL: https://github.com/ipdk-io/networking-recipe.git
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lovsp4rt_stubs
+Cflags: -I${includedir}
