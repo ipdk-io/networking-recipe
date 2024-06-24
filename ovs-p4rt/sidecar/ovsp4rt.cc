@@ -2286,6 +2286,8 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
           GetL2ToTunnelV6TableEntry(session.get(), learn_info, p4info);
       if (status_or_read_response.ok()) {
         learn_info.is_tunnel = true;
+        learn_info.tnl_info.local_ip.family = AF_INET6;
+        learn_info.tnl_info.remote_ip.family = AF_INET6;
       }
     }
   }
