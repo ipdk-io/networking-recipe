@@ -6,7 +6,7 @@
 
 #include <cstdbool>
 
-#include "lib/ovsp4rt_diag_detail.h"
+#include "logging/ovsp4rt_diag_detail.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "p4/config/v1/p4info.pb.h"
 #include "p4/v1/p4runtime.pb.h"

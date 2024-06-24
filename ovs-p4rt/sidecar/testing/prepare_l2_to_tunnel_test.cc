@@ -8,7 +8,7 @@
 
 #include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
-#include "lib/ovsp4rt_diag_detail.h"
+#include "logging/ovsp4rt_diag_detail.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
 #include "p4/config/v1/p4info.pb.h"
