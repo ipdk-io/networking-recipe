@@ -1,4 +1,4 @@
-# CMake build file for ovs-p4rt/sidecar/lib
+# CMake build file for ovs-p4rt/sidecar/logging
 #
 # Copyright 2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
