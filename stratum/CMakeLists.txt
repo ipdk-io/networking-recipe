@@ -21,15 +21,6 @@ set(P4RUNTIME_SOURCE_DIR
     "Path to P4Runtime source directory")
 mark_as_advanced(P4RUNTIME_SOURCE_DIR)
 
-#set(STRATUM_SOURCE_DIR
-#    "${CMAKE_CURRENT_SOURCE_DIR}/stratum" CACHE PATH
-#    "Path to Stratum source directory")
-#mark_as_advanced(STRATUM_SOURCE_DIR)
-#
-#set(PB_OUT_DIR "${CMAKE_BINARY_DIR}/pb.out" CACHE PATH
-#    "Path to directory for generated Protobuf files")
-#mark_as_advanced(PB_OUT_DIR)
-#file(MAKE_DIRECTORY ${PB_OUT_DIR})
 
 set(STRATUM_INCLUDES
     ${STRATUM_SOURCE_DIR}

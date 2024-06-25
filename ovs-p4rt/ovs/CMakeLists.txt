@@ -47,10 +47,9 @@ function(set_ovs_target_properties ARTIFACT)
   )
 
   target_link_libraries(${ARTIFACT} PUBLIC
-      stratum_static
       p4_role_config_proto
-      stratum_proto
       p4runtime_proto
+      stratum_utils
   )
 endfunction()
 
