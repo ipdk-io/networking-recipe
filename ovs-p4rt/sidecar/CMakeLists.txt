@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
+set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 #################
 # ovs_sidecar_o #
 #################
@@ -13,6 +15,7 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt.cc
     ovsp4rt_credentials.cc
     ovsp4rt_credentials.h
+    ovsp4rt_private.h
     ovsp4rt_session.cc
     ovsp4rt_session.h
 )
@@ -27,13 +30,13 @@ endif()
 
 target_include_directories(ovs_sidecar_o PUBLIC
     ${OVSP4RT_INCLUDE_DIR}
+    ${SIDECAR_SOURCE_DIR}
     ${STRATUM_SOURCE_DIR}
 )
 
 target_link_libraries(ovs_sidecar_o PUBLIC
     p4_role_config_proto
     p4runtime_proto
-    sde::target_sys
 )
 
 #################
@@ -45,11 +48,8 @@ add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
 
-target_link_libraries(ovsp4rt PRIVATE stratum_static)
-
 target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto
-    stratum_proto
     p4runtime_proto
 )
 
@@ -59,9 +59,11 @@ target_link_libraries(ovsp4rt PUBLIC
     absl::flags
 )
 
-add_dependencies(ovsp4rt ovs_sidecar_o)
-
 set_install_rpath(ovsp4rt $ORIGIN ${DEP_ELEMENT})
+
+###########
+# install #
+###########
 
 install(
     TARGETS ovsp4rt
@@ -92,6 +94,6 @@ install(
 # testing #
 ###########
 
-set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-
-add_subdirectory(testing EXCLUDE_FROM_ALL)
+if(BUILD_TESTING)
+    add_subdirectory(testing)
+endif()
