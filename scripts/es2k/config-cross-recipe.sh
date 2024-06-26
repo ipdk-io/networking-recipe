@@ -58,7 +58,6 @@ print_help() {
     echo "  --sde=DIR*       -S  SDE install directory [${_SDE_DIR}]"
     echo ""
     echo "Options:"
-    echo "  --lnw-version=VER    Linux networking version [${_LNW_VERSION}]"
     echo "  --no-krnlmon         Exclude Kernel Monitor"
     echo "  --no-ovs             Exclude OVS support"
     echo ""
@@ -87,7 +86,6 @@ print_cmake_params() {
     echo "HOST_DEPEND_DIR=${_HOST_DIR}"
     echo "OVS_INSTALL_DIR=${_OVS_DIR}"
     echo "SDE_INSTALL_DIR=${_SDE_DIR}"
-    [ -n "${_LNW_VERSION}" ] && echo "${_LNW_VERSION:2}"
     [ -n "${_WITH_KRNLMON}" ] && echo "${_WITH_KRNLMON:2}"
     [ -n "${_WITH_OVSP4RT}" ] && echo "${_WITH_OVSP4RT:2}"
     echo ""
@@ -100,7 +98,7 @@ print_cmake_params() {
 SHORTOPTS=B:D:H:O:P:S:T:
 SHORTOPTS=${SHORTOPTS}hn
 
-LONGOPTS=build:,deps:,hostdeps:,lnw-version:,ovs:,prefix:,sde:,toolchain:
+LONGOPTS=build:,deps:,hostdeps:,ovs:,prefix:,sde:,toolchain:
 LONGOPTS=${LONGOPTS},dry-run,help,no-krnlmon,no-ovs
 
 GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
@@ -138,9 +136,6 @@ while true ; do
     --help|-h)
         print_help
         exit 99 ;;
-    --lnw-version)
-        _LNW_VERSION=$2
-        shift 2 ;;
     --no-krnlmon)
         _WITH_KRNLMON=FALSE
         shift 1 ;;
@@ -167,7 +162,6 @@ done
 [ "${_PREFIX:0:2}" = "//" ] && _PREFIX=${_SYSROOT}/${_PREFIX:2}
 [ "${_SDE_DIR:0:2}" = "//" ] && _SDE_DIR=${_SYSROOT}/${_SDE_DIR:2}
 
-[ -n "${_LNW_VERSION}" ] && _LNW_VERSION="-DLNW_VERSION=${_LNW_VERSION}"
 [ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON=-DWITH_KRNLMON=${_WITH_KRNLMON}
 [ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT=-DWITH_OVSP4RT=${_WITH_OVSP4RT}
 
@@ -191,7 +185,6 @@ cmake -S . -B "${_BLD_DIR}" \
     -DHOST_DEPEND_DIR="${_HOST_DIR}" \
     -DOVS_INSTALL_DIR="${_OVS_DIR}" \
     -DSDE_INSTALL_DIR="${_SDE_DIR}" \
-    ${_LNW_VERSION} \
     ${_WITH_KRNLMON} \
     ${_WITH_OVSP4RT} \
     -DSET_RPATH=TRUE \
