@@ -8,18 +8,16 @@
 #
 set -e
 
-if [ -z "$1" ]
-then
+if [ -z "$1" ]; then
     echo "- Missing mandatory argument: P4CP_INSTALL"
     echo " - Usage: sudo copy_config_files.sh <P4CP_INSTALL> <SDE_INSTALL>"
-    return 0
+    exit 1
 fi
 
-if [ -z "$2" ]
-then
+if [ -z "$2" ]; then
     echo "- Missing mandatory argument: SDE_INSTALL"
     echo " - Usage: sudo copy_config_files.sh <P4CP_INSTALL> <SDE_INSTALL>"
-    return 0
+    exit 1
 fi
 
 export P4CP_INSTALL=$1
@@ -30,24 +28,24 @@ mkdir -p /etc/stratum/
 mkdir -p /var/log/stratum/
 
 # stratum configuration
-SOURCE_DIR=${P4CP_INSTALL}/share/stratum/{{ target }}
+SOURCE_DIR="${P4CP_INSTALL}/share/stratum/{{ target }}"
 TARGET_DIR=/usr/share/stratum/{{ target }}
 mkdir -p ${TARGET_DIR}
-cp ${SOURCE_DIR}/{{ target }}_port_config.pb.txt ${TARGET_DIR}/
-cp ${SOURCE_DIR}/{{ target }}_skip_p4.conf ${TARGET_DIR}/
+cp -v "${SOURCE_DIR}/{{ target }}_port_config.pb.txt" "${TARGET_DIR}/"
+cp -v "${SOURCE_DIR}/{{ target }}_skip_p4.conf" "${TARGET_DIR}/"
 
 # tls certificate generation
 TLS_CERTS_DIR=/usr/share/stratum
-cp ${SOURCE_DIR}/ca.conf ${TLS_CERTS_DIR}/
-cp ${SOURCE_DIR}/grpc-client.conf ${TLS_CERTS_DIR}/
-cp ${P4CP_INSTALL}/sbin/generate-certs.sh ${TLS_CERTS_DIR}/
+cp -v "${SOURCE_DIR}/ca.conf" "${TLS_CERTS_DIR}/"
+cp -v "${SOURCE_DIR}/grpc-client.conf" "${TLS_CERTS_DIR}/"
+cp -v "${P4CP_INSTALL}/sbin/generate-certs.sh" "${TLS_CERTS_DIR}/"
 {%- if target == 'es2k' -%}
 {{'\n\n'}}# packetio configuration
 mkdir -p /usr/share/ipu_shared
-cp $SDE_INSTALL/share/ipu_shared/tdi_pktio.json /usr/share/ipu_shared/
+cp -v "$SDE_INSTALL/share/ipu_shared/tdi_pktio.json" /usr/share/ipu_shared/
 {%- endif %}
 
 # zlog configuration
 mkdir -p /usr/share/target_sys/
-cp $SDE_INSTALL/share/target_sys/zlog-cfg /usr/share/target_sys/
+cp -v "$SDE_INSTALL/share/target_sys/zlog-cfg" /usr/share/target_sys/
 
