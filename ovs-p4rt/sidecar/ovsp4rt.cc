@@ -116,30 +116,6 @@ static inline int32_t ValidIpAddr(uint32_t nw_addr) {
 }
 
 #if defined(ES2K_TARGET)
-#ifdef LNW_V2
-void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
-                              const struct mac_learning_info& learn_info,
-                              const ::p4::config::v1::P4Info& p4info,
-                              bool insert_entry, DiagDetail& detail) {
-  detail.table_id = LOG_L2_FWD_SMAC_TABLE;
-  table_entry->set_table_id(GetTableId(p4info, L2_FWD_SMAC_TABLE));
-  table_entry->set_priority(1);
-  auto match = table_entry->add_match();
-  match->set_field_id(
-      GetMatchFieldId(p4info, L2_FWD_SMAC_TABLE, L2_FWD_SMAC_TABLE_KEY_SA));
-  std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
-  match->mutable_ternary()->set_value(mac_addr);
-  match->mutable_ternary()->set_mask(
-      EncodeByteValue(6, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff));
-
-  if (insert_entry) {
-    auto table_action = table_entry->mutable_action();
-    auto action = table_action->mutable_action();
-    action->set_action_id(
-        GetActionId(p4info, L2_FWD_SMAC_TABLE_ACTION_SMAC_LEARN));
-  }
-}
-#else
 void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const struct mac_learning_info& learn_info,
                               const ::p4::config::v1::P4Info& p4info,
@@ -164,7 +140,6 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
         GetActionId(p4info, L2_FWD_SMAC_TABLE_ACTION_NO_ACTION));
   }
 }
-#endif  // LNW_V2
 #endif  // ES2K_TARGET
 
 void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
@@ -187,15 +162,6 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
       GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_BRIDGE_ID));
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
-
-#ifdef LNW_V2
-  // Based on p4 program for ES2K, we need to provide a match key SMAC flag
-  auto match2 = table_entry->add_match();
-  match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
-                                       L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
-
-  match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-#endif
 
   if (insert_entry) {
     /* Action param configured by user in TX_ACC_VSI_TABLE is used as port_id
@@ -269,15 +235,6 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
-#ifdef LNW_V2
-  // Based on p4 program for ES2K, we need to provide a match key Bridge ID
-  auto match2 = table_entry->add_match();
-  match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_RX_TABLE,
-                                       L2_FWD_RX_TABLE_KEY_SMAC_LEARNED));
-
-  match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-#endif
-
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
@@ -340,14 +297,6 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
-#ifdef LNW_V2
-  // Based on p4 program for ES2K, we need to provide a match key SMAC flag
-  auto match2 = table_entry->add_match();
-  match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
-                                       L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
-
-  match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-#endif
 #endif
 
 #if defined(DPDK_TARGET)
@@ -448,14 +397,6 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
 
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
 
-#ifdef LNW_V2
-  // Based on p4 program for ES2K, we need to provide a match key SMAC flag
-  auto match2 = table_entry->add_match();
-  match2->set_field_id(GetMatchFieldId(p4info, L2_FWD_TX_TABLE,
-                                       L2_FWD_TX_TABLE_KEY_SMAC_LEARNED));
-
-  match2->mutable_exact()->set_value(EncodeByteValue(1, 1));
-#endif
 #endif
 
 #if defined(DPDK_TARGET)
