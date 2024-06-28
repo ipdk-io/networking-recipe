@@ -149,3 +149,28 @@ jobs:
         if: steps.changed.outputs.any_changed == 'true'
         run: |
           clang-format -n -Werror ${{ steps.changed.outputs.all_changed_files }}
+
+  #---------------------------------------------------------------------
+  # 6-shellcheck
+  #---------------------------------------------------------------------
+  shellcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get list of changed files
+        id: changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **.sh
+
+      - name: Check for bash errors
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          shellcheck ${{ steps.changed.outputs.all_changed_files }}
