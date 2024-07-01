@@ -50,10 +50,10 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   local_ip["prefix_len"] = learn_local_ip.prefix_len;
 
   if (learn_local_ip.family == AF_INET) {
-    local_ip["ipv4_addr"] = { learn_local_ip.ip.v4addr.s_addr };
+    local_ip["ipv4_addr"] = {learn_local_ip.ip.v4addr.s_addr};
   } else if (learn_local_ip.family == AF_INET6) {
     const uint32_t* v6addr = &learn_local_ip.ip.v6addr.__in6_u.__u6_addr32[0];
-    local_ip["ipv6_addr"] = { v6addr[0], v6addr[1], v6addr[2], v6addr[3] };
+    local_ip["ipv6_addr"] = {v6addr[0], v6addr[1], v6addr[2], v6addr[3]};
   }
 
   // remote ip address
@@ -63,10 +63,10 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   remote_ip["prefix_len"] = learn_remote_ip.prefix_len;
 
   if (learn_remote_ip.family == AF_INET) {
-    remote_ip["ipv4_addr"] = { learn_remote_ip.ip.v4addr.s_addr };
+    remote_ip["ipv4_addr"] = {learn_remote_ip.ip.v4addr.s_addr};
   } else if (learn_remote_ip.family == AF_INET6) {
     const uint32_t* v6addr = &learn_remote_ip.ip.v6addr.__in6_u.__u6_addr32[0];
-    remote_ip["ipv6_addr"] = { v6addr[0], v6addr[1], v6addr[2], v6addr[3] };
+    remote_ip["ipv6_addr"] = {v6addr[0], v6addr[1], v6addr[2], v6addr[3]};
   }
 
   json_info["params"]["insert_entry"] = insert_entry;
