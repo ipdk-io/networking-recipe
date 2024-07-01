@@ -6,10 +6,9 @@
 
 set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-#################
-# ovs_sidecar_o #
-#################
-
+#-----------------------------------------------------------------------
+# ovs_sidecar_o
+#-----------------------------------------------------------------------
 add_library(ovs_sidecar_o OBJECT
     ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
     ovsp4rt.cc
@@ -39,10 +38,9 @@ target_link_libraries(ovs_sidecar_o PUBLIC
     p4runtime_proto
 )
 
-#################
-# libovsp4rt.so #
-#################
-
+#-----------------------------------------------------------------------
+# libovsp4rt.so
+#-----------------------------------------------------------------------
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
@@ -61,12 +59,24 @@ target_link_libraries(ovsp4rt PUBLIC
 
 set_install_rpath(ovsp4rt $ORIGIN ${DEP_ELEMENT})
 
-###########
-# install #
-###########
+#-----------------------------------------------------------------------
+# libovsp4rt_stubs.a
+#-----------------------------------------------------------------------
+add_library(ovsp4rt_stubs STATIC
+    ovsp4rt_stubs.cc
+)
 
+target_include_directories(ovsp4rt_stubs PUBLIC
+    ${OVSP4RT_INCLUDE_DIR}
+)
+
+target_link_libraries(ovsp4rt_stubs PRIVATE stratum_static)
+
+#-----------------------------------------------------------------------
+# Install
+#-----------------------------------------------------------------------
 install(
-    TARGETS ovsp4rt
+    TARGETS ovsp4rt ovsp4rt_stubs
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
@@ -77,23 +87,26 @@ install(
         ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-#################
-# libovsp4rt.pc #
-#################
+#-----------------------------------------------------------------------
+# pkg-config files
+#-----------------------------------------------------------------------
+set(ovsp4rt_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt.pc)
+configure_file(cmake/libovsp4rt.pc.in ${ovsp4rt_cfg_file} @ONLY)
 
-set(pkg_config_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt.pc)
-
-configure_file(libovsp4rt.pc.in ${pkg_config_file} @ONLY)
+set(ovsp4rt_stubs_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_stubs.pc)
+configure_file(cmake/libovsp4rt_stubs.pc.in ${ovsp4rt_stubs_cfg_file} @ONLY)
 
 install(
-  FILES ${pkg_config_file}
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+    FILES
+        ${ovsp4rt_cfg_file}
+        ${ovsp4rt_stubs_cfg_file}
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
 
-###########
-# testing #
-###########
-
+#-----------------------------------------------------------------------
+# Testing
+#-----------------------------------------------------------------------
 if(BUILD_TESTING)
     add_subdirectory(testing)
 endif()
