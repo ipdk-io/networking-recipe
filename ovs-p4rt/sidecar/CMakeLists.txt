@@ -61,12 +61,16 @@ target_link_libraries(ovsp4rt PUBLIC
 
 set_install_rpath(ovsp4rt $ORIGIN ${DEP_ELEMENT})
 
-###########
-# install #
-###########
+#-----------------------------------------------------------------------
+# libovsp4rt_spies.a
+#-----------------------------------------------------------------------
+add_subdirectory(spies)
 
+#-----------------------------------------------------------------------
+# Install
+#-----------------------------------------------------------------------
 install(
-    TARGETS ovsp4rt
+    TARGETS ovsp4rt ovsp4rt_spies
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
@@ -77,23 +81,26 @@ install(
         ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-#################
-# libovsp4rt.pc #
-#################
+#-----------------------------------------------------------------------
+# pkg-config files
+#-----------------------------------------------------------------------
+set(ovsp4rt_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt.pc)
+configure_file(cmake/libovsp4rt.pc.in ${ovsp4rt_cfg_file} @ONLY)
 
-set(pkg_config_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt.pc)
-
-configure_file(libovsp4rt.pc.in ${pkg_config_file} @ONLY)
+set(ovsp4rt_spies_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_spies.pc)
+configure_file(cmake/libovsp4rt_spies.pc.in ${ovsp4rt_spies_cfg_file} @ONLY)
 
 install(
-  FILES ${pkg_config_file}
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+    FILES
+        ${ovsp4rt_cfg_file}
+        ${ovsp4rt_spies_cfg_file}
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
 
-###########
-# testing #
-###########
-
+#-----------------------------------------------------------------------
+# Testing
+#-----------------------------------------------------------------------
 if(BUILD_TESTING)
     add_subdirectory(testing)
 endif()
