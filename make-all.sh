@@ -28,6 +28,8 @@ _BLD_DIR=build
 _DO_BUILD=1
 _DRY_RUN=0
 _OVS_BLD="ovs/build"
+_OVS_FIRST=1
+_OVS_LAST=0
 _WITH_OVS=1
 
 ##############
@@ -58,6 +60,7 @@ print_help() {
     echo "  --lnw-version=VER    Linux networking version [${_LNW_VERSION}]"
     echo "  --no-build           Configure without building"
     echo "  --no-krnlmon         Exclude Kernel Monitor"
+    echo "  --no-legacy-p4ovs    Do not build OVS in legacy P4 mode"
     echo "  --no-ovs             Exclude OVS support"
     echo "  --target=TARGET      Target to build (dpdk|es2k|tofino) [${_TGT_TYPE}]"
     echo ""
@@ -95,9 +98,21 @@ print_cmake_params() {
     [ -n "${_LNW_VERSION}" ] && echo "${_LNW_VERSION:2}"
     [ -n "${_WITH_KRNLMON}" ] && echo "${_WITH_KRNLMON:2}"
     [ -n "${_WITH_OVSP4RT}" ] && echo "${_WITH_OVSP4RT:2}"
+    [ -n "${_LEGACY_P4OVS}" ] && echo "${_LEGACY_P4OVS:2}"
+    [ -n "${_OVS_P4MODE}" ] && echo "${_OVS_P4MODE:2}"
     [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
     echo "${_SET_RPATH:2}"
     echo "${_TARGET_TYPE:2}"
+    echo "PKG_CONFIG_PATH=${_PKG_CONFIG_PATH}"
+
+    if [ ${_OVS_FIRST} -ne 0 ]; then
+	echo "OVS will be built first"
+    elif [ ${_OVS_LAST} -ne 0 ]; then
+	echo "OVS will be built last"
+    else
+	echo "OVS will not be built"
+    fi
+
     if [ ${_DO_BUILD} -eq 0 ]; then
         echo ""
         echo "Configure without building"
@@ -113,12 +128,14 @@ print_cmake_params() {
 ##############
 
 config_ovs() {
+    export PKG_CONFIG_PATH="${_PKG_CONFIG_PATH}"
+
     # shellcheck disable=SC2086
     cmake -S ovs -B ${_OVS_BLD} \
         ${_BUILD_TYPE}  \
         -DCMAKE_INSTALL_PREFIX="${_OVS_DIR}" \
         ${_TOOLCHAIN_FILE} \
-        -DP4OVS=ON
+        ${_OVS_P4MODE}
 }
 
 #############
@@ -149,6 +166,7 @@ config_recipe() {
         ${_LNW_VERSION} \
         ${_WITH_KRNLMON} \
         ${_WITH_OVSP4RT} \
+	${_LEGACY_P4OVS} \
         ${_COVERAGE} \
         ${_SET_RPATH} \
         ${_TARGET_TYPE}
@@ -175,6 +193,7 @@ LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
 LONGOPTS=${LONGOPTS},dry-run,help
 LONGOPTS=${LONGOPTS},coverage,ninja,rpath
 LONGOPTS=${LONGOPTS},no-build,no-krnlmon,no-ovs,no-rpath
+LONGOPTS=${LONGOPTS},no-legacy-p4ovs
 
 GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 eval set -- "${GETOPTS}"
@@ -244,7 +263,13 @@ while true ; do
     --no-krnlmon)
         _WITH_KRNLMON=FALSE
         shift ;;
+    --no-legacy-p4ovs)
+	_OVS_FIRST=0
+	_OVS_LAST=1
+	shift ;;
     --no-ovs)
+	_OVS_FIRST=0
+	_OVS_LAST=0
         _WITH_OVS=0
         _WITH_OVSP4RT=FALSE
         shift ;;
@@ -287,6 +312,16 @@ fi
 [ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON="-DWITH_KRNLMON=${_WITH_KRNLMON}"
 [ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT="-DWITH_OVSP4RT=${_WITH_OVSP4RT}"
 
+if [ ${_OVS_FIRST} -ne 0 ]; then
+    _LEGACY_P4OVS="-DLEGACY_P4OVS=ON"
+    _OVS_P4MODE="-DP4MODE=p4ovs"
+elif [ ${_OVS_LAST} -ne 0 ]; then
+    _LEGACY_P4OVS="-DLEGACY_P4OVS=OFF"
+    _OVS_P4MODE="-DP4MODE=ovsp4rt"
+fi
+
+_PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:$(realpath install/lib/pkgconfig)
+
 # Show parameters if this is a dry run
 if [ ${_DRY_RUN} -ne 0 ]; then
     print_cmake_params
@@ -297,13 +332,20 @@ fi
 # Do the build #
 ################
 
-# First build OVS
-if [ ${_WITH_OVS} -ne 0 ]; then
-    config_ovs
+# Build OVS before recipe (legacy mode)
+if [ ${_OVS_FIRST} -ne 0 ]; then
+    config_ovs p4ovs
     build_ovs
 fi
 
+# Build networking recipe
 config_recipe
 if [ ${_DO_BUILD} -ne 0 ]; then
     build_recipe
+fi
+
+# Build OVS after recipe
+if [ ${_OVS_LAST} -ne 0 ]; then
+    config_ovs ovsp4rt
+    build_ovs
 fi

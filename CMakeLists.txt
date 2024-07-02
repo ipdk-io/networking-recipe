@@ -26,6 +26,8 @@ endif()
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     "Debug;MinSizeRel;Release;RelWithDebInfo")
 
+option(LEGACY_P4OVS "Build OVS with P4 support (legacy mode)" ON)
+
 cmake_print_variables(CMAKE_STAGING_PREFIX)
 cmake_print_variables(CMAKE_SYSROOT)
 cmake_print_variables(CMAKE_TOOLCHAIN_FILE)
@@ -81,10 +83,14 @@ if(TOFINO_TARGET)
     set(WITH_OVSP4RT OFF)
 endif()
 
+if(NOT WITH_OVSP4RT)
+    set(LEGACY_P4OVS OFF)
+endif()
+
 cmake_print_variables(WITH_KRNLMON)
 cmake_print_variables(WITH_OVSP4RT)
 
-if(WITH_OVSP4RT AND OVS_INSTALL_DIR STREQUAL "")
+if(LEGACY_OVS AND OVS_INSTALL_DIR STREQUAL "")
     message(FATAL_ERROR "OVS_INSTALL_DIR (OVS_INSTALL) not defined!")
 endif()
 
@@ -122,7 +128,7 @@ if(CMAKE_CROSSCOMPILING)
 
     list(APPEND CMAKE_FIND_ROOT_PATH ${SDE_INSTALL_DIR})
 
-    if(NOT OVS_INSTALL_DIR STREQUAL "")
+    if(LEGACY_P4OVS AND NOT OVS_INSTALL_DIR STREQUAL "")
         list(APPEND CMAKE_FIND_ROOT_PATH ${OVS_INSTALL_DIR})
     endif()
 else()
@@ -135,7 +141,7 @@ else()
 
     list(APPEND CMAKE_PREFIX_PATH ${SDE_INSTALL_DIR})
 
-    if(NOT OVS_INSTALL_DIR STREQUAL "")
+    if(LEGACY_P4OVS AND NOT OVS_INSTALL_DIR STREQUAL "")
         list(APPEND CMAKE_PREFIX_PATH ${OVS_INSTALL_DIR})
     endif()
 endif()
@@ -177,7 +183,7 @@ elseif(TOFINO_TARGET)
 endif()
 
 # Open vSwitch.
-if(WITH_OVSP4RT)
+if(LEGACY_P4OVS)
     find_package(OVS)
 endif()
 

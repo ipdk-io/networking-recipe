@@ -36,6 +36,7 @@ target_include_directories(ovs_sidecar_o PUBLIC
 target_link_libraries(ovs_sidecar_o PUBLIC
     p4_role_config_proto
     p4runtime_proto
+    stratum_utils
 )
 
 #-----------------------------------------------------------------------
@@ -49,6 +50,7 @@ add_library(ovsp4rt SHARED
 target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto
     p4runtime_proto
+    stratum_utils
 )
 
 target_link_libraries(ovsp4rt PUBLIC

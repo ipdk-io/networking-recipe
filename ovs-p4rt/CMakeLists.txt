@@ -9,4 +9,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(OVSP4RT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(sidecar)
-add_subdirectory(ovs)
+
+if(LEGACY_P4OVS)
+    add_subdirectory(ovs)
+endif()
