@@ -100,7 +100,7 @@ print_cmake_params() {
     [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
     echo "${_SET_RPATH:2}"
     echo "${_TARGET_TYPE:2}"
-    echo "PKG_CONFIG_PATH=${_PKG_CONFIG_PATH}"
+    [ -n "${_PKG_CONFIG_PATH}" ] && echo "PKG_CONFIG_PATH=${_PKG_CONFIG_PATH}"
 
     if [ ${_OVS_FIRST} -ne 0 ]; then
 	echo "OVS will be built first"
@@ -111,7 +111,6 @@ print_cmake_params() {
     fi
 
     if [ ${_DO_BUILD} -eq 0 ]; then
-        echo ""
         echo "Configure without building"
         echo ""
         return
@@ -125,7 +124,9 @@ print_cmake_params() {
 ##############
 
 config_ovs() {
-    export PKG_CONFIG_PATH="${_PKG_CONFIG_PATH}"
+    if [ -n "${_PKG_CONFIG_PATH}" ]; then
+        export PKG_CONFIG_PATH="${_PKG_CONFIG_PATH}"
+    fi
 
     # shellcheck disable=SC2086
     cmake -S ovs -B ${_OVS_BLD} \
@@ -310,9 +311,10 @@ if [ ${_OVS_FIRST} -ne 0 ]; then
 elif [ ${_OVS_LAST} -ne 0 ]; then
     _LEGACY_P4OVS="-DLEGACY_P4OVS=OFF"
     _OVS_P4MODE="-DP4MODE=ovsp4rt"
+    _pkgconfig_dir="$(realpath -m ${_PREFIX}/lib/pkgconfig)"
+    _PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${_pkgconfig_dir}"
+    unset _pkgconfig_dir
 fi
-
-_PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:$(realpath install/lib/pkgconfig)
 
 # Show parameters if this is a dry run
 if [ ${_DRY_RUN} -ne 0 ]; then
