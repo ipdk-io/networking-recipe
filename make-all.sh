@@ -312,7 +312,8 @@ config_legacy_mode() {
 
 config_non_legacy_mode() {
     _ovs_last=1
-    local _PKG_CONFIG_DIR="$(realpath -m "${_PREFIX}"/lib/pkgconfig)"
+    local _PKG_CONFIG_DIR
+    _PKG_CONFIG_DIR="$(realpath -m "${_PREFIX}"/lib/pkgconfig)"
     _PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${_PKG_CONFIG_DIR}"
 }
 

@@ -50,5 +50,5 @@ done
 rm -fr build install
 
 # ${_OVS_BLD} ${_OVS_DIR} ${_TOOLCHAIN_FILE}
-cmake -S . -B build -DCMAKE_INSTALL_PREFIX=${_PREFIX} -DP4MODE=${_P4MODE}
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX="${_PREFIX}" -DP4MODE="${_P4MODE}"
 cmake --build build -j6 -- V=0
