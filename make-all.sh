@@ -90,38 +90,42 @@ print_help() {
 
 print_cmake_params() {
     echo ""
-    [ -n "${_GENERATOR}" ] && echo "${_GENERATOR}"
-    [ -n "${_BUILD_TYPE}" ] && echo "${_BUILD_TYPE:2}"
-    echo "CMAKE_INSTALL_PREFIX=${_PREFIX}"
-    [ -n "${_STAGING_PREFIX}" ] && echo "${_STAGING_PREFIX:2}"
-    [ -n "${_TOOLCHAIN_FILE}" ] && echo "${_TOOLCHAIN_FILE:2}"
+    echo "Networking-recipe options:"
+    [ -n "${_GENERATOR}" ] && echo "  ${_GENERATOR}"
+    [ -n "${_BUILD_TYPE}" ] && echo "  ${_BUILD_TYPE:2}"
+    echo "  CMAKE_INSTALL_PREFIX=${_PREFIX}"
+    [ -n "${_STAGING_PREFIX}" ] && echo "  ${_STAGING_PREFIX:2}"
+    [ -n "${_TOOLCHAIN_FILE}" ] && echo "  ${_TOOLCHAIN_FILE:2}"
     [ -n "${_CXX_STD}" ] && echo "CMAKE_CXX_STANDARD=${_CXX_STD}"
-    echo "DEPEND_INSTALL_DIR=${_DEPS_DIR}"
-    [ -n "${_HOST_DEPEND_DIR}" ] && echo "${_HOST_DEPEND_DIR:2}"
-    echo "OVS_INSTALL_DIR=${_OVS_DIR}"
-    echo "SDE_INSTALL_DIR=${_SDE_DIR}"
-    [ -n "${_WITH_KRNLMON}" ] && echo "${_WITH_KRNLMON:2}"
-    [ -n "${_WITH_OVSP4RT}" ] && echo "${_WITH_OVSP4RT:2}"
-    [ -n "${_OVS_P4MODE}" ] && echo "${_OVS_P4MODE:2}"
-    [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
-    echo "${_SET_RPATH:2}"
-    echo "${_TARGET_TYPE:2}"
-    [ -n "${_PKG_CONFIG_PATH}" ] && echo "PKG_CONFIG_PATH=${_PKG_CONFIG_PATH}"
+    echo "  DEPEND_INSTALL_DIR=${_DEPS_DIR}"
+    [ -n "${_HOST_DEPEND_DIR}" ] && echo "  ${_HOST_DEPEND_DIR:2}"
+    echo "  OVS_INSTALL_DIR=${_OVS_DIR}"
+    echo "  SDE_INSTALL_DIR=${_SDE_DIR}"
+    [ -n "${_WITH_KRNLMON}" ] && echo "  ${_WITH_KRNLMON:2}"
+    [ -n "${_WITH_OVSP4RT}" ] && echo "  ${_WITH_OVSP4RT:2}"
+    [ -n "${_LEGACY_P4OVS}" ] && echo "  ${_LEGACY_P4OVS:2}"
+    [ -n "${_COVERAGE}" ] && echo "  ${_COVERAGE:2}"
+    echo "  ${_SET_RPATH:2}"
+    echo "  ${_TARGET_TYPE:2}"
+    echo "  JOBS=${_NJOBS}"
 
+    echo ""
+    echo "OvS options:"
+    [ -n "${_OVS_P4MODE}" ] && echo "  ${_OVS_P4MODE:2}"
+    [ -n "${_PKG_CONFIG_PATH}" ] && echo "  PKG_CONFIG_PATH=${_PKG_CONFIG_PATH}"
     if [ ${_OVS_FIRST} -ne 0 ]; then
-        echo "OVS will be built first"
+        echo "  OVS will be built first"
     elif [ ${_OVS_LAST} -ne 0 ]; then
-        echo "OVS will be built last"
+        echo "  OVS will be built last"
     else
-        echo "OVS will not be built"
+        echo "  OVS will not be built"
     fi
 
     if [ ${_DO_BUILD} -eq 0 ]; then
-        echo "Configure without building"
         echo ""
-        return
+        echo "Configure without building"
     fi
-    echo "JOBS=${_NJOBS}"
+
     echo ""
 }
 
@@ -169,7 +173,7 @@ config_recipe() {
         -DSDE_INSTALL_DIR="${_SDE_DIR}" \
         ${_WITH_KRNLMON} \
         ${_WITH_OVSP4RT} \
-        ${_OVS_P4MODE} \
+        ${_LEGACY_P4OVS} \
         ${_COVERAGE} \
         ${_SET_RPATH} \
         ${_TARGET_TYPE}
@@ -180,6 +184,7 @@ config_recipe() {
 ################
 
 build_recipe() {
+    [ ${_DO_BUILD} -eq 0 ] && return
     cmake --build ${_BLD_DIR} "-j${_NJOBS}" --target install
 }
 
@@ -300,6 +305,7 @@ fi
 
 config_legacy_mode() {
     _OVS_FIRST=1
+    _LEGACY_P4OVS=ON
 }
 
 config_non_legacy_mode() {
@@ -327,6 +333,7 @@ fi
 [ -n "${_BLD_TYPE}" ] && _BUILD_TYPE="-DCMAKE_BUILD_TYPE=${_BLD_TYPE}"
 [ -n "${_CXX_STD}" ] && _CXX_STANDARD="-DCMAKE_CXX_STANDARD=${_CXX_STD}"
 [ -n "${_HOST_DIR}" ] && _HOST_DEPEND_DIR="-DHOST_DEPEND_DIR=${_HOST_DIR}"
+[ -n "${_LEGACY_P4OVS}" ] && _LEGACY_P4OVS="-DLEGACY_P4OVS=${_LEGACY_P4OVS}"
 [ -n "${_OVS_P4MODE}" ] && _OVS_P4MODE="-DP4MODE=${_OVS_P4MODE}"
 [ -n "${_RPATH}" ] && _SET_RPATH="-DSET_RPATH=${_RPATH}"
 [ -n "${_STAGING}" ] && _STAGING_PREFIX="-DCMAKE_STAGING_PREFIX=${_STAGING}"
@@ -347,18 +354,18 @@ fi
 
 # Build OVS before recipe (legacy mode)
 if [ ${_OVS_FIRST} -ne 0 ]; then
-    config_ovs p4ovs
+    config_ovs
     build_ovs
 fi
 
 # Build networking recipe
 config_recipe
-if [ ${_DO_BUILD} -ne 0 ]; then
-    build_recipe
-fi
+build_recipe
 
 # Build OVS after recipe
 if [ ${_OVS_LAST} -ne 0 ]; then
-    config_ovs ovsp4rt
-    build_ovs
+    config_ovs
+    if [ ${_DO_BUILD} -ne 0 ]; then
+        build_ovs
+    fi
 fi
