@@ -26,9 +26,7 @@ endif()
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     "Debug;MinSizeRel;Release;RelWithDebInfo")
 
-option(LEGACY_P4OVS "Build OVS with P4 support (legacy mode)" ON)
-
-cmake_print_variables(CMAKE_STAGING_PREFIX)
+#cmake_print_variables(CMAKE_STAGING_PREFIX)
 cmake_print_variables(CMAKE_SYSROOT)
 cmake_print_variables(CMAKE_TOOLCHAIN_FILE)
 
@@ -83,14 +81,24 @@ if(TOFINO_TARGET)
     set(WITH_OVSP4RT OFF)
 endif()
 
-if(NOT WITH_OVSP4RT)
+##################
+# OVS build mode #
+##################
+
+set(P4MODE "p4ovs" CACHE STRING "P4OVS build mode")
+string(TOLOWER "${P4MODE}" P4MODE)
+
+if(NOT WITH_OVSP4RT OR P4MODE STREQUAL "none")
+    unset(WITH_OVSP4RT)
+    set(WITH_OVSP4RT OFF CACHE STRING "" FORCE)
+    set(LEGACY_P4OVS OFF)
+elseif(P4MODE STREQUAL "p4ovs")
+    set(LEGACY_P4OVS ON)
+else()
     set(LEGACY_P4OVS OFF)
 endif()
 
-cmake_print_variables(WITH_KRNLMON)
-cmake_print_variables(WITH_OVSP4RT)
-
-if(LEGACY_OVS AND OVS_INSTALL_DIR STREQUAL "")
+if(LEGACY_P4OVS AND OVS_INSTALL_DIR STREQUAL "")
     message(FATAL_ERROR "OVS_INSTALL_DIR (OVS_INSTALL) not defined!")
 endif()
 

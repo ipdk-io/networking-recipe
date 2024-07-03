@@ -106,7 +106,6 @@ print_cmake_params() {
     echo "  SDE_INSTALL_DIR=${_SDE_DIR}"
     [ -n "${_WITH_KRNLMON}" ] && echo "  ${_WITH_KRNLMON:2}"
     [ -n "${_WITH_OVSP4RT}" ] && echo "  ${_WITH_OVSP4RT:2}"
-    [ -n "${_LEGACY_P4OVS}" ] && echo "  ${_LEGACY_P4OVS:2}"
     [ -n "${_COVERAGE}" ] && echo "  ${_COVERAGE:2}"
     echo "  ${_SET_RPATH:2}"
     echo "  ${_TARGET_TYPE:2}"
@@ -176,7 +175,7 @@ config_recipe() {
         -DSDE_INSTALL_DIR="${_SDE_DIR}" \
         ${_WITH_KRNLMON} \
         ${_WITH_OVSP4RT} \
-        ${_LEGACY_P4OVS} \
+        ${_OVS_P4MODE} \
         ${_COVERAGE} \
         ${_SET_RPATH} \
         ${_TARGET_TYPE}
@@ -308,7 +307,6 @@ fi
 
 config_legacy_mode() {
     _ovs_first=1
-    _LEGACY_P4OVS=ON
 }
 
 config_non_legacy_mode() {
@@ -336,7 +334,6 @@ fi
 [ -n "${_BLD_TYPE}" ] && _BUILD_TYPE="-DCMAKE_BUILD_TYPE=${_BLD_TYPE}"
 [ -n "${_CXX_STD}" ] && _CXX_STANDARD="-DCMAKE_CXX_STANDARD=${_CXX_STD}"
 [ -n "${_HOST_DIR}" ] && _HOST_DEPEND_DIR="-DHOST_DEPEND_DIR=${_HOST_DIR}"
-[ -n "${_LEGACY_P4OVS}" ] && _LEGACY_P4OVS="-DLEGACY_P4OVS=${_LEGACY_P4OVS}"
 [ -n "${_OVS_P4MODE}" ] && _OVS_P4MODE="-DP4MODE=${_OVS_P4MODE}"
 [ -n "${_RPATH}" ] && _SET_RPATH="-DSET_RPATH=${_RPATH}"
 [ -n "${_STAGING}" ] && _STAGING_PREFIX="-DCMAKE_STAGING_PREFIX=${_STAGING}"
