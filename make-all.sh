@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 # Sample script to configure and build P4 Control Plane.
@@ -17,19 +17,20 @@ _DEPS_DIR=${DEPEND_INSTALL}
 _HOST_DIR=${HOST_INSTALL}
 _NJOBS=8
 _OVS_DIR="${OVS_INSTALL:-ovs/install}"
+_OVS_P4MODE=P4OVS
 _PREFIX="install"
 _RPATH=OFF
 _SDE_DIR=${SDE_INSTALL}
 _TGT_TYPE="DPDK"
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
+_WITH_OVSP4RT=TRUE
 
 _BLD_DIR=build
 _DO_BUILD=1
 _DRY_RUN=0
 _OVS_BLD="ovs/build"
-_OVS_FIRST=1
+_OVS_FIRST=0
 _OVS_LAST=0
-_WITH_OVS=1
 
 ##############
 # print_help #
@@ -58,15 +59,21 @@ print_help() {
     echo "  --jobs=NJOBS     -j  Number of build threads [${_NJOBS}]"
     echo "  --no-build           Configure without building"
     echo "  --no-krnlmon         Exclude Kernel Monitor"
-    echo "  --no-legacy-p4ovs    Do not build OVS in legacy P4 mode"
     echo "  --no-ovs             Exclude OVS support"
+    echo "  --p4ovs=MODE         Build OvS in specified P4OVS mode"
     echo "  --target=TARGET      Target to build (dpdk|es2k|tofino) [${_TGT_TYPE}]"
     echo ""
-    echo "Configurations:"
+    echo "Build types:"
     echo "  --debug              Debug configuration"
     echo "  --minsize            MinSizeRel configuration"
     echo "  --reldeb             RelWithDebInfo configuration"
     echo "  --release            Release configuration"
+    echo ""
+    echo "P4OVS modes:"
+    echo "  none                 Build OvS in non-P4 mode"
+    echo "  ovsp4rt              Build OvS with ovsp4rt library"
+    echo "  p4ovs                Build OvS in legacy P4 mode (default)"
+    echo "  stubs                Build OVS with ovsp4rt stubs"
     echo ""
     echo "Environment variables:"
     echo "  CMAKE_TOOLCHAIN_FILE - Default toolchain file"
@@ -95,7 +102,6 @@ print_cmake_params() {
     echo "SDE_INSTALL_DIR=${_SDE_DIR}"
     [ -n "${_WITH_KRNLMON}" ] && echo "${_WITH_KRNLMON:2}"
     [ -n "${_WITH_OVSP4RT}" ] && echo "${_WITH_OVSP4RT:2}"
-    [ -n "${_LEGACY_P4OVS}" ] && echo "${_LEGACY_P4OVS:2}"
     [ -n "${_OVS_P4MODE}" ] && echo "${_OVS_P4MODE:2}"
     [ -n "${_COVERAGE}" ] && echo "${_COVERAGE:2}"
     echo "${_SET_RPATH:2}"
@@ -103,11 +109,11 @@ print_cmake_params() {
     [ -n "${_PKG_CONFIG_PATH}" ] && echo "PKG_CONFIG_PATH=${_PKG_CONFIG_PATH}"
 
     if [ ${_OVS_FIRST} -ne 0 ]; then
-	echo "OVS will be built first"
+        echo "OVS will be built first"
     elif [ ${_OVS_LAST} -ne 0 ]; then
-	echo "OVS will be built last"
+        echo "OVS will be built last"
     else
-	echo "OVS will not be built"
+        echo "OVS will not be built"
     fi
 
     if [ ${_DO_BUILD} -eq 0 ]; then
@@ -163,7 +169,7 @@ config_recipe() {
         -DSDE_INSTALL_DIR="${_SDE_DIR}" \
         ${_WITH_KRNLMON} \
         ${_WITH_OVSP4RT} \
-	${_LEGACY_P4OVS} \
+        ${_OVS_P4MODE} \
         ${_COVERAGE} \
         ${_SET_RPATH} \
         ${_TARGET_TYPE}
@@ -185,12 +191,11 @@ SHORTOPTS=D:H:O:P:S:T:
 SHORTOPTS=${SHORTOPTS}hj:n
 
 LONGOPTS=deps:,hostdeps:,ovs:,prefix:,sde:,toolchain:
-LONGOPTS=${LONGOPTS},cxx-std:,jobs:,staging:,target:
+LONGOPTS=${LONGOPTS},cxx-std:,jobs:,p4ovs:,staging:,target:
 LONGOPTS=${LONGOPTS},debug,release,minsize,reldeb
 LONGOPTS=${LONGOPTS},dry-run,help
 LONGOPTS=${LONGOPTS},coverage,ninja,rpath
 LONGOPTS=${LONGOPTS},no-build,no-krnlmon,no-ovs,no-rpath
-LONGOPTS=${LONGOPTS},no-legacy-p4ovs
 
 GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 eval set -- "${GETOPTS}"
@@ -257,19 +262,17 @@ while true ; do
     --no-krnlmon)
         _WITH_KRNLMON=FALSE
         shift ;;
-    --no-legacy-p4ovs)
-	_OVS_FIRST=0
-	_OVS_LAST=1
-	shift ;;
     --no-ovs)
-	_OVS_FIRST=0
-	_OVS_LAST=0
-        _WITH_OVS=0
+        _OVS_P4MODE=NONE
         _WITH_OVSP4RT=FALSE
         shift ;;
     --no-rpath)
         _RPATH=OFF
         shift ;;
+    --p4ovs)
+        # convert to uppercase
+        _OVS_P4MODE=${2^^}
+        shift 2 ;;
     --rpath)
         _RPATH=ON
         shift ;;
@@ -295,26 +298,42 @@ if [ -z "${_SDE_DIR}" ]; then
     exit 1
 fi
 
+config_legacy_mode() {
+    _OVS_FIRST=1
+}
+
+config_non_legacy_mode() {
+    _OVS_LAST=1
+    local _pkgconfig_dir
+    _pkgconfig_dir="$(realpath -m "${_PREFIX}"/lib/pkgconfig)"
+    _PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${_pkgconfig_dir}"
+}
+
+if [ "${_WITH_OVSP4RT}" == "FALSE" ]; then
+    _OVS_P4MODE=NONE
+elif [ "${_OVS_P4MODE}" == "NONE" ]; then
+    _WITH_OVSP4RT=FALSE
+elif [ "${_OVS_P4MODE}" == "P4OVS" ]; then
+    config_legacy_mode
+elif [ "${_OVS_P4MODE}" == "OVSP4RT" ]; then
+    config_non_legacy_mode
+elif [ "${_OVS_P4MODE}" == "STUBS" ]; then
+    config_non_legacy_mode
+else
+    echo "Unknown P4OVS MODE: '${_OVS_P4MODE}'"
+    exit 1
+fi
+
 [ -n "${_BLD_TYPE}" ] && _BUILD_TYPE="-DCMAKE_BUILD_TYPE=${_BLD_TYPE}"
 [ -n "${_CXX_STD}" ] && _CXX_STANDARD="-DCMAKE_CXX_STANDARD=${_CXX_STD}"
 [ -n "${_HOST_DIR}" ] && _HOST_DEPEND_DIR="-DHOST_DEPEND_DIR=${_HOST_DIR}"
+[ -n "${_OVS_P4MODE}" ] && _OVS_P4MODE="-DP4MODE=${_OVS_P4MODE}"
 [ -n "${_RPATH}" ] && _SET_RPATH="-DSET_RPATH=${_RPATH}"
 [ -n "${_STAGING}" ] && _STAGING_PREFIX="-DCMAKE_STAGING_PREFIX=${_STAGING}"
 [ -n "${_TGT_TYPE}" ] && _TARGET_TYPE="-DTDI_TARGET=${_TGT_TYPE}"
 [ -n "${_TOOLFILE}" ] && _TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
 [ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON="-DWITH_KRNLMON=${_WITH_KRNLMON}"
 [ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT="-DWITH_OVSP4RT=${_WITH_OVSP4RT}"
-
-if [ ${_OVS_FIRST} -ne 0 ]; then
-    _LEGACY_P4OVS="-DLEGACY_P4OVS=ON"
-    _OVS_P4MODE="-DP4MODE=p4ovs"
-elif [ ${_OVS_LAST} -ne 0 ]; then
-    _LEGACY_P4OVS="-DLEGACY_P4OVS=OFF"
-    _OVS_P4MODE="-DP4MODE=ovsp4rt"
-    _pkgconfig_dir="$(realpath -m "${_PREFIX}"/lib/pkgconfig)"
-    _PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${_pkgconfig_dir}"
-    unset _pkgconfig_dir
-fi
 
 # Show parameters if this is a dry run
 if [ ${_DRY_RUN} -ne 0 ]; then

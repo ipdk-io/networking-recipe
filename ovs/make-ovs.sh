@@ -1,22 +1,27 @@
 #!/bin/bash
 
 _P4MODE=P4OVS
+_PREFIX=install
 
 print_help() {
     echo ""
     echo "Build Open vSwitch (OvS)"
     echo ""
     echo "Options:"
-    echo "  --help        Display help text and exit"
-    echo "  --none        Build OvS without P4 support"
-    echo "  --ovsp4rt     Build OvS with P4 support (ovsp4rt library)"
-    echo "  --p4ovs       Build OvS with P4 support (legacy mode)"
-    echo "  --stubs       Build OvS with P4 support (stubs library)"
+    echo "  --help          -h  Display help text and exit"
+    echo "  --p4ovs=MODE        Build OvS in specified P4OVS mode"
+    echo "  --prefix=DIR    -P  Install directory prefix [${_PREFIX}]"
+    echo ""
+    echo "P4OVS modes:"
+    echo "  none                Build OvS in non-P4 mode"
+    echo "  ovsp4rt             Build OvS with ovsp4rt library"
+    echo "  p4ovs               Build OvS in legacy P4 mode (default)"
+    echo "  stubs               Build OVS with ovsp4rt stubs"
     echo ""
 }
 
-SHORTOPTS=h
-LONGOPTS=ovsp4rt,p4ovs,stubs,none,help
+SHORTOPTS=hP
+LONGOPTS=help,p4ovs:,prefix:
 
 GETOPTS=$(getopt -o ${SHORTOPTS} --long ${LONGOPTS} -- "$@")
 eval set -- "${GETOPTS}"
@@ -24,31 +29,26 @@ eval set -- "${GETOPTS}"
 while true; do
     case "$1" in
     --help|-h)
-	print_help
-	exit 99 ;;
-    --none)
-	_P4MODE=
-	shift ;;
-    --ovsp4rt)
-	_P4MODE=OVSP4RT
-	shift ;;
+        print_help
+        exit 99 ;;
     --p4ovs)
-	_P4MODE=P4OVS
-	shift ;;
-    --stubs)
-	_P4MODE=STUBS
-	shift ;;
+        # convert to uppercase
+        _P4MODE=${2^^}
+        shift 2 ;;
+    --prefix|-P)
+        _PREFIX=$2
+        shift 2 ;;
     --)
-	shift
-	break ;;
+        shift
+        break ;;
     *)
-	echo "Invalid parameter: $1"
-	exit 1 ;;
+        echo "Invalid parameter: $1"
+        exit 1 ;;
     esac
 done
 
 rm -fr build install
 
 # ${_OVS_BLD} ${_OVS_DIR} ${_TOOLCHAIN_FILE}
-cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install -DP4MODE=${_P4MODE}
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=${_PREFIX} -DP4MODE=${_P4MODE}
 cmake --build build -j6 -- V=0
