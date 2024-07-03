@@ -311,7 +311,7 @@ if [ ${_OVS_FIRST} -ne 0 ]; then
 elif [ ${_OVS_LAST} -ne 0 ]; then
     _LEGACY_P4OVS="-DLEGACY_P4OVS=OFF"
     _OVS_P4MODE="-DP4MODE=ovsp4rt"
-    _pkgconfig_dir="$(realpath -m ${_PREFIX}/lib/pkgconfig)"
+    _pkgconfig_dir="$(realpath -m "${_PREFIX}"/lib/pkgconfig)"
     _PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${_pkgconfig_dir}"
     unset _pkgconfig_dir
 fi
