@@ -23,14 +23,16 @@ _RPATH=OFF
 _SDE_DIR=${SDE_INSTALL}
 _TGT_TYPE="DPDK"
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
-_WITH_OVSP4RT=TRUE
 
 _BLD_DIR=build
-_DO_BUILD=1
-_DRY_RUN=0
 _OVS_BLD="ovs/build"
-_OVS_FIRST=0
-_OVS_LAST=0
+
+_do_build=1
+_dry_run=0
+_ovs_first=0
+_ovs_last=0
+_with_krnlmon=1
+_with_ovsp4rt=1
 
 ##############
 # print_help #
@@ -113,15 +115,15 @@ print_cmake_params() {
     echo "OvS options:"
     [ -n "${_OVS_P4MODE}" ] && echo "  ${_OVS_P4MODE:2}"
     [ -n "${_PKG_CONFIG_PATH}" ] && echo "  PKG_CONFIG_PATH=${_PKG_CONFIG_PATH}"
-    if [ ${_OVS_FIRST} -ne 0 ]; then
+    if [ ${_ovs_first} -ne 0 ]; then
         echo "  OVS will be built first"
-    elif [ ${_OVS_LAST} -ne 0 ]; then
+    elif [ ${_ovs_last} -ne 0 ]; then
         echo "  OVS will be built last"
     else
         echo "  OVS will not be built"
     fi
 
-    if [ ${_DO_BUILD} -eq 0 ]; then
+    if [ ${_do_build} -eq 0 ]; then
         echo ""
         echo "Configure without building"
     fi
@@ -184,7 +186,7 @@ config_recipe() {
 ################
 
 build_recipe() {
-    [ ${_DO_BUILD} -eq 0 ] && return
+    [ ${_do_build} -eq 0 ] && return
     cmake --build ${_BLD_DIR} "-j${_NJOBS}" --target install
 }
 
@@ -250,7 +252,7 @@ while true ; do
         _CXX_STD=$2
         shift 2;;
     --dry-run|-n)
-        _DRY_RUN=1
+        _dry_run=1
         shift ;;
     --help|-h)
         print_help
@@ -262,14 +264,14 @@ while true ; do
         _GENERATOR="-G Ninja"
         shift 1 ;;
     --no-build)
-        _DO_BUILD=0
+        _do_build=0
         shift ;;
     --no-krnlmon)
-        _WITH_KRNLMON=FALSE
+        _with_krnlmon=0
         shift ;;
     --no-ovs)
         _OVS_P4MODE=NONE
-        _WITH_OVSP4RT=FALSE
+        _with_ovsp4rt=0
         shift ;;
     --no-rpath)
         _RPATH=OFF
@@ -304,21 +306,20 @@ if [ -z "${_SDE_DIR}" ]; then
 fi
 
 config_legacy_mode() {
-    _OVS_FIRST=1
+    _ovs_first=1
     _LEGACY_P4OVS=ON
 }
 
 config_non_legacy_mode() {
-    _OVS_LAST=1
-    local _pkgconfig_dir
-    _pkgconfig_dir="$(realpath -m "${_PREFIX}"/lib/pkgconfig)"
-    _PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${_pkgconfig_dir}"
+    _ovs_last=1
+    local _PKG_CONFIG_DIR="$(realpath -m "${_PREFIX}"/lib/pkgconfig)"
+    _PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${_PKG_CONFIG_DIR}"
 }
 
-if [ "${_WITH_OVSP4RT}" == "FALSE" ]; then
+if [ ${_with_ovsp4rt} -eq 0 ]; then
     _OVS_P4MODE=NONE
 elif [ "${_OVS_P4MODE}" == "NONE" ]; then
-    _WITH_OVSP4RT=FALSE
+    _with_ovsp4rt=0
 elif [ "${_OVS_P4MODE}" == "P4OVS" ]; then
     config_legacy_mode
 elif [ "${_OVS_P4MODE}" == "OVSP4RT" ]; then
@@ -339,11 +340,11 @@ fi
 [ -n "${_STAGING}" ] && _STAGING_PREFIX="-DCMAKE_STAGING_PREFIX=${_STAGING}"
 [ -n "${_TGT_TYPE}" ] && _TARGET_TYPE="-DTDI_TARGET=${_TGT_TYPE}"
 [ -n "${_TOOLFILE}" ] && _TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
-[ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON="-DWITH_KRNLMON=${_WITH_KRNLMON}"
-[ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT="-DWITH_OVSP4RT=${_WITH_OVSP4RT}"
+[ ${_with_krnlmon} -ne 0 ] && _WITH_KRNLMON="-DWITH_KRNLMON=${_WITH_KRNLMON}"
+[ ${_with_ovsp4rt} -ne 0 ] && _WITH_OVSP4RT="-DWITH_OVSP4RT=${_WITH_OVSP4RT}"
 
 # Show parameters if this is a dry run
-if [ ${_DRY_RUN} -ne 0 ]; then
+if [ ${_dry_run} -ne 0 ]; then
     print_cmake_params
     exit 0
 fi
@@ -353,7 +354,7 @@ fi
 ################
 
 # Build OVS before recipe (legacy mode)
-if [ ${_OVS_FIRST} -ne 0 ]; then
+if [ ${_ovs_first} -ne 0 ]; then
     config_ovs
     build_ovs
 fi
@@ -363,9 +364,9 @@ config_recipe
 build_recipe
 
 # Build OVS after recipe
-if [ ${_OVS_LAST} -ne 0 ]; then
+if [ ${_ovs_last} -ne 0 ]; then
     config_ovs
-    if [ ${_DO_BUILD} -ne 0 ]; then
+    if [ ${_do_build} -ne 0 ]; then
         build_ovs
     fi
 fi
