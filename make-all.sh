@@ -23,6 +23,8 @@ _RPATH=OFF
 _SDE_DIR=${SDE_INSTALL}
 _TGT_TYPE="DPDK"
 _TOOLFILE=${CMAKE_TOOLCHAIN_FILE}
+_WITH_KRNLMON=ON
+_WITH_OVSP4RT=ON
 
 _BLD_DIR=build
 _OVS_BLD="ovs/build"
@@ -31,7 +33,6 @@ _do_build=1
 _dry_run=0
 _ovs_first=0
 _ovs_last=0
-_with_krnlmon=1
 _with_ovsp4rt=1
 
 ##############
@@ -267,10 +268,10 @@ while true ; do
         _do_build=0
         shift ;;
     --no-krnlmon)
-        _with_krnlmon=0
+        _WITH_KRNLMON=OFF
         shift ;;
     --no-ovs)
-        _OVS_P4MODE=NONE
+        _WITH_OVSP4RT=OFF
         _with_ovsp4rt=0
         shift ;;
     --no-rpath)
@@ -320,7 +321,7 @@ config_non_legacy_mode() {
 if [ ${_with_ovsp4rt} -eq 0 ]; then
     _OVS_P4MODE=NONE
 elif [ "${_OVS_P4MODE}" == "NONE" ]; then
-    _with_ovsp4rt=0
+    _WITH_OVSP4RT=OFF
 elif [ "${_OVS_P4MODE}" == "P4OVS" ]; then
     config_legacy_mode
 elif [ "${_OVS_P4MODE}" == "OVSP4RT" ]; then
@@ -341,8 +342,8 @@ fi
 [ -n "${_STAGING}" ] && _STAGING_PREFIX="-DCMAKE_STAGING_PREFIX=${_STAGING}"
 [ -n "${_TGT_TYPE}" ] && _TARGET_TYPE="-DTDI_TARGET=${_TGT_TYPE}"
 [ -n "${_TOOLFILE}" ] && _TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE=${_TOOLFILE}"
-[ ${_with_krnlmon} -ne 0 ] && _WITH_KRNLMON="-DWITH_KRNLMON=${_WITH_KRNLMON}"
-[ ${_with_ovsp4rt} -ne 0 ] && _WITH_OVSP4RT="-DWITH_OVSP4RT=${_WITH_OVSP4RT}"
+[ -n "${_WITH_KRNLMON}" ] && _WITH_KRNLMON="-DWITH_KRNLMON=${_WITH_KRNLMON}"
+[ -n "${_WITH_OVSP4RT}" ] && _WITH_OVSP4RT="-DWITH_OVSP4RT=${_WITH_OVSP4RT}"
 
 # Show parameters if this is a dry run
 if [ ${_dry_run} -ne 0 ]; then
