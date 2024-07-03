@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -15,7 +16,7 @@ if [ -z "${SDE_INSTALL}" ]; then
 fi
 
 print_target_type() {
-    read TYPE
+    read -r TYPE
     echo "Target type is '$TYPE'"
 }
 
@@ -23,9 +24,9 @@ print_target_type() {
 filename="${SDE_INSTALL}/share/TARGET"
 if [ ! -e "${filename}" ]; then
     echo "Creating ${filename}"
-    echo "ES2K" > ${filename}
+    echo "ES2K" > "${filename}"
     echo "TARGET file created"
 else
     echo "TARGET file already exists"
-    print_target_type < ${filename}
+    print_target_type < "${filename}"
 fi

@@ -163,9 +163,6 @@ cmake_print_variables(CMAKE_PREFIX_PATH)
 # Stratum dependencies for the target system.
 include(StratumDependencies)
 
-# LNW version options.
-include(LnwVersion)
-
 # Protobuf compiler for the development system.
 find_package(HostProtoc)
 

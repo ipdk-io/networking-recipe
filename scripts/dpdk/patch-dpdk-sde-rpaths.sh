@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -39,49 +40,58 @@ lib64=${SDE_INSTALL}/lib64
 # RTE libraries are in lib/x86_64-linux-gnu directory.
 patch_lib_x86_64_libs() {
     echo "Patching ${dpdk_infra_path}"
-    patchelf --set-rpath '$ORIGIN/x86_64-linux-gnu' ${dpdk_infra_path}
-    patchelf --print-rpath ${dpdk_infra_path}
+    # shellcheck disable=SC2016
+    patchelf --set-rpath '$ORIGIN/x86_64-linux-gnu' "${dpdk_infra_path}"
+    patchelf --print-rpath "${dpdk_infra_path}"
 
     echo "Patching ${driver_path}"
-    patchelf --set-rpath '$ORIGIN:$ORIGIN/x86_64-linux-gnu' ${driver_path}
-    patchelf --print-rpath ${driver_path}
+    # shellcheck disable=SC2016
+    patchelf --set-rpath '$ORIGIN:$ORIGIN/x86_64-linux-gnu' "${driver_path}"
+    patchelf --print-rpath "${driver_path}"
 
     filename="${SDE_INSTALL}/lib/x86_64-linux-gnu/${pipeline_lib}"
     echo "Patching ${filename}"
-    patchelf --set-rpath '$ORIGIN' ${filename}
-    patchelf --print-rpath ${filename}
+    # shellcheck disable=SC2016
+    patchelf --set-rpath '$ORIGIN' "${filename}"
+    patchelf --print-rpath "${filename}"
 }
 
 # RTE libraries are in lib64 directory.
 patch_lib64_libs() {
     echo "Patching ${dpdk_infra_path}"
-    patchelf --set-rpath '$ORIGIN/../lib64' ${dpdk_infra_path}
-    patchelf --print-rpath ${dpdk_infra_path}
+    # shellcheck disable=SC2016
+    patchelf --set-rpath '$ORIGIN/../lib64' "${dpdk_infra_path}"
+    patchelf --print-rpath "${dpdk_infra_path}"
 
     echo "Patching ${driver_path}"
-    patchelf --set-rpath '$ORIGIN:$ORIGIN/../lib64' ${driver_path}
-    patchelf --print-rpath ${driver_path}
+    # shellcheck disable=SC2016
+    patchelf --set-rpath '$ORIGIN:$ORIGIN/../lib64' "${driver_path}"
+    patchelf --print-rpath "${driver_path}"
 
     filename="${SDE_INSTALL}/lib64/${pipeline_lib}"
     echo "Patching ${filename}"
-    patchelf --set-rpath '$ORIGIN' ${filename}
-    patchelf --print-rpath ${filename}
+    # shellcheck disable=SC2016
+    patchelf --set-rpath '$ORIGIN' "${filename}"
+    patchelf --print-rpath "${filename}"
 }
 
 # RTE libraries are in lib directory.
 patch_lib_libs() {
     echo "Patching ${dpdk_infra_path}"
-    patchelf --set-rpath '$ORIGIN' ${dpdk_infra_path}
-    patchelf --print-rpath ${dpdk_infra_path}
+    # shellcheck disable=SC2016
+    patchelf --set-rpath '$ORIGIN' "${dpdk_infra_path}"
+    patchelf --print-rpath "${dpdk_infra_path}"
 
     echo "Patching ${driver_path}"
-    patchelf --set-rpath '$ORIGIN' ${driver_path}
-    patchelf --print-rpath ${driver_path}
+    # shellcheck disable=SC2016
+    patchelf --set-rpath '$ORIGIN' "${driver_path}"
+    patchelf --print-rpath "${driver_path}"
 
     filename="${SDE_INSTALL}/lib/${pipeline_lib}"
     echo "Patching ${filename}"
-    patchelf --set-rpath '$ORIGIN' ${filename}
-    patchelf --print-rpath ${filename}
+    # shellcheck disable=SC2016
+    patchelf --set-rpath '$ORIGIN' "${filename}"
+    patchelf --print-rpath "${filename}"
 }
 
 # Patch libraries.

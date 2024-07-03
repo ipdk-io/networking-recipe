@@ -72,13 +72,16 @@ target_include_directories(ovsp4rt_stubs PUBLIC
     ${OVSP4RT_INCLUDE_DIR}
 )
 
-target_link_libraries(ovsp4rt_stubs PRIVATE stratum_static)
+#-----------------------------------------------------------------------
+# libovsp4rt_spies.a
+#-----------------------------------------------------------------------
+add_subdirectory(spies)
 
 #-----------------------------------------------------------------------
 # Install
 #-----------------------------------------------------------------------
 install(
-    TARGETS ovsp4rt ovsp4rt_stubs
+    TARGETS ovsp4rt ovsp4rt_spies ovsp4rt_stubs
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
@@ -95,12 +98,16 @@ install(
 set(ovsp4rt_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt.pc)
 configure_file(cmake/libovsp4rt.pc.in ${ovsp4rt_cfg_file} @ONLY)
 
+set(ovsp4rt_spies_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_spies.pc)
+configure_file(cmake/libovsp4rt_spies.pc.in ${ovsp4rt_spies_cfg_file} @ONLY)
+
 set(ovsp4rt_stubs_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_stubs.pc)
 configure_file(cmake/libovsp4rt_stubs.pc.in ${ovsp4rt_stubs_cfg_file} @ONLY)
 
 install(
     FILES
         ${ovsp4rt_cfg_file}
+        ${ovsp4rt_spies_cfg_file}
         ${ovsp4rt_stubs_cfg_file}
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/pkgconfig
