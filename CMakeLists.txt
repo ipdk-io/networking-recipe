@@ -85,14 +85,14 @@ endif()
 # OVS build mode #
 ##################
 
-set(P4MODE "p4ovs" CACHE STRING "P4OVS build mode")
-string(TOLOWER "${P4MODE}" P4MODE)
+set(P4OVS_MODE "p4ovs" CACHE STRING "P4OVS build mode")
+string(TOLOWER "${P4OVS_MODE}" P4OVS_MODE)
 
-if(NOT WITH_OVSP4RT OR P4MODE STREQUAL "none")
+if(NOT WITH_OVSP4RT OR P4OVS_MODE STREQUAL "none")
     unset(WITH_OVSP4RT)
     set(WITH_OVSP4RT OFF CACHE STRING "" FORCE)
     set(LEGACY_P4OVS OFF)
-elseif(P4MODE STREQUAL "p4ovs")
+elseif(P4OVS_MODE STREQUAL "p4ovs")
     set(LEGACY_P4OVS ON)
 else()
     set(LEGACY_P4OVS OFF)

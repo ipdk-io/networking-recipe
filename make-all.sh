@@ -17,7 +17,7 @@ _DEPS_DIR=${DEPEND_INSTALL}
 _HOST_DIR=${HOST_INSTALL}
 _NJOBS=8
 _OVS_DIR="${OVS_INSTALL:-ovs/install}"
-_OVS_P4MODE=P4OVS
+_P4OVS_MODE=P4OVS
 _PREFIX="install"
 _RPATH=OFF
 _SDE_DIR=${SDE_INSTALL}
@@ -113,7 +113,7 @@ print_cmake_params() {
 
     echo ""
     echo "OvS options:"
-    [ -n "${_OVS_P4MODE}" ] && echo "  ${_OVS_P4MODE:2}"
+    [ -n "${_P4OVS_MODE}" ] && echo "  ${_P4OVS_MODE:2}"
     [ -n "${_PKG_CONFIG_PATH}" ] && echo "  PKG_CONFIG_PATH=${_PKG_CONFIG_PATH}"
     if [ ${_ovs_first} -ne 0 ]; then
         echo "  OVS will be built first"
@@ -145,7 +145,7 @@ config_ovs() {
         ${_BUILD_TYPE}  \
         -DCMAKE_INSTALL_PREFIX="${_OVS_DIR}" \
         ${_TOOLCHAIN_FILE} \
-        ${_OVS_P4MODE}
+        ${_P4OVS_MODE}
 }
 
 #############
@@ -175,7 +175,7 @@ config_recipe() {
         -DSDE_INSTALL_DIR="${_SDE_DIR}" \
         ${_WITH_KRNLMON} \
         ${_WITH_OVSP4RT} \
-        ${_OVS_P4MODE} \
+        ${_P4OVS_MODE} \
         ${_COVERAGE} \
         ${_SET_RPATH} \
         ${_TARGET_TYPE}
@@ -278,7 +278,7 @@ while true ; do
         shift ;;
     --p4ovs)
         # convert to uppercase
-        _OVS_P4MODE=${2^^}
+        _P4OVS_MODE=${2^^}
         shift 2 ;;
     --rpath)
         _RPATH=ON
@@ -317,24 +317,24 @@ config_non_legacy_mode() {
 }
 
 if [ ${_with_ovsp4rt} -eq 0 ]; then
-    _OVS_P4MODE=NONE
-elif [ "${_OVS_P4MODE}" == "NONE" ]; then
+    _P4OVS_MODE=NONE
+elif [ "${_P4OVS_MODE}" == "NONE" ]; then
     _WITH_OVSP4RT=OFF
-elif [ "${_OVS_P4MODE}" == "P4OVS" ]; then
+elif [ "${_P4OVS_MODE}" == "P4OVS" ]; then
     config_legacy_mode
-elif [ "${_OVS_P4MODE}" == "OVSP4RT" ]; then
+elif [ "${_P4OVS_MODE}" == "OVSP4RT" ]; then
     config_non_legacy_mode
-elif [ "${_OVS_P4MODE}" == "STUBS" ]; then
+elif [ "${_P4OVS_MODE}" == "STUBS" ]; then
     config_non_legacy_mode
 else
-    echo "Unknown P4OVS MODE: '${_OVS_P4MODE}'"
+    echo "Unknown P4OVS MODE: '${_P4OVS_MODE}'"
     exit 1
 fi
 
 [ -n "${_BLD_TYPE}" ] && _BUILD_TYPE="-DCMAKE_BUILD_TYPE=${_BLD_TYPE}"
 [ -n "${_CXX_STD}" ] && _CXX_STANDARD="-DCMAKE_CXX_STANDARD=${_CXX_STD}"
 [ -n "${_HOST_DIR}" ] && _HOST_DEPEND_DIR="-DHOST_DEPEND_DIR=${_HOST_DIR}"
-[ -n "${_OVS_P4MODE}" ] && _OVS_P4MODE="-DP4MODE=${_OVS_P4MODE}"
+[ -n "${_P4OVS_MODE}" ] && _P4OVS_MODE="-DP4OVS_MODE=${_P4OVS_MODE}"
 [ -n "${_RPATH}" ] && _SET_RPATH="-DSET_RPATH=${_RPATH}"
 [ -n "${_STAGING}" ] && _STAGING_PREFIX="-DCMAKE_STAGING_PREFIX=${_STAGING}"
 [ -n "${_TGT_TYPE}" ] && _TARGET_TYPE="-DTDI_TARGET=${_TGT_TYPE}"
