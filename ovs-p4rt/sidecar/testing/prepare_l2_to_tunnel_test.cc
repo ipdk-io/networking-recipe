@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 
+#include "capture/ovsp4rt_capture.h"
 #include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
 #include "logging/ovsp4rt_diag_detail.h"
@@ -15,7 +16,7 @@
 #include "p4info_file_path.h"
 #include "stratum/lib/utils.h"
 
-// Whether to dump TableEntry in JSON.
+// Whether to dump input/output in JSON.
 #undef DUMP_JSON
 
 namespace ovs_p4rt {
@@ -40,13 +41,23 @@ class PrepareL2ToTunnelTest : public ::testing::Test {
     }
   }
 
-  void DumpMessageAsJson(const google::protobuf::Message& message) {
+  void DumpMacLearningInfo(const char* func_name,
+                           const struct mac_learning_info& learn_info,
+                           bool insert_entry) {
+#ifdef DUMP_JSON
+    CaptureMacLearningInfo(func_name, learn_info, insert_entry);
+#endif
+  }
+
+  void DumpTableEntry(const ::p4::v1::TableEntry& table_entry) {
+#ifdef DUMP_JSON
     JsonPrintOptions options;
     options.add_whitespace = true;
     options.preserve_proto_field_names = true;
     std::string output;
     ASSERT_TRUE(MessageToJsonString(message, &output, options).ok());
     std::cout << output << std::endl;
+#endif
   }
 };
 
@@ -78,14 +89,14 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV4TableEntry) {
   // Arrange
   struct mac_learning_info fdb_info = {0};
   get_v4_fdb_info(fdb_info);
+  const bool insert_entry = true;
 
   // Act
+  DumpMacLearningInfo("GetL2ToTunnelV4TableEntry", fdb_info, insert_entry);
   ::p4::v1::TableEntry table_entry;
   DiagDetail detail;
-  PrepareL2ToTunnelV4(&table_entry, fdb_info, p4info, true, detail);
-#ifdef DUMP_JSON
-  DumpMessageAsJson(table_entry);
-#endif
+  PrepareL2ToTunnelV4(&table_entry, fdb_info, p4info, insert_entry, detail);
+  DumpTableEntry(table_entry);
 
   // Assert
   ASSERT_EQ(table_entry.table_id(), kTableIdV4);
@@ -147,14 +158,14 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV6TableEntry) {
   // Arrange
   struct mac_learning_info fdb_info = {0};
   get_v6_fdb_info(fdb_info);
+  const bool insert_entry = true;
 
   // Act
+  DumpMacLearningInfo("GetL2ToTunnelV6TableEntry", fdb_info, insert_entry);
   ::p4::v1::TableEntry table_entry;
   DiagDetail detail;
-  PrepareL2ToTunnelV6(&table_entry, fdb_info, p4info, true, detail);
-#ifdef DUMP_JSON
-  DumpMessageAsJson(table_entry);
-#endif
+  PrepareL2ToTunnelV6(&table_entry, fdb_info, p4info, insert_entry, detail);
+  DumpTableEntry(table_entry);
 
   // Assert
   ASSERT_EQ(table_entry.table_id(), kTableIdV6);

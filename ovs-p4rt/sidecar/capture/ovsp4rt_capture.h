@@ -11,7 +11,7 @@
 namespace ovs_p4rt {
 
 extern void CaptureMacLearningInfo(const char* func_name,
-                                   struct mac_learning_info& learn_info,
+                                   const struct mac_learning_info& learn_info,
                                    bool insert_entry);
 
 }  // namespace ovs_p4rt

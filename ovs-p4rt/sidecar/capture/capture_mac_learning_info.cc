@@ -15,7 +15,7 @@
 namespace ovs_p4rt {
 
 void CaptureMacLearningInfo(const char* func_name,
-                            struct mac_learning_info& learn_info,
+                            const struct mac_learning_info& learn_info,
                             bool insert_entry) {
   nlohmann::json json_info;
 

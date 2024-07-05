@@ -19,6 +19,7 @@ function(set_test_properties TARGET)
     GTest::gtest
     GTest::gtest_main
     ovsp4rt
+    ovsp4rt_capture
     p4runtime_proto
     stratum_utils
   )
