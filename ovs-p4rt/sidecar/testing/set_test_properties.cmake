@@ -17,7 +17,6 @@ function(set_test_properties TARGET)
 
   target_link_libraries(${TARGET} PUBLIC
     GTest::gtest
-    GTest::gtest_main
     ovsp4rt
     ovsp4rt_capture
     p4runtime_proto

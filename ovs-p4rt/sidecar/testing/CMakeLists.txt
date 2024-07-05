@@ -38,8 +38,13 @@ if(ES2K_TARGET)
 #-----------------------------------------------------------------------
 add_executable(prepare_l2_to_tunnel_test
   prepare_l2_to_tunnel_test.cc
+  test_main.cc
 )
 
 set_test_properties(prepare_l2_to_tunnel_test)
+
+target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
+  absl::flags_parse
+)
 
 endif(ES2K_TARGET)

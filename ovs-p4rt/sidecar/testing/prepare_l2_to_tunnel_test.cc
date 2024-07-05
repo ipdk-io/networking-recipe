@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 
+#include "absl/flags/flag.h"
 #include "capture/ovsp4rt_capture.h"
 #include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
@@ -18,6 +19,8 @@
 
 // Whether to dump input/output in JSON.
 #undef DUMP_JSON
+
+ABSL_FLAG(bool, dump_json, false, "Dump test input and output in JSON.");
 
 namespace ovs_p4rt {
 
@@ -41,24 +44,31 @@ class PrepareL2ToTunnelTest : public ::testing::Test {
     }
   }
 
+  PrepareL2ToTunnelTest() {
+    dump_json_ = absl::GetFlag(FLAGS_dump_json);
+  }
+
   void DumpMacLearningInfo(const char* func_name,
                            const struct mac_learning_info& learn_info,
                            bool insert_entry) {
-#ifdef DUMP_JSON
-    CaptureMacLearningInfo(func_name, learn_info, insert_entry);
-#endif
+    if (dump_json_) {
+      CaptureMacLearningInfo(func_name, learn_info, insert_entry);
+    }
   }
 
   void DumpTableEntry(const ::p4::v1::TableEntry& table_entry) {
-#ifdef DUMP_JSON
-    JsonPrintOptions options;
-    options.add_whitespace = true;
-    options.preserve_proto_field_names = true;
-    std::string output;
-    ASSERT_TRUE(MessageToJsonString(message, &output, options).ok());
-    std::cout << output << std::endl;
-#endif
+    if (dump_json_) {
+      JsonPrintOptions options;
+      options.add_whitespace = true;
+      options.preserve_proto_field_names = true;
+      std::string output;
+      ASSERT_TRUE(MessageToJsonString(table_entry, &output, options).ok());
+      std::cout << output << std::endl;
+    }
   }
+
+ private:
+  bool dump_json_;
 };
 
 uint32_t DecodeWordValue(const std::string string_value) {
