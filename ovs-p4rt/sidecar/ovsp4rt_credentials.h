@@ -18,7 +18,7 @@
 
 #define DEFAULT_CERTS_DIR "/usr/share/stratum/certs/"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 static std::string ca_cert_file = DEFAULT_CERTS_DIR "ca.crt";
 static std::string client_key_file = DEFAULT_CERTS_DIR "client.key";
@@ -31,6 +31,6 @@ bool IsRegularFile(const std::string& filename);
 
 std::shared_ptr<::grpc::ChannelCredentials> GenerateClientCredentials();
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVSP4RT_TLS_CREDENTIALS_H_

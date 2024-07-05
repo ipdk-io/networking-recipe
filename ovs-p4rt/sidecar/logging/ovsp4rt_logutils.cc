@@ -17,7 +17,7 @@ const char* MessagePrefix(bool inserting) {
 }
 }  // namespace
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 const std::string FormatMacAddr(const uint8_t* mac_addr) {
   char buf[32];
@@ -36,4 +36,4 @@ void LogFailureWithMacAddr(bool inserting, const char* table,
                     FormatMacAddr(mac_addr).c_str());
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

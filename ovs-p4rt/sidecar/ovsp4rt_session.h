@@ -20,7 +20,7 @@
 #include "p4/v1/p4runtime.grpc.pb.h"
 #include "p4/v1/p4runtime.pb.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 // Generates an election id that increases monotonically over time.
 // Specifically, the upper 64 bits are the unix timestamp in seconds, and the
@@ -117,6 +117,6 @@ std::unique_ptr<p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
 
 ::p4::v1::TableEntry* SetupTableEntryToRead(OvsP4rtSession* session,
                                             ::p4::v1::ReadRequest* req);
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVS_P4RT_SESSION_H_
