@@ -70,7 +70,10 @@ target_include_directories(ovsp4rt_stubs PUBLIC
     ${OVSP4RT_INCLUDE_DIR}
 )
 
-target_link_libraries(ovsp4rt_stubs PRIVATE stratum_static)
+#-----------------------------------------------------------------------
+# libovsp4rt_capture.a
+#-----------------------------------------------------------------------
+add_subdirectory(capture)
 
 #-----------------------------------------------------------------------
 # libovsp4rt_spies.a

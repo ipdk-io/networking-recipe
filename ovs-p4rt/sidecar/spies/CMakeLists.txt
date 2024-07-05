@@ -8,12 +8,14 @@
 # libovsp4rt_spies.a
 #-----------------------------------------------------------------------
 add_library(ovsp4rt_spies STATIC
-    ovsp4rt_config_fdb_entry_spy.cc
     ovsp4rt_spies.cc
 )
 
+target_link_libraries(ovsp4rt_spies PUBLIC
+  ovsp4rt_capture
+)
+
 target_include_directories(ovsp4rt_spies PUBLIC
-    ${DEPEND_INSTALL_DIR}/include
     ${OVSP4RT_INCLUDE_DIR}
 )
 

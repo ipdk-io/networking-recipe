@@ -9,13 +9,17 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <nlohmann/json.hpp>
-
+#include "capture/ovsp4rt_capture.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
+                              bool insert_entry, const char* grpc_addr) {
+  ::ovs_p4rt::CaptureMacLearningInfo(__func__, learn_info, insert_entry);
+}
 
 void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info learn_info,
                                      bool insert_entry, const char* grpc_addr) {

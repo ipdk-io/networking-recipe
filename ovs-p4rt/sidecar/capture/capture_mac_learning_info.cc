@@ -1,9 +1,6 @@
 /*
- * Copyright (c) 2024 Intel Corporation.
+ * Copyright 2024 Intel Corporation.
  * SPDX-License-Identifier: Apache-2.0
- *
- * Test double (spy) for the ovsp4rt_config_fdb_entry API.
- * Dumps the input parameters in JSON.
  */
 
 #include <stdbool.h>
@@ -12,13 +9,17 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
+#include "capture/ovsp4rt_capture.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
-void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
-                              bool insert_entry, const char* grpc_addr) {
+namespace ovs_p4rt {
+
+void CaptureMacLearningInfo(const char* func_name,
+                            struct mac_learning_info& learn_info,
+                            bool insert_entry) {
   nlohmann::json json_info;
 
-  json_info["name"] = "ovsp4rt_config_fdb_entry";
+  json_info["name"] = func_name;
   json_info["version"] = 1;
 
   // discrete fields
@@ -73,3 +74,5 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
 
   std::cout << std::endl << json_info.dump(2) << std::endl;
 }
+
+}  // namespace ovs_p4rt
