@@ -44,9 +44,7 @@ class PrepareL2ToTunnelTest : public ::testing::Test {
     }
   }
 
-  PrepareL2ToTunnelTest() {
-    dump_json_ = absl::GetFlag(FLAGS_dump_json);
-  }
+  PrepareL2ToTunnelTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
 
   void DumpMacLearningInfo(const char* func_name,
                            const struct mac_learning_info& learn_info,
