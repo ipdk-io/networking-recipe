@@ -1,0 +1,45 @@
+// Copyright 2024 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+
+#ifndef OVSP4RT_CONTEXT_H_
+#define OVSP4RT_CONTEXT_H_
+
+#include <stdint.h>
+
+#include <string>
+
+#include "absl/flags/declare.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "ovsp4rt_session.h"
+#include "p4/v1/p4runtime.pb.h"
+
+ABSL_DECLARE_FLAG(uint64_t, device_id);
+ABSL_DECLARE_FLAG(std::string, role_name);
+
+namespace ovs_p4rt {
+
+// Abstracts the interface to the P4Runtime session.
+class Ovsp4rtContext {
+ public:
+  Ovsp4rtContext() {}
+
+  absl::Status connect(const char* grpc_addr);
+
+  ovs_p4rt::OvsP4rtSession* session() const { return session_.get(); }
+
+  absl::Status getPipelineConfig(::p4::config::v1::P4Info* p4info);
+
+  ::p4::v1::TableEntry* initReadRequest(::p4::v1::ReadRequest* request);
+
+  ::absl::StatusOr<p4::v1::ReadResponse> sendReadRequest(
+      const p4::v1::ReadRequest& request);
+
+ private:
+  // P4Runtime session.
+  std::unique_ptr<ovs_p4rt::OvsP4rtSession> session_;
+};
+
+}  // namespace ovs_p4rt
+
+#endif  // OVSP4RT_CONTEXT_H_
