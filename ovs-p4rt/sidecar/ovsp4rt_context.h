@@ -26,14 +26,31 @@ class Ovsp4rtContext {
 
   absl::Status connect(const char* grpc_addr);
 
-  ovs_p4rt::OvsP4rtSession* session() const { return session_.get(); }
+  OvsP4rtSession* session() const { return session_.get(); }
 
   absl::Status getPipelineConfig(::p4::config::v1::P4Info* p4info);
 
+  // Read requests
   ::p4::v1::TableEntry* initReadRequest(::p4::v1::ReadRequest* request);
 
-  ::absl::StatusOr<p4::v1::ReadResponse> sendReadRequest(
+  absl::StatusOr<p4::v1::ReadResponse> sendReadRequest(
       const p4::v1::ReadRequest& request);
+
+  // Write requests
+  ::p4::v1::TableEntry* initInsertRequest(::p4::v1::WriteRequest* request);
+  ::p4::v1::TableEntry* initModifyRequest(::p4::v1::WriteRequest* request);
+  ::p4::v1::TableEntry* initDeleteRequest(::p4::v1::WriteRequest* request);
+
+  ::p4::v1::TableEntry* initWriteRequest(::p4::v1::WriteRequest* request,
+                                         bool insert_entry) {
+    if (insert_entry) {
+      return initInsertRequest(request);
+    } else {
+      return initDeleteRequest(request);
+    }
+  }
+
+  absl::Status sendWriteRequest(const p4::v1::WriteRequest& request);
 
  private:
   // P4Runtime session.

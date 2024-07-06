@@ -42,9 +42,29 @@ absl::Status Ovsp4rtContext::getPipelineConfig(
   return SetupTableEntryToRead(session_.get(), request);
 }
 
-::absl::StatusOr<p4::v1::ReadResponse> Ovsp4rtContext::sendReadRequest(
+absl::StatusOr<::p4::v1::ReadResponse> Ovsp4rtContext::sendReadRequest(
     const p4::v1::ReadRequest& request) {
   return SendReadRequest(session_.get(), request);
+}
+
+::p4::v1::TableEntry* Ovsp4rtContext::initInsertRequest(
+    ::p4::v1::WriteRequest* request) {
+  return SetupTableEntryToInsert(session_.get(), request);
+}
+
+::p4::v1::TableEntry* Ovsp4rtContext::initModifyRequest(
+    ::p4::v1::WriteRequest* request) {
+  return SetupTableEntryToModify(session_.get(), request);
+}
+
+::p4::v1::TableEntry* Ovsp4rtContext::initDeleteRequest(
+    ::p4::v1::WriteRequest* request) {
+  return SetupTableEntryToDelete(session_.get(), request);
+}
+
+absl::Status Ovsp4rtContext::sendWriteRequest(
+    const p4::v1::WriteRequest& request) {
+  return SendWriteRequest(session_.get(), request);
 }
 
 }  // namespace ovs_p4rt

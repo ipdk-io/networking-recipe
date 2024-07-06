@@ -533,7 +533,7 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
   }
 }
 
-absl::Status ConfigFdbSmacTableEntry(ovs_p4rt::OvsP4rtSession* session,
+absl::Status ConfigFdbSmacTableEntry(Ovsp4rtContext& context,
                                      const struct mac_learning_info& learn_info,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
@@ -541,16 +541,12 @@ absl::Status ConfigFdbSmacTableEntry(ovs_p4rt::OvsP4rtSession* session,
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
+  table_entry = context.initWriteRequest(&write_request, insert_entry);
 
   PrepareFdbSmacTableEntry(table_entry, learn_info, p4info, insert_entry,
                            detail);
 
-  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  auto status = context.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
                           learn_info.mac_addr);
@@ -589,23 +585,18 @@ absl::Status ConfigL2TunnelTableEntry(
 #endif
 
 absl::Status ConfigFdbTxVlanTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
-    const struct mac_learning_info& learn_info,
+    Ovsp4rtContext& context, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
+  table_entry = context.initWriteRequest(&write_request, insert_entry);
 
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, insert_entry,
                              detail);
 
-  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  auto status = context.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
                           learn_info.mac_addr);
@@ -614,23 +605,18 @@ absl::Status ConfigFdbTxVlanTableEntry(
 }
 
 absl::Status ConfigFdbRxVlanTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
-    const struct mac_learning_info& learn_info,
+    Ovsp4rtContext& context, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
+  table_entry = context.initWriteRequest(&write_request, insert_entry);
 
   PrepareFdbRxVlanTableEntry(table_entry, learn_info, p4info, insert_entry,
                              detail);
 
-  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  auto status = context.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
                           learn_info.mac_addr);
@@ -639,18 +625,13 @@ absl::Status ConfigFdbRxVlanTableEntry(
 }
 
 absl::Status ConfigFdbTunnelTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
-    const struct mac_learning_info& learn_info,
+    Ovsp4rtContext& context, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
+  table_entry = context.initWriteRequest(&write_request, insert_entry);
 
 #if defined(DPDK_TARGET)
   PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
@@ -673,7 +654,7 @@ absl::Status ConfigFdbTunnelTableEntry(
 #else
 #error "Unsupported target"
 #endif
-  auto status = ovs_p4rt::SendWriteRequest(session, write_request);
+  auto status = context.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
                           learn_info.mac_addr);
@@ -2027,33 +2008,29 @@ absl::StatusOr<::p4::v1::ReadResponse> GetVmDstTableEntry(
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
-    ovs_p4rt::OvsP4rtSession* session, uint32_t sp,
+    Ovsp4rtContext& context, uint32_t sp,
     const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = ovs_p4rt::SetupTableEntryToRead(session, &read_request);
+  table_entry = context.initReadRequest(&read_request);
 
   PrepareTxAccVsiTableEntry(table_entry, sp, p4info);
 
-  return ovs_p4rt::SendReadRequest(session, read_request);
+  return context.sendReadRequest(read_request);
 }
 
 absl::Status ConfigureVsiSrcPortTableEntry(
-    ovs_p4rt::OvsP4rtSession* session, const struct src_port_info& sp,
+    Ovsp4rtContext& context, const struct src_port_info& sp,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
-  if (insert_entry) {
-    table_entry = ovs_p4rt::SetupTableEntryToInsert(session, &write_request);
-  } else {
-    table_entry = ovs_p4rt::SetupTableEntryToDelete(session, &write_request);
-  }
+  table_entry = context.initWriteRequest(&write_request, insert_entry);
 
   PrepareSrcPortTableEntry(table_entry, sp, p4info, insert_entry);
 
-  return ovs_p4rt::SendWriteRequest(session, write_request);
+  return context.sendWriteRequest(write_request);
 }
 
 absl::Status ConfigRxTunnelSrcPortTableEntry(
@@ -2229,8 +2206,8 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       }
     }
 
-    status = ConfigFdbTunnelTableEntry(context.session(), learn_info, p4info,
-                                       insert_entry);
+    status =
+        ConfigFdbTunnelTableEntry(context, learn_info, p4info, insert_entry);
     if (!status.ok()) {
     }
 
@@ -2239,8 +2216,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     if (!status.ok()) {
     }
 
-    status = ConfigFdbSmacTableEntry(context.session(), learn_info, p4info,
-                                     insert_entry);
+    status = ConfigFdbSmacTableEntry(context, learn_info, p4info, insert_entry);
     if (!status.ok()) {
     }
   } else {
@@ -2251,13 +2227,13 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
         return;
       }
 
-      status = ConfigFdbRxVlanTableEntry(context.session(), learn_info, p4info,
-                                         insert_entry);
+      status =
+          ConfigFdbRxVlanTableEntry(context, learn_info, p4info, insert_entry);
       if (!status.ok()) {
       }
 
       status_or_read_response =
-          GetTxAccVsiTableEntry(context.session(), learn_info.src_port, p4info);
+          GetTxAccVsiTableEntry(context, learn_info.src_port, p4info);
       if (!status_or_read_response.ok()) {
         return;
       }
@@ -2292,13 +2268,12 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       learn_info.src_port = host_sp;
     }
 
-    status = ConfigFdbTxVlanTableEntry(context.session(), learn_info, p4info,
-                                       insert_entry);
+    status =
+        ConfigFdbTxVlanTableEntry(context, learn_info, p4info, insert_entry);
     if (!status.ok()) {
     }
 
-    status = ConfigFdbSmacTableEntry(context.session(), learn_info, p4info,
-                                     insert_entry);
+    status = ConfigFdbSmacTableEntry(context, learn_info, p4info, insert_entry);
     if (!status.ok()) {
     }
   }
@@ -2368,24 +2343,17 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
                                    bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
-  p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
+  // Initialize context
+  Ovsp4rtContext context;
+  absl::Status status = context.connect(grpc_addr);
+  if (!status.ok()) return;
 
-  // Start a new client session.
-  auto status_or_session = OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
-
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<OvsP4rtSession> session =
-      std::move(status_or_session).value();
   ::p4::config::v1::P4Info p4info;
-  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  status = context.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   auto status_or_read_response =
-      GetTxAccVsiTableEntry(session.get(), vsi_sp.src_port, p4info);
+      GetTxAccVsiTableEntry(context, vsi_sp.src_port, p4info);
   if (!status_or_read_response.ok()) return;
 
   ::p4::v1::ReadResponse read_response =
@@ -2417,17 +2385,13 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
 
   vsi_sp.src_port = host_sp;
 
-  status = ConfigureVsiSrcPortTableEntry(session.get(), vsi_sp, p4info,
-                                         insert_entry);
+  status = ConfigureVsiSrcPortTableEntry(context, vsi_sp, p4info, insert_entry);
   if (!status.ok()) return;
 }
 
 void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
                                const char* grpc_addr) {
   using namespace ovs_p4rt;
-
-  p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
@@ -2457,30 +2421,25 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
-  // Start a new client session.
-  auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
+  // Initialize context
+  Ovsp4rtContext context;
+  absl::Status status = context.connect(grpc_addr);
+  if (!status.ok()) return;
 
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<ovs_p4rt::OvsP4rtSession> session =
-      std::move(status_or_session).value();
   ::p4::config::v1::P4Info p4info;
-  ::absl::Status status =
-      ovs_p4rt::GetForwardingPipelineConfig(session.get(), &p4info);
+  status = context.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   if (learn_info.is_tunnel) {
-    status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
-                                       insert_entry);
+    status =
+        ConfigFdbTunnelTableEntry(context, learn_info, p4info, insert_entry);
   } else if (learn_info.is_vlan) {
-    status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
-                                       insert_entry);
+    status =
+        ConfigFdbTxVlanTableEntry(context, learn_info, p4info, insert_entry);
     if (!status.ok()) return;
 
-    status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
-                                       insert_entry);
+    status =
+        ConfigFdbRxVlanTableEntry(context, learn_info, p4info, insert_entry);
     if (!status.ok()) return;
   }
 }
