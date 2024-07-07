@@ -16,8 +16,7 @@ constexpr uint32_t PORT_INFO_SCHEMA = 1;
 
 namespace ovs_p4rt {
 
-void SrcPortInfoToJson(nlohmann::json& json,
-                       const struct src_port_info& info) {
+void SrcPortInfoToJson(nlohmann::json& json, const struct src_port_info& info) {
   json["bridge_id"] = info.bridge_id;
   json["vlan_id"] = info.vlan_id;
   json["src_port"] = info.src_port;
