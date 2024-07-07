@@ -1,7 +1,5 @@
-/*
- * Copyright 2024 Intel Corporation.
- * SPDX-License-Identifier: Apache-2.0
- */
+// Copyright 2024 Intel Corporation.
+// SPDX-License-Identifier: Apache-2.0
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -12,67 +10,85 @@
 #include "capture/ovsp4rt_capture.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
+namespace {
+constexpr uint32_t LEARN_INFO_SCHEMA = 1;
+}
+
 namespace ovs_p4rt {
+
+void PortVlanInfoToJson(nlohmann::json& json,
+                        const struct port_vlan_info& info) {
+  json["port_vlan_mode"] = info.port_vlan_mode;
+  json["port_vlan"] = info.port_vlan;
+}
+
+void IpAddrToJson(nlohmann::json& json, const struct p4_ipaddr& info) {
+  json["family"] = info.family;
+  json["prefix_len"] = info.prefix_len;
+
+  if (info.family == AF_INET) {
+    json["ipv4_addr"] = {info.ip.v4addr.s_addr};
+  } else if (info.family == AF_INET6) {
+    const uint32_t* v6addr = &info.ip.v6addr.__in6_u.__u6_addr32[0];
+    json["ipv6_addr"] = {v6addr[0], v6addr[1], v6addr[2], v6addr[3]};
+  }
+}
+
+void TunnelInfoToJson(nlohmann::json& json, const struct tunnel_info& info) {
+  json["ifindex"] = info.ifindex;
+  json["port_id"] = info.port_id;
+  json["src_port"] = info.src_port;
+
+  IpAddrToJson(json["local_ip"], info.local_ip);
+  IpAddrToJson(json["remote_ip"], info.remote_ip);
+
+  json["dst_port"] = info.dst_port;
+  json["vni"] = info.vni;
+
+  PortVlanInfoToJson(json["vlan_info"], info.vlan_info);
+
+  json["bridge_id"] = info.bridge_id;
+  json["tunnel_type"] = info.tunnel_type;
+}
+
+void VlanInfoToJson(nlohmann::json& json, const struct vlan_info& info) {
+  json["vlan_id"] = info.vlan_id;
+}
+
+void MacLearningInfoToJson(nlohmann::json& json,
+                           const struct mac_learning_info& info) {
+  json["is_tunnel"] = info.is_tunnel;
+  json["is_vlan"] = info.is_vlan;
+  json["mac_addr"] = {info.mac_addr[0], info.mac_addr[1], info.mac_addr[2],
+                      info.mac_addr[3], info.mac_addr[4], info.mac_addr[5]};
+  json["bridge_id"] = info.bridge_id;
+  json["src_port"] = info.src_port;
+  json["rx_src_port"] = info.rx_src_port;
+
+  PortVlanInfoToJson(json["vlan_info"], info.vlan_info);
+
+  if (info.is_tunnel) {
+    TunnelInfoToJson(json["tnl_info"], info.tnl_info);
+  } else if (info.is_vlan) {
+    VlanInfoToJson(json["vlan_info"], info.vln_info);
+  }
+}
 
 void CaptureMacLearningInfo(const char* func_name,
                             const struct mac_learning_info& learn_info,
                             bool insert_entry) {
-  nlohmann::json json_info;
+  nlohmann::json json;
 
-  json_info["name"] = func_name;
-  json_info["version"] = 1;
+  json["func_name"] = func_name;
+  json["schema"] = LEARN_INFO_SCHEMA;
+  json["struct_name"] = "mac_learning_info";
 
-  // discrete fields
-  auto& fdb_info = json_info["params"]["learn_info"];
-  fdb_info["is_tunnel"] = learn_info.is_tunnel;
-  fdb_info["is_vlan"] = learn_info.is_vlan;
-  fdb_info["mac_addr"] = {learn_info.mac_addr[0], learn_info.mac_addr[1],
-                          learn_info.mac_addr[2], learn_info.mac_addr[3],
-                          learn_info.mac_addr[4], learn_info.mac_addr[5]};
-  fdb_info["bridge_id"] = learn_info.bridge_id;
-  fdb_info["src_port"] = learn_info.src_port;
-  fdb_info["rx_src_port"] = learn_info.rx_src_port;
+  auto& params = json["params"];
+  MacLearningInfoToJson(params["learn_info"], learn_info);
+  params["insert_entry"] = insert_entry;
 
-  // vlan_info
-  auto& vlan_info = fdb_info["vlan_info"];
-  vlan_info["port_vlan_mode"] = learn_info.vlan_info.port_vlan_mode;
-  vlan_info["port_vlan"] = learn_info.vlan_info.port_vlan;
-
-  // tunnel_info
-  auto& tnl_info = fdb_info["tnl_info"];
-  tnl_info["ifindex"] = learn_info.tnl_info.ifindex;
-  tnl_info["port_id"] = learn_info.tnl_info.port_id;
-  tnl_info["src_port"] = learn_info.tnl_info.src_port;
-
-  // local ip address
-  const auto& learn_local_ip = learn_info.tnl_info.local_ip;
-  auto& local_ip = tnl_info["local_ip"];
-  local_ip["family"] = learn_local_ip.family;
-  local_ip["prefix_len"] = learn_local_ip.prefix_len;
-
-  if (learn_local_ip.family == AF_INET) {
-    local_ip["ipv4_addr"] = {learn_local_ip.ip.v4addr.s_addr};
-  } else if (learn_local_ip.family == AF_INET6) {
-    const uint32_t* v6addr = &learn_local_ip.ip.v6addr.__in6_u.__u6_addr32[0];
-    local_ip["ipv6_addr"] = {v6addr[0], v6addr[1], v6addr[2], v6addr[3]};
-  }
-
-  // remote ip address
-  const auto& learn_remote_ip = learn_info.tnl_info.remote_ip;
-  auto& remote_ip = tnl_info["remote_ip"];
-  remote_ip["family"] = learn_remote_ip.family;
-  remote_ip["prefix_len"] = learn_remote_ip.prefix_len;
-
-  if (learn_remote_ip.family == AF_INET) {
-    remote_ip["ipv4_addr"] = {learn_remote_ip.ip.v4addr.s_addr};
-  } else if (learn_remote_ip.family == AF_INET6) {
-    const uint32_t* v6addr = &learn_remote_ip.ip.v6addr.__in6_u.__u6_addr32[0];
-    remote_ip["ipv6_addr"] = {v6addr[0], v6addr[1], v6addr[2], v6addr[3]};
-  }
-
-  json_info["params"]["insert_entry"] = insert_entry;
-
-  std::cout << std::endl << json_info.dump(2) << std::endl;
+  // Return json object?
+  std::cout << std::endl << json.dump(2) << std::endl;
 }
 
 }  // namespace ovs_p4rt

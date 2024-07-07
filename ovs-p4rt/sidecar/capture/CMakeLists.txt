@@ -6,6 +6,7 @@
 
 add_library(ovsp4rt_capture STATIC
   capture_mac_learning_info.cc
+  capture_src_port_info.cc
   ovsp4rt_capture.h
 )
 
