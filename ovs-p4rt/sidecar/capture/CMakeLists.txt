@@ -5,9 +5,12 @@
 #
 
 add_library(ovsp4rt_capture STATIC
+  capture_api_input.cc
+  capture_api_input.h
   capture_mac_learning_info.cc
   capture_src_port_info.cc
   ovsp4rt_capture.h
+  ovsp4rt_encode.h
 )
 
 target_include_directories(ovsp4rt_capture PUBLIC

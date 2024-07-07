@@ -8,6 +8,7 @@
 #include <nlohmann/json.hpp>
 
 #include "capture/ovsp4rt_capture.h"
+#include "capture/ovsp4rt_encode.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
 namespace {
@@ -74,9 +75,9 @@ void MacLearningInfoToJson(nlohmann::json& json,
   }
 }
 
-void CaptureMacLearningInfo(const char* func_name,
-                            const struct mac_learning_info& learn_info,
-                            bool insert_entry) {
+nlohmann::json EncodeMacLearningInfo(const char* func_name,
+                                     const struct mac_learning_info& learn_info,
+                                     bool insert_entry) {
   nlohmann::json json;
 
   json["func_name"] = func_name;
@@ -87,7 +88,13 @@ void CaptureMacLearningInfo(const char* func_name,
   MacLearningInfoToJson(params["learn_info"], learn_info);
   params["insert_entry"] = insert_entry;
 
-  // Return json object?
+  return json;
+}
+
+void CaptureMacLearningInfo(const char* func_name,
+                            const struct mac_learning_info& learn_info,
+                            bool insert_entry) {
+  auto json = EncodeMacLearningInfo(func_name, learn_info, insert_entry);
   std::cout << std::endl << json.dump(2) << std::endl;
 }
 

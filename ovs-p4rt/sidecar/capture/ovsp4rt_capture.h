@@ -18,6 +18,6 @@ extern void CaptureSrcPortInfo(const char* func_name,
                                const struct src_port_info& sp_info,
                                bool insert_entry);
 
-}  // namespace ovs_p4rt
+} // namespace ovs_p4rt
 
 #endif  // OVSP4RT_CAPTURE_H
