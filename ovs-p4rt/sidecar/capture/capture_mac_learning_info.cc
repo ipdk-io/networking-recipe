@@ -71,7 +71,7 @@ void MacLearningInfoToJson(nlohmann::json& json,
   if (info.is_tunnel) {
     TunnelInfoToJson(json["tnl_info"], info.tnl_info);
   } else if (info.is_vlan) {
-    VlanInfoToJson(json["vlan_info"], info.vln_info);
+    VlanInfoToJson(json["vln_info"], info.vln_info);
   }
 }
 
