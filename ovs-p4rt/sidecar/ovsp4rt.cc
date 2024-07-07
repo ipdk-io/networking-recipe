@@ -1897,7 +1897,7 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
 
 absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
     Ovsp4rtContext& context, const struct mac_learning_info& learn_info,
-    ::p4::config::v1::P4Info& p4info) {
+    const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -1912,7 +1912,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
 
 absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV6TableEntry(
     Ovsp4rtContext& context, const struct mac_learning_info& learn_info,
-    ::p4::config::v1::P4Info& p4info) {
+    const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -1927,7 +1927,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV6TableEntry(
 
 absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
     Ovsp4rtContext& context, const struct mac_learning_info& learn_info,
-    ::p4::config::v1::P4Info& p4info, bool adding = false) {
+    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
