@@ -14,6 +14,6 @@ nlohmann::json EncodeMacLearningInfo(const char* func_name,
                                      const struct mac_learning_info& learn_info,
                                      bool insert_entry);
 
-} // namespace ovs_p4rt
+}  // namespace ovs_p4rt
 
 #endif  // OVSP4RT_ENCODE_H
