@@ -1530,9 +1530,7 @@ void PrepareGeneveDecapModTableEntry(p4::v1::TableEntry* table_entry,
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, GENEVE_DECAP_MOD_TABLE,
                                       GENEVE_DECAP_MOD_TABLE_KEY_MOD_BLOB_PTR));
-  match->mutable_exact()->set_value(
-      EncodeByteValue(3, (tunnel_info.vni >> 16) & 0xFF,
-                      (tunnel_info.vni >> 8) & 0xFF, tunnel_info.vni & 0xFF));
+  match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
