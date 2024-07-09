@@ -31,7 +31,7 @@ class Tracker {
 
   void captureInput(const char* func_name, uint16_t vlan_id, bool insert_entry);
 
-  void captureOutput(const char* func, ::p4::v1::WriteRequest& request);
+  void captureOutput(const char* func, ::p4::v1::WriteRequest& request) {}
 
   void saveSnapshot() {}
 

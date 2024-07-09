@@ -47,6 +47,7 @@ target_link_libraries(ovs_sidecar_o PUBLIC
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
+    $<TARGET_OBJECTS:ovsp4rt_tracker_o>
 )
 
 target_link_libraries(ovsp4rt PUBLIC
@@ -80,7 +81,7 @@ target_include_directories(ovsp4rt_stubs PUBLIC
 add_subdirectory(spies)
 
 #-----------------------------------------------------------------------
-# libovsp4rt_tracker.a
+# libovsp4rt_tracker.o
 #-----------------------------------------------------------------------
 add_subdirectory(tracker)
 

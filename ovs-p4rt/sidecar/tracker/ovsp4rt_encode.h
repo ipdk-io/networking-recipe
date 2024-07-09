@@ -44,8 +44,6 @@ extern void TunnelInfoToJson(nlohmann::json& json,
 // Convert vlan_info to json.
 extern void VlanInfoToJson(nlohmann::json& json, const struct vlan_info& info);
 
-}  // namespace ovs_p4rt
-
 //----------------------------------------------------------------------
 // Return JSON representation of API inputs.
 //----------------------------------------------------------------------
@@ -57,5 +55,7 @@ extern nlohmann::json EncodeMacLearningInfo(
 extern nlohmann::json EncodeSrcPortInfo(const char* func_name,
                                         const struct src_port_info& sp_info,
                                         bool insert_entry);
+
+}  // namespace ovs_p4rt
 
 #endif  // OVSP4RT_ENCODE_H
