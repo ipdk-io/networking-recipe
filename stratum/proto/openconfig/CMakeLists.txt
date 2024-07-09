@@ -87,4 +87,6 @@ add_library(openconfig_proto SHARED
 
 target_link_libraries(openconfig_proto PUBLIC protobuf::libprotobuf)
 
+set_install_rpath(openconfig_proto ${DEP_ELEMENT})
+
 install(TARGETS openconfig_proto LIBRARY)
