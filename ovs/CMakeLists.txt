@@ -1,6 +1,6 @@
 # CMake build file for Open vSwitch
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -13,7 +13,7 @@ include(CMakePrintHelpers)
 include(ExternalProject)
 include(GNUInstallDirs)
 
-option(P4OVS "Build OVS with P4Runtime support" OFF)
+option(P4OVS "Build OVS with P4 support (legacy mode)" OFF)
 option(WITH_RUNDIRS "Build with OVS runtime directories" OFF)
 
 ##############
@@ -39,8 +39,19 @@ set(OVS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ovs" CACHE PATH
 # OVS configuration #
 #####################
 
-if(P4OVS)
+set(P4OVS_MODE "" CACHE STRING "P4OVS build mode")
+string(TOLOWER "${P4OVS_MODE}" P4OVS_MODE)
+
+if(P4OVS_MODE STREQUAL "stubs")
+    set(P4OVS_OPTION --with-ovsp4rt=stubs)
+elseif(P4OVS_MODE STREQUAL "ovsp4rt")
+    set(P4OVS_OPTION --with-ovsp4rt)
+elseif(P4OVS_MODE STREQUAL "p4ovs" OR P4OVS)
     set(P4OVS_OPTION --with-p4ovs)
+elseif(P4OVS_MODE STREQUAL "none" OR P4OVS_MODE STREQUAL "")
+    set(P4OVS_OPTION "")
+else()
+    message(FATAL_ERROR "Invalid P4 build Mode '${P4OVS_MODE}'")
 endif()
 
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")

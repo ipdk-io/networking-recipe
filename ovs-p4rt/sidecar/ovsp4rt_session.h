@@ -119,4 +119,4 @@ std::unique_ptr<p4::v1::P4Runtime::Stub> CreateP4RuntimeStub(
                                             ::p4::v1::ReadRequest* req);
 }  // namespace ovs_p4rt
 
-#endif  // OVS_P4RT_SESSION_H_
+#endif  // OVSP4RT_SESSION_H_
