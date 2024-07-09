@@ -46,7 +46,7 @@ class PrepareL2ToTunnelTest : public ::testing::Test {
                            const struct mac_learning_info& learn_info,
                            bool insert_entry) {
     if (dump_json_) {
-//    CaptureMacLearningInfo(func_name, learn_info, insert_entry);
+      // CaptureMacLearningInfo(func_name, learn_info, insert_entry);
     }
   }
 
