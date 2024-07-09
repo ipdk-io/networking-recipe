@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
+option(BUILD_TRACKER "Build Tracker library (under development)" ON)
+
 set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 #-----------------------------------------------------------------------
@@ -76,6 +78,13 @@ target_include_directories(ovsp4rt_stubs PUBLIC
 # libovsp4rt_spies.a
 #-----------------------------------------------------------------------
 add_subdirectory(spies)
+
+#-----------------------------------------------------------------------
+# libovsp4rt_tracker_o
+#-----------------------------------------------------------------------
+if(BUILD_TRACKER)
+    add_subdirectory(tracker)
+endif()
 
 #-----------------------------------------------------------------------
 # Install
