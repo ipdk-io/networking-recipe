@@ -19,7 +19,6 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt_private.h
     ovsp4rt_session.cc
     ovsp4rt_session.h
-    ovsp4rt_tracker.h
 )
 
 add_subdirectory(logging)
@@ -79,6 +78,11 @@ target_include_directories(ovsp4rt_stubs PUBLIC
 # libovsp4rt_spies.a
 #-----------------------------------------------------------------------
 add_subdirectory(spies)
+
+#-----------------------------------------------------------------------
+# libovsp4rt_tracker.a
+#-----------------------------------------------------------------------
+add_subdirectory(tracker)
 
 #-----------------------------------------------------------------------
 # Install

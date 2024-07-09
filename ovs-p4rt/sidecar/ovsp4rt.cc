@@ -15,7 +15,7 @@
 #include "ovsp4rt_envoy.h"
 #include "ovsp4rt_private.h"
 #include "ovsp4rt_session.h"
-#include "ovsp4rt_tracker.h"
+#include "tracker/ovsp4rt_tracker.h"
 
 #if defined(DPDK_TARGET)
 #include "dpdk/p4_name_mapping.h"
