@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-option(BUILD_TRACKER "Build Tracker library (under development)" OFF)
+option(BUILD_JOURNAL "Build ovs-p4rt with Journal class" OFF)
 
 set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -80,10 +80,10 @@ target_include_directories(ovsp4rt_stubs PUBLIC
 add_subdirectory(spies)
 
 #-----------------------------------------------------------------------
-# libovsp4rt_tracker_o
+# libovsp4rt_journal_o
 #-----------------------------------------------------------------------
-if(BUILD_TRACKER)
-    add_subdirectory(tracker)
+if(BUILD_JOURNAL)
+    add_subdirectory(journal)
 endif()
 
 #-----------------------------------------------------------------------
