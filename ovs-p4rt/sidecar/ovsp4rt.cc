@@ -10,9 +10,12 @@
 #include "logging/ovsp4rt_logging.h"
 #include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
+#include "ovsp4rt_context.h"
 #include "ovsp4rt_credentials.h"
+#include "ovsp4rt_envoy.h"
 #include "ovsp4rt_private.h"
 #include "ovsp4rt_session.h"
+#include "tracker/ovsp4rt_tracker.h"
 
 #if defined(DPDK_TARGET)
 #include "dpdk/p4_name_mapping.h"
@@ -542,7 +545,8 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
   }
 }
 
-absl::Status ConfigFdbSmacTableEntry(ovs_p4rt::OvsP4rtSession* session,
+absl::Status ConfigFdbSmacTableEntry(Context& ctx,
+                                     ovs_p4rt::OvsP4rtSession* session,
                                      const struct mac_learning_info& learn_info,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
@@ -559,6 +563,7 @@ absl::Status ConfigFdbSmacTableEntry(ovs_p4rt::OvsP4rtSession* session,
   PrepareFdbSmacTableEntry(table_entry, learn_info, p4info, insert_entry,
                            detail);
 
+  ctx.tracker.captureOutput(__func__, write_request);
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -568,7 +573,7 @@ absl::Status ConfigFdbSmacTableEntry(ovs_p4rt::OvsP4rtSession* session,
 }
 
 absl::Status ConfigL2TunnelTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
+    Context& ctx, ovs_p4rt::OvsP4rtSession* session,
     const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
@@ -588,6 +593,7 @@ absl::Status ConfigL2TunnelTableEntry(
     PrepareL2ToTunnelV4(table_entry, learn_info, p4info, insert_entry, detail);
   }
 
+  ctx.tracker.captureOutput(__func__, write_request);
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -598,7 +604,7 @@ absl::Status ConfigL2TunnelTableEntry(
 #endif
 
 absl::Status ConfigFdbTxVlanTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
+    Context& ctx, ovs_p4rt::OvsP4rtSession* session,
     const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
@@ -614,6 +620,7 @@ absl::Status ConfigFdbTxVlanTableEntry(
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, insert_entry,
                              detail);
 
+  ctx.tracker.captureOutput(__func__, write_request);
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -623,7 +630,7 @@ absl::Status ConfigFdbTxVlanTableEntry(
 }
 
 absl::Status ConfigFdbRxVlanTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
+    Context& ctx, ovs_p4rt::OvsP4rtSession* session,
     const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
@@ -639,6 +646,7 @@ absl::Status ConfigFdbRxVlanTableEntry(
   PrepareFdbRxVlanTableEntry(table_entry, learn_info, p4info, insert_entry,
                              detail);
 
+  ctx.tracker.captureOutput(__func__, write_request);
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -648,7 +656,7 @@ absl::Status ConfigFdbRxVlanTableEntry(
 }
 
 absl::Status ConfigFdbTunnelTableEntry(
-    ovs_p4rt::OvsP4rtSession* session,
+    Context& ctx, ovs_p4rt::OvsP4rtSession* session,
     const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
@@ -682,6 +690,7 @@ absl::Status ConfigFdbTunnelTableEntry(
 #else
 #error "Unsupported target"
 #endif
+  ctx.tracker.captureOutput(__func__, write_request);
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -2247,6 +2256,11 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     }
   }
 
+  Envoy envoy;
+  Tracker tracker;
+  tracker.captureInput(__func__, learn_info, insert_entry);
+  Context ctx(envoy, p4info, tracker);
+
   if (learn_info.is_tunnel) {
     if (insert_entry) {
       auto status_or_read_response =
@@ -2256,17 +2270,17 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       }
     }
 
-    status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbTunnelTableEntry(ctx, session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) {
     }
 
-    status = ConfigL2TunnelTableEntry(session.get(), learn_info, p4info,
+    status = ConfigL2TunnelTableEntry(ctx, session.get(), learn_info, p4info,
                                       insert_entry);
     if (!status.ok()) {
     }
 
-    status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbSmacTableEntry(ctx, session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok()) {
     }
@@ -2278,7 +2292,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
         return;
       }
 
-      status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
+      status = ConfigFdbRxVlanTableEntry(ctx, session.get(), learn_info, p4info,
                                          insert_entry);
       if (!status.ok()) {
       }
@@ -2319,16 +2333,17 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       learn_info.src_port = host_sp;
     }
 
-    status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbTxVlanTableEntry(ctx, session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) {
     }
 
-    status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbSmacTableEntry(ctx, session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok()) {
     }
   }
+  tracker.saveSnapshot();
 }
 
 void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
@@ -2498,18 +2513,24 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       ovs_p4rt::GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
 
+  Envoy envoy;
+  Tracker tracker;
+  tracker.captureInput(__func__, learn_info, insert_entry);
+  Context ctx(envoy, p4info, tracker);
+
   if (learn_info.is_tunnel) {
-    status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbTunnelTableEntry(ctx, session.get(), learn_info, p4info,
                                        insert_entry);
   } else if (learn_info.is_vlan) {
-    status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbTxVlanTableEntry(ctx, session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) return;
 
-    status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbRxVlanTableEntry(ctx, session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) return;
   }
+  tracker.saveSnapshot();
 }
 
 void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,

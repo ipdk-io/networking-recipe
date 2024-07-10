@@ -14,8 +14,10 @@ set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(ovs_sidecar_o OBJECT
     ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
     ovsp4rt.cc
+    ovsp4rt_context.h
     ovsp4rt_credentials.cc
     ovsp4rt_credentials.h
+    ovsp4rt_envoy.h
     ovsp4rt_private.h
     ovsp4rt_session.cc
     ovsp4rt_session.h
@@ -80,10 +82,14 @@ target_include_directories(ovsp4rt_stubs PUBLIC
 add_subdirectory(spies)
 
 #-----------------------------------------------------------------------
-# libovsp4rt_tracker_o
+# libovsp4rt_tracker.a
 #-----------------------------------------------------------------------
 if(BUILD_TRACKER)
     add_subdirectory(tracker)
+
+    target_link_libraries(ovsp4rt PRIVATE
+      ovsp4rt_tracker
+    )
 endif()
 
 #-----------------------------------------------------------------------

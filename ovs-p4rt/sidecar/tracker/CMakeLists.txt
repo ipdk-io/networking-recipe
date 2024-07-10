@@ -5,23 +5,25 @@
 #
 
 #-----------------------------------------------------------------------
-# ovsp4rt_tracker_o
+# ovsp4rt_tracker.a
 #-----------------------------------------------------------------------
-add_library(ovsp4rt_tracker_o OBJECT
+add_library(ovsp4rt_tracker STATIC
   ovsp4rt_encode.cc
   ovsp4rt_encode.h
   ovsp4rt_tracker.cc
   ovsp4rt_tracker.h
 )
 
-target_include_directories(ovsp4rt_tracker_o PUBLIC
+target_include_directories(ovsp4rt_tracker PUBLIC
   ${DEPEND_INSTALL_DIR}/include
   ${OVSP4RT_INCLUDE_DIR}
 )
 
-target_link_libraries(ovsp4rt_tracker_o PUBLIC
+target_link_libraries(ovsp4rt_tracker PUBLIC
   p4runtime_proto
 )
+
+if(BUILD_TESTING)
 
 find_package(GTest)
 
@@ -43,3 +45,5 @@ target_link_libraries(encode_addr_test PUBLIC
 )
 
 add_test(NAME encode_addr_test COMMAND encode_addr_test)
+
+endif(BUILD_TESTING)
