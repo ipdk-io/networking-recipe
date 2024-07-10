@@ -1,17 +1,17 @@
-# CMake build file for ovs-p4rt/sidecar/tracker
+# CMake build file for ovs-p4rt/sidecar/journal
 #
 # Copyright 2024 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
 #-----------------------------------------------------------------------
-# Add ovsp4rt_tracker to ovsp4rt
+# Add ovsp4rt_journal to ovsp4rt
 #-----------------------------------------------------------------------
 target_sources(ovsp4rt PRIVATE
   ovsp4rt_encode.cc
   ovsp4rt_encode.h
-  ovsp4rt_tracker.cc
-  ovsp4rt_tracker.h
+  ovsp4rt_journal.cc
+  ovsp4rt_journal.h
 )
 
 target_include_directories(ovsp4rt PUBLIC

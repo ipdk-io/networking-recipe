@@ -4,12 +4,6 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-# *** DANGER, WILL ROBINSON! DANGER! ***
-# The default value of BUILD_TRACKER has been set to ON for this branch
-# because the version of ovsp4rt.cc we're building includes references
-# to the Tracker object.
-option(BUILD_TRACKER "Build Tracker library (under development)" ON)
-
 set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 #-----------------------------------------------------------------------
@@ -54,9 +48,8 @@ add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
-if(BUILD_TRACKER)
-    add_subdirectory(tracker)
-endif()
+
+add_subdirectory(journal)
 
 target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto

@@ -9,14 +9,14 @@
 namespace ovs_p4rt {
 
 class Envoy;
-class Tracker;
+class Journal;
 
 // Shared between a public API function and the internal functions it
 // invokes during a call to the OVSP4RT API.
 class Context {
  public:
-  Context(Envoy& _envoy, ::p4::config::v1::P4Info& _p4info, Tracker& _tracker)
-      : envoy(_envoy), p4info(_p4info), tracker(_tracker) {}
+  Context(Envoy& _envoy, ::p4::config::v1::P4Info& _p4info, Journal& _journal)
+      : envoy(_envoy), p4info(_p4info), journal(_journal) {}
 
   // Interfaces to the P4Runtime session. Not owned by this object.
   Envoy& envoy;
@@ -26,7 +26,7 @@ class Context {
 
   // Snapshots the inputs and outputs to the API function.
   // Not owned by this object.
-  Tracker& tracker;
+  Journal& journal;
 };
 
 }  // namespace ovs_p4rt
