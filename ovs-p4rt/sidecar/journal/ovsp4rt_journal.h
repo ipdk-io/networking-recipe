@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include <nlohmann/json.hpp>
+#include <vector>
 
 #include "ovsp4rt/ovs-p4rt.h"
 #include "p4/v1/p4runtime.pb.h"
@@ -37,7 +38,7 @@ class Journal {
 
  private:
   nlohmann::json input_;
-  nlohmann::json output_;
+  std::vector<nlohmann::json> output_;
 };
 
 }  // namespace ovs_p4rt

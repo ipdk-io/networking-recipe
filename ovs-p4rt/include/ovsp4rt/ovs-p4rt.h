@@ -81,33 +81,33 @@ struct port_vlan_info {
 
 struct tunnel_info {
   uint32_t ifindex;
-  uint32_t port_id;
-  uint32_t src_port;
+  uint32_t port_id;   // bit<32>
+  uint32_t src_port;  // bit<16>
   struct p4_ipaddr local_ip;
   struct p4_ipaddr remote_ip;
-  uint16_t dst_port;
-  uint16_t vni;
+  uint16_t dst_port;  // bit<16>
+  uint16_t vni;       // bit<24>
   struct port_vlan_info vlan_info;
-  uint8_t bridge_id;
-  uint8_t tunnel_type;
+  uint8_t bridge_id;    // bit<8>
+  uint8_t tunnel_type;  // enum ovs_tunnel_type
 };
 
 struct src_port_info {
-  uint8_t bridge_id;
-  uint16_t vlan_id;
-  uint32_t src_port;
+  uint8_t bridge_id;  // bit<8>
+  uint16_t vlan_id;   // bit<12>
+  uint32_t src_port;  // bit<16>
 };
 
 struct vlan_info {
-  uint32_t vlan_id;
+  uint32_t vlan_id;  // bit<12>
 };
 
 struct mac_learning_info {
   bool is_tunnel;
   bool is_vlan;
   uint8_t mac_addr[6];
-  uint8_t bridge_id;
-  uint32_t src_port;
+  uint8_t bridge_id;  // bit<8>
+  uint32_t src_port;  // bit<16>
   uint32_t rx_src_port;
   struct port_vlan_info vlan_info;
   union {
