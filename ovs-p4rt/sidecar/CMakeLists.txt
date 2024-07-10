@@ -12,6 +12,7 @@ set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(ovs_sidecar_o OBJECT
     ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
     ovsp4rt.cc
+    ovsp4rt_context.h
     ovsp4rt_credentials.cc
     ovsp4rt_credentials.h
     ovsp4rt_envoy.cc
@@ -49,6 +50,8 @@ add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
 
+add_subdirectory(journal)
+
 target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto
     p4runtime_proto
@@ -78,11 +81,6 @@ target_include_directories(ovsp4rt_stubs PUBLIC
 # libovsp4rt_spies.a
 #-----------------------------------------------------------------------
 add_subdirectory(spies)
-
-#-----------------------------------------------------------------------
-# libovsp4rt_journal_o
-#-----------------------------------------------------------------------
-add_subdirectory(journal)
 
 #-----------------------------------------------------------------------
 # Install
