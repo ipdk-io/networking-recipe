@@ -11,8 +11,8 @@ namespace ovs_p4rt {
 class Envoy;
 class Journal;
 
-// Shared between a public API function and the internal functions it
-// invokes during a call to the OVSP4RT API.
+// Instantiated by a public API function and passed to internal functions
+// it invokes during a call.
 class Context {
  public:
   Context(Envoy& _envoy, ::p4::config::v1::P4Info& _p4info, Journal& _journal)
@@ -24,7 +24,7 @@ class Context {
   // Pipeline configuration. Not owned by this object.
   const ::p4::config::v1::P4Info& p4info;
 
-  // Snapshots the inputs and outputs to the API function.
+  // Records the inputs and outputs of an API function.
   // Not owned by this object.
   Journal& journal;
 };

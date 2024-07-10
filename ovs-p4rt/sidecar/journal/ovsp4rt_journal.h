@@ -1,8 +1,8 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef OVSP4RT_TRACKER_H_
-#define OVSP4RT_TRACKER_H_
+#ifndef OVSP4RT_JOURNAL_H_
+#define OVSP4RT_JOURNAL_H_
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -42,4 +42,4 @@ class Journal {
 
 }  // namespace ovs_p4rt
 
-#endif  // OVSP4RT_TRACKER_H_
+#endif  // OVSP4RT_JOURNAL_H_

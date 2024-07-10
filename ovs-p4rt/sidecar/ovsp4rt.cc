@@ -564,6 +564,7 @@ absl::Status ConfigFdbSmacTableEntry(Context& ctx,
                            detail);
 
   ctx.journal.recordOutput(__func__, write_request);
+
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -594,6 +595,7 @@ absl::Status ConfigL2TunnelTableEntry(
   }
 
   ctx.journal.recordOutput(__func__, write_request);
+
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -621,6 +623,7 @@ absl::Status ConfigFdbTxVlanTableEntry(
                              detail);
 
   ctx.journal.recordOutput(__func__, write_request);
+
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -647,6 +650,7 @@ absl::Status ConfigFdbRxVlanTableEntry(
                              detail);
 
   ctx.journal.recordOutput(__func__, write_request);
+
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -691,6 +695,7 @@ absl::Status ConfigFdbTunnelTableEntry(
 #error "Unsupported target"
 #endif
   ctx.journal.recordOutput(__func__, write_request);
+
   auto status = ovs_p4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -2214,6 +2219,9 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
+  Envoy envoy;
+  Journal journal;
+
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
       grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
@@ -2227,6 +2235,8 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   ::absl::Status status =
       ovs_p4rt::GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
+
+  Context ctx(envoy, p4info, journal);
 
   /* Hack: When we delete an FDB entry based on current logic  we will not know
    * we will not know if it's a Tunnel learn FDB or regular VSI learn FDB.
@@ -2256,10 +2266,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     }
   }
 
-  Envoy envoy;
-  Journal journal;
   journal.recordInput(__func__, learn_info, insert_entry);
-  Context ctx(envoy, p4info, journal);
 
   if (learn_info.is_tunnel) {
     if (insert_entry) {
@@ -2410,8 +2417,6 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
                                    bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
-  p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
 
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
@@ -2468,9 +2473,6 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
                                const char* grpc_addr) {
   using namespace ovs_p4rt;
 
-  p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
-
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
       grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
@@ -2499,6 +2501,9 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
+  Envoy envoy;
+  Journal journal;
+
   // Start a new client session.
   auto status_or_session = ovs_p4rt::OvsP4rtSession::Create(
       grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
@@ -2513,10 +2518,9 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       ovs_p4rt::GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
 
-  Envoy envoy;
-  Journal journal;
-  journal.recordInput(__func__, learn_info, insert_entry);
   Context ctx(envoy, p4info, journal);
+
+  journal.recordInput(__func__, learn_info, insert_entry);
 
   if (learn_info.is_tunnel) {
     status = ConfigFdbTunnelTableEntry(ctx, session.get(), learn_info, p4info,
