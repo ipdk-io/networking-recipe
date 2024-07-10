@@ -2417,7 +2417,6 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
                                    bool insert_entry, const char* grpc_addr) {
   using namespace ovs_p4rt;
 
-
   // Start a new client session.
   auto status_or_session = OvsP4rtSession::Create(
       grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
