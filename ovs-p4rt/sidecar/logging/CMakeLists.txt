@@ -23,7 +23,6 @@ target_include_directories(ovsp4rt_logging_o PUBLIC
 #-----------------------------------------------------------------------
 # libovsp4rt_logging.a
 #-----------------------------------------------------------------------
-
 add_library(ovsp4rt_logging STATIC
   $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
@@ -31,7 +30,6 @@ add_library(ovsp4rt_logging STATIC
 #-----------------------------------------------------------------------
 # ovsp4rt_logging_so
 #-----------------------------------------------------------------------
-
 add_library(ovsp4rt_logging_so SHARED EXCLUDE_FROM_ALL
   $<TARGET_OBJECTS:ovsp4rt_logging_o>
 )
