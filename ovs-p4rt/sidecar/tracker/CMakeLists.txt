@@ -5,21 +5,21 @@
 #
 
 #-----------------------------------------------------------------------
-# ovsp4rt_tracker.a
+# Add ovsp4rt_tracker to ovsp4rt
 #-----------------------------------------------------------------------
-add_library(ovsp4rt_tracker STATIC
+target_sources(ovsp4rt PRIVATE
   ovsp4rt_encode.cc
   ovsp4rt_encode.h
   ovsp4rt_tracker.cc
   ovsp4rt_tracker.h
 )
 
-target_include_directories(ovsp4rt_tracker PUBLIC
+target_include_directories(ovsp4rt PUBLIC
   ${DEPEND_INSTALL_DIR}/include
   ${OVSP4RT_INCLUDE_DIR}
 )
 
-target_link_libraries(ovsp4rt_tracker PUBLIC
+target_link_libraries(ovsp4rt PUBLIC
   p4runtime_proto
 )
 
