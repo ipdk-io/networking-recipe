@@ -13,7 +13,7 @@
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
 #include "p4/config/v1/p4info.pb.h"
-#include "p4info_file_path.h"
+#include "p4info_text.h"
 #include "stratum/lib/utils.h"
 
 ABSL_FLAG(bool, dump_json, false, "Dump test input and output in JSON.");
@@ -22,7 +22,7 @@ namespace ovs_p4rt {
 
 using google::protobuf::util::JsonPrintOptions;
 using google::protobuf::util::MessageToJsonString;
-using stratum::PrintProtoToString;
+using stratum::ParseProtoFromString;
 
 static ::p4::config::v1::P4Info p4info;
 
@@ -33,8 +33,7 @@ class PrepareL2ToTunnelTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() {
     // Initialize p4info message from file.
-    ::util::Status status =
-        stratum::ReadProtoFromTextFile(P4INFO_FILE_PATH, &p4info);
+    ::util::Status status = stratum::ParseProtoFromString(P4INFO_TEXT, &p4info);
     if (!status.ok()) {
       std::exit(EXIT_FAILURE);
     }
