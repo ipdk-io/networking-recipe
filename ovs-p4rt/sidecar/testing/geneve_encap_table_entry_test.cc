@@ -136,9 +136,8 @@ TEST_F(GeneveEncapTableEntryTest, encap_param_src_port_is_correct) {
     }
   }
 
-  // Due to an bug in PrepareGeneveEncapTableEntry, the dst_port parameter
-  // is set twice and the src_port parameter is not set at all. We get
-  // garbage instead.
+  // PrepareGeneveEncapTableEntry sets the dst_port parameter twice.
+  // The src_port parameter is not set at all. We get garbage instead.
   ASSERT_TRUE(src_port.has_value());
   // ASSERT_EQ(src_port.value(), SRC_PORT);
 
