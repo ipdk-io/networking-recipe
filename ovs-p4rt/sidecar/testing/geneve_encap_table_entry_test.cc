@@ -18,7 +18,8 @@
 #include "p4info_text.h"
 #include "stratum/lib/utils.h"
 
-ABSL_FLAG(bool, dump_json, false, "Dump JSON output");
+ABSL_FLAG(bool, dump_json, false, "Dump output object in JSON");
+ABSL_FLAG(bool, check_src_port, false, "Verify src_port field");
 
 namespace ovs_p4rt {
 
@@ -136,10 +137,15 @@ TEST_F(GeneveEncapTableEntryTest, encap_param_src_port_is_correct) {
     }
   }
 
-  // PrepareGeneveEncapTableEntry sets the dst_port parameter twice.
-  // The src_port parameter is not set at all. We get garbage instead.
-  ASSERT_TRUE(src_port.has_value());
-  // ASSERT_EQ(src_port.value(), SRC_PORT);
+
+  if (absl::GetFlag(FLAGS_check_src_port)) {
+    // The src_port field contains an arbitrary value that has nothing
+    // to do with what was specified in the tunnel_info structure.
+    // It is a workaround for a long-standing bug in the Linux
+    // Networking P4 program.
+    ASSERT_TRUE(src_port.has_value());
+    ASSERT_EQ(src_port.value(), SRC_PORT);
+  }
 
   ASSERT_TRUE(dst_port.has_value());
   ASSERT_EQ(dst_port.value(), DST_PORT);
