@@ -15,6 +15,20 @@ include(set_test_properties.cmake)
 
 option(TEST_COVERAGE OFF "Measure unit test code coverage")
 
+#-----------------------------------------------------------------------
+# encode_host_port_value_test
+#-----------------------------------------------------------------------
+add_executable(encode_host_port_value_test
+  encode_host_port_value_test.cc
+  p4info_text.h
+)
+
+set_test_properties(encode_host_port_value_test)
+
+target_link_libraries(encode_host_port_value_test PUBLIC
+  GTest::gtest_main
+)
+
 if(ES2K_TARGET)
 
 #-----------------------------------------------------------------------
