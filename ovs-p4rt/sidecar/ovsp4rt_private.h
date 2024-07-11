@@ -4,6 +4,7 @@
 #ifndef OVSP4RT_PRIVATE_H_
 #define OVSP4RT_PRIVATE_H_
 
+#include <stdarg.h>
 #include <stdbool.h>
 
 #include "logging/ovsp4rt_diag_detail.h"
@@ -12,6 +13,12 @@
 #include "p4/v1/p4runtime.pb.h"
 
 namespace ovs_p4rt {
+
+//----------------------------------------------------------------------
+// Utility functions
+//----------------------------------------------------------------------
+
+std::string EncodeByteValue(int arg_count...);
 
 //----------------------------------------------------------------------
 // Target-neutral functions
