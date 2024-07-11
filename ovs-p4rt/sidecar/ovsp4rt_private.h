@@ -4,8 +4,8 @@
 #ifndef OVSP4RT_PRIVATE_H_
 #define OVSP4RT_PRIVATE_H_
 
-#include <stdbool.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #include "logging/ovsp4rt_diag_detail.h"
 #include "ovsp4rt/ovs-p4rt.h"
