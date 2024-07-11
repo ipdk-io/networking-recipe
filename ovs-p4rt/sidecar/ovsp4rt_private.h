@@ -4,7 +4,7 @@
 #ifndef OVSP4RT_PRIVATE_H_
 #define OVSP4RT_PRIVATE_H_
 
-#include <cstdbool>
+#include <stdbool.h>
 
 #include "logging/ovsp4rt_diag_detail.h"
 #include "ovsp4rt/ovs-p4rt.h"
@@ -13,11 +13,17 @@
 
 namespace ovs_p4rt {
 
+//----------------------------------------------------------------------
+// Target-neutral functions
+//----------------------------------------------------------------------
+
 void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
                                  const struct tunnel_info& tunnel_info,
                                  const ::p4::config::v1::P4Info& p4info,
                                  bool insert_entry);
 
+//----------------------------------------------------------------------
+// ES2K-specific functions
 //----------------------------------------------------------------------
 
 #if defined(ES2K_TARGET)
