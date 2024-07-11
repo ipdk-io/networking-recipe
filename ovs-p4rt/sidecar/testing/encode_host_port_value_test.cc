@@ -8,23 +8,9 @@
 
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
+#include "ovsp4rt_private.h"
 
-//----------------------------------------------------------------------
-// Support function (from ovsp4rt.cc)
-//----------------------------------------------------------------------
-std::string EncodeByteValue(int arg_count...) {
-  std::string byte_value;
-  va_list args;
-  va_start(args, arg_count);
-
-  for (int arg = 0; arg < arg_count; ++arg) {
-    uint8_t byte = va_arg(args, int);
-    byte_value.push_back(byte);
-  }
-
-  va_end(args);
-  return byte_value;
-}
+namespace ovs_p4rt {
 
 //----------------------------------------------------------------------
 // Proposed new function (UUT)
@@ -64,3 +50,5 @@ TEST(EncodeHostPortTestValue, port_encodings_are_identical) {
   // Assert
   ASSERT_STREQ(experimental_value.c_str(), control_value.c_str());
 }
+
+}  // namespace ovs_p4rt

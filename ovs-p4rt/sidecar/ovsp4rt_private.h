@@ -4,7 +4,8 @@
 #ifndef OVSP4RT_PRIVATE_H_
 #define OVSP4RT_PRIVATE_H_
 
-#include <cstdbool>
+#include <stdbool.h>
+#include <stdarg.h>
 
 #include "logging/ovsp4rt_diag_detail.h"
 #include "ovsp4rt/ovs-p4rt.h"
@@ -12,6 +13,8 @@
 #include "p4/v1/p4runtime.pb.h"
 
 namespace ovs_p4rt {
+
+std::string EncodeByteValue(int arg_count...);
 
 void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
