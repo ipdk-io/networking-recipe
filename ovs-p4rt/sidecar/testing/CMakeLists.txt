@@ -16,19 +16,17 @@ include(set_test_properties.cmake)
 option(TEST_COVERAGE OFF "Measure unit test code coverage")
 
 #-----------------------------------------------------------------------
-# p4info_file_path.h - header file specifying the path to p4Info.txt
+# encode_host_port_value_test
 #-----------------------------------------------------------------------
-set(P4INFO_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/p4Info.txt")
+add_executable(encode_host_port_value_test
+  encode_host_port_value_test.cc
+  p4info_text.h
+)
 
-if(NOT EXISTS "${P4INFO_FILE_PATH}")
-  message(WARNING "p4Info.txt not found: OVSP4RT unit tests will not be built")
-  return()
-endif()
+set_test_properties(encode_host_port_value_test)
 
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/p4info_file_path.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/p4info_file_path.h
-  @ONLY
+target_link_libraries(encode_host_port_value_test PUBLIC
+  GTest::gtest_main
 )
 
 if(ES2K_TARGET)
@@ -38,6 +36,7 @@ if(ES2K_TARGET)
 #-----------------------------------------------------------------------
 add_executable(prepare_l2_to_tunnel_test
   prepare_l2_to_tunnel_test.cc
+  p4info_text.h
   test_main.cc
 )
 
