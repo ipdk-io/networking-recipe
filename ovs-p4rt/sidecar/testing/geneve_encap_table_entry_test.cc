@@ -137,7 +137,6 @@ TEST_F(GeneveEncapTableEntryTest, encap_param_src_port_is_correct) {
     }
   }
 
-
   if (absl::GetFlag(FLAGS_check_src_port)) {
     // The src_port field contains an arbitrary value that has nothing
     // to do with what was specified in the tunnel_info structure.
