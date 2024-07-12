@@ -723,6 +723,7 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP,
                                      ACTION_VXLAN_ENCAP_PARAM_SRC_PORT));
+
       // The src_port param is an arbitrary value that has nothing to do
       // with what was specified in the tunnel_info structure. This is a
       // workaround for a bug in the Linux Networking P4 program.
@@ -783,6 +784,7 @@ void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_GENEVE_ENCAP,
                                      ACTION_GENEVE_ENCAP_PARAM_SRC_PORT));
+
       // The src_port param is an arbitrary value that has nothing to do
       // with what was specified in the tunnel_info structure. This is a
       // workaround for a bug in the Linux Networking P4 program.
@@ -862,6 +864,7 @@ void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP_V6,
                                      ACTION_VXLAN_ENCAP_V6_PARAM_SRC_PORT));
+
       // The src_port param is an arbitrary value that has nothing to do
       // with what was specified in the tunnel_info structure. This is a
       // workaround for a bug in the Linux Networking P4 program.
@@ -920,6 +923,7 @@ void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_GENEVE_ENCAP_V6,
                                      ACTION_GENEVE_ENCAP_V6_PARAM_SRC_PORT));
+
       // The src_port param is an arbitrary value that has nothing to do
       // with what was specified in the tunnel_info structure. This is a
       // workaround for a bug in the Linux Networking P4 program.
@@ -995,6 +999,7 @@ void PrepareVxlanEncapAndVlanPopTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_VXLAN_ENCAP_VLAN_POP,
                      ACTION_VXLAN_ENCAP_VLAN_POP_PARAM_SRC_PORT));
+
       // The src_port param is an arbitrary value that has nothing to do
       // with what was specified in the tunnel_info structure. This is a
       // workaround for a bug in the Linux Networking P4 program.
@@ -1057,6 +1062,7 @@ void PrepareGeneveEncapAndVlanPopTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_GENEVE_ENCAP_VLAN_POP,
                      ACTION_GENEVE_ENCAP_VLAN_POP_PARAM_SRC_PORT));
+
       // The src_port param is an arbitrary value that has nothing to do
       // with what was specified in the tunnel_info structure. This is a
       // workaround for a bug in the Linux Networking P4 program.
@@ -1134,6 +1140,7 @@ void PrepareV6VxlanEncapAndVlanPopTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_VXLAN_ENCAP_V6_VLAN_POP,
                      ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_SRC_PORT));
+
       // The src_port param is an arbitrary value that has nothing to do
       // with what was specified in the tunnel_info structure. This is a
       // workaround for a bug in the Linux Networking P4 program.
@@ -1196,6 +1203,7 @@ void PrepareV6GeneveEncapAndVlanPopTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_GENEVE_ENCAP_V6_VLAN_POP,
                      ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_SRC_PORT));
+
       // The src_port param is an arbitrary value that has nothing to do
       // with what was specified in the tunnel_info structure. This is a
       // workaround for a bug in the Linux Networking P4 program.
