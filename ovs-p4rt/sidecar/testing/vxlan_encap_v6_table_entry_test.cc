@@ -112,7 +112,7 @@ TEST_F(VxlanEncapTableEntryTest, vxlan_encap_v6_params_are_correct) {
 
   // Act
   PrepareV6VxlanEncapTableEntry(&table_entry, tunnel_info, p4info,
-                                 insert_entry);
+                                insert_entry);
   DumpTableEntry(table_entry);
 
   // Assert
