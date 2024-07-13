@@ -30,17 +30,17 @@ target_link_libraries(encode_host_port_value_test PUBLIC
 )
 
 #-----------------------------------------------------------------------
-# vxlan_encap_table_entry_test
+# vxlan_encap_v4_table_entry_test
 #-----------------------------------------------------------------------
-add_executable(vxlan_encap_table_entry_test
-  vxlan_encap_table_entry_test.cc
+add_executable(vxlan_encap_v4_table_entry_test
+  vxlan_encap_v4_table_entry_test.cc
   p4info_text.h
   test_main.cc
 )
 
-set_test_properties(vxlan_encap_table_entry_test)
+set_test_properties(vxlan_encap_v4_table_entry_test)
 
-target_link_libraries(vxlan_encap_table_entry_test PUBLIC
+target_link_libraries(vxlan_encap_v4_table_entry_test PUBLIC
   absl::flags_parse
 )
 

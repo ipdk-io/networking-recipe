@@ -60,7 +60,7 @@ uint32_t DecodeWordValue(const std::string& string_value) {
 }
 
 //----------------------------------------------------------------------
-// PrepareVxlanEncapTableEntry
+// PrepareVxlanEncapTableEntry()
 //----------------------------------------------------------------------
 
 constexpr char IPV4_SRC_ADDR[] = "10.0.0.1";
@@ -101,7 +101,7 @@ void InitV4TunnelInfo(tunnel_info& info) {
 
 //----------------------------------------------------------------------
 
-TEST_F(VxlanEncapTableEntryTest, vxlan_v4_encap_params_are_correct) {
+TEST_F(VxlanEncapTableEntryTest, vxlan_encap_v4_params_are_correct) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;
