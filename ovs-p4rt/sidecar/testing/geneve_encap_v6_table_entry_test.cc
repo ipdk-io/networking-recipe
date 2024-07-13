@@ -19,7 +19,7 @@ namespace ovs_p4rt {
 // PrepareV6GeneveEncapTableEntry
 //----------------------------------------------------------------------
 
-//constexpr uint32_t GENEVE_ENCAP_V6_MOD_TABLE_ID = 42283616U;
+// constexpr uint32_t GENEVE_ENCAP_V6_MOD_TABLE_ID = 42283616U;
 constexpr uint32_t GENEVE_ENCAP_V6_ACTION_ID = 29610186U;
 
 enum {
