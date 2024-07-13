@@ -16,6 +16,15 @@ include(set_test_properties.cmake)
 option(TEST_COVERAGE OFF "Measure unit test code coverage")
 
 #-----------------------------------------------------------------------
+# encap_table_entry_test (library)
+#-----------------------------------------------------------------------
+add_library(encap_table_entry_test INTERFACE)
+
+target_include_directories(encap_table_entry_test INTERFACE
+  ${SIDECAR_SOURCE_DIR}
+)
+
+#-----------------------------------------------------------------------
 # encode_host_port_value_test
 #-----------------------------------------------------------------------
 add_executable(encode_host_port_value_test
@@ -51,7 +60,6 @@ target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
 #-----------------------------------------------------------------------
 add_executable(geneve_encap_table_entry_test
   geneve_encap_table_entry_test.cc
-  encap_table_entry_test.h
   p4info_text.h
   test_main.cc
 )
@@ -60,6 +68,7 @@ set_test_properties(geneve_encap_table_entry_test)
 
 target_link_libraries(geneve_encap_table_entry_test PUBLIC
   absl::flags_parse
+  encap_table_entry_test
 )
 
 endif(ES2K_TARGET)

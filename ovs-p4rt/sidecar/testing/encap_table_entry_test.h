@@ -7,7 +7,6 @@
 #include <stdint.h>
 
 #include <iostream>
-
 #include <string>
 
 #include "absl/flags/flag.h"
