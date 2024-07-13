@@ -61,4 +61,21 @@ target_link_libraries(geneve_encap_table_entry_test PUBLIC
   absl::flags_parse
 )
 
+#-----------------------------------------------------------------------
+# geneve_encap_v6_table_entry_test
+#-----------------------------------------------------------------------
+add_executable(geneve_encap_v6_table_entry_test
+  geneve_encap_v6_table_entry_test.cc
+  ipv6_tunnel_test_defs.h
+  p4info_text.h
+  table_entry_test.h
+  test_main.cc
+)
+
+set_test_properties(geneve_encap_v6_table_entry_test)
+
+target_link_libraries(geneve_encap_v6_table_entry_test PUBLIC
+  absl::flags_parse
+)
+
 endif(ES2K_TARGET)
