@@ -51,6 +51,7 @@ target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
 #-----------------------------------------------------------------------
 add_executable(geneve_encap_table_entry_test
   geneve_encap_table_entry_test.cc
+  encap_table_entry_test.h
   p4info_text.h
   test_main.cc
 )

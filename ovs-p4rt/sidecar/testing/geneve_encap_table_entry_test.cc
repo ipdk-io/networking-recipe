@@ -2,67 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <arpa/inet.h>
-#include <stdarg.h>
 #include <stdint.h>
-
-#include <iostream>
-#include <string>
 
 #include "absl/flags/flag.h"
 #include "absl/types/optional.h"
-#include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
 #include "p4/config/v1/p4info.pb.h"
-#include "p4info_text.h"
-#include "stratum/lib/utils.h"
-
-ABSL_FLAG(bool, dump_json, false, "Dump output object in JSON");
-ABSL_FLAG(bool, check_src_port, false, "Verify src_port field");
+#include "testing/encap_table_entry_test.h"
 
 namespace ovs_p4rt {
 
-using google::protobuf::util::JsonPrintOptions;
-using google::protobuf::util::MessageToJsonString;
-using stratum::ParseProtoFromString;
-
-static ::p4::config::v1::P4Info p4info;
-
-class GeneveEncapTableEntryTest : public ::testing::Test {
- protected:
-  GeneveEncapTableEntryTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); };
-  static void SetUpTestSuite() {
-    // Initialize p4info message from file.
-    ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
-    if (!status.ok()) {
-      std::exit(EXIT_FAILURE);
-    }
-  }
-
-  void DumpTableEntry(const ::p4::v1::TableEntry& table_entry) {
-    if (dump_json_) {
-      JsonPrintOptions options;
-      options.add_whitespace = true;
-      options.preserve_proto_field_names = true;
-      std::string output;
-      ASSERT_TRUE(MessageToJsonString(table_entry, &output, options).ok());
-      std::cout << output << std::endl;
-    }
-  }
-  bool dump_json_;
-};
-
-uint32_t DecodeWordValue(const std::string& string_value) {
-  uint32_t word_value = 0;
-  for (int i = 0; i < string_value.size(); i++) {
-    word_value = (word_value << 8) | (string_value[i] & 0xff);
-  }
-  return word_value;
-}
-
 //----------------------------------------------------------------------
-// PrepareGeneveEncapTableEntry
+// PrepareGeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
 constexpr char IPV4_SRC_ADDR[] = "10.0.0.1";
@@ -99,7 +52,7 @@ void InitV4TunnelInfo(tunnel_info& info) {
 
 //----------------------------------------------------------------------
 
-TEST_F(GeneveEncapTableEntryTest, geneve_v4_encap_params_are_correct) {
+TEST_F(EncapTableEntryTest, geneve_encap_v4_params_are_correct) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;
@@ -151,7 +104,7 @@ TEST_F(GeneveEncapTableEntryTest, geneve_v4_encap_params_are_correct) {
 }
 
 //----------------------------------------------------------------------
-// PrepareV6GeneveEncapTableEntry
+// PrepareV6GeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
 constexpr char IPV6_SRC_ADDR[] = "fe80::215:5dff:fefa";
@@ -192,7 +145,7 @@ void InitV6TunnelInfo(tunnel_info& info) {
 
 //----------------------------------------------------------------------
 
-TEST_F(GeneveEncapTableEntryTest, geneve_v6_encap_params_are_correct) {
+TEST_F(EncapTableEntryTest, geneve_encap_v6_params_are_correct) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;
@@ -235,11 +188,11 @@ TEST_F(GeneveEncapTableEntryTest, geneve_v6_encap_params_are_correct) {
     // It is a workaround for a long-standing bug in the Linux
     // Networking P4 program.
     ASSERT_TRUE(src_port.has_value());
-    ASSERT_EQ(src_port.value(), IPV6_SRC_PORT);
+    EXPECT_EQ(src_port.value(), IPV6_SRC_PORT);
   }
 
   ASSERT_TRUE(dst_port.has_value());
-  ASSERT_EQ(dst_port.value(), IPV6_DST_PORT);
+  EXPECT_EQ(dst_port.value(), IPV6_DST_PORT);
 }
 
 }  // namespace ovs_p4rt
