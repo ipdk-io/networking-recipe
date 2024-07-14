@@ -19,7 +19,7 @@ namespace ovs_p4rt {
 // PrepareV6VxlanEncapAndVlanPopTableEntry()
 //----------------------------------------------------------------------
 
-//constexpr uint32_t VXLAN_ENCAP_V6_MOD_TABLE_ID = 46225003U;
+// constexpr uint32_t VXLAN_ENCAP_V6_MOD_TABLE_ID = 46225003U;
 constexpr uint32_t VXLAN_ENCAP_V6_ACTION_ID = 30345128U;
 
 enum {
