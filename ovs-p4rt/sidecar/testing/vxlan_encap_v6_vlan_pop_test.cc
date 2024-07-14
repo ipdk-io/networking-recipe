@@ -19,8 +19,8 @@ namespace ovs_p4rt {
 // PrepareV6VxlanEncapAndVlanPopTableEntry()
 //----------------------------------------------------------------------
 
-// constexpr uint32_t VXLAN_ENCAP_V6_MOD_TABLE_ID = 46225003U;
-constexpr uint32_t VXLAN_ENCAP_V6_ACTION_ID = 30345128U;
+// constexpr uint32_t VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE_ID = 34318005U;
+constexpr uint32_t VXLAN_ENCAP_V6_VLAN_POP_ACTION_ID = 28284062U;
 
 enum {
   SRC_PORT_PARAM_ID = 7,
@@ -39,8 +39,8 @@ TEST_F(TableEntryTest, vxlan_encap_v6_vlan_pop_params_are_correct) {
   InitV6TunnelInfo(tunnel_info);
 
   // Act
-  PrepareV6VxlanEncapTableEntry(&table_entry, tunnel_info, p4info,
-                                insert_entry);
+  PrepareV6VxlanEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,
+                                          insert_entry);
   DumpTableEntry(table_entry);
 
   // Assert
@@ -48,7 +48,7 @@ TEST_F(TableEntryTest, vxlan_encap_v6_vlan_pop_params_are_correct) {
 
   auto table_action = table_entry.action();
   auto action = table_action.action();
-  ASSERT_EQ(action.action_id(), VXLAN_ENCAP_V6_ACTION_ID);
+  ASSERT_EQ(action.action_id(), VXLAN_ENCAP_V6_VLAN_POP_ACTION_ID);
 
   auto params = action.params();
   int num_params = action.params_size();
