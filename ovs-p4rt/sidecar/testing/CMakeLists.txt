@@ -61,4 +61,21 @@ target_link_libraries(geneve_encap_table_entry_test PUBLIC
   absl::flags_parse
 )
 
+#-----------------------------------------------------------------------
+# vxlan_encap_v6_vlan_pop_test
+#-----------------------------------------------------------------------
+add_executable(vxlan_encap_v6_vlan_pop_test
+  vxlan_encap_v6_vlan_pop_test.cc
+  ipv6_tunnel_test.h
+  p4info_text.h
+  table_entry_test.h
+  test_main.cc
+)
+
+set_test_properties(vxlan_encap_v6_vlan_pop_test)
+
+target_link_libraries(vxlan_encap_v6_vlan_pop_test PUBLIC
+  absl::flags_parse
+)
+
 endif(ES2K_TARGET)
