@@ -4,6 +4,7 @@
 #ifndef TABLE_ENTRY_TEST_H_
 #define TABLE_ENTRY_TEST_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include <iostream>
@@ -29,12 +30,24 @@ static ::p4::config::v1::P4Info p4info;
 
 class TableEntryTest : public ::testing::Test {
  protected:
-  TableEntryTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); };
+  TableEntryTest() {
+    check_src_port_ = absl::GetFlag(FLAGS_check_src_port);
+    dump_json_ = absl::GetFlag(FLAGS_dump_json);
+  };
+
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
     if (!status.ok()) {
       std::exit(EXIT_FAILURE);
     }
+  }
+
+  static uint32_t DecodeWordValue(const std::string& string_value) {
+    uint32_t word_value = 0;
+    for (int i = 0; i < string_value.size(); i++) {
+      word_value = (word_value << 8) | (string_value[i] & 0xff);
+    }
+    return word_value;
   }
 
   void DumpTableEntry(const ::p4::v1::TableEntry& table_entry) {
@@ -47,16 +60,10 @@ class TableEntryTest : public ::testing::Test {
       std::cout << output << std::endl;
     }
   }
+
+  bool check_src_port_;
   bool dump_json_;
 };
-
-uint32_t DecodeWordValue(const std::string& string_value) {
-  uint32_t word_value = 0;
-  for (int i = 0; i < string_value.size(); i++) {
-    word_value = (word_value << 8) | (string_value[i] & 0xff);
-  }
-  return word_value;
-}
 
 }  // namespace ovs_p4rt
 
