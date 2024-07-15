@@ -729,8 +729,8 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       // set the src_port param to (dst_port * 2).
       uint16_t src_port = htons(tunnel_info.dst_port) * 2;
 
-      param->set_value(EncodeByteValue(2, ((src_port >> 8) & 0xff),
-                                       (src_port & 0xff)));
+      param->set_value(
+          EncodeByteValue(2, ((src_port >> 8) & 0xff), (src_port & 0xff)));
     }
 #endif
     {
@@ -790,8 +790,8 @@ void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       // set the src_port param to (dst_port * 2).
       uint16_t src_port = htons(tunnel_info.dst_port) * 2;
 
-      param->set_value(EncodeByteValue(2, ((src_port >> 8) & 0xff),
-                                       (src_port & 0xff)));
+      param->set_value(
+          EncodeByteValue(2, ((src_port >> 8) & 0xff), (src_port & 0xff)));
     }
     {
       auto param = action->add_params();
@@ -870,8 +870,8 @@ void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       // set the src_port param to (dst_port * 2).
       uint16_t src_port = htons(tunnel_info.dst_port) * 2;
 
-      param->set_value(EncodeByteValue(2, (src_port >> 8) & 0xff,
-                                       src_port & 0xff));
+      param->set_value(
+          EncodeByteValue(2, (src_port >> 8) & 0xff, src_port & 0xff));
     }
     {
       auto param = action->add_params();
@@ -929,8 +929,8 @@ void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       // set the src_port param to (dst_port * 2).
       uint16_t src_port = htons(tunnel_info.dst_port) * 2;
 
-      param->set_value(EncodeByteValue(2, (src_port >> 8) & 0xff,
-                                       src_port & 0xff));
+      param->set_value(
+          EncodeByteValue(2, (src_port >> 8) & 0xff, src_port & 0xff));
     }
     {
       auto param = action->add_params();
@@ -1005,8 +1005,8 @@ void PrepareVxlanEncapAndVlanPopTableEntry(
       // set the src_port param to (dst_port * 2).
       uint16_t src_port = htons(tunnel_info.dst_port) * 2;
 
-      param->set_value(EncodeByteValue(2, ((src_port >> 8) & 0xff),
-                                       (src_port & 0xff)));
+      param->set_value(
+          EncodeByteValue(2, ((src_port >> 8) & 0xff), (src_port & 0xff)));
     }
     {
       auto param = action->add_params();
@@ -1068,8 +1068,8 @@ void PrepareGeneveEncapAndVlanPopTableEntry(
       // set the src_port param to (dst_port * 2).
       uint16_t src_port = htons(tunnel_info.dst_port) * 2;
 
-      param->set_value(EncodeByteValue(2, ((src_port >> 8) & 0xff),
-                                       (src_port & 0xff)));
+      param->set_value(
+          EncodeByteValue(2, ((src_port >> 8) & 0xff), (src_port & 0xff)));
     }
     {
       auto param = action->add_params();
@@ -1146,8 +1146,8 @@ void PrepareV6VxlanEncapAndVlanPopTableEntry(
       // set the src_port param to (dst_port * 2).
       uint16_t src_port = htons(tunnel_info.dst_port) * 2;
 
-      param->set_value(EncodeByteValue(2, (src_port >> 8) & 0xff,
-                                       src_port & 0xff));
+      param->set_value(
+          EncodeByteValue(2, (src_port >> 8) & 0xff, src_port & 0xff));
     }
     {
       auto param = action->add_params();
@@ -1209,8 +1209,8 @@ void PrepareV6GeneveEncapAndVlanPopTableEntry(
       // set the src_port param to (dst_port * 2).
       uint16_t src_port = htons(tunnel_info.dst_port) * 2;
 
-      param->set_value(EncodeByteValue(2, (src_port >> 8) & 0xff,
-                                       src_port & 0xff));
+      param->set_value(
+          EncodeByteValue(2, (src_port >> 8) & 0xff, src_port & 0xff));
     }
     {
       auto param = action->add_params();
