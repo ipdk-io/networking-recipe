@@ -79,15 +79,15 @@ target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
 )
 
 #-----------------------------------------------------------------------
-# geneve_encap_table_entry_test
+# geneve_encap_v4_table_entry_test
 #-----------------------------------------------------------------------
-add_executable(geneve_encap_table_entry_test
-  geneve_encap_table_entry_test.cc
+add_executable(geneve_encap_v4_table_entry_test
+  geneve_encap_v4_table_entry_test.cc
 )
 
-set_test_properties(geneve_encap_table_entry_test)
+set_test_properties(geneve_encap_v4_table_entry_test)
 
-target_link_libraries(geneve_encap_table_entry_test PUBLIC
+target_link_libraries(geneve_encap_v4_table_entry_test PUBLIC
   ipv4_test_utils
 )
 
