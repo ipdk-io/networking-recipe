@@ -65,13 +65,13 @@ TEST_F(Ipv4TunnelTest, geneve_encap_v4_params_are_correct) {
     }
   }
 
+  ASSERT_TRUE(src_port.has_value());
+
   if (check_src_port_) {
-    // The src_port field contains an arbitrary value that has nothing
-    // to do with what was specified in the tunnel_info structure.
-    // It is a workaround for a long-standing bug in the Linux
-    // Networking P4 program.
-    ASSERT_TRUE(src_port.has_value());
-    EXPECT_EQ(src_port.value(), SRC_PORT);
+    // To work around a bug in the Linux Networking P4 program, we
+    // ignore the src_port value specified by the caller and instead
+    // set the src_port param to (dst_port * 2).
+    EXPECT_EQ(src_port.value(), DST_PORT * 2);  // SRC_PORT
   }
 
   ASSERT_TRUE(dst_port.has_value());
