@@ -18,7 +18,7 @@
 #include "stratum/lib/utils.h"
 
 ABSL_FLAG(bool, dump_json, false, "Dump output object in JSON");
-ABSL_FLAG(bool, check_src_port, false, "Verify src_port field");
+ABSL_FLAG(bool, check_src_port, true, "Verify src_port field");
 
 namespace ovs_p4rt {
 
