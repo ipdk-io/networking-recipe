@@ -116,7 +116,7 @@ static inline int32_t ValidIpAddr(uint32_t nw_addr) {
 }
 
 static inline std::string EncodeVniValue(uint16_t vni) {
-  return EncodeByteValue(3, 0, (vni >> 8) & 0xFF, vni & 0xFF);
+  return EncodeByteValue(3, 0, vni & 0xFF, (vni >> 8) & 0xFF);
 }
 
 #if defined(ES2K_TARGET)
