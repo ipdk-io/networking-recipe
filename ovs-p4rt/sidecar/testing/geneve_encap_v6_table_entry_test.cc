@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#include <string>
-
 #include "absl/types/optional.h"
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
@@ -17,21 +15,19 @@ namespace ovs_p4rt {
 // PrepareV6GeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
-constexpr uint32_t TABLE_ID = 42283616U;
-constexpr uint32_t ACTION_ID = 29610186U;
-
-enum {
-  SRC_PORT_PARAM_ID = 7,
-  DST_PORT_PARAM_ID = 8,
-  VNI_PARAM_ID = 9,
-};
-
-//----------------------------------------------------------------------
-
 TEST_F(Ipv6TunnelTest, geneve_encap_v6_params_are_correct) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;
+
+  constexpr uint32_t TABLE_ID = 42283616U;
+  constexpr uint32_t ACTION_ID = 29610186U;
+
+  enum {
+    SRC_PORT_PARAM_ID = 7,
+    DST_PORT_PARAM_ID = 8,
+    VNI_PARAM_ID = 9,
+  };
 
   // Arrange
   InitV6TunnelInfo(tunnel_info);
@@ -42,12 +38,12 @@ TEST_F(Ipv6TunnelTest, geneve_encap_v6_params_are_correct) {
   DumpTableEntry(table_entry);
 
   // Assert
-  ASSERT_EQ(table_entry.table_id(), TABLE_ID);
+  EXPECT_EQ(table_entry.table_id(), TABLE_ID);
 
   ASSERT_TRUE(table_entry.has_action());
   auto table_action = table_entry.action();
   auto action = table_action.action();
-  ASSERT_EQ(action.action_id(), ACTION_ID);
+  EXPECT_EQ(action.action_id(), ACTION_ID);
 
   auto params = action.params();
   int num_params = action.params_size();
@@ -60,6 +56,7 @@ TEST_F(Ipv6TunnelTest, geneve_encap_v6_params_are_correct) {
     auto param = params[i];
     int param_id = param.param_id();
     auto param_value = param.value();
+
     if (param_id == SRC_PORT_PARAM_ID) {
       src_port = DecodeWordValue(param_value) & 0xffff;
     } else if (param_id == DST_PORT_PARAM_ID) {
@@ -79,7 +76,7 @@ TEST_F(Ipv6TunnelTest, geneve_encap_v6_params_are_correct) {
   }
 
   ASSERT_TRUE(dst_port.has_value());
-  ASSERT_EQ(dst_port.value(), DST_PORT);
+  EXPECT_EQ(dst_port.value(), DST_PORT);
 
   ASSERT_TRUE(vni.has_value());
   EXPECT_EQ(vni.value(), VNI);
