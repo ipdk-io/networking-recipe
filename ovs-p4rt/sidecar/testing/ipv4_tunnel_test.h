@@ -12,13 +12,13 @@
 
 namespace ovs_p4rt {
 
-constexpr char IPV4_SRC_ADDR[] = "10.0.0.1";
+constexpr char IPV4_SRC_ADDR[] = "10.20.30.40";
 constexpr char IPV4_DST_ADDR[] = "192.168.17.5";
 constexpr int IPV4_PREFIX_LEN = 24;
 
-constexpr uint16_t SRC_PORT = 4;
-constexpr uint16_t DST_PORT = 1984;
-constexpr uint16_t VNI = 0x101;
+constexpr uint16_t SRC_PORT = 0x1066;
+constexpr uint16_t DST_PORT = 0x1984;
+constexpr uint16_t VNI = 0x1776;
 
 class Ipv4TunnelTest : public TableEntryTest {
  protected:
