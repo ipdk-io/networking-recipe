@@ -90,6 +90,19 @@ target_link_libraries(geneve_encap_v6_table_entry_test PUBLIC
 )
 
 #-----------------------------------------------------------------------
+# geneve_encap_v4_vlan_pop_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(geneve_encap_v4_vlan_pop_test
+  geneve_encap_v4_vlan_pop_test.cc
+)
+
+set_test_properties(geneve_encap_v4_vlan_pop_test)
+
+target_link_libraries(geneve_encap_v4_vlan_pop_test PUBLIC
+  ipv4_test_utils
+)
+
+#-----------------------------------------------------------------------
 # prepare_l2_to_tunnel_test (ES2K)
 #-----------------------------------------------------------------------
 add_executable(prepare_l2_to_tunnel_test
