@@ -77,6 +77,19 @@ target_link_libraries(geneve_encap_v4_table_entry_test PUBLIC
 )
 
 #-----------------------------------------------------------------------
+# geneve_encap_v6_table_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(geneve_encap_v6_table_entry_test
+  geneve_encap_v6_table_entry_test.cc
+)
+
+set_test_properties(geneve_encap_v6_table_entry_test)
+
+target_link_libraries(geneve_encap_v6_table_entry_test PUBLIC
+  ipv6_test_utils
+)
+
+#-----------------------------------------------------------------------
 # prepare_l2_to_tunnel_test (ES2K)
 #-----------------------------------------------------------------------
 add_executable(prepare_l2_to_tunnel_test
