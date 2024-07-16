@@ -64,7 +64,33 @@ target_link_libraries(encode_host_port_value_test PUBLIC
 if(ES2K_TARGET)
 
 #-----------------------------------------------------------------------
-# prepare_l2_to_tunnel_test
+# geneve_encap_table_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(geneve_encap_table_entry_test
+  geneve_encap_table_entry_test.cc
+)
+
+set_test_properties(geneve_encap_table_entry_test)
+
+target_link_libraries(geneve_encap_table_entry_test PUBLIC
+  ipv4_test_utils
+)
+
+#-----------------------------------------------------------------------
+# geneve_encap_v4_vlan_pop_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(geneve_encap_v4_vlan_pop_test
+  geneve_encap_v4_vlan_pop_test.cc
+)
+
+set_test_properties(geneve_encap_v4_vlan_pop_test)
+
+target_link_libraries(geneve_encap_v4_vlan_pop_test PUBLIC
+  ipv4_test_utils
+)
+
+#-----------------------------------------------------------------------
+# prepare_l2_to_tunnel_test (ES2K)
 #-----------------------------------------------------------------------
 add_executable(prepare_l2_to_tunnel_test
   prepare_l2_to_tunnel_test.cc
@@ -76,19 +102,6 @@ set_test_properties(prepare_l2_to_tunnel_test)
 
 target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
   absl::flags_parse
-)
-
-#-----------------------------------------------------------------------
-# geneve_encap_table_entry_test
-#-----------------------------------------------------------------------
-add_executable(geneve_encap_table_entry_test
-  geneve_encap_table_entry_test.cc
-)
-
-set_test_properties(geneve_encap_table_entry_test)
-
-target_link_libraries(geneve_encap_table_entry_test PUBLIC
-  ipv4_test_utils
 )
 
 endif(ES2K_TARGET)
