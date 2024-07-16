@@ -151,7 +151,7 @@ jobs:
           python -m pip install setuptools build wheel
 
       - name: Set up Go environment
-        uses: actions/setup-go@v5.0.1
+        uses: actions/setup-go@v5.0.2
         with:
           go-version: 'stable'
 
