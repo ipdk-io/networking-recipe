@@ -18,7 +18,7 @@ constexpr int IPV4_PREFIX_LEN = 24;
 
 constexpr uint16_t SRC_PORT = 0x1066;
 constexpr uint16_t DST_PORT = 0x1984;
-constexpr uint16_t VNI = 0x2525;
+constexpr uint16_t VNI = 0x1776;
 
 class Ipv4TunnelTest : public TableEntryTest {
  protected:
