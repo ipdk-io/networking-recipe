@@ -64,6 +64,21 @@ target_link_libraries(encode_host_port_value_test PUBLIC
 if(ES2K_TARGET)
 
 #-----------------------------------------------------------------------
+# geneve_encap_table_entry_test
+#-----------------------------------------------------------------------
+add_executable(geneve_encap_table_entry_test
+  geneve_encap_table_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(geneve_encap_table_entry_test)
+
+target_link_libraries(geneve_encap_table_entry_test PUBLIC
+  absl::flags_parse
+)
+
+#-----------------------------------------------------------------------
 # prepare_l2_to_tunnel_test
 #-----------------------------------------------------------------------
 add_executable(prepare_l2_to_tunnel_test
@@ -79,15 +94,15 @@ target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
 )
 
 #-----------------------------------------------------------------------
-# geneve_encap_table_entry_test
+# vxlan_encap_v4_vlan_pop_test (ES2K)
 #-----------------------------------------------------------------------
-add_executable(geneve_encap_table_entry_test
-  geneve_encap_table_entry_test.cc
+add_executable(vxlan_encap_v4_vlan_pop_test
+  vxlan_encap_v4_vlan_pop_test.cc
 )
 
-set_test_properties(geneve_encap_table_entry_test)
+set_test_properties(vxlan_encap_v4_vlan_pop_test)
 
-target_link_libraries(geneve_encap_table_entry_test PUBLIC
+target_link_libraries(vxlan_encap_v4_vlan_pop_test PUBLIC
   ipv4_test_utils
 )
 
