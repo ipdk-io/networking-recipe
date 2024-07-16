@@ -131,3 +131,20 @@ set_test_properties(vxlan_encap_v4_table_entry_test)
 target_link_libraries(vxlan_encap_v4_table_entry_test PUBLIC
   ipv4_test_utils
 )
+
+if(ES2K_TARGET)
+
+#-----------------------------------------------------------------------
+# vxlan_encap_v6_table_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(vxlan_encap_v6_table_entry_test
+  vxlan_encap_v6_table_entry_test.cc
+)
+
+set_test_properties(vxlan_encap_v6_table_entry_test)
+
+target_link_libraries(vxlan_encap_v6_table_entry_test PUBLIC
+  ipv6_test_utils
+)
+
+endif(ES2K_TARGET)
