@@ -16,9 +16,9 @@ constexpr char IPV6_SRC_ADDR[] = "fe80::215:5dff:fefa";
 constexpr char IPV6_DST_ADDR[] = "fe80::215:192.168.17.5";
 constexpr int IPV6_PREFIX_LEN = 64;
 
-constexpr uint16_t SRC_PORT = 42;
-constexpr uint16_t DST_PORT = 1066;
-constexpr uint16_t VNI = 0x202;
+constexpr uint16_t SRC_PORT = 0x1984;
+constexpr uint16_t DST_PORT = 0x1066;
+constexpr uint16_t VNI = 0x1776;
 
 class Ipv6TunnelTest : public TableEntryTest {
  protected:
