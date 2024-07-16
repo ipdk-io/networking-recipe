@@ -38,12 +38,12 @@ TEST_F(Ipv6TunnelTest, geneve_encap_v6_params_are_correct) {
   DumpTableEntry(table_entry);
 
   // Assert
-  EXPECT_EQ(table_entry.table_id(), TABLE_ID);
+  ASSERT_EQ(table_entry.table_id(), TABLE_ID);
 
   ASSERT_TRUE(table_entry.has_action());
   auto table_action = table_entry.action();
   auto action = table_action.action();
-  EXPECT_EQ(action.action_id(), ACTION_ID);
+  ASSERT_EQ(action.action_id(), ACTION_ID);
 
   auto params = action.params();
   int num_params = action.params_size();
