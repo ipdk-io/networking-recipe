@@ -5,6 +5,7 @@
 #
 
 option(BUILD_JOURNAL "Build ovs-p4rt with Journal class" OFF)
+option(BUILD_SPIES "Build ovs-p4rt with spies" OFF)
 
 set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -77,7 +78,9 @@ target_include_directories(ovsp4rt_stubs PUBLIC
 #-----------------------------------------------------------------------
 # libovsp4rt_spies.a
 #-----------------------------------------------------------------------
-add_subdirectory(spies)
+if(BUILD_SPIES)
+    add_subdirectory(spies)
+endif()
 
 #-----------------------------------------------------------------------
 # libovsp4rt_journal_o
@@ -90,9 +93,16 @@ endif()
 # Install
 #-----------------------------------------------------------------------
 install(
-    TARGETS ovsp4rt ovsp4rt_spies ovsp4rt_stubs
+    TARGETS ovsp4rt ovsp4rt_stubs
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+
+if(BUILD_SPIES)
+    install(
+        TARGETS ovsp4rt_stubs
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+endif()
 
 install(
     DIRECTORY
@@ -107,20 +117,26 @@ install(
 set(ovsp4rt_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt.pc)
 configure_file(cmake/libovsp4rt.pc.in ${ovsp4rt_cfg_file} @ONLY)
 
-set(ovsp4rt_spies_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_spies.pc)
-configure_file(cmake/libovsp4rt_spies.pc.in ${ovsp4rt_spies_cfg_file} @ONLY)
-
 set(ovsp4rt_stubs_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_stubs.pc)
 configure_file(cmake/libovsp4rt_stubs.pc.in ${ovsp4rt_stubs_cfg_file} @ONLY)
 
 install(
     FILES
         ${ovsp4rt_cfg_file}
-        ${ovsp4rt_spies_cfg_file}
         ${ovsp4rt_stubs_cfg_file}
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
+
+if(BUILD_SPIES)
+    set(ovsp4rt_spies_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_spies.pc)
+    configure_file(cmake/libovsp4rt_spies.pc.in ${ovsp4rt_spies_cfg_file} @ONLY)
+
+    install(
+        FILES ${ovsp4rt_spies_cfg_file}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+    )
+endif()
 
 #-----------------------------------------------------------------------
 # Testing
