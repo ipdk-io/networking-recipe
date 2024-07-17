@@ -119,7 +119,7 @@ static inline int32_t ValidIpAddr(uint32_t nw_addr) {
 }
 
 static inline std::string EncodeVniValue(uint16_t vni) {
-  return EncodeByteValue(3, 0, (vni >> 8) & 0xFF, vni & 0xFF);
+  return EncodeByteValue(3, 0, vni & 0xFF, (vni >> 8) & 0xFF);
 }
 
 #if defined(ES2K_TARGET)
@@ -737,10 +737,14 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP,
                                      ACTION_VXLAN_ENCAP_PARAM_SRC_PORT));
-      uint16_t dst_port = htons(tunnel_info.dst_port);
 
-      param->set_value(EncodeByteValue(2, (((dst_port * 2) >> 8) & 0xff),
-                                       ((dst_port * 2) & 0xff)));
+      // To work around a bug in the Linux Networking P4 program, we
+      // ignore the src_port value specified by the caller and instead
+      // set the src_port param to (dst_port * 2).
+      uint16_t src_port = htons(tunnel_info.dst_port) * 2;
+
+      param->set_value(
+          EncodeByteValue(2, ((src_port >> 8) & 0xff), (src_port & 0xff)));
     }
 #endif
     {
@@ -794,10 +798,14 @@ void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_GENEVE_ENCAP,
                                      ACTION_GENEVE_ENCAP_PARAM_SRC_PORT));
-      uint16_t dst_port = htons(tunnel_info.dst_port);
 
-      param->set_value(EncodeByteValue(2, (((dst_port * 2) >> 8) & 0xff),
-                                       ((dst_port * 2) & 0xff)));
+      // To work around a bug in the Linux Networking P4 program, we
+      // ignore the src_port value specified by the caller and instead
+      // set the src_port param to (dst_port * 2).
+      uint16_t src_port = htons(tunnel_info.dst_port) * 2;
+
+      param->set_value(
+          EncodeByteValue(2, ((src_port >> 8) & 0xff), (src_port & 0xff)));
     }
     {
       auto param = action->add_params();
@@ -870,10 +878,14 @@ void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP_V6,
                                      ACTION_VXLAN_ENCAP_V6_PARAM_SRC_PORT));
-      uint16_t dst_port = htons(tunnel_info.dst_port);
 
-      param->set_value(EncodeByteValue(2, ((dst_port * 2) >> 8) & 0xff,
-                                       (dst_port * 2) & 0xff));
+      // To work around a bug in the Linux Networking P4 program, we
+      // ignore the src_port value specified by the caller and instead
+      // set the src_port param to (dst_port * 2).
+      uint16_t src_port = htons(tunnel_info.dst_port) * 2;
+
+      param->set_value(
+          EncodeByteValue(2, (src_port >> 8) & 0xff, src_port & 0xff));
     }
     {
       auto param = action->add_params();
@@ -925,10 +937,14 @@ void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_GENEVE_ENCAP_V6,
                                      ACTION_GENEVE_ENCAP_V6_PARAM_SRC_PORT));
-      uint16_t dst_port = htons(tunnel_info.dst_port);
 
-      param->set_value(EncodeByteValue(2, ((dst_port * 2) >> 8) & 0xff,
-                                       (dst_port * 2) & 0xff));
+      // To work around a bug in the Linux Networking P4 program, we
+      // ignore the src_port value specified by the caller and instead
+      // set the src_port param to (dst_port * 2).
+      uint16_t src_port = htons(tunnel_info.dst_port) * 2;
+
+      param->set_value(
+          EncodeByteValue(2, (src_port >> 8) & 0xff, src_port & 0xff));
     }
     {
       auto param = action->add_params();
@@ -997,10 +1013,14 @@ void PrepareVxlanEncapAndVlanPopTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_VXLAN_ENCAP_VLAN_POP,
                      ACTION_VXLAN_ENCAP_VLAN_POP_PARAM_SRC_PORT));
-      uint16_t dst_port = htons(tunnel_info.dst_port);
 
-      param->set_value(EncodeByteValue(2, (((dst_port * 2) >> 8) & 0xff),
-                                       ((dst_port * 2) & 0xff)));
+      // To work around a bug in the Linux Networking P4 program, we
+      // ignore the src_port value specified by the caller and instead
+      // set the src_port param to (dst_port * 2).
+      uint16_t src_port = htons(tunnel_info.dst_port) * 2;
+
+      param->set_value(
+          EncodeByteValue(2, ((src_port >> 8) & 0xff), (src_port & 0xff)));
     }
     {
       auto param = action->add_params();
@@ -1056,10 +1076,14 @@ void PrepareGeneveEncapAndVlanPopTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_GENEVE_ENCAP_VLAN_POP,
                      ACTION_GENEVE_ENCAP_VLAN_POP_PARAM_SRC_PORT));
-      uint16_t dst_port = htons(tunnel_info.dst_port);
 
-      param->set_value(EncodeByteValue(2, (((dst_port * 2) >> 8) & 0xff),
-                                       ((dst_port * 2) & 0xff)));
+      // To work around a bug in the Linux Networking P4 program, we
+      // ignore the src_port value specified by the caller and instead
+      // set the src_port param to (dst_port * 2).
+      uint16_t src_port = htons(tunnel_info.dst_port) * 2;
+
+      param->set_value(
+          EncodeByteValue(2, ((src_port >> 8) & 0xff), (src_port & 0xff)));
     }
     {
       auto param = action->add_params();
@@ -1130,10 +1154,14 @@ void PrepareV6VxlanEncapAndVlanPopTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_VXLAN_ENCAP_V6_VLAN_POP,
                      ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_SRC_PORT));
-      uint16_t dst_port = htons(tunnel_info.dst_port);
 
-      param->set_value(EncodeByteValue(2, ((dst_port * 2) >> 8) & 0xff,
-                                       (dst_port * 2) & 0xff));
+      // To work around a bug in the Linux Networking P4 program, we
+      // ignore the src_port value specified by the caller and instead
+      // set the src_port param to (dst_port * 2).
+      uint16_t src_port = htons(tunnel_info.dst_port) * 2;
+
+      param->set_value(
+          EncodeByteValue(2, (src_port >> 8) & 0xff, src_port & 0xff));
     }
     {
       auto param = action->add_params();
@@ -1189,10 +1217,14 @@ void PrepareV6GeneveEncapAndVlanPopTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_GENEVE_ENCAP_V6_VLAN_POP,
                      ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_SRC_PORT));
-      uint16_t dst_port = htons(tunnel_info.dst_port);
 
-      param->set_value(EncodeByteValue(2, ((dst_port * 2) >> 8) & 0xff,
-                                       (dst_port * 2) & 0xff));
+      // To work around a bug in the Linux Networking P4 program, we
+      // ignore the src_port value specified by the caller and instead
+      // set the src_port param to (dst_port * 2).
+      uint16_t src_port = htons(tunnel_info.dst_port) * 2;
+
+      param->set_value(
+          EncodeByteValue(2, (src_port >> 8) & 0xff, src_port & 0xff));
     }
     {
       auto param = action->add_params();

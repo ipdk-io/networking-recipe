@@ -76,7 +76,7 @@ struct p4_ipaddr {
 
 struct port_vlan_info {
   enum p4_vlan_mode port_vlan_mode;
-  int port_vlan;
+  int port_vlan;  // bit<32> vlan_ptr
 };
 
 struct tunnel_info {
@@ -106,9 +106,9 @@ struct mac_learning_info {
   bool is_tunnel;
   bool is_vlan;
   uint8_t mac_addr[6];
-  uint8_t bridge_id;  // bit<8>
-  uint32_t src_port;  // bit<16>
-  uint32_t rx_src_port;
+  uint8_t bridge_id;     // bit<8>
+  uint32_t src_port;     // bit<16>
+  uint32_t rx_src_port;  // bit<32> (PortId_t)
   struct port_vlan_info vlan_info;
   union {
     struct tunnel_info tnl_info;
