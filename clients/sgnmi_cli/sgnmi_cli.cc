@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <csignal>
+#include <exception>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -354,5 +355,10 @@ void BuildGnmiPath(std::string path_str, ::gnmi::Path* path) {
 }  // namespace stratum
 
 int main(int argc, char** argv) {
-  return stratum::tools::gnmi::Main(argc, argv).error_code();
+  try {
+    return stratum::tools::gnmi::Main(argc, argv).error_code();
+  } catch (std::exception& e) {
+    LOG(ERROR) << e.what();
+    return util::error::INTERNAL;
+  }
 }
