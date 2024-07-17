@@ -9,40 +9,34 @@ It is the successor to P4-OVS.
 - also called the IPDK Networking Recipe
 - formerly known as P4-OVS Split Architecture
 
-P4 Control Plane modularizes P4-OVS and reduces coupling between its
-components, making the code easier to maintain and more suitable for
-upstreaming.
-
-It moves the P4-specific components of the architecture from `ovs-vswitchd`
-to a separate process called `infrap4d`.
-
 See the [Overview](https://ipdk.io/p4cp-userguide/overview/overview.html)
-section of the User Guide for a description of the components.
+section of the User Guide for a description of its components.
 
 ## Major changes
 
-### ovs-p4rt interface
+### Linux Networking
 
-The functions that ovs-p4rt publishes for use by OVS have been renamed
-to make them more consistent with C programming conventions.
+The Networking Recipe now supports version 3 of the ES2K Linux Networking
+P4 Program. Support for version 2 has been discontinued.
 
-### Setup directory
+### `ovs-p4rt` interface
+
+The public functions in the ovs-p4rt API have been renamed to make them
+more consistent with C programming conventions.
+
+### `docs` directory
+
+The documentation files have moved from the `docs` directory to the
+<https://github.com/ipdk-io/p4cp-userguide> repository.
+
+### `setup` directory
 
 The Stratum dependencies have moved from the `setup` directory
-to a new <https://github.com/ipdk-io/stratum-deps> repository.
-
-This change allows the dependencies to be downloaded and built independently
-of the Networking Recipe (P4 Control Plane).
-It also makes them easier to maintain.
-
-See the [README file](https://github.com/ipdk-io/stratum-deps/blob/main/README.md)
-and
-[Transition Guide](https://github.com/ipdk-io/stratum-deps/blob/main/docs/transition-guide.md)
-in the `stratum-deps` repository for more information.
+to the <https://github.com/ipdk-io/stratum-deps> repository.
 
 ## Source code
 
-To download the source code for P4 Control Plane:
+To download the source for P4 Control Plane:
 
 ```bash
 git clone --recursive https://github.com/ipdk-io/networking-recipe
@@ -50,4 +44,5 @@ git clone --recursive https://github.com/ipdk-io/networking-recipe
 
 ## Documentation
 
-- [P4 Control Plane User Guide](https://ipdk.io/p4cp-userguide/)
+See the link in the **About** panel on the right-hand side of the
+[home page](https://github.com/ipdk-io/networking-recipe).
