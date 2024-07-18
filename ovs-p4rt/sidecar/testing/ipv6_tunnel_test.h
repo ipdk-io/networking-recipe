@@ -10,7 +10,7 @@
 #include "ovsp4rt/ovs-p4rt.h"
 #include "testing/table_entry_test.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 constexpr char IPV6_SRC_ADDR[] = "fe80::215:5dff:fefa";
 constexpr char IPV6_DST_ADDR[] = "fe80::215:192.168.17.5";
@@ -43,6 +43,6 @@ class Ipv6TunnelTest : public TableEntryTest {
   };
 };
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // IPV6_TUNNEL_TEST_H_
