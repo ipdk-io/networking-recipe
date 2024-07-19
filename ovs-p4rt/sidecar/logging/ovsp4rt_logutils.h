@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <string>
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 const std::string FormatMacAddr(const uint8_t* mac_addr);
 
@@ -19,6 +19,6 @@ void LogFailure(bool inserting, const char* table);
 void LogFailureWithMacAddr(bool inserting, const char* table,
                            const uint8_t* mac_addr);
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVSP4RT_LOGUTILS_H_

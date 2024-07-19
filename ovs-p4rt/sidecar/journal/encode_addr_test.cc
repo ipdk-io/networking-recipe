@@ -14,7 +14,7 @@
 
 ABSL_FLAG(bool, dump_json, false, "Dump JSON output");
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 class EncodeAddrTest : public testing::Test {
  public:
@@ -95,4 +95,4 @@ TEST_F(EncodeAddrTest, can_encode_ipv6_address) {
   }
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

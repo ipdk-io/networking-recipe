@@ -10,7 +10,7 @@ constexpr uint32_t LEARN_INFO_SCHEMA = 1;
 constexpr uint32_t PORT_INFO_SCHEMA = 1;
 }  // namespace
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 // mac_learning_info
 void Journal::recordInput(const char* func_name,
@@ -40,4 +40,4 @@ void Journal::recordInput(const char* func_name, uint16_t vlan_id,
 // ::p4::v1::WriteRequest
 void recordOutput(const char* func, ::p4::v1::WriteRequest& request) {}
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

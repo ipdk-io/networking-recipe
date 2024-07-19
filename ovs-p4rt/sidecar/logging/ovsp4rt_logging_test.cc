@@ -17,7 +17,7 @@
 #include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
 
-using namespace ovs_p4rt;
+using namespace ovsp4rt;
 
 void adding_test() {
   DiagDetail detail(LOG_L2_FWD_SMAC_TABLE);
