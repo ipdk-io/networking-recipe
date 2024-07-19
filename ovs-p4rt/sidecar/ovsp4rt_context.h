@@ -6,7 +6,7 @@
 
 #include "p4/v1/p4runtime.pb.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 class Envoy;
 class Journal;
@@ -29,6 +29,6 @@ class Context {
   Journal& journal;
 };
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVSP4RT_CONTEXT_H_

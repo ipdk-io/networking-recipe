@@ -16,11 +16,11 @@ ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
 ABSL_FLAG(std::string, role_name, DEFAULT_OVS_P4RT_ROLE_NAME,
           "P4 config role name.");
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 absl::Status Envoy::connect(const char* grpc_addr) {
   // Start a new client session.
-  auto result = ovs_p4rt::OvsP4rtSession::Create(
+  auto result = ovsp4rt::OvsP4rtSession::Create(
       grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
       absl::GetFlag(FLAGS_role_name));
   if (!result.ok()) {
@@ -64,4 +64,4 @@ absl::Status Envoy::sendWriteRequest(const p4::v1::WriteRequest& request) {
   return SendWriteRequest(session_.get(), request);
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

@@ -12,7 +12,7 @@
 #include "ovsp4rt/ovs-p4rt.h"
 #include "p4/v1/p4runtime.pb.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 // Captures the inputs and outputs to an API function.
 class Journal {
@@ -40,6 +40,6 @@ class Journal {
   nlohmann::json output_;
 };
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVSP4RT_JOURNAL_H_

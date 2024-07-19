@@ -20,7 +20,7 @@
 ABSL_FLAG(bool, dump_json, false, "Dump output object in JSON");
 ABSL_FLAG(bool, check_src_port, true, "Verify src_port field");
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 using google::protobuf::util::JsonPrintOptions;
 using google::protobuf::util::MessageToJsonString;
@@ -65,6 +65,6 @@ class TableEntryTest : public ::testing::Test {
   bool dump_json_;
 };
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // TABLE_ENTRY_TEST_H_

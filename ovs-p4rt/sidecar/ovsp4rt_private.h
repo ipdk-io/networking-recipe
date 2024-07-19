@@ -12,7 +12,7 @@
 #include "p4/config/v1/p4info.pb.h"
 #include "p4/v1/p4runtime.pb.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 //----------------------------------------------------------------------
 // Utility functions
@@ -74,6 +74,6 @@ void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
 
 #endif  // ES2K_TARGET
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVSP4RT_PRIVATE_H_

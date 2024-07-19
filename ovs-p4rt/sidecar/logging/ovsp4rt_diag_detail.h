@@ -4,7 +4,7 @@
 #ifndef OVSP4RT_DIAG_DETAIL_H_
 #define OVSP4RT_DIAG_DETAIL_H_
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 enum LogTableId {
   LOG_UNKNOWN_TABLE = 0,
@@ -29,6 +29,6 @@ struct DiagDetail {
   LogTableId table_id;
 };
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVSP4RT_DIAG_DETAIL_H_

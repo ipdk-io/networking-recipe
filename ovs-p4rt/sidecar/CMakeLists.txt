@@ -95,13 +95,6 @@ install(
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-if(BUILD_SPIES)
-    install(
-        TARGETS ovsp4rt_stubs
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-endif()
-
 install(
     DIRECTORY
         ${OVSP4RT_INCLUDE_DIR}/ovsp4rt
@@ -125,16 +118,6 @@ install(
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
-
-if(BUILD_SPIES)
-    set(ovsp4rt_spies_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_spies.pc)
-    configure_file(cmake/libovsp4rt_spies.pc.in ${ovsp4rt_spies_cfg_file} @ONLY)
-
-    install(
-        FILES ${ovsp4rt_spies_cfg_file}
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-    )
-endif()
 
 #-----------------------------------------------------------------------
 # Testing

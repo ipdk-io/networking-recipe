@@ -9,7 +9,7 @@
 #include "ovsp4rt_private.h"
 #include "testing/ipv6_tunnel_test.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 //----------------------------------------------------------------------
 // PrepareV6VxlanEncapTableEntry
@@ -81,4 +81,4 @@ TEST_F(Ipv6TunnelTest, vxlan_encap_v6_params_are_correct) {
   EXPECT_EQ(vni.value(), VNI);
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

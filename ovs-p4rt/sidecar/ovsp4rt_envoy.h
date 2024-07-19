@@ -17,7 +17,7 @@
 ABSL_DECLARE_FLAG(uint64_t, device_id);
 ABSL_DECLARE_FLAG(std::string, role_name);
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 // Abstracts the interface to the P4Runtime session.
 class Envoy {
@@ -54,9 +54,9 @@ class Envoy {
 
  private:
   // P4Runtime session.
-  std::unique_ptr<ovs_p4rt::OvsP4rtSession> session_;
+  std::unique_ptr<ovsp4rt::OvsP4rtSession> session_;
 };
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVSP4RT_ENVOY_H_
