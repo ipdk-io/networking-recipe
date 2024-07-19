@@ -18,7 +18,7 @@
 
 ABSL_FLAG(bool, dump_json, false, "Dump test input and output in JSON.");
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 using google::protobuf::util::JsonPrintOptions;
 using google::protobuf::util::MessageToJsonString;
@@ -209,4 +209,4 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV6TableEntry) {
   }
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

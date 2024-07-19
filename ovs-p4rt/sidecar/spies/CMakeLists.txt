@@ -17,6 +17,19 @@ target_include_directories(ovsp4rt_spies PUBLIC
     ${OVSP4RT_INCLUDE_DIR}
 )
 
+install(
+    TARGETS ovsp4rt_spies
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+set(ovsp4rt_spies_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_spies.pc)
+configure_file(libovsp4rt_spies.pc.in ${ovsp4rt_spies_cfg_file} @ONLY)
+
+install(
+    FILES ${ovsp4rt_spies_cfg_file}
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
+
 #-----------------------------------------------------------------------
 # ovsp4rt_config_fdb_entry_spy_test
 #-----------------------------------------------------------------------

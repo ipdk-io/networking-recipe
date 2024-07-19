@@ -10,7 +10,7 @@
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 //----------------------------------------------------------------------
 // Proposed new function (UUT)
@@ -51,4 +51,4 @@ TEST(EncodeHostPortTestValue, port_encodings_are_identical) {
   ASSERT_STREQ(experimental_value.c_str(), control_value.c_str());
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

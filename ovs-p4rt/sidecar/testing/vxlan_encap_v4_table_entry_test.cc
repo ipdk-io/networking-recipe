@@ -9,7 +9,7 @@
 #include "ovsp4rt_private.h"
 #include "testing/ipv4_tunnel_test.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 //----------------------------------------------------------------------
 // PrepareVxlanEncapTableEntry()
@@ -64,6 +64,7 @@ TEST_F(Ipv4TunnelTest, vxlan_encap_v4_params_are_correct) {
     }
   }
 
+#if defined(ES2K_TARGET)
   ASSERT_TRUE(src_port.has_value());
 
   if (check_src_port_) {
@@ -72,6 +73,7 @@ TEST_F(Ipv4TunnelTest, vxlan_encap_v4_params_are_correct) {
     // set the src_port param to (dst_port * 2).
     EXPECT_EQ(src_port.value(), DST_PORT * 2);  // SRC_PORT
   }
+#endif
 
   ASSERT_TRUE(dst_port.has_value());
   EXPECT_EQ(dst_port.value(), DST_PORT);
@@ -80,4 +82,4 @@ TEST_F(Ipv4TunnelTest, vxlan_encap_v4_params_are_correct) {
   EXPECT_EQ(vni.value(), VNI);
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

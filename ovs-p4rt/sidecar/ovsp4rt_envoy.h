@@ -9,7 +9,7 @@
 #include "ovsp4rt_session.h"
 #include "p4/v1/p4runtime.pb.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 // Abstracts the interface to the P4Runtime session.
 // SIMPLIFIED VERSION FOR EARLY TESTING.
@@ -25,6 +25,6 @@ class Envoy {
   }
 };
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVSP4RT_ENVOY_H_
