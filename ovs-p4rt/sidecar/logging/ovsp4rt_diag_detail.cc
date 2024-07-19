@@ -3,7 +3,7 @@
 
 #include "ovsp4rt_diag_detail.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 const char* DiagDetail::getLogTableName() {
   switch (table_id) {
@@ -30,4 +30,4 @@ const char* DiagDetail::getLogTableName() {
   }
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

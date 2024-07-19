@@ -10,7 +10,7 @@
 #include <iostream>
 #include <string>
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 using ::grpc::experimental::FileWatcherCertificateProvider;
 using ::grpc::experimental::TlsChannelCredentialsOptions;
@@ -46,4 +46,4 @@ std::shared_ptr<::grpc::ChannelCredentials> GenerateClientCredentials() {
   return client_credentials_;
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

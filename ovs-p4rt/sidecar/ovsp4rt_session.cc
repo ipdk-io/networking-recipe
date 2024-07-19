@@ -22,7 +22,7 @@
 #define DEFAULT_OVS_P4RT_ROLE_CONFIG_FILE \
   "/usr/share/stratum/ovs_p4rt_role_config.pb.txt"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 using ::p4::config::v1::P4Info;
 using ::p4::v1::GetForwardingPipelineConfigRequest;
@@ -213,4 +213,4 @@ absl::Status SendWriteRequest(OvsP4rtSession* session,
   return update->mutable_entity()->mutable_table_entry();
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt

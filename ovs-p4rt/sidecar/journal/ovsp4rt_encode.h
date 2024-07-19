@@ -10,7 +10,7 @@
 
 #include "ovsp4rt/ovs-p4rt.h"
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 //----------------------------------------------------------------------
 // Convert struct contents to JSON.
@@ -56,6 +56,6 @@ extern nlohmann::json EncodeSrcPortInfo(const char* func_name,
                                         const struct src_port_info& sp_info,
                                         bool insert_entry);
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
 
 #endif  // OVSP4RT_ENCODE_H

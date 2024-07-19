@@ -15,7 +15,7 @@ constexpr uint32_t LEARN_INFO_SCHEMA = 1;
 constexpr uint32_t PORT_INFO_SCHEMA = 1;
 }  // namespace
 
-namespace ovs_p4rt {
+namespace ovsp4rt {
 
 //----------------------------------------------------------------------
 // Convert struct contents to JSON.
@@ -145,4 +145,4 @@ nlohmann::json EncodeSrcPortInfo(const char* func_name,
   return json;
 }
 
-}  // namespace ovs_p4rt
+}  // namespace ovsp4rt
