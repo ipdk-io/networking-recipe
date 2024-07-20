@@ -83,7 +83,7 @@ if(BUILD_SPIES)
 endif()
 
 #-----------------------------------------------------------------------
-# libovsp4rt_journal_o
+# ovsp4rt_journal
 #-----------------------------------------------------------------------
 if(BUILD_JOURNAL)
     add_subdirectory(journal)

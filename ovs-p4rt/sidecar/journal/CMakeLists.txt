@@ -5,21 +5,21 @@
 #
 
 #-----------------------------------------------------------------------
-# ovsp4rt_journal_o
+# Add ovsp4rt_journal to ovsp4rt.
 #-----------------------------------------------------------------------
-add_library(ovsp4rt_journal_o OBJECT
+target_sources(ovsp4rt PRIVATE
   ovsp4rt_encode.cc
   ovsp4rt_encode.h
   ovsp4rt_journal.cc
   ovsp4rt_journal.h
 )
 
-target_include_directories(ovsp4rt_journal_o PUBLIC
+target_include_directories(ovsp4rt PUBLIC
   ${DEPEND_INSTALL_DIR}/include
   ${OVSP4RT_INCLUDE_DIR}
 )
 
-target_link_libraries(ovsp4rt_journal_o PUBLIC
+target_link_libraries(ovsp4rt PUBLIC
   p4runtime_proto
 )
 
@@ -38,8 +38,8 @@ target_include_directories(encode_addr_test PUBLIC
 )
 
 target_link_libraries(encode_addr_test PUBLIC
-  GTest::gtest
   absl::flags_parse
+  GTest::gtest
 )
 
 add_test(NAME encode_addr_test COMMAND encode_addr_test)
