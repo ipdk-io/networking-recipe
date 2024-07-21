@@ -20,7 +20,7 @@ target_link_libraries(sgnmi_cli
     PUBLIC
         stratum_static
         gnmi_proto
-        grpc_proto
+        google_rpc_proto
         gflags::gflags_shared
         gRPC::grpc
         gRPC::grpc++

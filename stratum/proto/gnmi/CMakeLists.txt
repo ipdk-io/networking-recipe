@@ -29,14 +29,11 @@ add_library(gnmi_proto SHARED
     ${PB_OUT_DIR}/gnmi/gnmi_ext.pb.h
 )
 
-# Ensure that the header files on which we depend have been generated.
-#add_dependencies(gnmi_proto grpc_proto)
-
 target_include_directories(gnmi_proto PRIVATE ${PB_OUT_DIR})
 
 target_link_libraries(gnmi_proto
     PUBLIC
-        grpc_proto
+        google_rpc_proto
         protobuf::libprotobuf
         absl::hash
         absl::strings
