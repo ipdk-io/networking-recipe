@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
+find_package(GTest)
+
 #-----------------------------------------------------------------------
 # Add ovsp4rt_journal to ovsp4rt
 #-----------------------------------------------------------------------
@@ -25,10 +27,12 @@ target_link_libraries(ovsp4rt PUBLIC
 
 if(BUILD_TESTING)
 
-find_package(GTest)
-
+#-----------------------------------------------------------------------
+# encode_addr_test
+#-----------------------------------------------------------------------
 add_executable(encode_addr_test
   encode_addr_test.cc
+  encode_base_test.h
   ovsp4rt_encode.cc
   ovsp4rt_encode.h
   test_main.cc
@@ -40,8 +44,8 @@ target_include_directories(encode_addr_test PUBLIC
 )
 
 target_link_libraries(encode_addr_test PUBLIC
-  GTest::gtest
   absl::flags_parse
+  GTest::gtest
 )
 
 add_test(NAME encode_addr_test COMMAND encode_addr_test)
