@@ -20,12 +20,12 @@ add_library(google_rpc_code_proto_o OBJECT
 target_include_directories(google_rpc_code_proto_o PUBLIC ${PB_OUT_DIR})
 
 # status.proto
-add_library(rpc_status_proto_o OBJECT
+add_library(google_rpc_status_proto_o OBJECT
     ${PB_OUT_DIR}/google/rpc/status.pb.cc
     ${PB_OUT_DIR}/google/rpc/status.pb.h
 )
 
-target_include_directories(rpc_status_proto_o PUBLIC ${PB_OUT_DIR})
+target_include_directories(google_rpc_status_proto_o PUBLIC ${PB_OUT_DIR})
 
 ####################
 # google_rpc_proto #
@@ -33,7 +33,7 @@ target_include_directories(rpc_status_proto_o PUBLIC ${PB_OUT_DIR})
 
 add_library(google_rpc_proto SHARED
     $<TARGET_OBJECTS:google_rpc_code_proto_o>
-    $<TARGET_OBJECTS:rpc_status_proto_o>
+    $<TARGET_OBJECTS:google_rpc_status_proto_o>
 )
 
 target_link_libraries(google_rpc_proto PUBLIC protobuf::libprotobuf)

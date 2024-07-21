@@ -57,7 +57,7 @@ add_library(p4runtime_proto_o OBJECT
 target_include_directories(p4runtime_proto_o PUBLIC ${PB_OUT_DIR})
 
 add_dependencies(p4runtime_proto_o
-    rpc_status_proto_o
+    google_rpc_status_proto_o
     p4data_proto_o
     p4info_proto_o
 )
