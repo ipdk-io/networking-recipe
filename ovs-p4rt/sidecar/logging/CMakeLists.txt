@@ -38,6 +38,8 @@ set_target_properties(ovsp4rt_logging_so PROPERTIES
   OUTPUT_NAME ovsp4rt_logging
 )
 
+if(BUILD_TESTING)
+
 #-----------------------------------------------------------------------
 # ovsp4rt_logging_test
 #-----------------------------------------------------------------------
@@ -54,3 +56,5 @@ target_link_libraries(ovsp4rt_logging_test PUBLIC
   ovsp4rt_logging_so
   sde::target_sys
 )
+
+endif(BUILD_TESTING)
