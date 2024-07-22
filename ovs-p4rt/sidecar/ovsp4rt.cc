@@ -11,6 +11,7 @@
 #include "logging/ovsp4rt_logging.h"
 #include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
+#include "ovsp4rt_context.h"
 #include "ovsp4rt_envoy.h"
 #include "ovsp4rt_private.h"
 #include "session/ovsp4rt_credentials.h"
