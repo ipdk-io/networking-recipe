@@ -15,17 +15,13 @@ set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(ovs_sidecar_o OBJECT
     ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
     ovsp4rt.cc
-    ovsp4rt_context.h
-    ovsp4rt_credentials.cc
-    ovsp4rt_credentials.h
     ovsp4rt_envoy.cc
     ovsp4rt_envoy.h
     ovsp4rt_private.h
-    ovsp4rt_session.cc
-    ovsp4rt_session.h
 )
 
 add_subdirectory(logging)
+add_subdirectory(session)
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
@@ -51,6 +47,7 @@ target_link_libraries(ovs_sidecar_o PUBLIC
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
+    $<TARGET_OBJECTS:ovsp4rt_session_o>
 )
 
 add_subdirectory(journal)
