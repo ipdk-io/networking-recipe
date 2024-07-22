@@ -25,6 +25,9 @@ target_link_libraries(ovsp4rt PUBLIC
 
 if(BUILD_TESTING)
 
+# Set the "ovsp4rt" label on all tests in this directory.
+set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
+
 find_package(GTest)
 
 add_executable(encode_addr_test

@@ -6,8 +6,8 @@
 #include "absl/flags/flag.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "ovsp4rt_credentials.h"
-#include "ovsp4rt_session.h"
+#include "session/ovsp4rt_credentials.h"
+#include "session/ovsp4rt_session.h"
 
 #define DEFAULT_OVS_P4RT_ROLE_NAME "ovs-p4rt"
 

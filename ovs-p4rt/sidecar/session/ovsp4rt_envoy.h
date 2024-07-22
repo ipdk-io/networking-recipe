@@ -11,8 +11,8 @@
 #include "absl/flags/declare.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "ovsp4rt_session.h"
 #include "p4/v1/p4runtime.pb.h"
+#include "session/ovsp4rt_session.h"
 
 ABSL_DECLARE_FLAG(uint64_t, device_id);
 ABSL_DECLARE_FLAG(std::string, role_name);

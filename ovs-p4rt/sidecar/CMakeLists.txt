@@ -15,8 +15,6 @@ set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(ovs_sidecar_o OBJECT
     ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
     ovsp4rt.cc
-    ovsp4rt_envoy.cc
-    ovsp4rt_envoy.h
     ovsp4rt_private.h
 )
 
