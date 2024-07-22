@@ -65,13 +65,7 @@ set_install_rpath(ovsp4rt $ORIGIN ${DEP_ELEMENT})
 #-----------------------------------------------------------------------
 # libovsp4rt_stubs.a
 #-----------------------------------------------------------------------
-add_library(ovsp4rt_stubs STATIC
-    ovsp4rt_stubs.cc
-)
-
-target_include_directories(ovsp4rt_stubs PUBLIC
-    ${OVSP4RT_INCLUDE_DIR}
-)
+add_subdirectory(stubs)
 
 #-----------------------------------------------------------------------
 # libovsp4rt_spies.a
@@ -103,18 +97,14 @@ install(
 )
 
 #-----------------------------------------------------------------------
-# pkg-config files
+# pkg-config file
 #-----------------------------------------------------------------------
 set(ovsp4rt_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt.pc)
 configure_file(cmake/libovsp4rt.pc.in ${ovsp4rt_cfg_file} @ONLY)
 
-set(ovsp4rt_stubs_cfg_file ${CMAKE_CURRENT_BINARY_DIR}/libovsp4rt_stubs.pc)
-configure_file(cmake/libovsp4rt_stubs.pc.in ${ovsp4rt_stubs_cfg_file} @ONLY)
-
 install(
     FILES
         ${ovsp4rt_cfg_file}
-        ${ovsp4rt_stubs_cfg_file}
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
