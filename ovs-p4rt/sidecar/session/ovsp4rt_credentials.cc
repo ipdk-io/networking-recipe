@@ -41,7 +41,7 @@ std::shared_ptr<::grpc::ChannelCredentials> GenerateClientCredentials() {
     client_credentials_ = ::grpc::experimental::TlsCredentials(*tls_opts);
   } else {
     client_credentials_ = ::grpc::InsecureChannelCredentials();
-    printf("Using insecure client credentials!\n");
+    std::cout << "Using insecure client credentials!" << std::endl;
   }
   return client_credentials_;
 }
