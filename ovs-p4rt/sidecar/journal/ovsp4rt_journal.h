@@ -18,6 +18,8 @@ namespace ovsp4rt {
 // Captures the inputs and outputs to an API function.
 class Journal {
  public:
+  ~Journal() { saveEntry(); }
+
   void recordInput(const char* func_name, const struct mac_learning_info& info,
                    bool insert_entry);
 

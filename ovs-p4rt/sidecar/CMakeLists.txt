@@ -19,13 +19,8 @@ set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
 add_library(ovs_sidecar_o OBJECT
     ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
     ovsp4rt.cc
-    ovsp4rt_context.h
-    ovsp4rt_envoy.h
     ovsp4rt_private.h
 )
-
-add_subdirectory(logging)
-add_subdirectory(session)
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
@@ -48,6 +43,9 @@ target_link_libraries(ovs_sidecar_o PUBLIC
 #-----------------------------------------------------------------------
 # libovsp4rt.so
 #-----------------------------------------------------------------------
+add_subdirectory(logging)
+add_subdirectory(session)
+
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
