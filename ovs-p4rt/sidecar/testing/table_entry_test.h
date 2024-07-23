@@ -42,6 +42,17 @@ class TableEntryTest : public ::testing::Test {
     }
   }
 
+  static uint16_t DecodePortValue(const std::string& string_value) {
+    uint16_t port_value = DecodeWordValue(string_value) & 0xffff;
+    // I have no idea why the port value should be byte-swapped, but
+    // that's what the functions in ovsp4rt.cc do.
+    return ntohs(port_value);
+  }
+
+  static uint16_t DecodeVniValue(const std::string& string_value) {
+    return DecodeWordValue(string_value) & 0xffff;
+  }
+
   static uint32_t DecodeWordValue(const std::string& string_value) {
     uint32_t word_value = 0;
     for (int i = 0; i < string_value.size(); i++) {
