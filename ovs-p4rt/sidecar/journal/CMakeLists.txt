@@ -4,6 +4,11 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
+find_package(GTest)
+
+# Set the "ovsp4rt" label on all tests in this directory.
+set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
+
 #-----------------------------------------------------------------------
 # ovsp4rt_journal_o
 #-----------------------------------------------------------------------
@@ -23,10 +28,14 @@ target_link_libraries(ovsp4rt_journal_o PUBLIC
   p4runtime_proto
 )
 
-find_package(GTest)
+if(BUILD_TESTING)
 
+#-----------------------------------------------------------------------
+# encode_addr_test
+#-----------------------------------------------------------------------
 add_executable(encode_addr_test
   encode_addr_test.cc
+  encode_base_test.h
   ovsp4rt_encode.cc
   ovsp4rt_encode.h
   test_main.cc
@@ -43,3 +52,5 @@ target_link_libraries(encode_addr_test PUBLIC
 )
 
 add_test(NAME encode_addr_test COMMAND encode_addr_test)
+
+endif(BUILD_TESTING)
