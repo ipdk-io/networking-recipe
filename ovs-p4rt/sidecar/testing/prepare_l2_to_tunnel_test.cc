@@ -9,6 +9,7 @@
 #include "absl/flags/flag.h"
 #include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
+#include "journal/ovsp4rt_encode.h"
 #include "logging/ovsp4rt_diag_detail.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
@@ -31,6 +32,8 @@ static ::p4::config::v1::P4Info p4info;
 //----------------------------------------------------------------------
 class PrepareL2ToTunnelTest : public ::testing::Test {
  protected:
+  PrepareL2ToTunnelTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
+
   static void SetUpTestSuite() {
     // Initialize p4info message from file.
     ::util::Status status = stratum::ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -39,13 +42,21 @@ class PrepareL2ToTunnelTest : public ::testing::Test {
     }
   }
 
-  PrepareL2ToTunnelTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
+  static uint32_t DecodeWordValue(const std::string& string_value) {
+    uint32_t word_value;
+    for (int i = 0; i < string_value.size(); i++) {
+      word_value = (word_value << 8) | string_value[i];
+    }
+    return word_value;
+  }
 
   void DumpMacLearningInfo(const char* func_name,
                            const struct mac_learning_info& learn_info,
                            bool insert_entry) {
     if (dump_json_) {
-      // CaptureMacLearningInfo(func_name, learn_info, insert_entry);
+      nlohmann::json json =
+        EncodeMacLearningInfo(func_name, learn_info, insert_entry);
+      std::cout << json.dump(2) << std::endl;
     }
   }
 
@@ -64,18 +75,10 @@ class PrepareL2ToTunnelTest : public ::testing::Test {
   bool dump_json_;
 };
 
-uint32_t DecodeWordValue(const std::string string_value) {
-  uint32_t word_value;
-  for (int i = 0; i < string_value.size(); i++) {
-    word_value = (word_value << 8) | string_value[i];
-  }
-  return word_value;
-}
-
 //----------------------------------------------------------------------
 // GetL2ToTunnelV4TableEntry
 //----------------------------------------------------------------------
-constexpr uint8_t kMacAddrV4[6] = {0xd, 0xe, 0xa, 0xd, 0, 0};
+constexpr uint8_t kMacAddrV4[6] = {10, 20, 30, 40, 50, 60};
 constexpr uint32_t kIpAddrV4 = 0x0a010203U;  // 10.1.2.3
 
 // TODO(derek): How stable are the table and action IDs?
@@ -84,6 +87,7 @@ constexpr uint32_t kActionIdV4 = 23805991U;
 
 void get_v4_fdb_info(mac_learning_info& fdb_info) {
   memcpy(fdb_info.mac_addr, kMacAddrV4, sizeof(fdb_info.mac_addr));
+  fdb_info.is_tunnel = true;
   fdb_info.tnl_info.remote_ip.family = AF_INET;
   fdb_info.tnl_info.remote_ip.ip.v4addr.s_addr = kIpAddrV4;
 }
@@ -141,7 +145,7 @@ TEST_F(PrepareL2ToTunnelTest, GetL2ToTunnelV4TableEntry) {
 //----------------------------------------------------------------------
 // GetL2ToTunnelV6TableEntry
 //----------------------------------------------------------------------
-constexpr uint8_t kMacAddrV6[] = {0xb, 0xe, 0xe, 0xb, 0xe, 0xe};
+constexpr uint8_t kMacAddrV6[] = {60, 50, 40, 30, 20, 10};
 constexpr uint32_t kIpAddrV6[] = {0, 66, 129, 512};
 constexpr int kIpAddrV6Len = sizeof(kIpAddrV6) / sizeof(kIpAddrV6[0]);
 
@@ -151,6 +155,7 @@ constexpr uint32_t kActionIdV6 = 23953453U;
 
 void get_v6_fdb_info(mac_learning_info& fdb_info) {
   memcpy(fdb_info.mac_addr, kMacAddrV6, sizeof(fdb_info.mac_addr));
+  fdb_info.is_tunnel = true;
   fdb_info.tnl_info.remote_ip.family = AF_INET6;
   for (int i = 0; i < kIpAddrV6Len; i++) {
     fdb_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[i] = kIpAddrV6[i];
