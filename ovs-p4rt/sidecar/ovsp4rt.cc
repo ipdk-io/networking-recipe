@@ -2129,6 +2129,7 @@ absl::Status ConfigTunnelTermTableEntry(ovsp4rt::OvsP4rtSession* session,
 }
 
 #if defined(ES2K_TARGET)
+
 absl::Status ConfigDstIpMacMapTableEntry(ovsp4rt::OvsP4rtSession* session,
                                          struct ip_mac_map_info& ip_info,
                                          const ::p4::config::v1::P4Info& p4info,
@@ -2176,14 +2177,14 @@ absl::Status ConfigSrcIpMacMapTableEntry(ovsp4rt::OvsP4rtSession* session,
   }
   return status;
 }
+
 #endif  // ES2K_TARGET
 
 }  // namespace ovsp4rt
 
 //----------------------------------------------------------------------
-// Functions with C interfaces
+// ovsp4rt_str_to_tunnel_type (common)
 //----------------------------------------------------------------------
-
 enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
   if (tnl_type) {
     if (strcmp(tnl_type, "vxlan") == 0) {
@@ -2196,6 +2197,9 @@ enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
 }
 
 #if defined(ES2K_TARGET)
+//----------------------------------------------------------------------
+// ovsp4rt_config_fdb_entry (ES2K)
+//----------------------------------------------------------------------
 void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
@@ -2208,6 +2212,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   status = envoy.connect(grpc_addr);
   if (!status.ok()) return;
 
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = envoy.getPipelineConfig(&p4info);
   if (!status.ok()) return;
@@ -2320,6 +2325,9 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   }
 }
 
+//----------------------------------------------------------------------
+// ovsp4rt_config_rx_tunnel_src_entry (ES2K)
+//----------------------------------------------------------------------
 void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
                                         bool insert_entry,
                                         const char* grpc_addr) {
@@ -2334,6 +2342,8 @@ void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
       std::move(status_or_session).value();
+
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
@@ -2343,12 +2353,15 @@ void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
   if (!status.ok()) return;
 }
 
+//----------------------------------------------------------------------
+// ovsp4rt_config_tunnel_src_port_entry (ES2K)
+//----------------------------------------------------------------------
 void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
                                           bool insert_entry,
                                           const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   // Start a new client session.
@@ -2360,6 +2373,8 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
       std::move(status_or_session).value();
+
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
@@ -2380,6 +2395,9 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
   if (!status.ok()) return;
 }
 
+//----------------------------------------------------------------------
+// ovsp4rt_config_src_port_entry (ES2K)
+//----------------------------------------------------------------------
 void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
                                    bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
@@ -2392,6 +2410,7 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
   status = envoy.connect(grpc_addr);
   if (!status.ok()) return;
 
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = envoy.getPipelineConfig(&p4info);
   if (!status.ok()) return;
@@ -2435,6 +2454,9 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
   if (!status.ok()) return;
 }
 
+//----------------------------------------------------------------------
+// ovsp4rt_config_vlan_entry (ES2K)
+//----------------------------------------------------------------------
 void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
                                const char* grpc_addr) {
   using namespace ovsp4rt;
@@ -2448,6 +2470,8 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
       std::move(status_or_session).value();
+
+  // Fetch P4Info object from the server.
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
@@ -2462,7 +2486,9 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
 }
 #else
 
-// DPDK target
+//----------------------------------------------------------------------
+// ovsp4rt_config_fdb_entry (DPDK)
+//----------------------------------------------------------------------
 void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
@@ -2475,6 +2501,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   status = envoy.connect(grpc_addr);
   if (!status.ok()) return;
 
+  // Fetch P4Info object from the server.
   ::p4::config::v1::P4Info p4info;
   status = envoy.getPipelineConfig(&p4info);
   if (!status.ok()) return;
@@ -2492,34 +2519,32 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   }
 }
 
+//----------------------------------------------------------------------
+// Unimplemented functions (DPDK)
+//----------------------------------------------------------------------
 void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
                                         bool insert_entry,
-                                        const char* grpc_addr) {
-  /* Unimplemented for DPDK target */
-}
+                                        const char* grpc_addr) {}
 
 void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
-                               const char* grpc_addr) {
-  /* Unimplemented for DPDK target */
-}
+                               const char* grpc_addr) {}
+
 void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
                                           bool insert_entry,
-                                          const char* grpc_addr) {
-  /* Unimplemented for DPDK target */
-}
+                                          const char* grpc_addr) {}
 
 void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
-                                   bool insert_entry, const char* grpc_addr) {
-  /* Unimplemented for DPDK target */
-}
+                                   bool insert_entry, const char* grpc_addr) {}
 
 void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
                                      bool insert_entry, const char* grpc_addr) {
-  /* Unimplemented for DPDK target */
 }
 
 #endif
 
+//----------------------------------------------------------------------
+// ovsp4rt_config_tunnel_entry (common)
+//----------------------------------------------------------------------
 void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
                                  bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
@@ -2533,9 +2558,12 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<OvsP4rtSession> session =
       std::move(status_or_session).value();
+
+  // Fetch P4Info object from the server.
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
+
   status =
       ConfigEncapTableEntry(session.get(), tunnel_info, p4info, insert_entry);
   if (!status.ok()) return;
@@ -2552,6 +2580,9 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
 }
 
 #if defined(ES2K_TARGET)
+//----------------------------------------------------------------------
+// ovsp4rt_config_ip_mac_map_entry (ES2K)
+//----------------------------------------------------------------------
 void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
                                      bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
@@ -2565,6 +2596,8 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
   // Unwrap the session from the StatusOr object.
   std::unique_ptr<ovsp4rt::OvsP4rtSession> session =
       std::move(status_or_session).value();
+
+  // Fetch P4Info object from the server.
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status =
       ovsp4rt::GetForwardingPipelineConfig(session.get(), &p4info);
