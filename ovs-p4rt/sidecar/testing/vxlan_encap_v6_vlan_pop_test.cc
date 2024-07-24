@@ -58,11 +58,11 @@ TEST_F(Ipv6TunnelTest, vxlan_encap_v6_vlan_pop_params_are_correct) {
     auto param_value = param.value();
 
     if (param_id == SRC_PORT_PARAM_ID) {
-      src_port = DecodeWordValue(param_value) & 0xffff;
+      src_port = DecodePortValue(param_value);
     } else if (param_id == DST_PORT_PARAM_ID) {
-      dst_port = DecodeWordValue(param_value) & 0xffff;
+      dst_port = DecodePortValue(param_value);
     } else if (param_id == VNI_PARAM_ID) {
-      vni = DecodeWordValue(param_value) & 0xffff;
+      vni = DecodeVniValue(param_value);
     }
   }
 
