@@ -45,6 +45,10 @@ std::string EncodeByteValue(int arg_count...) {
   return byte_value;
 }
 
+static inline std::string EncodeVniValue(uint16_t vni) {
+  return EncodeByteValue(3, 0, (vni >> 8) & 0xFF, vni & 0xFF);
+}
+
 std::string CanonicalizeIp(const uint32_t ipv4addr) {
   return EncodeByteValue(4, (ipv4addr & 0xff), ((ipv4addr >> 8) & 0xff),
                          ((ipv4addr >> 16) & 0xff), ((ipv4addr >> 24) & 0xff));
@@ -110,10 +114,6 @@ int GetMatchFieldId(const ::p4::config::v1::P4Info& p4info,
 static inline int32_t ValidIpAddr(uint32_t nw_addr) {
   return (nw_addr && nw_addr != INADDR_ANY && nw_addr != INADDR_LOOPBACK &&
           nw_addr != 0xffffffff);
-}
-
-static inline std::string EncodeVniValue(uint16_t vni) {
-  return EncodeByteValue(3, 0, vni & 0xFF, (vni >> 8) & 0xFF);
 }
 
 #if defined(ES2K_TARGET)

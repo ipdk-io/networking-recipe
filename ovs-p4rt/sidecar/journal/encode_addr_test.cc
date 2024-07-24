@@ -7,19 +7,16 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-#include "absl/flags/flag.h"
+#include "encode_base_test.h"
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_encode.h"
 
-ABSL_FLAG(bool, dump_json, false, "Dump JSON output");
-
 namespace ovsp4rt {
 
-class EncodeAddrTest : public testing::Test {
- public:
-  EncodeAddrTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); };
-  bool dump_json_;
+class EncodeAddrTest : public EncodeBaseTest {
+ protected:
+  EncodeAddrTest() {}
 };
 
 TEST_F(EncodeAddrTest, can_encode_mac_address) {
