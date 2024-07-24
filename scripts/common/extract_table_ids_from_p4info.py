@@ -47,8 +47,11 @@ def write_output(ids_and_names, output_file):
 parser = argparse.ArgumentParser(description='This script extracts P4 table ID \
                                 values from the input P4Info.txt file and \
                                 writes them to the output role_config.txt file.')
-parser.add_argument("-i", "--input", required=True, help="input file path")
-parser.add_argument("-o", "--output", required=True, help="output file path")
+requiredArgs = parser.add_argument_group("required arguments")
+requiredArgs.add_argument("-i", "--input", required=True,
+                          help="input file path")
+requiredArgs.add_argument("-o", "--output", required=True,
+                          help="output file path")
 args = parser.parse_args()
 
 

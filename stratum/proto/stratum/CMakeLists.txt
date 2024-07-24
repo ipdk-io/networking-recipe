@@ -36,7 +36,7 @@ add_library(stratum_proto SHARED
 target_include_directories(stratum_proto PUBLIC ${PB_OUT_DIR})
 
 target_link_libraries(stratum_proto PUBLIC
-    grpc_proto
+    google_rpc_proto
     p4runtime_proto
     protobuf::libprotobuf
 )
