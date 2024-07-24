@@ -17,8 +17,8 @@ constexpr char IPV6_DST_ADDR[] = "fe80::215:192.168.17.5";
 constexpr int IPV6_PREFIX_LEN = 64;
 
 constexpr uint16_t SRC_PORT = 0x1984;
-constexpr uint16_t DST_PORT = 0x1066;
-constexpr uint16_t VNI = 0x1776;
+constexpr uint16_t DST_PORT = 0x4224;
+constexpr uint16_t VNI = 0x1066;
 
 class Ipv6TunnelTest : public TableEntryTest {
  protected:
@@ -37,9 +37,9 @@ class Ipv6TunnelTest : public TableEntryTest {
         << "Error converting " << IPV6_DST_ADDR;
     info.remote_ip.prefix_len = IPV6_PREFIX_LEN;
 
-    info.src_port = htons(SRC_PORT);
-    info.dst_port = htons(DST_PORT);
-    info.vni = htons(VNI);
+    info.src_port = SRC_PORT;
+    info.dst_port = DST_PORT;
+    info.vni = VNI;
   };
 };
 

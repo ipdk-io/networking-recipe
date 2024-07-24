@@ -6,6 +6,9 @@
 
 find_package(GTest)
 
+# Set the "ovsp4rt" label on all tests in this directory.
+set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
+
 #-----------------------------------------------------------------------
 # Add ovsp4rt_journal to ovsp4rt
 #-----------------------------------------------------------------------
