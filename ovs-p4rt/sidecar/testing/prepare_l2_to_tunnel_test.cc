@@ -55,7 +55,7 @@ class PrepareL2ToTunnelTest : public ::testing::Test {
                            bool insert_entry) {
     if (dump_json_) {
       nlohmann::json json =
-        EncodeMacLearningInfo(func_name, learn_info, insert_entry);
+          EncodeMacLearningInfo(func_name, learn_info, insert_entry);
       std::cout << json.dump(2) << std::endl;
     }
   }
