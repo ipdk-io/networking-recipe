@@ -18,7 +18,7 @@ constexpr int IPV6_PREFIX_LEN = 64;
 
 constexpr uint16_t SRC_PORT = 0x1984;
 constexpr uint16_t DST_PORT = 0x4224;
-constexpr uint16_t VNI = 0x1066;
+constexpr uint32_t VNI = 0x1066;
 
 class Ipv6TunnelTest : public TableEntryTest {
  protected:

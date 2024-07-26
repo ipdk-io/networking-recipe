@@ -49,8 +49,8 @@ class TableEntryTest : public ::testing::Test {
     return ntohs(port_value);
   }
 
-  static uint16_t DecodeVniValue(const std::string& string_value) {
-    return DecodeWordValue(string_value) & 0xffff;
+  static uint32_t DecodeVniValue(const std::string& string_value) {
+    return DecodeWordValue(string_value) & 0xffffff;
   }
 
   static uint32_t DecodeWordValue(const std::string& string_value) {
