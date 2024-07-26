@@ -1,12 +1,12 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef TESTING_P4INFO_TEXT_H_
-#define TESTING_P4INFO_TEXT_H_
+#ifndef ES2K_P4INFO_TEXT_H_
+#define ES2K_P4INFO_TEXT_H_
 
-// P4Info for ES2K Linux Networking V3.
-constexpr char P4INFO_TEXT[] =
-    R"p4(pkg_info {
+// P4Info for ES2K Linux Networking.
+constexpr char P4INFO_TEXT[] = R"p4(
+pkg_info {
   arch: "pna"
 }
 tables {
@@ -168,6 +168,30 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 48081556
+    name: "linux_networking_control.always_trap_arp_table"
+    alias: "always_trap_arp_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.inval.data"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdrs.inval.data"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 19361592
+  }
+  const_default_action_id: 19361592
   size: 1024
 }
 tables {
@@ -503,7 +527,7 @@ tables {
   match_fields {
     id: 2
     name: "vni"
-    bitwidth: 16
+    bitwidth: 24
     match_type: EXACT
   }
   action_refs {
@@ -549,7 +573,7 @@ tables {
   match_fields {
     id: 2
     name: "vni"
-    bitwidth: 16
+    bitwidth: 24
     match_type: EXACT
   }
   action_refs {
@@ -1045,9 +1069,9 @@ tables {
 }
 tables {
   preamble {
-    id: 33785091
-    name: "linux_networking_control.tx_source_port_v4"
-    alias: "tx_source_port_v4"
+    id: 39041593
+    name: "linux_networking_control.tx_source_port"
+    alias: "tx_source_port"
   }
   match_fields {
     id: 1
@@ -1496,7 +1520,6 @@ actions {
     id: 21257015
     name: "NoAction"
     alias: "NoAction"
-    annotations: "@noWarn(\"unused\")"
   }
 }
 actions {
@@ -2225,6 +2248,11 @@ actions {
   }
   params {
     id: 1
+    name: "router_interface_id"
+    bitwidth: 16
+  }
+  params {
+    id: 2
     name: "egress_port"
     bitwidth: 32
     type_name {
@@ -2270,21 +2298,16 @@ actions {
   }
   params {
     id: 1
-    name: "router_interface_id"
-    bitwidth: 16
-  }
-  params {
-    id: 2
     name: "lag_group_id"
     bitwidth: 8
   }
   params {
-    id: 3
+    id: 2
     name: "dmac_high"
     bitwidth: 16
   }
   params {
-    id: 4
+    id: 3
     name: "dmac_low"
     bitwidth: 32
   }
@@ -2502,6 +2525,13 @@ actions {
     id: 21790705
     name: "linux_networking_control.trap_enable"
     alias: "trap_enable"
+  }
+}
+actions {
+  preamble {
+    id: 19361592
+    name: "linux_networking_control.do_trap_enable"
+    alias: "do_trap_enable"
   }
 }
 actions {
@@ -2765,6 +2795,7 @@ type_info {
       }
     }
   }
-})p4";
+}
+)p4";
 
-#endif  // TESTING_P4INFO_TEXT_H_
+#endif  // ES2K_P4INFO_TEXT_H_
