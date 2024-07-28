@@ -223,7 +223,7 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
     }
   }
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 }
 
@@ -295,7 +295,7 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 void PrepareFdbTableEntryforV4VxlanTunnel(
@@ -397,7 +397,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
     }
   }
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 }
 
@@ -501,7 +501,7 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
     }
   }
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 }
 
@@ -706,7 +706,7 @@ absl::Status ConfigFdbTunnelTableEntry(
     }
   }
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   auto status = ovsp4rt::SendWriteRequest(session, write_request);
@@ -1390,7 +1390,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
   match2->mutable_exact()->set_value(
       CanonicalizeIp(tunnel_info.local_ip.ip.v4addr.s_addr));
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 #if defined(DPDK_TARGET)
@@ -1455,7 +1455,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
     }
   }
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 }
 
@@ -1566,7 +1566,7 @@ absl::Status ConfigEncapTableEntry(ovsp4rt::OvsP4rtSession* session,
     }
   }
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return ovsp4rt::SendWriteRequest(session, write_request);
@@ -2072,7 +2072,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
     return absl::UnknownError("Unsupported tunnel type");
   }
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   auto status = ovsp4rt::SendReadRequest(session, read_request);
@@ -2212,7 +2212,7 @@ absl::Status ConfigTunnelTermTableEntry(ovsp4rt::OvsP4rtSession* session,
                                   insert_entry);
   }
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return ovsp4rt::SendWriteRequest(session, write_request);
@@ -2643,7 +2643,7 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
 }
 
 #else
-#error "ASSERT: unknown TDI target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 //----------------------------------------------------------------------
