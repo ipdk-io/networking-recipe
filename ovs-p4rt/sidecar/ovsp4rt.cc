@@ -55,7 +55,7 @@ static inline std::string EncodeVniValue(uint32_t vni) {
 
 static inline std::string EncodeTunnelId(uint32_t tun) {
   // tunnel_id is bit<20> everywhere but the set_ipsec_tunnel action
-  return EncodeByteValue(3, (tun >> 16) & 0xF, (tun >> 8) & 0xFF, tun & 0xFF);
+  return EncodeByteValue(3, (tun >> 16) & 0x0F, (tun >> 8) & 0xFF, tun & 0xFF);
 }
 
 std::string CanonicalizeIp(const uint32_t ipv4addr) {
