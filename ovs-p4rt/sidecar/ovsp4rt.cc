@@ -208,8 +208,7 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
       }
     }
   }
-
-#else
+#elif defined(DPDK_TARGET)
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
@@ -218,15 +217,18 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD,
                                      ACTION_L2_FWD_PARAM_PORT));
-      // Note: Unusual value semantics. Extract function and document. (dpdk)
+      // Note: Unusual value semantics. Extract Function and document. (dpdk)
       auto port_id = learn_info.vln_info.vlan_id - 1;
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 }
 
 #if defined(ES2K_TARGET)
+
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
@@ -263,6 +265,7 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 #elif defined(DPDK_TARGET)
+
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
@@ -284,12 +287,15 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD,
                                      ACTION_L2_FWD_PARAM_PORT));
-      // Note: Unusual value semantics. Extract function and document. (dpdk)
+      // Note: Unusual value semantics. Extract Function and document. (dpdk)
       auto port_id = learn_info.vln_info.vlan_id - 1;
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
 }
+
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 void PrepareFdbTableEntryforV4VxlanTunnel(
@@ -311,7 +317,6 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
   match1->set_field_id(
       GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_BRIDGE_ID));
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
-
 #endif
 
 #if defined(DPDK_TARGET)
@@ -391,6 +396,8 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
       }
     }
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 }
 
@@ -407,14 +414,13 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
 
   std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
   match->mutable_exact()->set_value(mac_addr);
+
 #if defined(ES2K_TARGET)
   // Based on p4 program for ES2K, we need to provide a match key Bridge ID
   auto match1 = table_entry->add_match();
   match1->set_field_id(
       GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_BRIDGE_ID));
-
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
-
 #endif
 
 #if defined(DPDK_TARGET)
@@ -493,10 +499,13 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
       }
     }
   }
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 }
 
 #if defined(ES2K_TARGET)
+
 void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
                          const ::p4::config::v1::P4Info& p4info,
@@ -610,7 +619,8 @@ absl::Status ConfigL2TunnelTableEntry(
   }
   return status;
 }
-#endif
+
+#endif  // ES2K_TARGET
 
 absl::Status ConfigFdbTxVlanTableEntry(
     ovsp4rt::OvsP4rtSession* session,
@@ -695,8 +705,9 @@ absl::Status ConfigFdbTunnelTableEntry(
     }
   }
 #else
-#error "Unsupported target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
+
   auto status = ovsp4rt::SendWriteRequest(session, write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
@@ -825,7 +836,7 @@ void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
     }
   }
 }
-#endif
+#endif  // ES2K_TARGET
 
 void PrepareEncapTableEntry(p4::v1::TableEntry* table_entry,
                             const struct tunnel_info& tunnel_info,
@@ -1333,7 +1344,8 @@ void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
     }
   }
 }
-#endif
+
+#endif  // ES2K_TARGET
 
 void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                  const struct tunnel_info& tunnel_info,
@@ -1360,9 +1372,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
   match2->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
                                        IPV4_TUNNEL_TERM_TABLE_KEY_VNI));
   match2->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
-
-#else
-
+#elif defined(DPDK_TARGET)
   table_entry->set_table_id(GetTableId(p4info, IPV4_TUNNEL_TERM_TABLE));
 
   // match vxlan tunnel type
@@ -1377,6 +1387,8 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                        IPV4_TUNNEL_TERM_TABLE_KEY_IPV4_DST));
   match2->mutable_exact()->set_value(
       CanonicalizeIp(tunnel_info.local_ip.ip.v4addr.s_addr));
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 #if defined(DPDK_TARGET)
@@ -1440,7 +1452,8 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       }
     }
   }
-
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 }
 
@@ -1514,7 +1527,7 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
     }
   }
 }
-#endif
+#endif  // ES2K_TARGET
 
 absl::Status ConfigEncapTableEntry(ovsp4rt::OvsP4rtSession* session,
                                    const struct tunnel_info& tunnel_info,
@@ -1551,13 +1564,14 @@ absl::Status ConfigEncapTableEntry(ovsp4rt::OvsP4rtSession* session,
     }
   }
 #else
-#error "Unsupported target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return ovsp4rt::SendWriteRequest(session, write_request);
 }
 
 #if defined(ES2K_TARGET)
+
 void PrepareVxlanDecapModTableEntry(p4::v1::TableEntry* table_entry,
                                     const struct tunnel_info& tunnel_info,
                                     const ::p4::config::v1::P4Info& p4info,
@@ -2056,7 +2070,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
     return absl::UnknownError("Unsupported tunnel type");
   }
 #else
-#error "Unsupported target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   auto status = ovsp4rt::SendReadRequest(session, read_request);
@@ -2168,7 +2182,8 @@ absl::Status ConfigRxTunnelSrcPortTableEntry(
 
   return ovsp4rt::SendWriteRequest(session, write_request);
 }
-#endif
+
+#endif  // ES2K_TARGET
 
 absl::Status ConfigTunnelTermTableEntry(ovsp4rt::OvsP4rtSession* session,
                                         const struct tunnel_info& tunnel_info,
@@ -2195,7 +2210,7 @@ absl::Status ConfigTunnelTermTableEntry(ovsp4rt::OvsP4rtSession* session,
                                   insert_entry);
   }
 #else
-#error "Unsupported target"
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
   return ovsp4rt::SendWriteRequest(session, write_request);
@@ -2270,6 +2285,7 @@ enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
 }
 
 #if defined(ES2K_TARGET)
+
 //----------------------------------------------------------------------
 // ovsp4rt_config_fdb_entry (ES2K)
 //----------------------------------------------------------------------
@@ -2563,7 +2579,8 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
       ConfigVlanPopTableEntry(session.get(), vlan_id, p4info, insert_entry);
   if (!status.ok()) return;
 }
-#else
+
+#elif defined(DPDK_TARGET)
 
 //----------------------------------------------------------------------
 // ovsp4rt_config_fdb_entry (DPDK)
@@ -2623,6 +2640,8 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
                                      bool insert_entry, const char* grpc_addr) {
 }
 
+#else
+#error "ASSERT: Unknown TARGET type!"
 #endif
 
 //----------------------------------------------------------------------
