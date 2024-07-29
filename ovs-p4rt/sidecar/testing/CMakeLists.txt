@@ -61,7 +61,7 @@ target_link_libraries(encode_table_id_test PUBLIC
   GTest::gtest_main
 )
 
-#list(APPEND unit_test_names encode_table_id_test)
+list(APPEND unit_test_names encode_table_id_test)
 
 #-----------------------------------------------------------------------
 # encode_host_port_value_test
