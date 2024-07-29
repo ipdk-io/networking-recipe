@@ -91,7 +91,9 @@ class EncodeTableIdTest : public ::testing::Test {
     auto table_action = table_entry.action();
 
     auto action = table_action.action();
-    // EXPECT_EQ(action.action_id(), ACTION_ID);
+    if (ACTION_ID) {
+      EXPECT_EQ(action.action_id(), ACTION_ID);
+    }
 
     auto params = action.params();
     ASSERT_EQ(action.params_size(), 1);
@@ -124,7 +126,7 @@ class EncodeTableIdTest : public ::testing::Test {
 TEST_F(EncodeTableIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_tagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
-  InitV4NativeTagged(23849990);
+  InitV4NativeTagged(26412051);
 
   // Act
   PrepareFdbTableEntryforV4VxlanTunnel(&table_entry, learn_info, p4info,
