@@ -414,14 +414,13 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
 
   std::string mac_addr = CanonicalizeMac(learn_info.mac_addr);
   match->mutable_exact()->set_value(mac_addr);
+
 #if defined(ES2K_TARGET)
   // Based on p4 program for ES2K, we need to provide a match key Bridge ID
   auto match1 = table_entry->add_match();
   match1->set_field_id(
       GetMatchFieldId(p4info, L2_FWD_TX_TABLE, L2_FWD_TX_TABLE_KEY_BRIDGE_ID));
-
   match1->mutable_exact()->set_value(EncodeByteValue(1, learn_info.bridge_id));
-
 #endif
 
 #if defined(DPDK_TARGET)
@@ -1373,7 +1372,6 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
   match2->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
                                        IPV4_TUNNEL_TERM_TABLE_KEY_VNI));
   match2->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
-
 #elif defined(DPDK_TARGET)
   table_entry->set_table_id(GetTableId(p4info, IPV4_TUNNEL_TERM_TABLE));
 
