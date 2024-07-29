@@ -123,6 +123,66 @@ class EncodeTunnelIdTest : public ::testing::Test {
   uint32_t PARAM_ID = 1;
 };
 
+//----------------------------------------------------------------------
+// PrepareFdbTableEntryforV4GeneveTunnel()
+//----------------------------------------------------------------------
+
+TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v4_tagged) {
+  // Arrange
+  InitLearnInfo(OVS_TUNNEL_GENEVE);
+  InitV4NativeTagged(0);
+
+  // Act
+  PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
+                                        INSERT_ENTRY, detail);
+
+  // Assert
+  CheckResults();
+}
+
+TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v4_untagged) {
+  // Arrange
+  InitLearnInfo(OVS_TUNNEL_GENEVE);
+  InitV4NativeUntagged(0);
+
+  // Act
+  PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
+                                        INSERT_ENTRY, detail);
+
+  // Assert
+  CheckResults();
+}
+
+TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v6_tagged) {
+  // Arrange
+  InitLearnInfo(OVS_TUNNEL_GENEVE);
+  InitV6NativeTagged(0);
+
+  // Act
+  PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
+                                        INSERT_ENTRY, detail);
+
+  // Assert
+  CheckResults();
+}
+
+TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v6_untagged) {
+  // Arrange
+  InitLearnInfo(OVS_TUNNEL_GENEVE);
+  InitV6NativeUntagged(0);
+
+  // Act
+  PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
+                                        INSERT_ENTRY, detail);
+
+  // Assert
+  CheckResults();
+}
+
+//----------------------------------------------------------------------
+// PrepareFdbTableEntryforV4VxlanTunnel()
+//----------------------------------------------------------------------
+
 TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_tagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
