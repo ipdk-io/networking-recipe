@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 
+#include "es2k/p4_name_mapping.h"
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
@@ -32,6 +33,8 @@ class EncodeTunnelIdTest : public ::testing::Test {
       std::exit(EXIT_FAILURE);
     }
   }
+
+  void SetUp() { SelectTable(L2_FWD_TX_TABLE); }
 
   static uint32_t DecodeTableId(const std::string& string_value) {
     return DecodeWordValue(string_value) & 0xffffff;
@@ -85,8 +88,9 @@ class EncodeTunnelIdTest : public ::testing::Test {
   }
 
   void CheckResults() const {
-    EXPECT_EQ(table_entry.table_id(), TABLE_ID);
+    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
 
+    EXPECT_EQ(table_entry.table_id(), TABLE_ID);
     ASSERT_TRUE(table_entry.has_action());
     auto table_action = table_entry.action();
 
@@ -115,14 +119,30 @@ class EncodeTunnelIdTest : public ::testing::Test {
   }
 
   // Working variables
-  p4::v1::TableEntry table_entry;
+  ::p4::v1::TableEntry table_entry;
   struct mac_learning_info learn_info;
   DiagDetail detail;
 
   // Values to check against
-  uint32_t TABLE_ID = 40240205;  // l2_fwd_rx_table
+  uint32_t TABLE_ID;
   uint32_t ACTION_ID = -1;
   uint32_t PARAM_ID = 1;
+
+ private:
+  void SelectTable(const std::string& table_name) {
+    TABLE_NAME = table_name;
+    for (const auto& table : p4info.tables()) {
+      const auto& pre = table.preamble();
+      if (pre.name() == table_name) {
+        TABLE = &table;
+        TABLE_ID = pre.id();
+        return;
+      }
+    }
+  }
+
+  std::string TABLE_NAME = "none";
+  const ::p4::config::v1::Table* TABLE = nullptr;
 };
 
 //----------------------------------------------------------------------
