@@ -47,6 +47,8 @@ target_link_libraries(ipv6_test_utils PUBLIC
   absl::flags_parse
 )
 
+if(ES2K_TARGET)
+
 #-----------------------------------------------------------------------
 # encode_tunnel_id_test
 #-----------------------------------------------------------------------
@@ -62,6 +64,8 @@ target_link_libraries(encode_tunnel_id_test PUBLIC
 )
 
 list(APPEND unit_test_names encode_tunnel_id_test)
+
+endif(ES2K_TARGET)
 
 #-----------------------------------------------------------------------
 # encode_host_port_value_test
