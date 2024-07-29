@@ -22,9 +22,9 @@ constexpr bool REMOVE_ENTRY = false;
 
 static ::p4::config::v1::P4Info p4info;
 
-class EncodeTableIdTest : public ::testing::Test {
+class EncodeTunnelIdTest : public ::testing::Test {
  protected:
-  EncodeTableIdTest() { memset(&learn_info, 0, sizeof(learn_info)); }
+  EncodeTunnelIdTest() { memset(&learn_info, 0, sizeof(learn_info)); }
 
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -123,7 +123,7 @@ class EncodeTableIdTest : public ::testing::Test {
   uint32_t PARAM_ID = 1;
 };
 
-TEST_F(EncodeTableIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_tagged) {
+TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_tagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
   InitV4NativeTagged(26412051);
@@ -136,7 +136,7 @@ TEST_F(EncodeTableIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_tagged) {
   CheckResults();
 }
 
-TEST_F(EncodeTableIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_untagged) {
+TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_untagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
   InitV4NativeUntagged(31983357);
@@ -149,7 +149,7 @@ TEST_F(EncodeTableIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_untagged) {
   CheckResults();
 }
 
-TEST_F(EncodeTableIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v6_tagged) {
+TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v6_tagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
   InitV6NativeTagged(19193142);
@@ -162,7 +162,7 @@ TEST_F(EncodeTableIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v6_tagged) {
   CheckResults();
 }
 
-TEST_F(EncodeTableIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v6_untagged) {
+TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v6_untagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
   InitV6NativeUntagged(23849990);
