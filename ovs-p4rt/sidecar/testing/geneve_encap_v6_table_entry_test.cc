@@ -30,7 +30,7 @@ TEST_F(Ipv6TunnelTest, geneve_encap_v6_params_are_correct) {
   };
 
   // Arrange
-  InitV6TunnelInfo(tunnel_info);
+  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
   // Act
   PrepareV6GeneveEncapTableEntry(&table_entry, tunnel_info, p4info,
