@@ -30,7 +30,7 @@ TEST_F(Ipv6TunnelTest, vxlan_encap_v6_vlan_pop_params_are_correct) {
   };
 
   // Arrange
-  InitV6TunnelInfo(tunnel_info);
+  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
   // Act
   PrepareV6VxlanEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,

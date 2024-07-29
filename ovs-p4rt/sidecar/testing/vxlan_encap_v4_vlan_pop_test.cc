@@ -30,7 +30,7 @@ TEST_F(Ipv4TunnelTest, vxlan_encap_v4_vlan_pop_params_are_correct) {
   };
 
   // Arrange
-  InitV4TunnelInfo(tunnel_info);
+  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
   // Act
   PrepareVxlanEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,

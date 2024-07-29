@@ -24,7 +24,7 @@ class Ipv4TunnelTest : public TableEntryTest {
  protected:
   Ipv4TunnelTest() {}
 
-  void InitV4TunnelInfo(tunnel_info& info) {
+  void InitV4TunnelInfo(tunnel_info& info, uint8_t tunnel_type) {
     EXPECT_EQ(
         inet_pton(AF_INET, IPV4_SRC_ADDR, &info.local_ip.ip.v4addr.s_addr), 1)
         << "Error converting " << IPV4_SRC_ADDR;
@@ -38,6 +38,7 @@ class Ipv4TunnelTest : public TableEntryTest {
     info.src_port = SRC_PORT;
     info.dst_port = DST_PORT;
     info.vni = VNI;
+    info.tunnel_type = tunnel_type;
   };
 };
 
