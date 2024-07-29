@@ -84,7 +84,7 @@ class EncodeTunnelIdTest : public ::testing::Test {
     ACTION_ID = action_id;
   }
 
-  void CheckResults() {
+  void CheckResults() const {
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
 
     ASSERT_TRUE(table_entry.has_action());
@@ -100,8 +100,10 @@ class EncodeTunnelIdTest : public ::testing::Test {
 
     auto param = params[0];
     ASSERT_EQ(param.param_id(), PARAM_ID);
+    CheckTunnelIdParam(param.value());
+  }
 
-    auto param_value = param.value();
+  void CheckTunnelIdParam(const std::string& param_value) const {
     EXPECT_EQ(param_value.size(), 3);
 
     uint32_t tunnel_id = DecodeWordValue(param_value);
