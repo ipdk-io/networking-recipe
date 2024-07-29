@@ -30,7 +30,7 @@ TEST_F(Ipv4TunnelTest, geneve_encap_v4_params_are_correct) {
   };
 
   // Arrange
-  InitV4TunnelInfo(tunnel_info);
+  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
   // Act
   PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, insert_entry);
