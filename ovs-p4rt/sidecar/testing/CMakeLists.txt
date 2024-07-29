@@ -48,6 +48,22 @@ target_link_libraries(ipv6_test_utils PUBLIC
 )
 
 #-----------------------------------------------------------------------
+# encode_table_id_test
+#-----------------------------------------------------------------------
+add_executable(encode_table_id_test
+  encode_table_id_test.cc
+  p4info_text.h
+)
+
+set_test_properties(encode_table_id_test)
+
+target_link_libraries(encode_table_id_test PUBLIC
+  GTest::gtest_main
+)
+
+#list(APPEND unit_test_names encode_table_id_test)
+
+#-----------------------------------------------------------------------
 # encode_host_port_value_test
 #-----------------------------------------------------------------------
 add_executable(encode_host_port_value_test

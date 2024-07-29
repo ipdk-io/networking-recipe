@@ -50,7 +50,7 @@ std::string EncodeByteValue(int arg_count...) {
 
 static inline std::string EncodeVniValue(uint32_t vni) {
   // mod_blob_ptr and vni are both bit<24>
-  return EncodeByteValue(3, (vni >> 16), (vni >> 8) & 0xFF, vni & 0xFF);
+  return EncodeByteValue(3, (vni >> 16) & 0xff, (vni >> 8) & 0xFF, vni & 0xFF);
 }
 
 static inline std::string EncodeTunnelId(uint32_t tun) {
