@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // NOTE:
-// This is a super-minimal unit test, used solely to check the
-// table_id field. It needs to be expanded to validate all output
-// fields for all (tunnel_type, vlan_mode) combinations.
+// This is a minimal unit test, used solely to check the table_id
+// field. It needs to be expanded to validate all output fields
+// for all (tunnel_type, vlan_mode) combinations.
 
 #include <arpa/inet.h>
 #include <stdint.h>
