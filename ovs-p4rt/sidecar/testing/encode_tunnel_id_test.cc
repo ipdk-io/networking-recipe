@@ -6,7 +6,6 @@
 #include <iostream>
 #include <string>
 
-#include "es2k/p4_name_mapping.h"
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
@@ -17,6 +16,22 @@
 namespace ovsp4rt {
 
 using stratum::ParseProtoFromString;
+
+constexpr char TABLE_NAME[] = "l2_fwd_tx_table";
+
+constexpr char SET_GENEVE_UNDERLAY_V4[] = "set_geneve_underlay_v4";
+constexpr char POP_VLAN_SET_GENEVE_UNDERLAY_V4[] =
+    "pop_vlan_set_geneve_underlay_v4";
+constexpr char SET_GENEVE_UNDERLAY_V6[] = "set_geneve_underlay_v6";
+constexpr char POP_VLAN_SET_GENEVE_UNDERLAY_V6[] =
+    "pop_vlan_set_geneve_underlay_v6";
+
+constexpr char SET_VXLAN_UNDERLAY_V4[] = "set_vxlan_underlay_v4";
+constexpr char POP_VLAN_SET_VXLAN_UNDERLAY_V4[] =
+    "pop_vlan_set_vxlan_underlay_v4";
+constexpr char SET_VXLAN_UNDERLAY_V6[] = "set_vxlan_underlay_v6";
+constexpr char POP_VLAN_SET_VXLAN_UNDERLAY_V6[] =
+    "pop_vlan_set_vxlan_underlay_v6";
 
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
@@ -34,7 +49,7 @@ class EncodeTunnelIdTest : public ::testing::Test {
     }
   }
 
-  void SetUp() { SelectTable(L2_FWD_TX_TABLE); }
+  void SetUp() { SelectTable(TABLE_NAME); }
 
   static uint32_t DecodeTableId(const std::string& string_value) {
     return DecodeWordValue(string_value) & 0xffffff;
@@ -55,36 +70,36 @@ class EncodeTunnelIdTest : public ::testing::Test {
     learn_info.tnl_info.tunnel_type = tunnel_type;
   }
 
-  void InitV4NativeTagged(uint32_t action_id) {
+  void InitV4NativeTagged(const std::string& action_name) {
     learn_info.tnl_info.local_ip.family = AF_INET;
     learn_info.tnl_info.remote_ip.family = AF_INET;
     learn_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
     learn_info.tnl_info.vni = 0x1984E;
-    ACTION_ID = action_id;
+    ACTION_ID = GetActionId(action_name);
   }
 
-  void InitV4NativeUntagged(uint32_t action_id) {
+  void InitV4NativeUntagged(const std::string& action_name) {
     learn_info.tnl_info.local_ip.family = AF_INET;
     learn_info.tnl_info.remote_ip.family = AF_INET;
     learn_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
     learn_info.tnl_info.vni = 0xA1776;
-    ACTION_ID = action_id;
+    ACTION_ID = GetActionId(action_name);
   }
 
-  void InitV6NativeTagged(uint32_t action_id) {
+  void InitV6NativeTagged(const std::string& action_name) {
     learn_info.tnl_info.local_ip.family = AF_INET6;
     learn_info.tnl_info.remote_ip.family = AF_INET6;
     learn_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
     learn_info.tnl_info.vni = 0xFACED;
-    ACTION_ID = action_id;
+    ACTION_ID = GetActionId(action_name);
   }
 
-  void InitV6NativeUntagged(uint32_t action_id) {
+  void InitV6NativeUntagged(const std::string& action_name) {
     learn_info.tnl_info.local_ip.family = AF_INET6;
     learn_info.tnl_info.remote_ip.family = AF_INET6;
     learn_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
     learn_info.tnl_info.vni = 0xCEDED;
-    ACTION_ID = action_id;
+    ACTION_ID = GetActionId(action_name);
   }
 
   void CheckResults() const {
@@ -130,10 +145,9 @@ class EncodeTunnelIdTest : public ::testing::Test {
 
  private:
   void SelectTable(const std::string& table_name) {
-    TABLE_NAME = table_name;
     for (const auto& table : p4info.tables()) {
       const auto& pre = table.preamble();
-      if (pre.name() == table_name) {
+      if (pre.name() == table_name || pre.alias() == table_name) {
         TABLE = &table;
         TABLE_ID = pre.id();
         return;
@@ -141,7 +155,16 @@ class EncodeTunnelIdTest : public ::testing::Test {
     }
   }
 
-  std::string TABLE_NAME = "none";
+  uint32_t GetActionId(const std::string& action_name) const {
+    for (const auto& action : p4info.actions()) {
+      const auto& pre = action.preamble();
+      if (pre.name() == action_name || pre.alias() == action_name) {
+        return pre.id();
+      }
+    }
+    return -1;
+  }
+
   const ::p4::config::v1::Table* TABLE = nullptr;
 };
 
@@ -152,7 +175,7 @@ class EncodeTunnelIdTest : public ::testing::Test {
 TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v4_tagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_GENEVE);
-  InitV4NativeTagged(0);
+  InitV4NativeTagged(SET_GENEVE_UNDERLAY_V4);
 
   // Act
   PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
@@ -165,7 +188,7 @@ TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v4_tagged) {
 TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v4_untagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_GENEVE);
-  InitV4NativeUntagged(0);
+  InitV4NativeUntagged(POP_VLAN_SET_GENEVE_UNDERLAY_V4);
 
   // Act
   PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
@@ -178,7 +201,7 @@ TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v4_untagged) {
 TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v6_tagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_GENEVE);
-  InitV6NativeTagged(0);
+  InitV6NativeTagged(SET_GENEVE_UNDERLAY_V6);
 
   // Act
   PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
@@ -191,7 +214,7 @@ TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v6_tagged) {
 TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v6_untagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_GENEVE);
-  InitV6NativeUntagged(0);
+  InitV6NativeUntagged(POP_VLAN_SET_GENEVE_UNDERLAY_V6);
 
   // Act
   PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
@@ -208,7 +231,7 @@ TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4GeneveTunnel_v6_untagged) {
 TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_tagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
-  InitV4NativeTagged(26412051);
+  InitV4NativeTagged(SET_VXLAN_UNDERLAY_V4);
 
   // Act
   PrepareFdbTableEntryforV4VxlanTunnel(&table_entry, learn_info, p4info,
@@ -221,7 +244,7 @@ TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_tagged) {
 TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_untagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
-  InitV4NativeUntagged(31983357);
+  InitV4NativeUntagged(POP_VLAN_SET_VXLAN_UNDERLAY_V4);
 
   // Act
   PrepareFdbTableEntryforV4VxlanTunnel(&table_entry, learn_info, p4info,
@@ -234,7 +257,7 @@ TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v4_untagged) {
 TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v6_tagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
-  InitV6NativeTagged(19193142);
+  InitV6NativeTagged(SET_VXLAN_UNDERLAY_V6);
 
   // Act
   PrepareFdbTableEntryforV4VxlanTunnel(&table_entry, learn_info, p4info,
@@ -247,7 +270,7 @@ TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v6_tagged) {
 TEST_F(EncodeTunnelIdTest, PrepareFdbTableEntryforV4VxlanTunnel_v6_untagged) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_VXLAN);
-  InitV6NativeUntagged(23849990);
+  InitV6NativeUntagged(POP_VLAN_SET_VXLAN_UNDERLAY_V6);
 
   // Act
   PrepareFdbTableEntryforV4VxlanTunnel(&table_entry, learn_info, p4info,
