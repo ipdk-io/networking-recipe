@@ -3,10 +3,10 @@
 
 // NOTE:
 // This is a super-minimal unit test, used solely to check the
-// table_id field in a single use case. It needs to be expanded
-// to validate all output fields for all (tunnel_type, vlan_mode)
-// combinations.
+// table_id field. It needs to be expanded to validate all output
+// fields for all (tunnel_type, vlan_mode) combinations.
 
+#include <arpa/inet.h>
 #include <stdint.h>
 
 #include <iostream>
@@ -26,8 +26,17 @@ using stratum::ParseProtoFromString;
 
 constexpr char TABLE_NAME[] = "ipv4_tunnel_term_table";
 
+constexpr char IPV4_SRC_ADDR[] = "10.20.30.40";
+constexpr char IPV4_DST_ADDR[] = "192.168.17.5";
+constexpr int IPV4_PREFIX_LEN = 24;
+
+constexpr char SET_VXLAN_DECAP_OUTER_HDR[] = "set_vxlan_decap_outer_hdr";
 constexpr char SET_VXLAN_DECAP_OUTER_AND_PUSH_VLAN[] =
     "set_vxlan_decap_outer_and_push_vlan";
+
+constexpr char SET_GENEVE_DECAP_OUTER_HDR[] = "set_geneve_decap_outer_hdr";
+constexpr char SET_GENEVE_DECAP_OUTER_AND_PUSH_VLAN[] =
+    "set_geneve_decap_outer_and_push_vlan";
 
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
@@ -55,17 +64,50 @@ class TunnelTermV4TableTest : public ::testing::Test {
     return word_value;
   }
 
-  void InitTunnelInfo() {
-    tunnel_info.remote_ip.ip.v4addr.s_addr = 0x01020304;
+  void InitV4TunnelInfo() {
+    EXPECT_EQ(inet_pton(AF_INET, IPV4_SRC_ADDR,
+                        &tunnel_info.local_ip.ip.v4addr.s_addr),
+              1)
+        << "Error converting " << IPV4_SRC_ADDR;
+    tunnel_info.local_ip.family = AF_INET;
+    tunnel_info.local_ip.prefix_len = IPV4_PREFIX_LEN;
+
+    EXPECT_EQ(inet_pton(AF_INET, IPV4_DST_ADDR,
+                        &tunnel_info.remote_ip.ip.v4addr.s_addr),
+              1)
+        << "Error converting " << IPV4_DST_ADDR;
+    tunnel_info.remote_ip.family = AF_INET;
+    tunnel_info.remote_ip.prefix_len = IPV4_PREFIX_LEN;
+
     tunnel_info.bridge_id = 86;
+  }
+
+  void InitVxlanTagged() {
+    tunnel_info.tunnel_type = OVS_TUNNEL_VXLAN;
+    tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
+    tunnel_info.vni = 0x1776B;
+    ACTION_ID = GetActionId(SET_VXLAN_DECAP_OUTER_HDR);
   }
 
   void InitVxlanUntagged() {
     tunnel_info.tunnel_type = OVS_TUNNEL_VXLAN;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
-    // Used twice: match key is bit<24>, but tunnel_id is bit<20>
     tunnel_info.vni = 0xA1984;
     ACTION_ID = GetActionId(SET_VXLAN_DECAP_OUTER_AND_PUSH_VLAN);
+  }
+
+  void InitGeneveTagged() {
+    tunnel_info.tunnel_type = OVS_TUNNEL_GENEVE;
+    tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
+    tunnel_info.vni = 0x1776B;
+    ACTION_ID = GetActionId(SET_GENEVE_DECAP_OUTER_HDR);
+  }
+
+  void InitGeneveUntagged() {
+    tunnel_info.tunnel_type = OVS_TUNNEL_GENEVE;
+    tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
+    tunnel_info.vni = 0xA1984;
+    ACTION_ID = GetActionId(SET_GENEVE_DECAP_OUTER_AND_PUSH_VLAN);
   }
 
   void CheckResults() const {
@@ -134,13 +176,53 @@ class TunnelTermV4TableTest : public ::testing::Test {
 };
 
 //----------------------------------------------------------------------
-// PrepareTunnelTermTableEntry()
+// PrepareTunnelTermTableEntry() - vxlan
 //----------------------------------------------------------------------
 
 TEST_F(TunnelTermV4TableTest, PrepareTunnelTermTableEntry_vxlan_untagged) {
   // Arrange
-  InitTunnelInfo();
+  InitV4TunnelInfo();
   InitVxlanUntagged();
+
+  // Act
+  PrepareTunnelTermTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
+
+  // Assert
+  CheckResults();
+}
+
+TEST_F(TunnelTermV4TableTest, PrepareTunnelTermTableEntry_vxlan_tagged) {
+  // Arrange
+  InitV4TunnelInfo();
+  InitVxlanTagged();
+
+  // Act
+  PrepareTunnelTermTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
+
+  // Assert
+  CheckResults();
+}
+
+//----------------------------------------------------------------------
+// PrepareTunnelTermTableEntry() - geneve
+//----------------------------------------------------------------------
+
+TEST_F(TunnelTermV4TableTest, PrepareTunnelTermTableEntry_geneve_untagged) {
+  // Arrange
+  InitV4TunnelInfo();
+  InitGeneveUntagged();
+
+  // Act
+  PrepareTunnelTermTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
+
+  // Assert
+  CheckResults();
+}
+
+TEST_F(TunnelTermV4TableTest, PrepareTunnelTermTableEntry_geneve_tagged) {
+  // Arrange
+  InitV4TunnelInfo();
+  InitGeneveTagged();
 
   // Act
   PrepareTunnelTermTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);

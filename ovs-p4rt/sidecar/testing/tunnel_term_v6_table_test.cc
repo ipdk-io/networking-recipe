@@ -3,9 +3,8 @@
 
 // NOTE:
 // This is a super-minimal unit test, used solely to check the
-// table_id field in a single use case. It needs to be expanded
-// to validate all output fields for all (tunnel_type, vlan_mode)
-// combinations.
+// table_id field. It needs to be expanded to validate all output
+// fields for all (tunnel_type, vlan_mode) combinations.
 
 #include <arpa/inet.h>
 #include <stdint.h>
@@ -34,6 +33,10 @@ constexpr int IPV6_PREFIX_LEN = 64;
 constexpr char SET_VXLAN_DECAP_OUTER_HDR[] = "set_vxlan_decap_outer_hdr";
 constexpr char SET_VXLAN_DECAP_OUTER_AND_PUSH_VLAN[] =
     "set_vxlan_decap_outer_and_push_vlan";
+
+constexpr char SET_GENEVE_DECAP_OUTER_HDR[] = "set_geneve_decap_outer_hdr";
+constexpr char SET_GENEVE_DECAP_OUTER_AND_PUSH_VLAN[] =
+    "set_geneve_decap_outer_and_push_vlan";
 
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
@@ -66,29 +69,45 @@ class TunnelTermV6TableTest : public ::testing::Test {
                         &tunnel_info.local_ip.ip.v6addr.__in6_u.__u6_addr32),
               1)
         << "Error converting " << IPV6_SRC_ADDR;
+    tunnel_info.local_ip.family = AF_INET6;
     tunnel_info.local_ip.prefix_len = IPV6_PREFIX_LEN;
 
     EXPECT_EQ(inet_pton(AF_INET6, IPV6_DST_ADDR,
                         &tunnel_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32),
               1)
         << "Error converting " << IPV6_DST_ADDR;
+    tunnel_info.remote_ip.family = AF_INET6;
     tunnel_info.remote_ip.prefix_len = IPV6_PREFIX_LEN;
 
-    tunnel_info.bridge_id = 86;
+    tunnel_info.bridge_id = 99;
   }
 
-  void InitV6VxlanTagged() {
+  void InitVxlanTagged() {
     tunnel_info.tunnel_type = OVS_TUNNEL_VXLAN;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
     tunnel_info.vni = 0x1776B;
     ACTION_ID = GetActionId(SET_VXLAN_DECAP_OUTER_HDR);
   }
 
-  void InitV6VxlanUntagged() {
+  void InitVxlanUntagged() {
     tunnel_info.tunnel_type = OVS_TUNNEL_VXLAN;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
     tunnel_info.vni = 0xA1984;
     ACTION_ID = GetActionId(SET_VXLAN_DECAP_OUTER_AND_PUSH_VLAN);
+  }
+
+  void InitGeneveTagged() {
+    tunnel_info.tunnel_type = OVS_TUNNEL_GENEVE;
+    tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
+    tunnel_info.vni = 0x1776B;
+    ACTION_ID = GetActionId(SET_GENEVE_DECAP_OUTER_HDR);
+  }
+
+  void InitGeneveUntagged() {
+    tunnel_info.tunnel_type = OVS_TUNNEL_GENEVE;
+    tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
+    tunnel_info.vni = 0xA1984;
+    ACTION_ID = GetActionId(SET_GENEVE_DECAP_OUTER_AND_PUSH_VLAN);
   }
 
   void CheckResults() const {
@@ -157,13 +176,13 @@ class TunnelTermV6TableTest : public ::testing::Test {
 };
 
 //----------------------------------------------------------------------
-// PrepareV6TunnelTermTableEntry()
+// PrepareV6TunnelTermTableEntry() - vxlan
 //----------------------------------------------------------------------
 
 TEST_F(TunnelTermV6TableTest, PrepareV6TunnelTermTableEntry_vxlan_untagged) {
   // Arrange
   InitV6TunnelInfo();
-  InitV6VxlanUntagged();
+  InitVxlanUntagged();
 
   // Act
   PrepareV6TunnelTermTableEntry(&table_entry, tunnel_info, p4info,
@@ -176,7 +195,37 @@ TEST_F(TunnelTermV6TableTest, PrepareV6TunnelTermTableEntry_vxlan_untagged) {
 TEST_F(TunnelTermV6TableTest, PrepareV6TunnelTermTableEntry_vxlan_tagged) {
   // Arrange
   InitV6TunnelInfo();
-  InitV6VxlanTagged();
+  InitVxlanTagged();
+
+  // Act
+  PrepareV6TunnelTermTableEntry(&table_entry, tunnel_info, p4info,
+                                INSERT_ENTRY);
+
+  // Assert
+  CheckResults();
+}
+
+//----------------------------------------------------------------------
+// PrepareV6TunnelTermTableEntry() - geneve
+//----------------------------------------------------------------------
+
+TEST_F(TunnelTermV6TableTest, PrepareV6TunnelTermTableEntry_geneve_untagged) {
+  // Arrange
+  InitV6TunnelInfo();
+  InitGeneveUntagged();
+
+  // Act
+  PrepareV6TunnelTermTableEntry(&table_entry, tunnel_info, p4info,
+                                INSERT_ENTRY);
+
+  // Assert
+  CheckResults();
+}
+
+TEST_F(TunnelTermV6TableTest, PrepareV6TunnelTermTableEntry_geneve_tagged) {
+  // Arrange
+  InitV6TunnelInfo();
+  InitGeneveTagged();
 
   // Act
   PrepareV6TunnelTermTableEntry(&table_entry, tunnel_info, p4info,
