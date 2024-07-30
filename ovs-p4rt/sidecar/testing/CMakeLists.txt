@@ -147,6 +147,40 @@ target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
 
 list(APPEND unit_test_names prepare_l2_to_tunnel_test)
 
+#-----------------------------------------------------------------------
+# tunnel_term_v4_table_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(tunnel_term_v4_table_test
+  tunnel_term_v4_table_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(tunnel_term_v4_table_test)
+
+target_link_libraries(tunnel_term_v4_table_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND unit_test_names tunnel_term_v4_table_test)
+
+#-----------------------------------------------------------------------
+# tunnel_term_v6_table_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(tunnel_term_v6_table_test
+  tunnel_term_v6_table_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(tunnel_term_v6_table_test)
+
+target_link_libraries(tunnel_term_v6_table_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND unit_test_names tunnel_term_v6_table_test)
+
 endif(ES2K_TARGET)
 
 #-----------------------------------------------------------------------

@@ -10,6 +10,7 @@
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
 #include "p4/config/v1/p4info.pb.h"
+#include "p4/v1/p4runtime.pb.h"
 #include "p4info_text.h"
 #include "stratum/lib/utils.h"
 
@@ -50,10 +51,6 @@ class EncodeTunnelIdTest : public ::testing::Test {
   }
 
   void SetUp() { SelectTable(TABLE_NAME); }
-
-  static uint32_t DecodeTableId(const std::string& string_value) {
-    return DecodeWordValue(string_value) & 0xffffff;
-  }
 
   static uint32_t DecodeWordValue(const std::string& string_value) {
     uint32_t word_value = 0;
