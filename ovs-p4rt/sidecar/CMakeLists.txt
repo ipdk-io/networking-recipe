@@ -13,6 +13,9 @@ set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 # and its descendants.
 set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
 
+# Initialize list of unit tests.
+set(UNIT_TEST_NAMES)
+
 #-----------------------------------------------------------------------
 # ovs_sidecar_o
 #-----------------------------------------------------------------------
@@ -114,3 +117,7 @@ install(
 if(BUILD_TESTING)
     add_subdirectory(testing)
 endif()
+
+add_custom_target(ovsp4rt-unit-tests
+  DEPENDS ${UNIT_TEST_NAMES}
+)

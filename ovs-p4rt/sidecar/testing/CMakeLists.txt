@@ -57,7 +57,7 @@ target_link_libraries(encode_host_port_value_test PUBLIC
   GTest::gtest_main
 )
 
-list(APPEND unit_test_names encode_host_port_value_test)
+list(APPEND UNIT_TEST_NAMES encode_host_port_value_test)
 
 if(ES2K_TARGET)
 
@@ -74,7 +74,7 @@ target_link_libraries(geneve_encap_v4_table_entry_test PUBLIC
   ipv4_test_utils
 )
 
-list(APPEND unit_test_names geneve_encap_v4_table_entry_test)
+list(APPEND UNIT_TEST_NAMES geneve_encap_v4_table_entry_test)
 
 #-----------------------------------------------------------------------
 # geneve_encap_v6_table_entry_test (ES2K)
@@ -89,7 +89,7 @@ target_link_libraries(geneve_encap_v6_table_entry_test PUBLIC
   ipv6_test_utils
 )
 
-list(APPEND unit_test_names geneve_encap_v6_table_entry_test)
+list(APPEND UNIT_TEST_NAMES geneve_encap_v6_table_entry_test)
 
 #-----------------------------------------------------------------------
 # geneve_encap_v4_vlan_pop_test (ES2K)
@@ -104,7 +104,7 @@ target_link_libraries(geneve_encap_v4_vlan_pop_test PUBLIC
   ipv4_test_utils
 )
 
-list(APPEND unit_test_names geneve_encap_v4_vlan_pop_test)
+list(APPEND UNIT_TEST_NAMES geneve_encap_v4_vlan_pop_test)
 
 #-----------------------------------------------------------------------
 # prepare_l2_to_tunnel_test (ES2K)
@@ -121,7 +121,7 @@ target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
   absl::flags_parse
 )
 
-list(APPEND unit_test_names prepare_l2_to_tunnel_test)
+list(APPEND UNIT_TEST_NAMES prepare_l2_to_tunnel_test)
 
 endif(ES2K_TARGET)
 
@@ -138,7 +138,7 @@ target_link_libraries(vxlan_encap_v4_table_entry_test PUBLIC
   ipv4_test_utils
 )
 
-list(APPEND unit_test_names vxlan_encap_v4_table_entry_test)
+list(APPEND UNIT_TEST_NAMES vxlan_encap_v4_table_entry_test)
 
 if(ES2K_TARGET)
 
@@ -155,7 +155,7 @@ target_link_libraries(vxlan_encap_v6_table_entry_test PUBLIC
   ipv6_test_utils
 )
 
-list(APPEND unit_test_names vxlan_encap_v6_table_entry_test)
+list(APPEND UNIT_TEST_NAMES vxlan_encap_v6_table_entry_test)
 
 #-----------------------------------------------------------------------
 # vxlan_encap_v4_vlan_pop_test (ES2K)
@@ -170,7 +170,7 @@ target_link_libraries(vxlan_encap_v4_vlan_pop_test PUBLIC
   ipv4_test_utils
 )
 
-list(APPEND unit_test_names vxlan_encap_v4_vlan_pop_test)
+list(APPEND UNIT_TEST_NAMES vxlan_encap_v4_vlan_pop_test)
 
 #-----------------------------------------------------------------------
 # vxlan_encap_v6_vlan_pop_test (ES2K)
@@ -185,13 +185,9 @@ target_link_libraries(vxlan_encap_v6_vlan_pop_test PUBLIC
   ipv6_test_utils
 )
 
-list(APPEND unit_test_names vxlan_encap_v6_vlan_pop_test)
+list(APPEND UNIT_TEST_NAMES vxlan_encap_v6_vlan_pop_test)
 
 endif(ES2K_TARGET)
 
-#-----------------------------------------------------------------------
-# ovsp4rt-unit-tests
-#-----------------------------------------------------------------------
-add_custom_target(ovsp4rt-unit-tests
-  DEPENDS ${unit_test_names}
-)
+# Export updated list of unit tests.
+set(UNIT_TEST_NAMES "${UNIT_TEST_NAMES}" PARENT_SCOPE)

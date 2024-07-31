@@ -53,4 +53,9 @@ target_link_libraries(encode_addr_test PUBLIC
 
 add_test(NAME encode_addr_test COMMAND encode_addr_test)
 
+list(APPEND UNIT_TEST_NAMES encode_addr_test)
+
+# export updated list of unit tests.
+set(UNIT_TEST_NAMES "${UNIT_TEST_NAMES}" PARENT_SCOPE)
+
 endif(BUILD_TESTING)
