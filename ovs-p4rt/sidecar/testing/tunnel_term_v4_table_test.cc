@@ -64,6 +64,25 @@ class TunnelTermV4TableTest : public ::testing::Test {
     return word_value;
   }
 
+  int GetActionId(const std::string& action_name) const {
+    for (const auto& action : p4info.actions()) {
+      const auto& pre = action.preamble();
+      if (pre.name() == action_name || pre.alias() == action_name) {
+        return pre.id();
+      }
+    }
+    return -1;
+  }
+
+  int GetMatchFieldId(const std::string& mf_name) const {
+    for (const auto& mf : TABLE->match_fields()) {
+      if (mf.name() == mf_name) {
+        return mf.id();
+      }
+    }
+    return -1;
+  }
+
   void InitV4TunnelInfo() {
     EXPECT_EQ(inet_pton(AF_INET, IPV4_SRC_ADDR,
                         &tunnel_info.local_ip.ip.v4addr.s_addr),
@@ -110,10 +129,7 @@ class TunnelTermV4TableTest : public ::testing::Test {
     ACTION_ID = GetActionId(SET_GENEVE_DECAP_OUTER_AND_PUSH_VLAN);
   }
 
-  void CheckResults() const {
-    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
-
-    EXPECT_EQ(table_entry.table_id(), TABLE_ID);
+  void CheckActions() const {
     ASSERT_TRUE(table_entry.has_action());
     auto table_action = table_entry.action();
 
@@ -128,6 +144,15 @@ class TunnelTermV4TableTest : public ::testing::Test {
     auto param = params[0];
     ASSERT_EQ(param.param_id(), PARAM_ID);
     CheckTunnelIdParam(param.value());
+  }
+
+  void CheckMatches() const {}
+
+  void CheckResults() const {
+    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
+    EXPECT_EQ(table_entry.table_id(), TABLE_ID);
+    CheckMatches();
+    CheckActions();
   }
 
   void CheckTunnelIdParam(const std::string& param_value) const {
@@ -147,8 +172,8 @@ class TunnelTermV4TableTest : public ::testing::Test {
 
   // Values to check against
   uint32_t TABLE_ID;
-  uint32_t ACTION_ID = -1;
-  uint32_t PARAM_ID = 1;  // tunnel_id
+  int ACTION_ID = -1;
+  int PARAM_ID = 1;  // tunnel_id
 
  private:
   void SelectTable(const std::string& table_name) {
@@ -160,16 +185,6 @@ class TunnelTermV4TableTest : public ::testing::Test {
         return;
       }
     }
-  }
-
-  uint32_t GetActionId(const std::string& action_name) const {
-    for (const auto& action : p4info.actions()) {
-      const auto& pre = action.preamble();
-      if (pre.name() == action_name || pre.alias() == action_name) {
-        return pre.id();
-      }
-    }
-    return -1;
   }
 
   const ::p4::config::v1::Table* TABLE = nullptr;
