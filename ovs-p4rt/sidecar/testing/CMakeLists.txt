@@ -63,7 +63,7 @@ target_link_libraries(encode_tunnel_id_test PUBLIC
   GTest::gtest_main
 )
 
-list(APPEND unit_test_names encode_tunnel_id_test)
+list(APPEND UNIT_TEST_NAMES encode_tunnel_id_test)
 
 endif(ES2K_TARGET)
 
@@ -162,7 +162,7 @@ target_link_libraries(tunnel_term_v4_table_test PUBLIC
   absl::flags_parse
 )
 
-list(APPEND unit_test_names tunnel_term_v4_table_test)
+list(APPEND UNIT_TEST_NAMES tunnel_term_v4_table_test)
 
 #-----------------------------------------------------------------------
 # tunnel_term_v6_table_test (ES2K)
@@ -179,7 +179,7 @@ target_link_libraries(tunnel_term_v6_table_test PUBLIC
   absl::flags_parse
 )
 
-list(APPEND unit_test_names tunnel_term_v6_table_test)
+list(APPEND UNIT_TEST_NAMES tunnel_term_v6_table_test)
 
 endif(ES2K_TARGET)
 
