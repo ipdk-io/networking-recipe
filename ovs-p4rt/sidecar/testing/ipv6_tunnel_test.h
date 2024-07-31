@@ -24,7 +24,7 @@ class Ipv6TunnelTest : public TableEntryTest {
  protected:
   Ipv6TunnelTest() {}
 
-  void InitV6TunnelInfo(tunnel_info& info) {
+  void InitV6TunnelInfo(tunnel_info& info, uint8_t tunnel_type) {
     EXPECT_EQ(inet_pton(AF_INET6, IPV6_SRC_ADDR,
                         &info.local_ip.ip.v6addr.__in6_u.__u6_addr32),
               1)
@@ -40,6 +40,7 @@ class Ipv6TunnelTest : public TableEntryTest {
     info.src_port = SRC_PORT;
     info.dst_port = DST_PORT;
     info.vni = VNI;
+    info.tunnel_type = tunnel_type;
   };
 };
 
