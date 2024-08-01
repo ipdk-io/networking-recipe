@@ -51,6 +51,8 @@ add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovsp4rt_session_o>
 )
 
+add_subdirectory(journal)
+
 target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto
     p4runtime_proto
@@ -75,13 +77,6 @@ add_subdirectory(stubs)
 #-----------------------------------------------------------------------
 if(BUILD_SPIES)
     add_subdirectory(spies)
-endif()
-
-#-----------------------------------------------------------------------
-# libovsp4rt_journal_o
-#-----------------------------------------------------------------------
-if(BUILD_JOURNAL)
-    add_subdirectory(journal)
 endif()
 
 #-----------------------------------------------------------------------
