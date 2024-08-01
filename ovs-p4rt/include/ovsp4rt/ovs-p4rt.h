@@ -89,7 +89,7 @@ struct tunnel_info {
   uint16_t vni;       // bit<24>
   struct port_vlan_info vlan_info;
   uint8_t bridge_id;    // bit<8>
-  uint8_t tunnel_type;  // ovs_tunnel_type
+  uint8_t tunnel_type;  // enum ovs_tunnel_type
 };
 
 struct src_port_info {

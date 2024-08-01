@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include <nlohmann/json.hpp>
+#include <vector>
 
 #include "ovsp4rt/ovs-p4rt.h"
 #include "p4/v1/p4runtime.pb.h"
@@ -17,6 +18,8 @@ namespace ovsp4rt {
 // Captures the inputs and outputs to an API function.
 class Journal {
  public:
+  ~Journal() { saveEntry(); }
+
   void recordInput(const char* func_name, const struct mac_learning_info& info,
                    bool insert_entry);
 
@@ -37,7 +40,7 @@ class Journal {
 
  private:
   nlohmann::json input_;
-  nlohmann::json output_;
+  std::vector<nlohmann::json> output_;
 };
 
 }  // namespace ovsp4rt

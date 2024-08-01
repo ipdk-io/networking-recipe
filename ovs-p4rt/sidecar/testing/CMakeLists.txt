@@ -15,10 +15,6 @@ include(set_test_properties.cmake)
 
 option(TEST_COVERAGE OFF "Measure unit test code coverage")
 
-# Set the "ovsp4rt" label on all tests in this directory.
-# We can use this with ctest to filter the tests to be run.
-set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
-
 #-----------------------------------------------------------------------
 # ipv4_test_utils
 #-----------------------------------------------------------------------

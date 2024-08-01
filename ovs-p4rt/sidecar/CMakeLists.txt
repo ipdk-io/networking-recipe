@@ -9,6 +9,10 @@ option(BUILD_SPIES "Build ovs-p4rt with spies" OFF)
 
 set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Set the "ovsp4rt" label on all build artifacts in this directory
+# and its descendants.
+set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
+
 # Initialize list of unit tests.
 set(UNIT_TEST_NAMES)
 
@@ -20,9 +24,6 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt.cc
     ovsp4rt_private.h
 )
-
-add_subdirectory(logging)
-add_subdirectory(session)
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
@@ -45,11 +46,16 @@ target_link_libraries(ovs_sidecar_o PUBLIC
 #-----------------------------------------------------------------------
 # libovsp4rt.so
 #-----------------------------------------------------------------------
+add_subdirectory(logging)
+add_subdirectory(session)
+
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
     $<TARGET_OBJECTS:ovsp4rt_session_o>
 )
+
+add_subdirectory(journal)
 
 target_link_libraries(ovsp4rt PUBLIC
     p4_role_config_proto
@@ -75,13 +81,6 @@ add_subdirectory(stubs)
 #-----------------------------------------------------------------------
 if(BUILD_SPIES)
     add_subdirectory(spies)
-endif()
-
-#-----------------------------------------------------------------------
-# libovsp4rt_journal_o
-#-----------------------------------------------------------------------
-if(BUILD_JOURNAL)
-    add_subdirectory(journal)
 endif()
 
 #-----------------------------------------------------------------------
