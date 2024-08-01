@@ -720,7 +720,7 @@ absl::Status ConfigFdbTunnelTableEntry(
 #else
 #error "ASSERT: Unknown TARGET type!"
 #endif
-  
+
   journal.recordOutput(__func__, write_request);
 
   auto status = ovsp4rt::SendWriteRequest(session, write_request);
