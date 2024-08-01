@@ -9,6 +9,10 @@ option(BUILD_SPIES "Build ovs-p4rt with spies" OFF)
 
 set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Set the "ovsp4rt" label on all build artifacts in this directory
+# and its descendants.
+set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
+
 # Initialize list of unit tests.
 set(UNIT_TEST_NAMES)
 
@@ -78,7 +82,7 @@ if(BUILD_SPIES)
 endif()
 
 #-----------------------------------------------------------------------
-# libovsp4rt_journal_o
+# ovsp4rt_journal
 #-----------------------------------------------------------------------
 if(BUILD_JOURNAL)
     add_subdirectory(journal)

@@ -48,13 +48,24 @@ extern void VlanInfoToJson(nlohmann::json& json, const struct vlan_info& info);
 // Return JSON representation of API inputs.
 //----------------------------------------------------------------------
 
+extern nlohmann::json EncodeIpMacMapInfo(const char* func_name,
+                                         const struct ip_mac_map_info& info,
+                                         bool insert_entry);
+
 extern nlohmann::json EncodeMacLearningInfo(
-    const char* func_name, const struct mac_learning_info& learn_info,
+    const char* func_name, const struct mac_learning_info& info,
     bool insert_entry);
 
 extern nlohmann::json EncodeSrcPortInfo(const char* func_name,
-                                        const struct src_port_info& sp_info,
+                                        const struct src_port_info& info,
                                         bool insert_entry);
+
+extern nlohmann::json EncodeTunnelInfo(const char* func_name,
+                                       const struct tunnel_info& info,
+                                       bool insert_entry);
+
+extern nlohmann::json EncodeVlanId(const char* func_name, uint16_t vlan_id,
+                                   bool insert_entry);
 
 }  // namespace ovsp4rt
 

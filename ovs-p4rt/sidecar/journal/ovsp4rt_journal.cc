@@ -21,11 +21,15 @@ void Journal::recordInput(const char* func_name,
 
 // ip_mac_map_info
 void Journal::recordInput(const char* func_name, const ip_mac_map_info& info,
-                          bool insert_entry) {}
+                          bool insert_entry) {
+  input_ = EncodeIpMacMapInfo(func_name, info, insert_entry);
+}
 
 // tunnel_info
 void Journal::recordInput(const char* func_name, const tunnel_info& info,
-                          bool insert_entry) {}
+                          bool insert_entry) {
+  input_ = EncodeTunnelInfo(func_name, info, insert_entry);
+}
 
 // src_port_info
 void Journal::recordInput(const char* func_name, const src_port_info info,
@@ -35,7 +39,9 @@ void Journal::recordInput(const char* func_name, const src_port_info info,
 
 // vlan_id
 void Journal::recordInput(const char* func_name, uint16_t vlan_id,
-                          bool insert_entry) {}
+                          bool insert_entry) {
+  input_ = EncodeVlanId(func_name, vlan_id, insert_entry);
+}
 
 // ::p4::v1::WriteRequest
 void recordOutput(const char* func, ::p4::v1::WriteRequest& request) {}
