@@ -24,6 +24,11 @@ std::string EncodeByteValue(int arg_count...);
 // Target-neutral functions
 //----------------------------------------------------------------------
 
+void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
+                                 const struct tunnel_info& tunnel_info,
+                                 const ::p4::config::v1::P4Info& p4info,
+                                 bool insert_entry);
+
 void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
                                  const struct tunnel_info& tunnel_info,
                                  const ::p4::config::v1::P4Info& p4info,
@@ -39,6 +44,16 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const struct mac_learning_info& learn_info,
                               const ::p4::config::v1::P4Info& p4info,
                               bool insert_entry, DiagDetail& detail);
+
+void PrepareFdbTableEntryforV4GeneveTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
+    DiagDetail& detail);
+
+void PrepareFdbTableEntryforV4VxlanTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
+    DiagDetail& detail);
 
 void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
@@ -63,6 +78,11 @@ void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
                                     const struct tunnel_info& tunnel_info,
                                     const ::p4::config::v1::P4Info& p4info,
                                     bool insert_entry);
+
+void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
+                                   const struct tunnel_info& tunnel_info,
+                                   const ::p4::config::v1::P4Info& p4info,
+                                   bool insert_entry);
 
 void PrepareVxlanEncapAndVlanPopTableEntry(
     p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,

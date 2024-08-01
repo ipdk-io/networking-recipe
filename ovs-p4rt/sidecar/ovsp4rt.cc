@@ -48,8 +48,14 @@ std::string EncodeByteValue(int arg_count...) {
   return byte_value;
 }
 
-static inline std::string EncodeVniValue(uint16_t vni) {
-  return EncodeByteValue(3, 0, (vni >> 8) & 0xFF, vni & 0xFF);
+static inline std::string EncodeVniValue(uint32_t vni) {
+  // mod_blob_ptr and vni are both bit<24>
+  return EncodeByteValue(3, (vni >> 16) & 0xff, (vni >> 8) & 0xFF, vni & 0xFF);
+}
+
+static inline std::string EncodeTunnelId(uint32_t tun) {
+  // tunnel_id is bit<20> everywhere but the set_ipsec_tunnel action
+  return EncodeByteValue(3, (tun >> 16) & 0x0F, (tun >> 8) & 0xFF, tun & 0xFF);
 }
 
 std::string CanonicalizeIp(const uint32_t ipv4addr) {
@@ -357,7 +363,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
           param->set_param_id(GetParamId(
               p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V4,
               ACTION_PARAM_TUNNEL_ID));
-          param->set_value(EncodeVniValue(learn_info.tnl_info.vni));
+          param->set_value(EncodeTunnelId(learn_info.tnl_info.vni));
         }
       } else {
         action->set_action_id(
@@ -367,7 +373,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
           param->set_param_id(
               GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V4,
                          ACTION_PARAM_TUNNEL_ID));
-          param->set_value(EncodeVniValue(learn_info.tnl_info.vni));
+          param->set_value(EncodeTunnelId(learn_info.tnl_info.vni));
         }
       }
     } else if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
@@ -380,8 +386,8 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
           param->set_param_id(GetParamId(
               p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V6,
               ACTION_PARAM_TUNNEL_ID));
-          // TODO(derek): 8-bit vni (es2k, ipv6)
-          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+          // tunnel_id is bit<20>
+          param->set_value(EncodeTunnelId(learn_info.tnl_info.vni));
         }
       } else {
         action->set_action_id(
@@ -391,7 +397,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
           param->set_param_id(
               GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_VXLAN_UNDERLAY_V6,
                          ACTION_PARAM_TUNNEL_ID));
-          param->set_value(EncodeVniValue(learn_info.tnl_info.vni));
+          param->set_value(EncodeTunnelId(learn_info.tnl_info.vni));
         }
       }
     }
@@ -461,7 +467,7 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
           param->set_param_id(GetParamId(
               p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V4,
               ACTION_PARAM_TUNNEL_ID));
-          param->set_value(EncodeVniValue(learn_info.tnl_info.vni));
+          param->set_value(EncodeTunnelId(learn_info.tnl_info.vni));
         }
       } else {
         action->set_action_id(
@@ -471,7 +477,7 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
           param->set_param_id(
               GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V4,
                          ACTION_PARAM_TUNNEL_ID));
-          param->set_value(EncodeVniValue(learn_info.tnl_info.vni));
+          param->set_value(EncodeTunnelId(learn_info.tnl_info.vni));
         }
       }
     } else if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
@@ -484,7 +490,7 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
           param->set_param_id(GetParamId(
               p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_GENEVE_UNDERLAY_V6,
               ACTION_PARAM_TUNNEL_ID));
-          param->set_value(EncodeVniValue(learn_info.tnl_info.vni));
+          param->set_value(EncodeTunnelId(learn_info.tnl_info.vni));
         }
       } else {
         action->set_action_id(
@@ -494,7 +500,7 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
           param->set_param_id(
               GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_GENEVE_UNDERLAY_V6,
                          ACTION_PARAM_TUNNEL_ID));
-          param->set_value(EncodeVniValue(learn_info.tnl_info.vni));
+          param->set_value(EncodeTunnelId(learn_info.tnl_info.vni));
         }
       }
     }
@@ -726,6 +732,7 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
   match->set_field_id(
       GetMatchFieldId(p4info, VXLAN_ENCAP_MOD_TABLE,
                       VXLAN_ENCAP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -772,6 +779,7 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(
           GetParamId(p4info, ACTION_VXLAN_ENCAP, ACTION_VXLAN_ENCAP_PARAM_VNI));
+      // vni is bit<24>
       param->set_value(EncodeVniValue(tunnel_info.vni));
     }
   }
@@ -788,6 +796,7 @@ void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
   match->set_field_id(
       GetMatchFieldId(p4info, GENEVE_ENCAP_MOD_TABLE,
                       GENEVE_ENCAP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -832,6 +841,7 @@ void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_GENEVE_ENCAP,
                                      ACTION_GENEVE_ENCAP_PARAM_VNI));
+      // vni is bit<24>
       param->set_value(EncodeVniValue(tunnel_info.vni));
     }
   }
@@ -868,6 +878,7 @@ void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
   match->set_field_id(
       GetMatchFieldId(p4info, VXLAN_ENCAP_V6_MOD_TABLE,
                       VXLAN_ENCAP_V6_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -912,6 +923,7 @@ void PrepareV6VxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP_V6,
                                      ACTION_VXLAN_ENCAP_V6_PARAM_VNI));
+      // vni is bit<24>
       param->set_value(EncodeVniValue(tunnel_info.vni));
     }
   }
@@ -927,6 +939,7 @@ void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
   match->set_field_id(
       GetMatchFieldId(p4info, GENEVE_ENCAP_V6_MOD_TABLE,
                       GENEVE_ENCAP_V6_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -971,6 +984,7 @@ void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_GENEVE_ENCAP_V6,
                                      ACTION_GENEVE_ENCAP_V6_PARAM_VNI));
+      // vni is bit<24>
       param->set_value(EncodeVniValue(tunnel_info.vni));
     }
   }
@@ -1000,6 +1014,7 @@ void PrepareVxlanEncapAndVlanPopTableEntry(
   match->set_field_id(GetMatchFieldId(
       p4info, VXLAN_ENCAP_VLAN_POP_MOD_TABLE,
       VXLAN_ENCAP_VLAN_POP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -1048,6 +1063,7 @@ void PrepareVxlanEncapAndVlanPopTableEntry(
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP_VLAN_POP,
                                      ACTION_VXLAN_ENCAP_VLAN_POP_PARAM_VNI));
+      // vni is bit<24>
       param->set_value(EncodeVniValue(tunnel_info.vni));
     }
   }
@@ -1063,6 +1079,7 @@ void PrepareGeneveEncapAndVlanPopTableEntry(
   match->set_field_id(GetMatchFieldId(
       p4info, GENEVE_ENCAP_VLAN_POP_MOD_TABLE,
       GENEVE_ENCAP_VLAN_POP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -1111,6 +1128,7 @@ void PrepareGeneveEncapAndVlanPopTableEntry(
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_GENEVE_ENCAP_VLAN_POP,
                                      ACTION_GENEVE_ENCAP_VLAN_POP_PARAM_VNI));
+      // vni is bit<24>
       param->set_value(EncodeVniValue(tunnel_info.vni));
     }
   }
@@ -1141,6 +1159,7 @@ void PrepareV6VxlanEncapAndVlanPopTableEntry(
   match->set_field_id(GetMatchFieldId(
       p4info, VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE,
       VXLAN_ENCAP_V6_VLAN_POP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -1189,6 +1208,7 @@ void PrepareV6VxlanEncapAndVlanPopTableEntry(
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_VXLAN_ENCAP_V6_VLAN_POP,
                                      ACTION_VXLAN_ENCAP_V6_VLAN_POP_PARAM_VNI));
+      // vni is bit<24>
       param->set_value(EncodeVniValue(tunnel_info.vni));
     }
   }
@@ -1204,6 +1224,7 @@ void PrepareV6GeneveEncapAndVlanPopTableEntry(
   match->set_field_id(GetMatchFieldId(
       p4info, GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE,
       GENEVE_ENCAP_V6_VLAN_POP_MOD_TABLE_KEY_VENDORMETA_MOD_DATA_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -1253,6 +1274,7 @@ void PrepareV6GeneveEncapAndVlanPopTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_GENEVE_ENCAP_V6_VLAN_POP,
                      ACTION_GENEVE_ENCAP_V6_VLAN_POP_PARAM_VNI));
+      // vni is bit<24>
       param->set_value(EncodeVniValue(tunnel_info.vni));
     }
   }
@@ -1284,6 +1306,7 @@ void PrepareRxTunnelTableEntry(p4::v1::TableEntry* table_entry,
   match->set_field_id(
       GetMatchFieldId(p4info, RX_IPV4_TUNNEL_SOURCE_PORT_TABLE,
                       RX_IPV4_TUNNEL_SOURCE_PORT_TABLE_KEY_VNI));
+  // vni is bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   auto match1 = table_entry->add_match();
@@ -1320,6 +1343,7 @@ void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
   match->set_field_id(
       GetMatchFieldId(p4info, RX_IPV6_TUNNEL_SOURCE_PORT_TABLE,
                       RX_IPV6_TUNNEL_SOURCE_PORT_TABLE_KEY_VNI));
+  // vni is bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   auto match1 = table_entry->add_match();
@@ -1371,6 +1395,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
                                        IPV4_TUNNEL_TERM_TABLE_KEY_VNI));
+  // vni is bit<24>
   match2->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 #elif defined(DPDK_TARGET)
   table_entry->set_table_id(GetTableId(p4info, IPV4_TUNNEL_TERM_TABLE));
@@ -1416,7 +1441,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
         param->set_param_id(
             GetParamId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR_AND_PUSH_VLAN,
                        ACTION_PARAM_TUNNEL_ID));
-        param->set_value(EncodeVniValue(tunnel_info.vni));
+        param->set_value(EncodeTunnelId(tunnel_info.vni));
 
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
         action->set_action_id(GetActionId(
@@ -1425,7 +1450,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
         param->set_param_id(
             GetParamId(p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR_AND_PUSH_VLAN,
                        ACTION_PARAM_TUNNEL_ID));
-        param->set_value(EncodeVniValue(tunnel_info.vni));
+        param->set_value(EncodeTunnelId(tunnel_info.vni));
 
       } else {
         std::cout << "Unsupported tunnel type" << std::endl;
@@ -1437,7 +1462,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
         auto param = action->add_params();
         param->set_param_id(GetParamId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR,
                                        ACTION_PARAM_TUNNEL_ID));
-        param->set_value(EncodeVniValue(tunnel_info.vni));
+        param->set_value(EncodeTunnelId(tunnel_info.vni));
 
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
         action->set_action_id(
@@ -1445,7 +1470,7 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
         auto param = action->add_params();
         param->set_param_id(GetParamId(
             p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR, ACTION_PARAM_TUNNEL_ID));
-        param->set_value(EncodeVniValue(tunnel_info.vni));
+        param->set_value(EncodeTunnelId(tunnel_info.vni));
 
       } else {
         std::cout << "Unsupported tunnel type" << std::endl;
@@ -1477,6 +1502,7 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
   auto match2 = table_entry->add_match();
   match2->set_field_id(GetMatchFieldId(p4info, IPV6_TUNNEL_TERM_TABLE,
                                        IPV6_TUNNEL_TERM_TABLE_KEY_VNI));
+  // vni is bit<24>
   match2->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -1490,7 +1516,7 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
         param->set_param_id(
             GetParamId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR_AND_PUSH_VLAN,
                        ACTION_PARAM_TUNNEL_ID));
-        param->set_value(EncodeVniValue(tunnel_info.vni));
+        param->set_value(EncodeTunnelId(tunnel_info.vni));
 
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
         action->set_action_id(GetActionId(
@@ -1499,7 +1525,7 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
         param->set_param_id(
             GetParamId(p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR_AND_PUSH_VLAN,
                        ACTION_PARAM_TUNNEL_ID));
-        param->set_value(EncodeVniValue(tunnel_info.vni));
+        param->set_value(EncodeTunnelId(tunnel_info.vni));
 
       } else {
         std::cout << "Unsupported tunnel type" << std::endl;
@@ -1511,7 +1537,7 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
         auto param = action->add_params();
         param->set_param_id(GetParamId(p4info, ACTION_SET_VXLAN_DECAP_OUTER_HDR,
                                        ACTION_PARAM_TUNNEL_ID));
-        param->set_value(EncodeVniValue(tunnel_info.vni));
+        param->set_value(EncodeTunnelId(tunnel_info.vni));
 
       } else if (tunnel_info.tunnel_type == OVS_TUNNEL_GENEVE) {
         action->set_action_id(
@@ -1519,7 +1545,7 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
         auto param = action->add_params();
         param->set_param_id(GetParamId(
             p4info, ACTION_SET_GENEVE_DECAP_OUTER_HDR, ACTION_PARAM_TUNNEL_ID));
-        param->set_value(EncodeVniValue(tunnel_info.vni));
+        param->set_value(EncodeTunnelId(tunnel_info.vni));
 
       } else {
         std::cout << "Unsupported tunnel type" << std::endl;
@@ -1580,6 +1606,7 @@ void PrepareVxlanDecapModTableEntry(p4::v1::TableEntry* table_entry,
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, VXLAN_DECAP_MOD_TABLE,
                                       VXLAN_DECAP_MOD_TABLE_KEY_MOD_BLOB_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -1599,6 +1626,7 @@ void PrepareGeneveDecapModTableEntry(p4::v1::TableEntry* table_entry,
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, GENEVE_DECAP_MOD_TABLE,
                                       GENEVE_DECAP_MOD_TABLE_KEY_MOD_BLOB_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -1634,6 +1662,7 @@ void PrepareVxlanDecapModAndVlanPushTableEntry(
   match->set_field_id(
       GetMatchFieldId(p4info, VXLAN_DECAP_AND_VLAN_PUSH_MOD_TABLE,
                       VXLAN_DECAP_AND_VLAN_PUSH_MOD_TABLE_KEY_MOD_BLOB_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {
@@ -1677,6 +1706,7 @@ void PrepareGeneveDecapModAndVlanPushTableEntry(
   match->set_field_id(
       GetMatchFieldId(p4info, GENEVE_DECAP_AND_VLAN_PUSH_MOD_TABLE,
                       GENEVE_DECAP_AND_VLAN_PUSH_MOD_TABLE_KEY_MOD_BLOB_PTR));
+  // mod_blob_ptr and vni are both bit<24>
   match->mutable_exact()->set_value(EncodeVniValue(tunnel_info.vni));
 
   if (insert_entry) {

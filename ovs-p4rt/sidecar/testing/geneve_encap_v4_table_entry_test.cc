@@ -49,7 +49,7 @@ TEST_F(Ipv4TunnelTest, geneve_encap_v4_params_are_correct) {
 
   absl::optional<uint16_t> src_port;
   absl::optional<uint16_t> dst_port;
-  absl::optional<uint16_t> vni;
+  absl::optional<uint32_t> vni;
 
   for (int i = 0; i < num_params; ++i) {
     auto param = params[i];
