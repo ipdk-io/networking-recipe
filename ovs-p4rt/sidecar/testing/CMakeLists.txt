@@ -144,6 +144,23 @@ target_link_libraries(prepare_fdb_smac_entry_test PUBLIC
 
 list(APPEND UNIT_TEST_NAMES prepare_fdb_smac_entry_test)
 
+#-----------------------------------------------------------------------
+# prepare_fdb_tx_vlan_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(prepare_fdb_tx_vlan_entry_test
+  prepare_fdb_tx_vlan_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(prepare_fdb_tx_vlan_entry_test)
+
+target_link_libraries(prepare_fdb_tx_vlan_entry_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES prepare_fdb_tx_vlan_entry_test)
+
 endif(ES2K_TARGET)
 
 #-----------------------------------------------------------------------
