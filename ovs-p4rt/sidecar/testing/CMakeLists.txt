@@ -66,6 +66,26 @@ list(APPEND UNIT_TEST_NAMES encode_host_port_value_test)
 if(ES2K_TARGET)
 
 #-----------------------------------------------------------------------
+# base_table_test
+#-----------------------------------------------------------------------
+add_library(base_table_test STATIC
+  p4info_text.h
+  base_table_test.cc
+  base_table_test.h
+)
+
+target_include_directories(base_table_test PUBLIC
+  ${SIDECAR_SOURCE_DIR}
+  ${STRATUM_SOURCE_DIR}
+)
+
+target_link_libraries(base_table_test PUBLIC
+  absl::flags_parse
+  p4runtime_proto
+  stratum_utils
+)
+
+#-----------------------------------------------------------------------
 # geneve_encap_v4_table_entry_test (ES2K)
 #-----------------------------------------------------------------------
 add_executable(geneve_encap_v4_table_entry_test
