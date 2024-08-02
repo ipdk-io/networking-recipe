@@ -89,6 +89,6 @@ class BaseTableTest : public ::testing::Test {
   const ::p4::config::v1::Table* TABLE = nullptr;
 };
 
-} // namespace ovsp4rt
+}  // namespace ovsp4rt
 
 #endif  // BASE_TABLE_TEST_H_

@@ -18,9 +18,7 @@ using google::protobuf::util::JsonPrintOptions;
 using google::protobuf::util::MessageToJsonString;
 using stratum::ParseProtoFromString;
 
-BaseTableTest::BaseTableTest() {
-  dump_json_ = absl::GetFlag(FLAGS_dump_json);
-}
+BaseTableTest::BaseTableTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
 
 void BaseTableTest::SetUpTestSuite() {
   ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -40,4 +38,4 @@ void BaseTableTest::DumpTableEntry() const {
   }
 }
 
-} // namespace ovsp4rt
+}  // namespace ovsp4rt
