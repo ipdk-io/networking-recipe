@@ -15,6 +15,9 @@
 
 namespace ovsp4rt {
 
+constexpr bool INSERT_ENTRY = true;
+constexpr bool REMOVE_ENTRY = false;
+
 // P4Info object describing the pipeline configuration.
 static ::p4::config::v1::P4Info p4info;
 
