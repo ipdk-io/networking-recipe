@@ -1,6 +1,8 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// Unit test for PrepareFdbSmacTableEntry()
+
 #include <arpa/inet.h>
 #include <stdint.h>
 
@@ -21,6 +23,7 @@ namespace ovsp4rt {
 using stratum::ParseProtoFromString;
 
 constexpr char TABLE_NAME[] = "l2_fwd_smac_table";
+constexpr char NO_ACTION[] = "NoAction";
 
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
@@ -75,7 +78,12 @@ class MacLearnInfoTest : public ::testing::Test {
     fdb_info.bridge_id = BRIDGE_ID;
   }
 
-  void CheckActions() const {}
+  void CheckActions() const {
+    ASSERT_TRUE(table_entry.has_action());
+    const auto& table_action = table_entry.action();
+    const auto& action = table_action.action();
+    EXPECT_EQ(action.action_id(), GetActionId(NO_ACTION));
+  }
 
   void CheckMatches() const {
     constexpr int MFID_MAC_ADDR = 1;
@@ -127,8 +135,6 @@ class MacLearnInfoTest : public ::testing::Test {
   void CheckTableEntry() const {
     ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
-    CheckMatches();
-    CheckActions();
   }
 
   // Working variables
@@ -158,7 +164,21 @@ class MacLearnInfoTest : public ::testing::Test {
 // PrepareFdbSmacTableEntry
 //----------------------------------------------------------------------
 
-TEST_F(MacLearnInfoTest, PrepareFdbSmacTableEntry) {
+TEST_F(MacLearnInfoTest, PrepareFdbSmacTableEntry_remove_entry) {
+  // Arrange
+  InitFdbInfo();
+
+  // Act
+  PrepareFdbSmacTableEntry(&table_entry, fdb_info, p4info, REMOVE_ENTRY,
+                           detail);
+
+  // Assert
+  CheckDetail();
+  CheckTableEntry();
+  CheckMatches();
+}
+
+TEST_F(MacLearnInfoTest, PrepareFdbSmacTableEntry_insert_entry) {
   // Arrange
   InitFdbInfo();
 
@@ -167,8 +187,7 @@ TEST_F(MacLearnInfoTest, PrepareFdbSmacTableEntry) {
                            detail);
 
   // Assert
-  CheckDetail();
-  CheckTableEntry();
+  CheckActions();
 }
 
 }  // namespace ovsp4rt
