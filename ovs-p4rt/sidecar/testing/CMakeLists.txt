@@ -111,23 +111,6 @@ target_link_libraries(geneve_encap_v4_vlan_pop_test PUBLIC
 list(APPEND UNIT_TEST_NAMES geneve_encap_v4_vlan_pop_test)
 
 #-----------------------------------------------------------------------
-# prepare_l2_to_tunnel_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(prepare_l2_to_tunnel_test
-  prepare_l2_to_tunnel_test.cc
-  p4info_text.h
-  test_main.cc
-)
-
-set_test_properties(prepare_l2_to_tunnel_test)
-
-target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
-  absl::flags_parse
-)
-
-list(APPEND UNIT_TEST_NAMES prepare_l2_to_tunnel_test)
-
-#-----------------------------------------------------------------------
 # prepare_fdb_smac_entry_test (ES2K)
 #-----------------------------------------------------------------------
 add_executable(prepare_fdb_smac_entry_test
@@ -143,6 +126,40 @@ target_link_libraries(prepare_fdb_smac_entry_test PUBLIC
 )
 
 list(APPEND UNIT_TEST_NAMES prepare_fdb_smac_entry_test)
+
+#-----------------------------------------------------------------------
+# prepare_l2_to_v4_tunnel_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(prepare_l2_to_v4_tunnel_test
+  prepare_l2_to_v4_tunnel_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(prepare_l2_to_v4_tunnel_test)
+
+target_link_libraries(prepare_l2_to_v4_tunnel_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES prepare_l2_to_v4_tunnel_test)
+
+#-----------------------------------------------------------------------
+# prepare_l2_to_v6_tunnel_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(prepare_l2_to_v6_tunnel_test
+  prepare_l2_to_v6_tunnel_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(prepare_l2_to_v6_tunnel_test)
+
+target_link_libraries(prepare_l2_to_v6_tunnel_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES prepare_l2_to_v6_tunnel_test)
 
 endif(ES2K_TARGET)
 
