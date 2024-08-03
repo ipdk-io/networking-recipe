@@ -31,9 +31,9 @@ constexpr bool REMOVE_ENTRY = false;
 
 static ::p4::config::v1::P4Info p4info;
 
-class MacLearnInfoTest : public ::testing::Test {
+class PrepareFdbTxVlanEntryTest : public ::testing::Test {
  protected:
-  MacLearnInfoTest() { memset(&fdb_info, 0, sizeof(fdb_info)); }
+  PrepareFdbTxVlanEntryTest() { memset(&fdb_info, 0, sizeof(fdb_info)); }
 
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -44,12 +44,28 @@ class MacLearnInfoTest : public ::testing::Test {
 
   void SetUp() { SelectTable(TABLE_NAME); }
 
-  static uint32_t DecodeWordValue(const std::string& string_value) {
-    uint32_t word_value = 0;
-    for (int i = 0; i < string_value.size(); i++) {
-      word_value = (word_value << 8) | (string_value[i] & 0xff);
+  //----------------------------
+  // P4Info lookup methods
+  //----------------------------
+
+  int GetMatchFieldId(const std::string& mf_name) const {
+    for (const auto& mf : TABLE->match_fields()) {
+      if (mf.name() == mf_name) {
+        return mf.id();
+      }
     }
-    return word_value;
+    std::cerr << "Match Field '" << mf_name << "' not found!\n";
+    return -1;
+  }
+
+  int GetParamId(const std::string& param_name) const {
+    for (const auto& param : ACTION->params()) {
+      if (param.name() == param_name) {
+        return param.id();
+      }
+    }
+    std::cerr << "Action Param '" << param_name << "' not found!\n";
+    return -1;
   }
 
   void SelectAction(const std::string& action_name) {
@@ -64,36 +80,32 @@ class MacLearnInfoTest : public ::testing::Test {
     std::cerr << "Action '" << action_name << "' not found!\n";
   }
 
-  int GetActionId(const std::string& action_name) const {
-    for (const auto& action : p4info.actions()) {
-      const auto& pre = action.preamble();
-      if (pre.name() == action_name || pre.alias() == action_name) {
-        return pre.id();
+  void SelectTable(const std::string& table_name) {
+    for (const auto& table : p4info.tables()) {
+      const auto& pre = table.preamble();
+      if (pre.name() == table_name || pre.alias() == table_name) {
+        TABLE = &table;
+        TABLE_ID = pre.id();
+        return;
       }
     }
-    std::cerr << "Action '" << action_name << "' not found!\n";
-    return -1;
   }
 
-  int GetParamId(const std::string& param_name) const {
-    for (const auto& param : ACTION->params()) {
-      if (param.name() == param_name) {
-        return param.id();
-      }
+  //----------------------------
+  // Utility methods
+  //----------------------------
+
+  static uint32_t DecodeWordValue(const std::string& string_value) {
+    uint32_t word_value = 0;
+    for (int i = 0; i < string_value.size(); i++) {
+      word_value = (word_value << 8) | (string_value[i] & 0xff);
     }
-    std::cerr << "Action Param '" << param_name << "' not found!\n";
-    return -1;
+    return word_value;
   }
 
-  int GetMatchFieldId(const std::string& mf_name) const {
-    for (const auto& mf : TABLE->match_fields()) {
-      if (mf.name() == mf_name) {
-        return mf.id();
-      }
-    }
-    std::cerr << "Match Field '" << mf_name << "' not found!\n";
-    return -1;
-  }
+  //----------------------------
+  // Initialization methods
+  //----------------------------
 
   void InitFdbInfo() {
     constexpr uint8_t MAC_ADDR[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
@@ -121,8 +133,8 @@ class MacLearnInfoTest : public ::testing::Test {
     constexpr uint32_t SRC_PORT = 0x1984;  // bit<32> -> bit<8>
     constexpr uint32_t VLAN_PTR = 0x1066;  // bit<24> -> bit<8>
 #else
-    constexpr uint32_t SRC_PORT = 0x84;  // bit<32> -> bit<8>
-    constexpr uint32_t VLAN_PTR = 0x66;  // bit<24> -> bit<8>
+    constexpr uint32_t SRC_PORT = 0x84;  // bit<8>
+    constexpr uint32_t VLAN_PTR = 0x66;  // bit<8>
 #endif
 
     fdb_info.vlan_info.port_vlan = VLAN_PTR;
@@ -130,6 +142,63 @@ class MacLearnInfoTest : public ::testing::Test {
     fdb_info.src_port = SRC_PORT;
 
     SelectAction("remove_vlan_and_fwd");
+  }
+
+  //----------------------------
+  // Test-specific methods
+  //----------------------------
+
+  void CheckMacAddr(const ::p4::v1::FieldMatch& match) const {
+    constexpr int MAC_ADDR_SIZE = 6;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+    ASSERT_EQ(match_value.size(), MAC_ADDR_SIZE);
+
+    for (int i = 0; i < MAC_ADDR_SIZE; i++) {
+      EXPECT_EQ(match_value[i], fdb_info.mac_addr[i])
+          << "mac_addr[" << i << "] is incorrect";
+    }
+  }
+
+  void CheckBridgeId(const ::p4::v1::FieldMatch& match) const {
+    constexpr int BRIDGE_ID_SIZE = 1;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+    ASSERT_EQ(match_value.size(), BRIDGE_ID_SIZE);
+
+    // widen so values will be treated as ints
+    ASSERT_EQ(uint32_t(match_value[0]), uint32_t(fdb_info.bridge_id));
+  }
+
+  void CheckDetail() const { EXPECT_EQ(detail.table_id, LOG_L2_FWD_TX_TABLE); }
+
+  void CheckMatches() const {
+    constexpr char BRIDGE_ID_KEY[] = "user_meta.pmeta.bridge_id";
+    constexpr char DST_MAC_KEY[] = "dst_mac";
+
+    const int MFID_BRIDGE_ID = GetMatchFieldId(BRIDGE_ID_KEY);
+    const int MFID_DST_MAC = GetMatchFieldId(DST_MAC_KEY);
+
+    // number of match fields
+    ASSERT_EQ(table_entry.match_size(), 2);
+
+    for (const auto& match : table_entry.match()) {
+      auto field_id = match.field_id();
+      if (field_id == MFID_DST_MAC) {
+        CheckMacAddr(match);
+      } else if (field_id == MFID_BRIDGE_ID) {
+        CheckBridgeId(match);
+      } else {
+        FAIL() << "Unexpected field_id (" << field_id << ")";
+      }
+    }
+  }
+
+  void CheckTableEntry() const {
+    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
+    EXPECT_EQ(table_entry.table_id(), TABLE_ID);
   }
 
   void CheckTaggedAction() const {
@@ -182,58 +251,9 @@ class MacLearnInfoTest : public ::testing::Test {
     }
   }
 
-  void CheckMatches() const {
-    constexpr char BRIDGE_ID_KEY[] = "user_meta.pmeta.bridge_id";
-    constexpr char DST_MAC_KEY[] = "dst_mac";
-
-    const int MFID_BRIDGE_ID = GetMatchFieldId(BRIDGE_ID_KEY);
-    const int MFID_DST_MAC = GetMatchFieldId(DST_MAC_KEY);
-
-    // number of match fields
-    ASSERT_EQ(table_entry.match_size(), 2);
-
-    for (const auto& match : table_entry.match()) {
-      auto field_id = match.field_id();
-      if (field_id == MFID_DST_MAC) {
-        CheckMacAddr(match);
-      } else if (field_id == MFID_BRIDGE_ID) {
-        CheckBridgeId(match);
-      } else {
-        FAIL() << "Unexpected field_id (" << field_id << ")";
-      }
-    }
-  }
-
-  void CheckMacAddr(const ::p4::v1::FieldMatch& match) const {
-    constexpr int MAC_ADDR_SIZE = 6;
-
-    ASSERT_TRUE(match.has_exact());
-    const auto& match_value = match.exact().value();
-    ASSERT_EQ(match_value.size(), MAC_ADDR_SIZE);
-
-    for (int i = 0; i < MAC_ADDR_SIZE; i++) {
-      EXPECT_EQ(match_value[i], fdb_info.mac_addr[i])
-          << "mac_addr[" << i << "] is incorrect";
-    }
-  }
-
-  void CheckBridgeId(const ::p4::v1::FieldMatch& match) const {
-    constexpr int BRIDGE_ID_SIZE = 1;
-
-    ASSERT_TRUE(match.has_exact());
-    const auto& match_value = match.exact().value();
-    ASSERT_EQ(match_value.size(), BRIDGE_ID_SIZE);
-
-    // widen so values will be treated as ints
-    ASSERT_EQ(uint32_t(match_value[0]), uint32_t(fdb_info.bridge_id));
-  }
-
-  void CheckDetail() const { EXPECT_EQ(detail.table_id, LOG_L2_FWD_TX_TABLE); }
-
-  void CheckTableEntry() const {
-    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
-    EXPECT_EQ(table_entry.table_id(), TABLE_ID);
-  }
+  //----------------------------
+  // Protected member data
+  //----------------------------
 
   // Working variables
   struct mac_learning_info fdb_info = {0};
@@ -245,16 +265,9 @@ class MacLearnInfoTest : public ::testing::Test {
   int ACTION_ID = -1;
 
  private:
-  void SelectTable(const std::string& table_name) {
-    for (const auto& table : p4info.tables()) {
-      const auto& pre = table.preamble();
-      if (pre.name() == table_name || pre.alias() == table_name) {
-        TABLE = &table;
-        TABLE_ID = pre.id();
-        return;
-      }
-    }
-  }
+  //----------------------------
+  // Private member data
+  //----------------------------
 
   const ::p4::config::v1::Table* TABLE = nullptr;
   const ::p4::config::v1::Action* ACTION = nullptr;
@@ -264,7 +277,7 @@ class MacLearnInfoTest : public ::testing::Test {
 // PrepareFdbTxVlanTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(MacLearnInfoTest, PrepareFdbTxVlanTableEntry_remove_entry) {
+TEST_F(PrepareFdbTxVlanEntryTest, remove_entry) {
   // Arrange
   InitFdbInfo();
 
@@ -278,7 +291,7 @@ TEST_F(MacLearnInfoTest, PrepareFdbTxVlanTableEntry_remove_entry) {
   CheckMatches();
 }
 
-TEST_F(MacLearnInfoTest, PrepareFdbTxVlanTableEntry_insert_untagged) {
+TEST_F(PrepareFdbTxVlanEntryTest, insert_untagged_entry) {
   // Arrange
   InitFdbInfo();
   InitUntagged();
@@ -291,7 +304,7 @@ TEST_F(MacLearnInfoTest, PrepareFdbTxVlanTableEntry_insert_untagged) {
   CheckUntaggedAction();
 }
 
-TEST_F(MacLearnInfoTest, PrepareFdbTxVlanTableEntry_insert_tagged) {
+TEST_F(PrepareFdbTxVlanEntryTest, insert_tagged_entry) {
   // Arrange
   InitFdbInfo();
   InitTagged();
