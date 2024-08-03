@@ -43,13 +43,9 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
 
   void SetUp() { SelectTable(TABLE_NAME); }
 
-  static uint32_t DecodeWordValue(const std::string& string_value) {
-    uint32_t word_value = 0;
-    for (int i = 0; i < string_value.size(); i++) {
-      word_value = (word_value << 8) | (string_value[i] & 0xff);
-    }
-    return word_value;
-  }
+  //----------------------------
+  // P4Info lookup methods
+  //----------------------------
 
   int GetActionId(const std::string& action_name) const {
     for (const auto& action : p4info.actions()) {
@@ -70,6 +66,33 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
     return -1;
   }
 
+  void SelectTable(const std::string& table_name) {
+    for (const auto& table : p4info.tables()) {
+      const auto& pre = table.preamble();
+      if (pre.name() == table_name || pre.alias() == table_name) {
+        TABLE = &table;
+        TABLE_ID = pre.id();
+        return;
+      }
+    }
+  }
+
+  //----------------------------
+  // Utility methods
+  //----------------------------
+
+  static uint32_t DecodeWordValue(const std::string& string_value) {
+    uint32_t word_value = 0;
+    for (int i = 0; i < string_value.size(); i++) {
+      word_value = (word_value << 8) | (string_value[i] & 0xff);
+    }
+    return word_value;
+  }
+
+  //----------------------------
+  // Initialization methods
+  //----------------------------
+
   void InitFdbInfo() {
     constexpr uint8_t MAC_ADDR[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
     constexpr uint8_t BRIDGE_ID = 42;
@@ -78,6 +101,10 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
     fdb_info.bridge_id = BRIDGE_ID;
   }
 
+  //----------------------------
+  // Test-specific methods
+  //----------------------------
+
   void CheckAction() const {
     ASSERT_TRUE(table_entry.has_action());
     const auto& table_action = table_entry.action();
@@ -85,9 +112,32 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
     EXPECT_EQ(action.action_id(), GetActionId(NO_ACTION));
   }
 
-  void CheckNoAction() const {
-    // Table entry does not specify an action
-    EXPECT_FALSE(table_entry.has_action());
+  void CheckBridgeId(const ::p4::v1::FieldMatch& match) const {
+    constexpr int BRIDGE_ID_SIZE = 1;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+    ASSERT_EQ(match_value.size(), BRIDGE_ID_SIZE);
+
+    // widen so values will be treated as ints
+    ASSERT_EQ(uint32_t(match_value[0]), uint32_t(fdb_info.bridge_id));
+  }
+
+  void CheckDetail() const {
+    EXPECT_EQ(detail.table_id, LOG_L2_FWD_SMAC_TABLE);
+  }
+
+  void CheckMacAddr(const ::p4::v1::FieldMatch& match) const {
+    constexpr int MAC_ADDR_SIZE = 6;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+    ASSERT_EQ(match_value.size(), MAC_ADDR_SIZE);
+
+    for (int i = 0; i < MAC_ADDR_SIZE; i++) {
+      EXPECT_EQ(match_value[i] & 0xFF, fdb_info.mac_addr[i])
+          << "mac_addr[" << i << "] is incorrect";
+    }
   }
 
   void CheckMatches() const {
@@ -109,32 +159,9 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
     }
   }
 
-  void CheckMacAddr(const ::p4::v1::FieldMatch& match) const {
-    constexpr int MAC_ADDR_SIZE = 6;
-
-    ASSERT_TRUE(match.has_exact());
-    const auto& match_value = match.exact().value();
-    ASSERT_EQ(match_value.size(), MAC_ADDR_SIZE);
-
-    for (int i = 0; i < MAC_ADDR_SIZE; i++) {
-      EXPECT_EQ(match_value[i] & 0xFF, fdb_info.mac_addr[i])
-          << "mac_addr[" << i << "] is incorrect";
-    }
-  }
-
-  void CheckBridgeId(const ::p4::v1::FieldMatch& match) const {
-    constexpr int BRIDGE_ID_SIZE = 1;
-
-    ASSERT_TRUE(match.has_exact());
-    const auto& match_value = match.exact().value();
-    ASSERT_EQ(match_value.size(), BRIDGE_ID_SIZE);
-
-    // widen so values will be treated as ints
-    ASSERT_EQ(uint32_t(match_value[0]), uint32_t(fdb_info.bridge_id));
-  }
-
-  void CheckDetail() const {
-    EXPECT_EQ(detail.table_id, LOG_L2_FWD_SMAC_TABLE);
+  void CheckNoAction() const {
+    // Table entry does not specify an action
+    EXPECT_FALSE(table_entry.has_action());
   }
 
   void CheckTableEntry() const {
@@ -145,6 +172,10 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
   }
 
+  //----------------------------
+  // Protected member data
+  //----------------------------
+
   // Working variables
   struct mac_learning_info fdb_info = {0};
   ::p4::v1::TableEntry table_entry;
@@ -154,16 +185,9 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
   uint32_t TABLE_ID;
 
  private:
-  void SelectTable(const std::string& table_name) {
-    for (const auto& table : p4info.tables()) {
-      const auto& pre = table.preamble();
-      if (pre.name() == table_name || pre.alias() == table_name) {
-        TABLE = &table;
-        TABLE_ID = pre.id();
-        return;
-      }
-    }
-  }
+  //----------------------------
+  // Private member data
+  //----------------------------
 
   const ::p4::config::v1::Table* TABLE = nullptr;
 };
