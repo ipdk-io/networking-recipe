@@ -30,9 +30,9 @@ constexpr bool REMOVE_ENTRY = false;
 
 static ::p4::config::v1::P4Info p4info;
 
-class MacLearnInfoTest : public ::testing::Test {
+class PrepareFdbSmacEntryTest : public ::testing::Test {
  protected:
-  MacLearnInfoTest() { memset(&fdb_info, 0, sizeof(fdb_info)); }
+  PrepareFdbSmacEntryTest() {}
 
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -78,11 +78,16 @@ class MacLearnInfoTest : public ::testing::Test {
     fdb_info.bridge_id = BRIDGE_ID;
   }
 
-  void CheckActions() const {
+  void CheckAction() const {
     ASSERT_TRUE(table_entry.has_action());
     const auto& table_action = table_entry.action();
     const auto& action = table_action.action();
     EXPECT_EQ(action.action_id(), GetActionId(NO_ACTION));
+  }
+
+  void CheckNoAction() const {
+    // Table entry does not specify an action
+    EXPECT_FALSE(table_entry.has_action());
   }
 
   void CheckMatches() const {
@@ -112,7 +117,7 @@ class MacLearnInfoTest : public ::testing::Test {
     ASSERT_EQ(match_value.size(), MAC_ADDR_SIZE);
 
     for (int i = 0; i < MAC_ADDR_SIZE; i++) {
-      EXPECT_EQ(match_value[i], fdb_info.mac_addr[i])
+      EXPECT_EQ(match_value[i] & 0xFF, fdb_info.mac_addr[i])
           << "mac_addr[" << i << "] is incorrect";
     }
   }
@@ -133,7 +138,10 @@ class MacLearnInfoTest : public ::testing::Test {
   }
 
   void CheckTableEntry() const {
+    // Table is defined (sanity check)
     ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
+
+    // Table ID is what we expect
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
   }
 
@@ -164,7 +172,7 @@ class MacLearnInfoTest : public ::testing::Test {
 // PrepareFdbSmacTableEntry
 //----------------------------------------------------------------------
 
-TEST_F(MacLearnInfoTest, PrepareFdbSmacTableEntry_remove_entry) {
+TEST_F(PrepareFdbSmacEntryTest, remove_entry) {
   // Arrange
   InitFdbInfo();
 
@@ -176,9 +184,10 @@ TEST_F(MacLearnInfoTest, PrepareFdbSmacTableEntry_remove_entry) {
   CheckDetail();
   CheckTableEntry();
   CheckMatches();
+  CheckNoAction();
 }
 
-TEST_F(MacLearnInfoTest, PrepareFdbSmacTableEntry_insert_entry) {
+TEST_F(PrepareFdbSmacEntryTest, insert_entry) {
   // Arrange
   InitFdbInfo();
 
@@ -187,7 +196,7 @@ TEST_F(MacLearnInfoTest, PrepareFdbSmacTableEntry_insert_entry) {
                            detail);
 
   // Assert
-  CheckActions();
+  CheckAction();
 }
 
 }  // namespace ovsp4rt
