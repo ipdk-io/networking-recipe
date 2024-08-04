@@ -1361,7 +1361,8 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
 #if defined(ES2K_TARGET)
   table_entry->set_table_id(GetTableId(p4info, IPV4_TUNNEL_TERM_TABLE));
 
-  // match bridge_id
+  // TODO(derek): ipv4_tunnel_term_table does not have a bridge_id
+  // match field. What gives?
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
                                       IPV4_TUNNEL_TERM_TABLE_KEY_BRIDGE_ID));
