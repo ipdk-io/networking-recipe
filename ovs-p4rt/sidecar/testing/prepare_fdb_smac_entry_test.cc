@@ -22,9 +22,6 @@ namespace ovsp4rt {
 
 using stratum::ParseProtoFromString;
 
-constexpr char TABLE_NAME[] = "l2_fwd_smac_table";
-constexpr char NO_ACTION[] = "NoAction";
-
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
 
@@ -41,7 +38,7 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
     }
   }
 
-  void SetUp() { SelectTable(TABLE_NAME); }
+  void SetUp() { SelectTable("l2_fwd_smac_table"); }
 
   //----------------------------
   // P4Info lookup methods
@@ -54,6 +51,7 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
         return pre.id();
       }
     }
+    std::cerr << "Action '" << action_name << "' not found!\n";
     return -1;
   }
 
@@ -63,6 +61,7 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
         return mf.id();
       }
     }
+    std::cerr << "Match Field '" << mf_name << "' not found!\n";
     return -1;
   }
 
@@ -75,6 +74,7 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
         return;
       }
     }
+    std::cerr << "Table '" << table_name << "' not found!\n";
   }
 
   //----------------------------
@@ -109,7 +109,7 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
     ASSERT_TRUE(table_entry.has_action());
     const auto& table_action = table_entry.action();
     const auto& action = table_action.action();
-    EXPECT_EQ(action.action_id(), GetActionId(NO_ACTION));
+    EXPECT_EQ(action.action_id(), GetActionId("NoAction"));
   }
 
   void CheckBridgeId(const ::p4::v1::FieldMatch& match) const {
@@ -166,7 +166,7 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
 
   void CheckTableEntry() const {
     // Table is defined (sanity check)
-    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
+    ASSERT_FALSE(TABLE == nullptr);
 
     // Table ID is what we expect
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
