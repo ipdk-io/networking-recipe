@@ -27,9 +27,9 @@ constexpr bool REMOVE_ENTRY = false;
 
 static ::p4::config::v1::P4Info p4info;
 
-class PrepareFdbSmacEntryTest : public ::testing::Test {
+class FdbSmacEntryTest : public ::testing::Test {
  protected:
-  PrepareFdbSmacEntryTest() {}
+  FdbSmacEntryTest() {}
 
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -196,7 +196,7 @@ class PrepareFdbSmacEntryTest : public ::testing::Test {
 // PrepareFdbSmacTableEntry
 //----------------------------------------------------------------------
 
-TEST_F(PrepareFdbSmacEntryTest, remove_entry) {
+TEST_F(FdbSmacEntryTest, remove_entry) {
   // Arrange
   InitFdbInfo();
 
@@ -211,7 +211,7 @@ TEST_F(PrepareFdbSmacEntryTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(PrepareFdbSmacEntryTest, insert_entry) {
+TEST_F(FdbSmacEntryTest, insert_entry) {
   // Arrange
   InitFdbInfo();
 

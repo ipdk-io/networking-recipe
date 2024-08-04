@@ -66,6 +66,23 @@ list(APPEND UNIT_TEST_NAMES encode_host_port_value_test)
 if(ES2K_TARGET)
 
 #-----------------------------------------------------------------------
+# fdb_smac_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(fdb_smac_entry_test
+  fdb_smac_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(fdb_smac_entry_test)
+
+target_link_libraries(fdb_smac_entry_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES fdb_smac_entry_test)
+
+#-----------------------------------------------------------------------
 # geneve_encap_v4_table_entry_test (ES2K)
 #-----------------------------------------------------------------------
 add_executable(geneve_encap_v4_table_entry_test
@@ -126,23 +143,6 @@ target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
 )
 
 list(APPEND UNIT_TEST_NAMES prepare_l2_to_tunnel_test)
-
-#-----------------------------------------------------------------------
-# prepare_fdb_smac_entry_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(prepare_fdb_smac_entry_test
-  prepare_fdb_smac_entry_test.cc
-  p4info_text.h
-  test_main.cc
-)
-
-set_test_properties(prepare_fdb_smac_entry_test)
-
-target_link_libraries(prepare_fdb_smac_entry_test PUBLIC
-  absl::flags_parse
-)
-
-list(APPEND UNIT_TEST_NAMES prepare_fdb_smac_entry_test)
 
 endif(ES2K_TARGET)
 
