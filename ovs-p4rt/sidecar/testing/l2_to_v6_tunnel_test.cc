@@ -29,9 +29,9 @@ using stratum::ParseProtoFromString;
 
 static ::p4::config::v1::P4Info p4info;
 
-class PrepareL2ToV6TunnelTest : public ::testing::Test {
+class L2ToV6TunnelTest : public ::testing::Test {
  protected:
-  PrepareL2ToV6TunnelTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
+  L2ToV6TunnelTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
 
   static void SetUpTestSuite() {
     ::util::Status status = stratum::ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -229,9 +229,9 @@ class PrepareL2ToV6TunnelTest : public ::testing::Test {
 };
 
 //----------------------------------------------------------------------
-// PrepareL2ToV6TunnelTest()
+// L2ToV6TunnelTest()
 //----------------------------------------------------------------------
-TEST_F(PrepareL2ToV6TunnelTest, remove_entry) {
+TEST_F(L2ToV6TunnelTest, remove_entry) {
   // Arrange
   InitFdbInfo();
 
@@ -247,7 +247,7 @@ TEST_F(PrepareL2ToV6TunnelTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(PrepareL2ToV6TunnelTest, insert_entry) {
+TEST_F(L2ToV6TunnelTest, insert_entry) {
   // Arrange
   InitFdbInfo();
 
