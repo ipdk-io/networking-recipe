@@ -32,9 +32,9 @@ constexpr bool REMOVE_ENTRY = false;
 
 static ::p4::config::v1::P4Info p4info;
 
-class PrepareFdbRxVlanEntryTest : public ::testing::Test {
+class FdbRxVlanEntryTest : public ::testing::Test {
  protected:
-  PrepareFdbRxVlanEntryTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
+  FdbRxVlanEntryTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
 
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -248,7 +248,7 @@ class PrepareFdbRxVlanEntryTest : public ::testing::Test {
 // PrepareFdbRxVlanTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(PrepareFdbRxVlanEntryTest, remove_entry) {
+TEST_F(FdbRxVlanEntryTest, remove_entry) {
   // Arrange
   InitFdbInfo();
 
@@ -263,7 +263,7 @@ TEST_F(PrepareFdbRxVlanEntryTest, remove_entry) {
   CheckMatches();
 }
 
-TEST_F(PrepareFdbRxVlanEntryTest, insert_entry) {
+TEST_F(FdbRxVlanEntryTest, insert_entry) {
   // Arrange
   InitFdbInfo();
   InitAction();
