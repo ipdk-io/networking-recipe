@@ -23,8 +23,6 @@ ABSL_FLAG(bool, dump_json, false, "Dump output table_entry in JSON");
 
 namespace ovsp4rt {
 
-constexpr char TABLE_NAME[] = "l2_to_tunnel_v4";
-
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
 
@@ -45,7 +43,7 @@ class PrepareL2ToV4TunnelTest : public ::testing::Test {
     }
   }
 
-  void SetUp() { SelectTable(TABLE_NAME); }
+  void SetUp() { SelectTable("l2_to_tunnel_v4"); }
 
   //----------------------------
   // P4Info lookup methods
@@ -92,6 +90,7 @@ class PrepareL2ToV4TunnelTest : public ::testing::Test {
         return;
       }
     }
+    std::cerr << "Table '" << table_name << "' not found!\n";
   }
 
   //----------------------------
@@ -216,7 +215,7 @@ class PrepareL2ToV4TunnelTest : public ::testing::Test {
 
   void CheckTableEntry() const {
     // Table is defined (sanity check)
-    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
+    ASSERT_FALSE(TABLE == nullptr);
 
     // Table ID is what we expect
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);

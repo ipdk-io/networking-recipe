@@ -44,34 +44,7 @@ class PrepareL2ToV6TunnelTest : public ::testing::Test {
     }
   }
 
-  void SetUp() { SelectTable(TABLE_NAME); }
-
-  //----------------------------
-  // Utility methods
-  //----------------------------
-
-  static uint32_t DecodeWordValue(const std::string& string_value) {
-    uint32_t word_value = 0;
-    for (int i = 0; i < string_value.size(); i++) {
-      word_value = (word_value << 8) | (string_value[i] & 0xff);
-    }
-    return word_value;
-  }
-
-  void DumpTableEntry() {
-    if (dump_json_) {
-      JsonPrintOptions options;
-      options.add_whitespace = true;
-      options.preserve_proto_field_names = true;
-      std::string output;
-      ASSERT_TRUE(MessageToJsonString(table_entry, &output, options).ok());
-      std::cout << output << std::endl;
-    }
-  }
-
-  static inline uint32_t Ipv6AddrWord(const struct p4_ipaddr& ipaddr, int i) {
-    return ipaddr.ip.v6addr.__in6_u.__u6_addr32[i];
-  }
+  void SetUp() { SelectTable("l2_to_tunnel_v6"); }
 
   //----------------------------
   // P4Info lookup methods
@@ -118,6 +91,33 @@ class PrepareL2ToV6TunnelTest : public ::testing::Test {
         return;
       }
     }
+  }
+
+  //----------------------------
+  // Utility methods
+  //----------------------------
+
+  static uint32_t DecodeWordValue(const std::string& string_value) {
+    uint32_t word_value = 0;
+    for (int i = 0; i < string_value.size(); i++) {
+      word_value = (word_value << 8) | (string_value[i] & 0xff);
+    }
+    return word_value;
+  }
+
+  void DumpTableEntry() {
+    if (dump_json_) {
+      JsonPrintOptions options;
+      options.add_whitespace = true;
+      options.preserve_proto_field_names = true;
+      std::string output;
+      ASSERT_TRUE(MessageToJsonString(table_entry, &output, options).ok());
+      std::cout << output << std::endl;
+    }
+  }
+
+  static inline uint32_t Ipv6AddrWord(const struct p4_ipaddr& ipaddr, int i) {
+    return ipaddr.ip.v6addr.__in6_u.__u6_addr32[i];
   }
 
   //----------------------------
@@ -187,7 +187,7 @@ class PrepareL2ToV6TunnelTest : public ::testing::Test {
   }
 
   void CheckTableEntry() const {
-    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
+    ASSERT_FALSE(TABLE == nullptr);
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
   }
 
