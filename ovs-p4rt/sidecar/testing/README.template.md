@@ -25,7 +25,7 @@
    If you do not specify `-D` or `-U` for a symbol, the conditional
    block will be unchanged in the output file.
 
-3. Rename placeholders in the new source file.
+2. Rename placeholders in the new source file.
 
    - Change "PrepareSampleTableEntry" to the name of the function.
    - Change "InitInputInfo" to reflect the name of the info struct.
@@ -33,7 +33,7 @@
    - Change "sample_table" to the name or alias of the table.
    - Change "sample_action" to the name or alias of the action.
 
-4. Run `clang-format` to clean up after the edits.
+3. Run `clang-format` to clean up after the edits.
 
    ```bash
    clang-format -i vlan_pop_table_test.cc
