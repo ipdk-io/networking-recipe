@@ -27,8 +27,6 @@ using google::protobuf::util::JsonPrintOptions;
 using google::protobuf::util::MessageToJsonString;
 using stratum::ParseProtoFromString;
 
-constexpr char TABLE_NAME[] = "l2_fwd_rx_table";
-
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
 
@@ -45,7 +43,7 @@ class PrepareFdbRxVlanEntryTest : public ::testing::Test {
     }
   }
 
-  void SetUp() { SelectTable(TABLE_NAME); }
+  void SetUp() { SelectTable("l2_fwd_rx_table"); }
 
   //----------------------------
   // P4Info lookup methods
@@ -103,6 +101,7 @@ class PrepareFdbRxVlanEntryTest : public ::testing::Test {
         return;
       }
     }
+    std::cerr << "Table '" << table_name << "' not found!\n";
   }
 
   //----------------------------
@@ -217,7 +216,7 @@ class PrepareFdbRxVlanEntryTest : public ::testing::Test {
   }
 
   void CheckTableEntry() const {
-    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
+    ASSERT_FALSE(TABLE == nullptr);
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
   }
 
