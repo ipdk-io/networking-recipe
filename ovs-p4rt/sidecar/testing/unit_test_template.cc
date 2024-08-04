@@ -1,8 +1,6 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// See README.template.md for instructions on using this file.
-
 // Unit test for PrepareSampleTableEntry()
 
 #include <stdint.h>
