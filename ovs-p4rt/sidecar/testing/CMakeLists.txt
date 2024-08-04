@@ -20,6 +20,22 @@ option(TEST_COVERAGE OFF "Measure unit test code coverage")
 set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
 
 #-----------------------------------------------------------------------
+# define_ovsp4rt_test()
+#-----------------------------------------------------------------------
+macro(define_ovsp4rt_test TARGET)
+  target_sources(${TARGET} PRIVATE
+    p4info_text.h
+    test_main.cc
+  )
+
+  set_test_properties(${TARGET})
+
+  target_link_libraries(${TARGET} PUBLIC
+    absl::flags_parse
+  )
+endmacro(define_ovsp4rt_test)
+
+#-----------------------------------------------------------------------
 # ipv4_test_utils
 #-----------------------------------------------------------------------
 add_library(ipv4_test_utils STATIC
@@ -143,6 +159,17 @@ target_link_libraries(prepare_fdb_smac_entry_test PUBLIC
 )
 
 list(APPEND UNIT_TEST_NAMES prepare_fdb_smac_entry_test)
+
+#-----------------------------------------------------------------------
+# vxlan_decap_mod_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(vxlan_decap_mod_entry_test
+  vxlan_decap_mod_entry_test.cc
+)
+
+define_ovsp4rt_test(vxlan_decap_mod_entry_test)
+
+list(APPEND UNIT_TEST_NAMES vxlan_decap_mod_entry_test)
 
 endif(ES2K_TARGET)
 
