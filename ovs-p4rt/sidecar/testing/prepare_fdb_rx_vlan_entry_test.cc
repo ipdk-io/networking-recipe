@@ -36,9 +36,7 @@ static ::p4::config::v1::P4Info p4info;
 
 class PrepareFdbRxVlanEntryTest : public ::testing::Test {
  protected:
-  PrepareFdbRxVlanEntryTest() {
-    dump_json_ = absl::GetFlag(FLAGS_dump_json);
-  }
+  PrepareFdbRxVlanEntryTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
 
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
