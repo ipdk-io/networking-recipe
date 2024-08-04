@@ -95,13 +95,9 @@ class VxlanDecapModEntryTest : public ::testing::Test {
   // Initialization methods
   //----------------------------
 
-  void InitAction() {
-    SelectAction("vxlan_decap_outer_hdr");
-  }
+  void InitAction() { SelectAction("vxlan_decap_outer_hdr"); }
 
-  void InitTunnelInfo() {
-    tunnel_info.vni = 0x1776;
-  }
+  void InitTunnelInfo() { tunnel_info.vni = 0x1776; }
 
   //----------------------------
   // Test-specific methods
@@ -131,9 +127,7 @@ class VxlanDecapModEntryTest : public ::testing::Test {
     CheckVniValue(match);
   }
 
-  void CheckNoAction() const {
-    EXPECT_FALSE(table_entry.has_action());
-  }
+  void CheckNoAction() const { EXPECT_FALSE(table_entry.has_action()); }
 
   void CheckTableEntry() const {
     ASSERT_FALSE(TABLE == nullptr);
