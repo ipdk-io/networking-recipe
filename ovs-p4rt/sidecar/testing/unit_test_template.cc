@@ -219,8 +219,7 @@ class TemplateTest : public ::testing::Test {
     }
   }
 
-  void CheckMatches() const {
-  }
+  void CheckMatches() const {}
 
   void CheckTableEntry() const {
     ASSERT_FALSE(TABLE == nullptr);
@@ -270,7 +269,8 @@ TEST_F(TemplateTest, remove_entry) {
   // Act
   PrepareSampleTableEntry(&table_entry, input_info, p4info, REMOVE_ENTRY
 #ifdef DIAG_DETAIL
-      , detail
+                          ,
+                          detail
 #endif
   );
 #ifdef DUMP_JSON
@@ -293,7 +293,8 @@ TEST_F(TemplateTest, insert_entry) {
   // Act
   PrepareSampleTableEntry(&table_entry, input_info, p4info, INSERT_ENTRY
 #ifdef DIAG_DETAIL
-      , detail
+                          ,
+                          detail
 #endif
   );
 #ifdef DUMP_JSON
