@@ -4,7 +4,7 @@
 // Unit test for PrepareFdbTxVlanTableEntry()
 //
 // TODO(derek): port and vlan_ptr parameter values are truncated to
-// 8 bits. Need to fix or document why.
+// 8 bits. Need to fix or document why this is correct.
 
 #include <stdint.h>
 
@@ -24,8 +24,6 @@ namespace ovsp4rt {
 
 using stratum::ParseProtoFromString;
 
-constexpr char TABLE_NAME[] = "l2_fwd_tx_table";
-
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
 
@@ -33,7 +31,7 @@ static ::p4::config::v1::P4Info p4info;
 
 class PrepareFdbTxVlanEntryTest : public ::testing::Test {
  protected:
-  PrepareFdbTxVlanEntryTest() { memset(&fdb_info, 0, sizeof(fdb_info)); }
+  PrepareFdbTxVlanEntryTest() {}
 
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -42,7 +40,7 @@ class PrepareFdbTxVlanEntryTest : public ::testing::Test {
     }
   }
 
-  void SetUp() { SelectTable(TABLE_NAME); }
+  void SetUp() { SelectTable("l2_fwd_tx_table"); }
 
   //----------------------------
   // P4Info lookup methods
@@ -197,7 +195,7 @@ class PrepareFdbTxVlanEntryTest : public ::testing::Test {
   }
 
   void CheckTableEntry() const {
-    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
+    ASSERT_FALSE(TABLE == nullptr);
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
   }
 
