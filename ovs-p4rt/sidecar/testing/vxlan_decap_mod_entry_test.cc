@@ -1,6 +1,8 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// Unit test for PrepareVxlanDecapModTableEntry().
+
 #include <stdint.h>
 
 #include <iostream>
@@ -18,8 +20,6 @@ namespace ovsp4rt {
 
 using stratum::ParseProtoFromString;
 
-constexpr char TABLE_NAME[] = "vxlan_decap_mod_table";
-
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
 
@@ -36,7 +36,7 @@ class VxlanDecapModEntryTest : public ::testing::Test {
     }
   }
 
-  void SetUp() { SelectTable(TABLE_NAME); }
+  void SetUp() { SelectTable("vxlan_decap_mod_table"); }
 
   //----------------------------
   // P4Info lookup methods
@@ -72,6 +72,7 @@ class VxlanDecapModEntryTest : public ::testing::Test {
         return;
       }
     }
+    std::cerr << "Table '" << table_name << "' not found!\n";
   }
 
   //----------------------------
@@ -135,7 +136,7 @@ class VxlanDecapModEntryTest : public ::testing::Test {
   }
 
   void CheckTableEntry() const {
-    ASSERT_FALSE(TABLE == nullptr) << "Table '" << TABLE_NAME << "' not found";
+    ASSERT_FALSE(TABLE == nullptr);
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
   }
 
@@ -172,7 +173,7 @@ class VxlanDecapModEntryTest : public ::testing::Test {
 };
 
 //----------------------------------------------------------------------
-// PrepareVxlanDecapModTableEntry
+// PrepareVxlanDecapModTableEntry()
 //----------------------------------------------------------------------
 
 TEST_F(VxlanDecapModEntryTest, remove_entry) {
