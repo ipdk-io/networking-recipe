@@ -4,9 +4,8 @@
 // Unit test for PrepareL2ToTunnelV4().
 
 #include <arpa/inet.h>
-//#include <cstdlib>
+
 #include <iostream>
-//#include <sstream>
 #include <string>
 
 #include "absl/flags/flag.h"

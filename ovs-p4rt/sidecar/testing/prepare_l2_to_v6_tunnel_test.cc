@@ -3,9 +3,7 @@
 
 // Unit test for PrepareL2ToTunnelV6().
 
-#include <cstdlib>
 #include <iostream>
-#include <sstream>
 #include <string>
 
 #include "absl/flags/flag.h"
@@ -21,8 +19,6 @@
 ABSL_FLAG(bool, dump_json, false, "Dump test output in JSON");
 
 namespace ovsp4rt {
-
-constexpr char TABLE_NAME[] = "l2_to_tunnel_v6";
 
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
@@ -91,6 +87,7 @@ class PrepareL2ToV6TunnelTest : public ::testing::Test {
         return;
       }
     }
+    std::cerr << "Table '" << table_name << "' not found!\n";
   }
 
   //----------------------------
