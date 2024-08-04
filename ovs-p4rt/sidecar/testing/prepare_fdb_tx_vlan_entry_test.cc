@@ -87,6 +87,7 @@ class PrepareFdbTxVlanEntryTest : public ::testing::Test {
         return;
       }
     }
+    std::cerr << "Table '" << table_name << "' not found!\n";
   }
 
   //----------------------------
