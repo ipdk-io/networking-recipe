@@ -144,8 +144,6 @@ target_link_libraries(prepare_fdb_smac_entry_test PUBLIC
 
 list(APPEND UNIT_TEST_NAMES prepare_fdb_smac_entry_test)
 
-endif(ES2K_TARGET)
-
 #-----------------------------------------------------------------------
 # tunnel_term_v4_table_test (ES2K)
 #-----------------------------------------------------------------------
@@ -162,6 +160,8 @@ target_link_libraries(tunnel_term_v4_table_test PUBLIC
 )
 
 list(APPEND UNIT_TEST_NAMES tunnel_term_v4_table_test)
+
+endif(ES2K_TARGET)
 
 #-----------------------------------------------------------------------
 # vxlan_encap_v4_table_entry_test (DPDK, ES2K)
