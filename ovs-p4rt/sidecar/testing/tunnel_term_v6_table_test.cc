@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #ifdef DUMP_JSON
 #include "absl/flags/flag.h"
@@ -112,6 +113,22 @@ class TunnelTermV6TableTest : public ::testing::Test {
   // Utility methods
   //----------------------------
 
+  static void DecodeIpv6AddrValue(const std::string& string_value,
+                                  std::vector<uint32_t>& ipv6_addr) {
+    constexpr int IPV6_ADDR_SIZE = 16;
+
+    ASSERT_EQ(string_value.size(), IPV6_ADDR_SIZE);
+
+    ipv6_addr.clear();
+    for (int base = 0; base < IPV6_ADDR_SIZE; base += 4) {
+      uint32_t word_value = 0;
+      for (int i = 0; i < 4; i++) {
+        word_value = (word_value << 8) | (string_value[base + i] & 0xFF);
+      }
+      ipv6_addr.push_back(ntohl(word_value));
+    }
+  }
+
   static uint16_t DecodeVniValue(const std::string& string_value) {
     return DecodeWordValue(string_value) & 0xffff;
   }
@@ -135,6 +152,10 @@ class TunnelTermV6TableTest : public ::testing::Test {
       std::cout << output << std::endl;
     }
 #endif
+  }
+
+  static inline uint32_t Ipv6AddrWord(const struct p4_ipaddr& ipaddr, int i) {
+    return ipaddr.ip.v6addr.__in6_u.__u6_addr32[i];
   }
 
   //----------------------------
@@ -257,7 +278,25 @@ class TunnelTermV6TableTest : public ::testing::Test {
     }
   }
 
-  void CheckIpv6AddrMatch(const ::p4::v1::FieldMatch& match) const {}
+  void CheckIpv6AddrMatch(const ::p4::v1::FieldMatch& match) const {
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+
+    std::vector<uint32_t> ipv6_addr;
+    DecodeIpv6AddrValue(match_value, ipv6_addr);
+
+    const struct p4_ipaddr& remote_ip = tunnel_info.remote_ip;
+
+    for (int i = 0; i < 4; i++) {
+      uint32_t word_value = Ipv6AddrWord(remote_ip, i);
+      EXPECT_EQ(ipv6_addr[i], word_value)
+          << "ipv6_addr[" << i << "] does not match\n"
+          << std::hex << std::setw(8) << "  expected value is 0x" << word_value
+          << '\n'
+          << "  actual value is   0x" << ipv6_addr[i] << '\n'
+          << std::dec << std::setw(0);
+    }
+  }
 
   void CheckVniMatch(const ::p4::v1::FieldMatch& match) const {
     constexpr int VNI_SIZE = 3;
