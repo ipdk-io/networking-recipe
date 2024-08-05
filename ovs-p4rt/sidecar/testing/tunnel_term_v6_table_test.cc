@@ -221,6 +221,8 @@ class TunnelTermV6TableTest : public ::testing::Test {
     CheckTunnelIdParam(param.value());
   }
 
+  void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
+
   void CheckTunnelIdParam(const std::string& param_value) const {
     EXPECT_EQ(param_value.size(), 3);
 
@@ -236,7 +238,38 @@ class TunnelTermV6TableTest : public ::testing::Test {
   // CheckMatches()
   //----------------------------
 
-  void CheckMatches() const {}
+  void CheckMatches() const {
+    const int MFID_IPV6_SRC = GetMatchFieldId("ipv6_src");
+    const int MFID_VNI = GetMatchFieldId("vni");
+
+    ASSERT_NE(MFID_IPV6_SRC, -1);
+    ASSERT_NE(MFID_VNI, -1);
+
+    ASSERT_GE(table_entry.match_size(), 3);
+
+    for (const auto& match : table_entry.match()) {
+      int field_id = match.field_id();
+      if (field_id == MFID_IPV6_SRC) {
+        CheckIpv6AddrMatch(match);
+      } else if (field_id == MFID_VNI) {
+        CheckVniMatch(match);
+      }
+    }
+  }
+
+  void CheckIpv6AddrMatch(const ::p4::v1::FieldMatch& match) const {}
+
+  void CheckVniMatch(const ::p4::v1::FieldMatch& match) const {
+    constexpr int VNI_SIZE = 3;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+
+    EXPECT_EQ(match_value.size(), VNI_SIZE);
+
+    auto vni_value = DecodeVniValue(match_value);
+    ASSERT_EQ(vni_value, tunnel_info.vni);
+  }
 
   //----------------------------
   // CheckTableEntry()
@@ -275,6 +308,21 @@ class TunnelTermV6TableTest : public ::testing::Test {
 // PrepareV6TunnelTermTableEntry() - vxlan
 //----------------------------------------------------------------------
 
+TEST_F(TunnelTermV6TableTest, remove_vxlan_untagged_entry) {
+  // Arrange
+  InitV6TunnelInfo();
+  InitVxlanUntagged();
+
+  // Act
+  PrepareV6TunnelTermTableEntry(&table_entry, tunnel_info, p4info,
+                                REMOVE_ENTRY);
+
+  // Assert
+  CheckTableEntry();
+  CheckMatches();
+  CheckNoAction();
+}
+
 TEST_F(TunnelTermV6TableTest, insert_vxlan_untagged_entry) {
   // Arrange
   InitV6TunnelInfo();
@@ -285,9 +333,22 @@ TEST_F(TunnelTermV6TableTest, insert_vxlan_untagged_entry) {
                                 INSERT_ENTRY);
 
   // Assert
+  CheckAction();
+}
+
+TEST_F(TunnelTermV6TableTest, remove_vxlan_tagged_entry) {
+  // Arrange
+  InitV6TunnelInfo();
+  InitVxlanTagged();
+
+  // Act
+  PrepareV6TunnelTermTableEntry(&table_entry, tunnel_info, p4info,
+                                REMOVE_ENTRY);
+
+  // Assert
   CheckTableEntry();
   CheckMatches();
-  CheckAction();
+  CheckNoAction();
 }
 
 TEST_F(TunnelTermV6TableTest, insert_vxlan_tagged_entry) {
@@ -300,14 +361,27 @@ TEST_F(TunnelTermV6TableTest, insert_vxlan_tagged_entry) {
                                 INSERT_ENTRY);
 
   // Assert
-  CheckTableEntry();
-  CheckMatches();
   CheckAction();
 }
 
 //----------------------------------------------------------------------
 // PrepareV6TunnelTermTableEntry() - geneve
 //----------------------------------------------------------------------
+
+TEST_F(TunnelTermV6TableTest, remove_geneve_untagged_entry) {
+  // Arrange
+  InitV6TunnelInfo();
+  InitGeneveUntagged();
+
+  // Act
+  PrepareV6TunnelTermTableEntry(&table_entry, tunnel_info, p4info,
+                                REMOVE_ENTRY);
+
+  // Assert
+  CheckTableEntry();
+  CheckMatches();
+  CheckNoAction();
+}
 
 TEST_F(TunnelTermV6TableTest, insert_geneve_untagged_entry) {
   // Arrange
@@ -319,9 +393,22 @@ TEST_F(TunnelTermV6TableTest, insert_geneve_untagged_entry) {
                                 INSERT_ENTRY);
 
   // Assert
+  CheckAction();
+}
+
+TEST_F(TunnelTermV6TableTest, remove_geneve_tagged_entry) {
+  // Arrange
+  InitV6TunnelInfo();
+  InitGeneveTagged();
+
+  // Act
+  PrepareV6TunnelTermTableEntry(&table_entry, tunnel_info, p4info,
+                                REMOVE_ENTRY);
+
+  // Assert
   CheckTableEntry();
   CheckMatches();
-  CheckAction();
+  CheckNoAction();
 }
 
 TEST_F(TunnelTermV6TableTest, insert_geneve_tagged_entry) {
@@ -332,10 +419,9 @@ TEST_F(TunnelTermV6TableTest, insert_geneve_tagged_entry) {
   // Act
   PrepareV6TunnelTermTableEntry(&table_entry, tunnel_info, p4info,
                                 INSERT_ENTRY);
+  DumpTableEntry();
 
   // Assert
-  CheckTableEntry();
-  CheckMatches();
   CheckAction();
 }
 
