@@ -83,6 +83,23 @@ target_link_libraries(fdb_smac_entry_test PUBLIC
 list(APPEND UNIT_TEST_NAMES fdb_smac_entry_test)
 
 #-----------------------------------------------------------------------
+# fdb_tx_vlan_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(fdb_tx_vlan_entry_test
+  fdb_tx_vlan_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(fdb_tx_vlan_entry_test)
+
+target_link_libraries(fdb_tx_vlan_entry_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES fdb_tx_vlan_entry_test)
+
+#-----------------------------------------------------------------------
 # geneve_encap_v4_table_entry_test (ES2K)
 #-----------------------------------------------------------------------
 add_executable(geneve_encap_v4_table_entry_test
