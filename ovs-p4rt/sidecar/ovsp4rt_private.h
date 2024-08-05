@@ -74,6 +74,11 @@ void PrepareV6GeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
                                     const ::p4::config::v1::P4Info& p4info,
                                     bool insert_entry);
 
+void PrepareVxlanDecapModTableEntry(p4::v1::TableEntry* table_entry,
+                                    const struct tunnel_info& tunnel_info,
+                                    const ::p4::config::v1::P4Info& p4info,
+                                    bool insert_entry);
+
 void PrepareVxlanEncapAndVlanPopTableEntry(
     p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
