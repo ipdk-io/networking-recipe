@@ -66,6 +66,57 @@ list(APPEND UNIT_TEST_NAMES encode_host_port_value_test)
 if(ES2K_TARGET)
 
 #-----------------------------------------------------------------------
+# fdb_rx_vlan_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(fdb_rx_vlan_entry_test
+  fdb_rx_vlan_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(fdb_rx_vlan_entry_test)
+
+target_link_libraries(fdb_rx_vlan_entry_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES fdb_rx_vlan_entry_test)
+
+#-----------------------------------------------------------------------
+# fdb_smac_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(fdb_smac_entry_test
+  fdb_smac_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(fdb_smac_entry_test)
+
+target_link_libraries(fdb_smac_entry_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES fdb_smac_entry_test)
+
+#-----------------------------------------------------------------------
+# fdb_tx_vlan_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(fdb_tx_vlan_entry_test
+  fdb_tx_vlan_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(fdb_tx_vlan_entry_test)
+
+target_link_libraries(fdb_tx_vlan_entry_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES fdb_tx_vlan_entry_test)
+
+#-----------------------------------------------------------------------
 # geneve_encap_v4_table_entry_test (ES2K)
 #-----------------------------------------------------------------------
 add_executable(geneve_encap_v4_table_entry_test
@@ -143,23 +194,6 @@ target_link_libraries(l2_to_v6_tunnel_test PUBLIC
 )
 
 list(APPEND UNIT_TEST_NAMES l2_to_v6_tunnel_test)
-
-#-----------------------------------------------------------------------
-# prepare_fdb_smac_entry_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(prepare_fdb_smac_entry_test
-  prepare_fdb_smac_entry_test.cc
-  p4info_text.h
-  test_main.cc
-)
-
-set_test_properties(prepare_fdb_smac_entry_test)
-
-target_link_libraries(prepare_fdb_smac_entry_test PUBLIC
-  absl::flags_parse
-)
-
-list(APPEND UNIT_TEST_NAMES prepare_fdb_smac_entry_test)
 
 endif(ES2K_TARGET)
 
