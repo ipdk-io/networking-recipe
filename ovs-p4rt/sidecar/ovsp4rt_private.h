@@ -35,10 +35,20 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
 
 #if defined(ES2K_TARGET)
 
+void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
+                                const struct mac_learning_info& learn_info,
+                                const ::p4::config::v1::P4Info& p4info,
+                                bool insert_entry, DiagDetail& detail);
+
 void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const struct mac_learning_info& learn_info,
                               const ::p4::config::v1::P4Info& p4info,
                               bool insert_entry, DiagDetail& detail);
+
+void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
+                                const struct mac_learning_info& learn_info,
+                                const ::p4::config::v1::P4Info& p4info,
+                                bool insert_entry, DiagDetail& detail);
 
 void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
@@ -68,6 +78,11 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                  const struct tunnel_info& tunnel_info,
                                  const ::p4::config::v1::P4Info& p4info,
                                  bool insert_entry);
+
+void PrepareVxlanDecapModTableEntry(p4::v1::TableEntry* table_entry,
+                                    const struct tunnel_info& tunnel_info,
+                                    const ::p4::config::v1::P4Info& p4info,
+                                    bool insert_entry);
 
 void PrepareVxlanEncapAndVlanPopTableEntry(
     p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
