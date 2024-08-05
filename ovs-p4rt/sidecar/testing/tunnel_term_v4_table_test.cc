@@ -64,17 +64,6 @@ class TunnelTermV4TableTest : public ::testing::Test {
   // P4Info lookup methods
   //----------------------------
 
-  int GetActionId(const std::string& action_name) const {
-    for (const auto& action : p4info.actions()) {
-      const auto& pre = action.preamble();
-      if (pre.name() == action_name || pre.alias() == action_name) {
-        return pre.id();
-      }
-    }
-    std::cerr << "Action '" << action_name << "' not found!\n";
-    return -1;
-  }
-
   int GetMatchFieldId(const std::string& mf_name) const {
     for (const auto& mf : TABLE->match_fields()) {
       if (mf.name() == mf_name) {
@@ -157,7 +146,7 @@ class TunnelTermV4TableTest : public ::testing::Test {
     tunnel_info.tunnel_type = OVS_TUNNEL_GENEVE;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
     tunnel_info.vni = 0x1776;
-    ACTION_ID = GetActionId(SET_GENEVE_DECAP_OUTER_HDR);
+    SelectAction(SET_GENEVE_DECAP_OUTER_HDR);
   }
 
   void InitGeneveUntagged() {
@@ -166,7 +155,7 @@ class TunnelTermV4TableTest : public ::testing::Test {
     tunnel_info.tunnel_type = OVS_TUNNEL_GENEVE;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
     tunnel_info.vni = 0x1984;
-    ACTION_ID = GetActionId(SET_GENEVE_DECAP_OUTER_AND_PUSH_VLAN);
+    SelectAction(SET_GENEVE_DECAP_OUTER_AND_PUSH_VLAN);
   }
 
   void InitTunnelInfo() {
@@ -196,7 +185,7 @@ class TunnelTermV4TableTest : public ::testing::Test {
     tunnel_info.tunnel_type = OVS_TUNNEL_VXLAN;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
     tunnel_info.vni = 0x1066;
-    ACTION_ID = GetActionId(SET_VXLAN_DECAP_OUTER_HDR);
+    SelectAction(SET_VXLAN_DECAP_OUTER_HDR);
   }
 
   void InitVxlanUntagged() {
@@ -205,7 +194,7 @@ class TunnelTermV4TableTest : public ::testing::Test {
     tunnel_info.tunnel_type = OVS_TUNNEL_VXLAN;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
     tunnel_info.vni = 0x1492;
-    ACTION_ID = GetActionId(SET_VXLAN_DECAP_OUTER_AND_PUSH_VLAN);
+    SelectAction(SET_VXLAN_DECAP_OUTER_AND_PUSH_VLAN);
   }
 
   //----------------------------
@@ -222,6 +211,9 @@ class TunnelTermV4TableTest : public ::testing::Test {
   //----------------------------
 
   void CheckAction() const {
+    const int TUNNEL_ID = GetParamId("tunnel_id");
+    ASSERT_NE(TUNNEL_ID, -1);
+
     ASSERT_TRUE(table_entry.has_action());
     auto table_action = table_entry.action();
 
@@ -267,16 +259,36 @@ class TunnelTermV4TableTest : public ::testing::Test {
     for (const auto& match : table_entry.match()) {
       int field_id = match.field_id();
       if (field_id == MFID_IPV4_SRC) {
-        CheckIpSrcMatch(match);
+        CheckIpAddrMatch(match);
       } else if (field_id == MFID_VNI) {
         CheckVniMatch(match);
       }
     }
   }
 
-  void CheckIpSrcMatch(const ::p4::v1::FieldMatch& match) const {}
+  void CheckIpAddrMatch(const ::p4::v1::FieldMatch& match) const {
+    constexpr int IPV4_ADDR_SIZE = 4;
 
-  void CheckVniMatch(const ::p4::v1::FieldMatch& match) const {}
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+
+    EXPECT_EQ(match_value.size(), IPV4_ADDR_SIZE);
+
+    auto addr_value = ntohl(DecodeWordValue(match_value));
+    ASSERT_EQ(addr_value, tunnel_info.remote_ip.ip.v4addr.s_addr);
+  }
+
+  void CheckVniMatch(const ::p4::v1::FieldMatch& match) const {
+    constexpr int VNI_SIZE = 3;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+
+    EXPECT_EQ(match_value.size(), VNI_SIZE);
+
+    auto vni_value = DecodeVniValue(match_value);
+    ASSERT_EQ(vni_value, tunnel_info.vni);
+  }
 
   //----------------------------
   // Protected member data
