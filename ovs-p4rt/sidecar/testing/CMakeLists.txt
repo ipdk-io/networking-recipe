@@ -162,21 +162,38 @@ target_link_libraries(geneve_encap_v4_vlan_pop_test PUBLIC
 list(APPEND UNIT_TEST_NAMES geneve_encap_v4_vlan_pop_test)
 
 #-----------------------------------------------------------------------
-# prepare_l2_to_tunnel_test (ES2K)
+# l2_to_v4_tunnel_test (ES2K)
 #-----------------------------------------------------------------------
-add_executable(prepare_l2_to_tunnel_test
-  prepare_l2_to_tunnel_test.cc
+add_executable(l2_to_v4_tunnel_test
+  l2_to_v4_tunnel_test.cc
   p4info_text.h
   test_main.cc
 )
 
-set_test_properties(prepare_l2_to_tunnel_test)
+set_test_properties(l2_to_v4_tunnel_test)
 
-target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
+target_link_libraries(l2_to_v4_tunnel_test PUBLIC
   absl::flags_parse
 )
 
-list(APPEND UNIT_TEST_NAMES prepare_l2_to_tunnel_test)
+list(APPEND UNIT_TEST_NAMES l2_to_v4_tunnel_test)
+
+#-----------------------------------------------------------------------
+# l2_to_v6_tunnel_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(l2_to_v6_tunnel_test
+  l2_to_v6_tunnel_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(l2_to_v6_tunnel_test)
+
+target_link_libraries(l2_to_v6_tunnel_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES l2_to_v6_tunnel_test)
 
 endif(ES2K_TARGET)
 
