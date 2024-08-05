@@ -20,6 +20,22 @@ option(TEST_COVERAGE OFF "Measure unit test code coverage")
 set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
 
 #-----------------------------------------------------------------------
+# define_ovsp4rt_test()
+#-----------------------------------------------------------------------
+macro(define_ovsp4rt_test TARGET)
+  target_sources(${TARGET} PRIVATE
+    p4info_text.h
+    test_main.cc
+  )
+
+  set_test_properties(${TARGET})
+
+  target_link_libraries(${TARGET} PUBLIC
+    absl::flags_parse
+  )
+endmacro(define_ovsp4rt_test)
+
+#-----------------------------------------------------------------------
 # ipv4_test_utils
 #-----------------------------------------------------------------------
 add_library(ipv4_test_utils STATIC
@@ -64,6 +80,57 @@ target_link_libraries(encode_host_port_value_test PUBLIC
 list(APPEND UNIT_TEST_NAMES encode_host_port_value_test)
 
 if(ES2K_TARGET)
+
+#-----------------------------------------------------------------------
+# fdb_rx_vlan_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(fdb_rx_vlan_entry_test
+  fdb_rx_vlan_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(fdb_rx_vlan_entry_test)
+
+target_link_libraries(fdb_rx_vlan_entry_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES fdb_rx_vlan_entry_test)
+
+#-----------------------------------------------------------------------
+# fdb_smac_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(fdb_smac_entry_test
+  fdb_smac_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(fdb_smac_entry_test)
+
+target_link_libraries(fdb_smac_entry_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES fdb_smac_entry_test)
+
+#-----------------------------------------------------------------------
+# fdb_tx_vlan_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(fdb_tx_vlan_entry_test
+  fdb_tx_vlan_entry_test.cc
+  p4info_text.h
+  test_main.cc
+)
+
+set_test_properties(fdb_tx_vlan_entry_test)
+
+target_link_libraries(fdb_tx_vlan_entry_test PUBLIC
+  absl::flags_parse
+)
+
+list(APPEND UNIT_TEST_NAMES fdb_tx_vlan_entry_test)
 
 #-----------------------------------------------------------------------
 # geneve_encap_v4_table_entry_test (ES2K)
@@ -111,38 +178,49 @@ target_link_libraries(geneve_encap_v4_vlan_pop_test PUBLIC
 list(APPEND UNIT_TEST_NAMES geneve_encap_v4_vlan_pop_test)
 
 #-----------------------------------------------------------------------
-# prepare_l2_to_tunnel_test (ES2K)
+# l2_to_v4_tunnel_test (ES2K)
 #-----------------------------------------------------------------------
-add_executable(prepare_l2_to_tunnel_test
-  prepare_l2_to_tunnel_test.cc
+add_executable(l2_to_v4_tunnel_test
+  l2_to_v4_tunnel_test.cc
   p4info_text.h
   test_main.cc
 )
 
-set_test_properties(prepare_l2_to_tunnel_test)
+set_test_properties(l2_to_v4_tunnel_test)
 
-target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
+target_link_libraries(l2_to_v4_tunnel_test PUBLIC
   absl::flags_parse
 )
 
-list(APPEND UNIT_TEST_NAMES prepare_l2_to_tunnel_test)
+list(APPEND UNIT_TEST_NAMES l2_to_v4_tunnel_test)
 
 #-----------------------------------------------------------------------
-# prepare_fdb_smac_entry_test (ES2K)
+# l2_to_v6_tunnel_test (ES2K)
 #-----------------------------------------------------------------------
-add_executable(prepare_fdb_smac_entry_test
-  prepare_fdb_smac_entry_test.cc
+add_executable(l2_to_v6_tunnel_test
+  l2_to_v6_tunnel_test.cc
   p4info_text.h
   test_main.cc
 )
 
-set_test_properties(prepare_fdb_smac_entry_test)
+set_test_properties(l2_to_v6_tunnel_test)
 
-target_link_libraries(prepare_fdb_smac_entry_test PUBLIC
+target_link_libraries(l2_to_v6_tunnel_test PUBLIC
   absl::flags_parse
 )
 
-list(APPEND UNIT_TEST_NAMES prepare_fdb_smac_entry_test)
+list(APPEND UNIT_TEST_NAMES l2_to_v6_tunnel_test)
+
+#-----------------------------------------------------------------------
+# vxlan_decap_mod_entry_test (ES2K)
+#-----------------------------------------------------------------------
+add_executable(vxlan_decap_mod_entry_test
+  vxlan_decap_mod_entry_test.cc
+)
+
+define_ovsp4rt_test(vxlan_decap_mod_entry_test)
+
+list(APPEND UNIT_TEST_NAMES vxlan_decap_mod_entry_test)
 
 endif(ES2K_TARGET)
 
