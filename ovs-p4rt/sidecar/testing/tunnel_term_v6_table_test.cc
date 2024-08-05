@@ -64,17 +64,6 @@ class TunnelTermV6TableTest : public ::testing::Test {
   // P4Info lookup methods
   //----------------------------
 
-  int GetActionId(const std::string& action_name) const {
-    for (const auto& action : p4info.actions()) {
-      const auto& pre = action.preamble();
-      if (pre.name() == action_name || pre.alias() == action_name) {
-        return pre.id();
-      }
-    }
-    std::cerr << "Action '" << action_name << "' not found!\n";
-    return -1;
-  }
-
   int GetMatchFieldId(const std::string& mf_name) const {
     for (const auto& mf : TABLE->match_fields()) {
       if (mf.name() == mf_name) {
@@ -157,7 +146,7 @@ class TunnelTermV6TableTest : public ::testing::Test {
     tunnel_info.tunnel_type = OVS_TUNNEL_GENEVE;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
     tunnel_info.vni = 0x1776;
-    ACTION_ID = GetActionId(SET_GENEVE_DECAP_OUTER_HDR);
+    SelectAction(SET_GENEVE_DECAP_OUTER_HDR);
   }
 
   void InitGeneveUntagged() {
@@ -166,7 +155,7 @@ class TunnelTermV6TableTest : public ::testing::Test {
     tunnel_info.tunnel_type = OVS_TUNNEL_GENEVE;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
     tunnel_info.vni = 0x1984;
-    ACTION_ID = GetActionId(SET_GENEVE_DECAP_OUTER_AND_PUSH_VLAN);
+    SelectAction(SET_GENEVE_DECAP_OUTER_AND_PUSH_VLAN);
   }
 
   void InitV6TunnelInfo() {
@@ -196,7 +185,7 @@ class TunnelTermV6TableTest : public ::testing::Test {
     tunnel_info.tunnel_type = OVS_TUNNEL_VXLAN;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
     tunnel_info.vni = 0x1066;
-    ACTION_ID = GetActionId(SET_VXLAN_DECAP_OUTER_HDR);
+    SelectAction(SET_VXLAN_DECAP_OUTER_HDR);
   }
 
   void InitVxlanUntagged() {
@@ -205,14 +194,17 @@ class TunnelTermV6TableTest : public ::testing::Test {
     tunnel_info.tunnel_type = OVS_TUNNEL_VXLAN;
     tunnel_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
     tunnel_info.vni = 0x1492;
-    ACTION_ID = GetActionId(SET_VXLAN_DECAP_OUTER_AND_PUSH_VLAN);
+    SelectAction(SET_VXLAN_DECAP_OUTER_AND_PUSH_VLAN);
   }
 
   //----------------------------
-  // Test-specific checks
+  // CheckAction()
   //----------------------------
 
   void CheckAction() const {
+    const int TUNNEL_ID = GetParamId("tunnel_id");
+    ASSERT_NE(TUNNEL_ID, -1);
+
     ASSERT_TRUE(table_entry.has_action());
     auto table_action = table_entry.action();
 
@@ -225,15 +217,8 @@ class TunnelTermV6TableTest : public ::testing::Test {
     ASSERT_EQ(action.params_size(), 1);
 
     auto param = params[0];
-    ASSERT_EQ(param.param_id(), PARAM_ID);
+    ASSERT_EQ(param.param_id(), TUNNEL_ID);
     CheckTunnelIdParam(param.value());
-  }
-
-  void CheckMatches() const {}
-
-  void CheckTableEntry() const {
-    ASSERT_FALSE(TABLE == nullptr);
-    EXPECT_EQ(table_entry.table_id(), TABLE_ID);
   }
 
   void CheckTunnelIdParam(const std::string& param_value) const {
@@ -248,6 +233,21 @@ class TunnelTermV6TableTest : public ::testing::Test {
   }
 
   //----------------------------
+  // CheckMatches()
+  //----------------------------
+
+  void CheckMatches() const {}
+
+  //----------------------------
+  // CheckTableEntry()
+  //----------------------------
+
+  void CheckTableEntry() const {
+    ASSERT_FALSE(TABLE == nullptr);
+    EXPECT_EQ(table_entry.table_id(), TABLE_ID);
+  }
+
+  //----------------------------
   // Protected member data
   //----------------------------
 
@@ -256,9 +256,8 @@ class TunnelTermV6TableTest : public ::testing::Test {
   struct tunnel_info tunnel_info;
 
   // Values to check against
-  uint32_t TABLE_ID;
+  int TABLE_ID;
   int ACTION_ID = -1;
-  int PARAM_ID = 1;  // tunnel_id
 
  private:
   //----------------------------
