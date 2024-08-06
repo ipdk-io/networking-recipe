@@ -154,6 +154,7 @@ class FdbTxGeneveEntryTest : public ::testing::Test {
         return pre.id();
       }
     }
+    std::cerr << "Action '" << action_name << "' not found\n";
     return -1;
   }
 
