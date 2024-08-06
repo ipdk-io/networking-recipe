@@ -11,11 +11,13 @@
 
 namespace ovsp4rt {
 
+class GeneveEncapV4TableTest : public Ipv4TunnelTest {};
+
 //----------------------------------------------------------------------
 // Test PrepareGeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(Ipv4TunnelTest, GeneveEncapV4TableTest_minimal) {
+TEST_F(GeneveEncapV4TableTest, minimal) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;
