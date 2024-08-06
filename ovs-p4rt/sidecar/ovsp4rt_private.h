@@ -45,6 +45,11 @@ void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                               const ::p4::config::v1::P4Info& p4info,
                               bool insert_entry, DiagDetail& detail);
 
+void PrepareFdbTableEntryforV4GeneveTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
+    DiagDetail& detail);
+
 void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
