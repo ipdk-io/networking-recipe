@@ -17,7 +17,7 @@
 namespace ovsp4rt {
 
 using stratum::ParseProtoFromString;
-  
+
 constexpr char SET_VXLAN_UNDERLAY_V4[] = "set_vxlan_underlay_v4";
 constexpr char POP_VLAN_SET_VXLAN_UNDERLAY_V4[] =
     "pop_vlan_set_vxlan_underlay_v4";
