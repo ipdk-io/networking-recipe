@@ -135,6 +135,8 @@ define_ovsp4rt_test(l2_to_v6_tunnel_test)
 define_ovsp4rt_test(tunnel_term_v4_table_test)
 define_ovsp4rt_test(tunnel_term_v6_table_test)
 
+define_ovsp4rt_test(vlan_pop_table_test)
+
 define_ovsp4rt_test(vxlan_decap_mod_entry_test)
 
 define_ipv4_tunnel_test(vxlan_encap_v4_table_entry_test)
