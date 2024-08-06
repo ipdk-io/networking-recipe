@@ -1,6 +1,8 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// Unit test for PrepareFdbTableEntryforV4GeneveTunnel().
+
 #include <stdint.h>
 
 #include <iostream>
