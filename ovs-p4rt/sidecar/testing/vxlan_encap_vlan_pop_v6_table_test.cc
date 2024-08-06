@@ -11,17 +11,19 @@
 
 namespace ovsp4rt {
 
+class VxlanEncapVlanPopV6TableTest : public Ipv6TunnelTest {};
+
 //----------------------------------------------------------------------
-// PrepareV6VxlanEncapTableEntry
+// PrepareV6VxlanEncapAndVlanPopTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(Ipv6TunnelTest, vxlan_encap_v6_params_are_correct) {
+TEST_F(VxlanEncapVlanPopV6TableTest, minimal) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;
 
-  constexpr uint32_t TABLE_ID = 46225003U;
-  constexpr uint32_t ACTION_ID = 30345128U;
+  constexpr uint32_t TABLE_ID = 34318005U;
+  constexpr uint32_t ACTION_ID = 28284062U;
 
   enum {
     SRC_PORT_PARAM_ID = 7,
@@ -33,17 +35,17 @@ TEST_F(Ipv6TunnelTest, vxlan_encap_v6_params_are_correct) {
   InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
   // Act
-  PrepareV6VxlanEncapTableEntry(&table_entry, tunnel_info, p4info,
-                                insert_entry);
+  PrepareV6VxlanEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,
+                                          insert_entry);
   DumpTableEntry(table_entry);
 
   // Assert
-  ASSERT_EQ(table_entry.table_id(), TABLE_ID);
+  EXPECT_EQ(table_entry.table_id(), TABLE_ID);
 
   ASSERT_TRUE(table_entry.has_action());
   auto table_action = table_entry.action();
   auto action = table_action.action();
-  ASSERT_EQ(action.action_id(), ACTION_ID);
+  EXPECT_EQ(action.action_id(), ACTION_ID);
 
   auto params = action.params();
   int num_params = action.params_size();
@@ -56,6 +58,7 @@ TEST_F(Ipv6TunnelTest, vxlan_encap_v6_params_are_correct) {
     auto param = params[i];
     int param_id = param.param_id();
     auto param_value = param.value();
+
     if (param_id == SRC_PORT_PARAM_ID) {
       src_port = DecodePortValue(param_value);
     } else if (param_id == DST_PORT_PARAM_ID) {

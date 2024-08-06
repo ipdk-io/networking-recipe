@@ -7,42 +7,45 @@
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
-#include "testing/ipv4_tunnel_test.h"
+#include "testing/ipv6_tunnel_test.h"
 
 namespace ovsp4rt {
 
+class VxlanEncapV6TableTest : public Ipv6TunnelTest {};
+
 //----------------------------------------------------------------------
-// Test PrepareGeneveEncapTableEntry()
+// PrepareV6VxlanEncapTableEntry
 //----------------------------------------------------------------------
 
-TEST_F(Ipv4TunnelTest, geneve_encap_v4_params_are_correct) {
+TEST_F(VxlanEncapV6TableTest, minimal) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;
 
-  constexpr uint32_t TABLE_ID = 41319073U;
-  constexpr uint32_t ACTION_ID = 25818889U;
+  constexpr uint32_t TABLE_ID = 46225003U;
+  constexpr uint32_t ACTION_ID = 30345128U;
 
   enum {
-    SRC_PORT_PARAM_ID = 3,
-    DST_PORT_PARAM_ID = 4,
-    VNI_PARAM_ID = 5,
+    SRC_PORT_PARAM_ID = 7,
+    DST_PORT_PARAM_ID = 8,
+    VNI_PARAM_ID = 9,
   };
 
   // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
   // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, insert_entry);
+  PrepareV6VxlanEncapTableEntry(&table_entry, tunnel_info, p4info,
+                                insert_entry);
   DumpTableEntry(table_entry);
 
   // Assert
-  EXPECT_EQ(table_entry.table_id(), TABLE_ID);
+  ASSERT_EQ(table_entry.table_id(), TABLE_ID);
 
   ASSERT_TRUE(table_entry.has_action());
   auto table_action = table_entry.action();
   auto action = table_action.action();
-  EXPECT_EQ(action.action_id(), ACTION_ID);
+  ASSERT_EQ(action.action_id(), ACTION_ID);
 
   auto params = action.params();
   int num_params = action.params_size();
@@ -55,7 +58,6 @@ TEST_F(Ipv4TunnelTest, geneve_encap_v4_params_are_correct) {
     auto param = params[i];
     int param_id = param.param_id();
     auto param_value = param.value();
-
     if (param_id == SRC_PORT_PARAM_ID) {
       src_port = DecodePortValue(param_value);
     } else if (param_id == DST_PORT_PARAM_ID) {

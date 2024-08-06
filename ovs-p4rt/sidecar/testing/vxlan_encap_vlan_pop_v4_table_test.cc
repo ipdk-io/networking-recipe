@@ -11,11 +11,13 @@
 
 namespace ovsp4rt {
 
+class VxlanEncapVlanPopV4TableTest : public Ipv4TunnelTest {};
+
 //----------------------------------------------------------------------
 // PrepareVxlanEncapAndVlanPopTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(Ipv4TunnelTest, vxlan_encap_v4_vlan_pop_params_are_correct) {
+TEST_F(VxlanEncapVlanPopV4TableTest, minimal) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;

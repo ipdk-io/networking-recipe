@@ -29,9 +29,9 @@ constexpr bool REMOVE_ENTRY = false;
 
 static ::p4::config::v1::P4Info p4info;
 
-class FdbTxVlanEntryTest : public ::testing::Test {
+class FdbTxVlanTableTest : public ::testing::Test {
  protected:
-  FdbTxVlanEntryTest() {}
+  FdbTxVlanTableTest() {}
 
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -276,7 +276,7 @@ class FdbTxVlanEntryTest : public ::testing::Test {
 // PrepareFdbTxVlanTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(FdbTxVlanEntryTest, remove_entry) {
+TEST_F(FdbTxVlanTableTest, remove_entry) {
   // Arrange
   InitFdbInfo();
 
@@ -290,7 +290,7 @@ TEST_F(FdbTxVlanEntryTest, remove_entry) {
   CheckMatches();
 }
 
-TEST_F(FdbTxVlanEntryTest, insert_untagged_entry) {
+TEST_F(FdbTxVlanTableTest, insert_untagged_entry) {
   // Arrange
   InitFdbInfo();
   InitUntagged();
@@ -303,7 +303,7 @@ TEST_F(FdbTxVlanEntryTest, insert_untagged_entry) {
   CheckUntaggedAction();
 }
 
-TEST_F(FdbTxVlanEntryTest, insert_tagged_entry) {
+TEST_F(FdbTxVlanTableTest, insert_tagged_entry) {
   // Arrange
   InitFdbInfo();
   InitTagged();

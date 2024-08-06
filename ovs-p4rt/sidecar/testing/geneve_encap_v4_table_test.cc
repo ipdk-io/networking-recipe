@@ -12,16 +12,16 @@
 namespace ovsp4rt {
 
 //----------------------------------------------------------------------
-// PrepareGeneveEncapTableEntry()
+// Test PrepareGeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(Ipv4TunnelTest, geneve_encap_v4_vlan_pop_params_are_correct) {
+TEST_F(Ipv4TunnelTest, GeneveEncapV4TableTest_minimal) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;
 
-  constexpr uint32_t TABLE_ID = 47977422U;
-  constexpr uint32_t ACTION_ID = 26665268U;
+  constexpr uint32_t TABLE_ID = 41319073U;
+  constexpr uint32_t ACTION_ID = 25818889U;
 
   enum {
     SRC_PORT_PARAM_ID = 3,
@@ -33,8 +33,7 @@ TEST_F(Ipv4TunnelTest, geneve_encap_v4_vlan_pop_params_are_correct) {
   InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
   // Act
-  PrepareGeneveEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,
-                                         insert_entry);
+  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, insert_entry);
   DumpTableEntry(table_entry);
 
   // Assert

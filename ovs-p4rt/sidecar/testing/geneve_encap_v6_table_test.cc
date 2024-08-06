@@ -15,7 +15,7 @@ namespace ovsp4rt {
 // PrepareV6GeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(Ipv6TunnelTest, geneve_encap_v6_params_are_correct) {
+TEST_F(Ipv6TunnelTest, GeneveEncapV6TableTest_minimal) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;

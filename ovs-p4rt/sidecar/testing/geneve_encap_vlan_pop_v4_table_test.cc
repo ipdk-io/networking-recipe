@@ -12,16 +12,16 @@
 namespace ovsp4rt {
 
 //----------------------------------------------------------------------
-// PrepareVxlanEncapTableEntry()
+// PrepareGeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(Ipv4TunnelTest, vxlan_encap_v4_params_are_correct) {
+TEST_F(Ipv4TunnelTest, GeneveEncapVlanPopV4TableTest_minimal) {
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
   constexpr bool insert_entry = true;
 
-  constexpr uint32_t TABLE_ID = 40763773U;
-  constexpr uint32_t ACTION_ID = 20733968U;
+  constexpr uint32_t TABLE_ID = 47977422U;
+  constexpr uint32_t ACTION_ID = 26665268U;
 
   enum {
     SRC_PORT_PARAM_ID = 3,
@@ -30,19 +30,20 @@ TEST_F(Ipv4TunnelTest, vxlan_encap_v4_params_are_correct) {
   };
 
   // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
+  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
   // Act
-  PrepareVxlanEncapTableEntry(&table_entry, tunnel_info, p4info, insert_entry);
+  PrepareGeneveEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,
+                                         insert_entry);
   DumpTableEntry(table_entry);
 
   // Assert
-  ASSERT_EQ(table_entry.table_id(), TABLE_ID);
-  ASSERT_TRUE(table_entry.has_action());
+  EXPECT_EQ(table_entry.table_id(), TABLE_ID);
 
+  ASSERT_TRUE(table_entry.has_action());
   auto table_action = table_entry.action();
   auto action = table_action.action();
-  ASSERT_EQ(action.action_id(), ACTION_ID);
+  EXPECT_EQ(action.action_id(), ACTION_ID);
 
   auto params = action.params();
   int num_params = action.params_size();
@@ -55,6 +56,7 @@ TEST_F(Ipv4TunnelTest, vxlan_encap_v4_params_are_correct) {
     auto param = params[i];
     int param_id = param.param_id();
     auto param_value = param.value();
+
     if (param_id == SRC_PORT_PARAM_ID) {
       src_port = DecodePortValue(param_value);
     } else if (param_id == DST_PORT_PARAM_ID) {
@@ -64,7 +66,6 @@ TEST_F(Ipv4TunnelTest, vxlan_encap_v4_params_are_correct) {
     }
   }
 
-#if defined(ES2K_TARGET)
   ASSERT_TRUE(src_port.has_value());
 
   if (check_src_port_) {
@@ -73,7 +74,6 @@ TEST_F(Ipv4TunnelTest, vxlan_encap_v4_params_are_correct) {
     // set the src_port param to (dst_port * 2).
     EXPECT_EQ(src_port.value(), DST_PORT * 2);  // SRC_PORT
   }
-#endif
 
   ASSERT_TRUE(dst_port.has_value());
   EXPECT_EQ(dst_port.value(), DST_PORT);

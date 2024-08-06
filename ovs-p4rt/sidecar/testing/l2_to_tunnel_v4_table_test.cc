@@ -1,7 +1,9 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareL2ToTunnelV6().
+// Unit test for PrepareL2ToTunnelV4().
+
+#include <arpa/inet.h>
 
 #include <iostream>
 #include <string>
@@ -16,7 +18,7 @@
 #include "p4info_text.h"
 #include "stratum/lib/utils.h"
 
-ABSL_FLAG(bool, dump_json, false, "Dump test output in JSON");
+ABSL_FLAG(bool, dump_json, false, "Dump output table_entry in JSON");
 
 namespace ovsp4rt {
 
@@ -29,9 +31,9 @@ using stratum::ParseProtoFromString;
 
 static ::p4::config::v1::P4Info p4info;
 
-class L2ToV6TunnelTest : public ::testing::Test {
+class L2ToTunnelV4TableTest : public ::testing::Test {
  protected:
-  L2ToV6TunnelTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
+  L2ToTunnelV4TableTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); }
 
   static void SetUpTestSuite() {
     ::util::Status status = stratum::ParseProtoFromString(P4INFO_TEXT, &p4info);
@@ -40,7 +42,7 @@ class L2ToV6TunnelTest : public ::testing::Test {
     }
   }
 
-  void SetUp() { SelectTable("l2_to_tunnel_v6"); }
+  void SetUp() { SelectTable("l2_to_tunnel_v4"); }
 
   //----------------------------
   // P4Info lookup methods
@@ -113,8 +115,27 @@ class L2ToV6TunnelTest : public ::testing::Test {
     }
   }
 
-  static inline uint32_t Ipv6AddrWord(const struct p4_ipaddr& ipaddr, int i) {
-    return ipaddr.ip.v6addr.__in6_u.__u6_addr32[i];
+  //----------------------------
+  // Initialization methods
+  //----------------------------
+
+  void InitFdbInfo() {
+    constexpr uint8_t MAC_ADDR[] = {0xde, 0xad, 0xbe, 0xef, 0x00, 0xe};
+    memcpy(fdb_info.mac_addr, MAC_ADDR, sizeof(fdb_info.mac_addr));
+  }
+
+  void InitTunnelInfo() {
+    constexpr char IPV4_DST_ADDR[] = "192.168.17.5";
+    constexpr int IPV4_PREFIX_LEN = 24;
+
+    EXPECT_EQ(inet_pton(AF_INET, IPV4_DST_ADDR,
+                        &fdb_info.tnl_info.remote_ip.ip.v4addr.s_addr),
+              1)
+        << "Error converting " << IPV4_DST_ADDR;
+    fdb_info.tnl_info.remote_ip.family = AF_INET;
+    fdb_info.tnl_info.remote_ip.prefix_len = IPV4_PREFIX_LEN;
+
+    SelectAction("set_tunnel_v4");
   }
 
   //----------------------------
@@ -122,56 +143,64 @@ class L2ToV6TunnelTest : public ::testing::Test {
   //----------------------------
 
   void CheckAction() const {
+    // ACTION_ID is defined (sanity check)
     ASSERT_NE(ACTION_ID, -1);
 
+    // Table entry specifies an action
     ASSERT_TRUE(table_entry.has_action());
     auto table_action = table_entry.action();
 
+    // Action ID is what we expect
     auto action = table_action.action();
     EXPECT_EQ(action.action_id(), ACTION_ID);
 
-    ASSERT_EQ(action.params_size(), 4);
+    // Only one parameter
+    ASSERT_EQ(action.params_size(), 1);
 
-    const struct p4_ipaddr& remote_ip = fdb_info.tnl_info.remote_ip;
+    // Param ID is what we expect
+    auto param = action.params()[0];
+    ASSERT_EQ(param.param_id(), GetParamId("dst_addr"));
 
-    // TODO(derek): look up param IDs by name.
-    // Allow for the possibility that params are not in order. (?)
-    for (int i = 0; i < action.params_size(); i++) {
-      auto param = action.params()[i];
-      ASSERT_EQ(param.param_id(), i + 1);
+    // Value has 4 bytes
+    auto param_value = param.value();
+    ASSERT_EQ(param_value.size(), 4);
 
-      auto param_value = param.value();
-      ASSERT_EQ(param_value.size(), 4);
-
-      auto word_value = ntohl(DecodeWordValue(param_value));
-      ASSERT_EQ(word_value, Ipv6AddrWord(remote_ip, i));
-    }
+    // Value is what we expect
+    auto word_value = ntohl(DecodeWordValue(param_value));
+    ASSERT_EQ(word_value, fdb_info.tnl_info.remote_ip.ip.v4addr.s_addr);
   }
 
   void CheckDetail() const {
-    EXPECT_EQ(detail.table_id, LOG_L2_TO_TUNNEL_V6_TABLE);
+    // LogTableId is correct for this table
+    EXPECT_EQ(detail.table_id, LOG_L2_TO_TUNNEL_V4_TABLE);
   }
 
   void CheckMatches() const {
-    constexpr char V6_KEY_DA[] = "hdrs.mac[vmeta.common.depth].da";
-    const int MFID_DA = GetMatchFieldId(V6_KEY_DA);
+    constexpr char V4_KEY_DA[] = "hdrs.mac[vmeta.common.depth].da";
+    const int MFID_DA = GetMatchFieldId(V4_KEY_DA);
 
-    // number of match fields
+    // Exactly one match field
     ASSERT_EQ(table_entry.match_size(), 1);
 
+    // Match Field ID is what we expect
     auto match = table_entry.match()[0];
     ASSERT_EQ(match.field_id(), MFID_DA);
 
+    // Value is what we expect
     CheckMacAddr(match);
   }
 
   void CheckMacAddr(const ::p4::v1::FieldMatch& match) const {
     constexpr int MAC_ADDR_SIZE = 6;
 
+    // This is an exact-match field
     ASSERT_TRUE(match.has_exact());
     const auto& match_value = match.exact().value();
+
+    // Value is correct for a mac address
     ASSERT_EQ(match_value.size(), MAC_ADDR_SIZE);
 
+    // Value is what we expect
     for (int i = 0; i < MAC_ADDR_SIZE; i++) {
       EXPECT_EQ(match_value[i] & 0xFF, fdb_info.mac_addr[i])
           << "mac_addr[" << i << "] is incorrect";
@@ -179,30 +208,16 @@ class L2ToV6TunnelTest : public ::testing::Test {
   }
 
   void CheckNoAction() const {
-    ASSERT_NE(ACTION_ID, -1);
+    // Table entry does not specify an action
     EXPECT_FALSE(table_entry.has_action());
   }
 
   void CheckTableEntry() const {
+    // Table is defined (sanity check)
     ASSERT_FALSE(TABLE == nullptr);
+
+    // Table ID is what we expect
     EXPECT_EQ(table_entry.table_id(), TABLE_ID);
-  }
-
-  void InitFdbInfo() {
-    constexpr uint8_t MAC_ADDR[] = {0xde, 0xad, 0xbe, 0xef, 0x00, 0xe};
-    constexpr uint32_t kIpAddrV6[] = {0, 66, 129, 512};
-    constexpr int kIpAddrV6Len = sizeof(kIpAddrV6) / sizeof(kIpAddrV6[0]);
-
-    memcpy(fdb_info.mac_addr, MAC_ADDR, sizeof(fdb_info.mac_addr));
-
-    fdb_info.tnl_info.remote_ip.family = AF_INET6;
-    // TODO(derek): replace this with pton()
-    for (int i = 0; i < kIpAddrV6Len; i++) {
-      fdb_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[i] =
-          kIpAddrV6[i];
-    }
-
-    SelectAction("set_tunnel_v6");
   }
 
   //----------------------------
@@ -229,14 +244,15 @@ class L2ToV6TunnelTest : public ::testing::Test {
 };
 
 //----------------------------------------------------------------------
-// L2ToV6TunnelTest()
+// L2ToTunnelV4TableTest
 //----------------------------------------------------------------------
-TEST_F(L2ToV6TunnelTest, remove_entry) {
+TEST_F(L2ToTunnelV4TableTest, remove_entry) {
   // Arrange
   InitFdbInfo();
+  InitTunnelInfo();
 
   // Act
-  PrepareL2ToTunnelV6(&table_entry, fdb_info, p4info, REMOVE_ENTRY, detail);
+  PrepareL2ToTunnelV4(&table_entry, fdb_info, p4info, REMOVE_ENTRY, detail);
   DumpTableEntry();
 
   // Assert
@@ -247,12 +263,13 @@ TEST_F(L2ToV6TunnelTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(L2ToV6TunnelTest, insert_entry) {
+TEST_F(L2ToTunnelV4TableTest, insert_entry) {
   // Arrange
   InitFdbInfo();
+  InitTunnelInfo();
 
   // Act
-  PrepareL2ToTunnelV6(&table_entry, fdb_info, p4info, INSERT_ENTRY, detail);
+  PrepareL2ToTunnelV4(&table_entry, fdb_info, p4info, INSERT_ENTRY, detail);
   DumpTableEntry();
 
   // Assert
