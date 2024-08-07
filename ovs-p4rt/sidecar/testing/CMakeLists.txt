@@ -20,39 +20,6 @@ option(TEST_COVERAGE OFF "Measure unit test code coverage")
 set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
 
 #-----------------------------------------------------------------------
-# define_ovsp4rt_test()
-#-----------------------------------------------------------------------
-macro(define_ovsp4rt_test TARGET)
-  add_executable(${TARGET}
-    ${TARGET}.cc
-    p4info_text.h
-    test_main.cc
-  )
-
-  set_test_properties(${TARGET})
-
-  target_link_libraries(${TARGET} PUBLIC
-    absl::flags_parse
-  )
-
-  list(APPEND UNIT_TEST_NAMES ${TARGET})
-endmacro(define_ovsp4rt_test)
-
-#-----------------------------------------------------------------------
-# ipv4_test_utils
-#-----------------------------------------------------------------------
-add_library(ipv4_test_utils STATIC
-  ipv4_tunnel_test.h
-  p4info_text.h
-  table_entry_test.h
-  test_main.cc
-)
-
-target_link_libraries(ipv4_test_utils PUBLIC
-  absl::flags_parse
-)
-
-#-----------------------------------------------------------------------
 # base_table_test
 #-----------------------------------------------------------------------
 add_library(base_table_test INTERFACE
@@ -70,6 +37,38 @@ target_link_libraries(base_table_test INTERFACE
   absl::flags_parse
   p4runtime_proto
   stratum_utils
+)
+
+#-----------------------------------------------------------------------
+# define_ovsp4rt_test()
+#-----------------------------------------------------------------------
+macro(define_ovsp4rt_test TARGET)
+  add_executable(${TARGET}
+    ${TARGET}.cc
+    test_main.cc
+  )
+
+  set_test_properties(${TARGET})
+
+  target_link_libraries(${TARGET} PUBLIC
+    base_table_test
+  )
+
+  list(APPEND UNIT_TEST_NAMES ${TARGET})
+endmacro(define_ovsp4rt_test)
+
+#-----------------------------------------------------------------------
+# ipv4_test_utils
+#-----------------------------------------------------------------------
+add_library(ipv4_test_utils STATIC
+  ipv4_tunnel_test.h
+  p4info_text.h
+  table_entry_test.h
+  test_main.cc
+)
+
+target_link_libraries(ipv4_test_utils PUBLIC
+  absl::flags_parse
 )
 
 #-----------------------------------------------------------------------
