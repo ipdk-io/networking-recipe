@@ -74,7 +74,7 @@ class VlanPopTableTest : public ::testing::Test {
   }
 
   void CheckMatches() const {
-    constexpr char MOD_BLOB_PTR [] = "vmeta.common.mod_blob_ptr";
+    constexpr char MOD_BLOB_PTR[] = "vmeta.common.mod_blob_ptr";
     const int MF_MOD_BLOB_PTR = helper.GetMatchFieldId(MOD_BLOB_PTR);
 
     ASSERT_NE(MF_MOD_BLOB_PTR, -1);
