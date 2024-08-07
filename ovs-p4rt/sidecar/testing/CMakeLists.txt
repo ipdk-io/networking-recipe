@@ -124,6 +124,7 @@ if(ES2K_TARGET)
 define_ovsp4rt_test(fdb_rx_vlan_entry_test)
 define_ovsp4rt_test(fdb_smac_entry_test)
 define_ovsp4rt_test(fdb_tx_vlan_entry_test)
+define_ovsp4rt_test(fdb_tx_vxlan_entry_test)
 
 define_ipv4_tunnel_test(geneve_encap_v4_table_entry_test)
 define_ipv6_tunnel_test(geneve_encap_v6_table_entry_test)
