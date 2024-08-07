@@ -123,6 +123,7 @@ if(ES2K_TARGET)
 
 define_ovsp4rt_test(fdb_rx_vlan_entry_test)
 define_ovsp4rt_test(fdb_smac_entry_test)
+define_ovsp4rt_test(fdb_tx_geneve_entry_test)
 define_ovsp4rt_test(fdb_tx_vlan_entry_test)
 define_ovsp4rt_test(fdb_tx_vxlan_entry_test)
 
