@@ -380,8 +380,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
           param->set_param_id(GetParamId(
               p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V6,
               ACTION_PARAM_TUNNEL_ID));
-          // TODO(derek): 8-bit vni (es2k, ipv6)
-          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+          param->set_value(EncodeVniValue(learn_info.tnl_info.vni));
         }
       } else {
         action->set_action_id(
