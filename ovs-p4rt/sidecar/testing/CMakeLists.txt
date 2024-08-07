@@ -120,10 +120,11 @@ if(ES2K_TARGET)
 #-----------------------------------------------------------------------
 # ES2K unit tests
 #-----------------------------------------------------------------------
-
 define_ovsp4rt_test(fdb_rx_vlan_entry_test)
 define_ovsp4rt_test(fdb_smac_entry_test)
+define_ovsp4rt_test(fdb_tx_geneve_entry_test)
 define_ovsp4rt_test(fdb_tx_vlan_entry_test)
+define_ovsp4rt_test(fdb_tx_vxlan_entry_test)
 
 define_ipv4_tunnel_test(geneve_encap_v4_table_entry_test)
 define_ipv6_tunnel_test(geneve_encap_v6_table_entry_test)
@@ -132,8 +133,12 @@ define_ipv4_tunnel_test(geneve_encap_v4_vlan_pop_test)
 define_ovsp4rt_test(l2_to_v4_tunnel_test)
 define_ovsp4rt_test(l2_to_v6_tunnel_test)
 
+define_ovsp4rt_test(rx_tunnel_v4_table_test)
+
 define_ovsp4rt_test(tunnel_term_v4_table_test)
 define_ovsp4rt_test(tunnel_term_v6_table_test)
+
+define_ovsp4rt_test(vlan_pop_table_test)
 
 define_ovsp4rt_test(vxlan_decap_mod_entry_test)
 
@@ -144,5 +149,5 @@ define_ipv6_tunnel_test(vxlan_encap_v6_vlan_pop_test)
 
 endif(ES2K_TARGET)
 
-# Export updated list of unit tests.
+# Export list of unit tests.
 set(UNIT_TEST_NAMES "${UNIT_TEST_NAMES}" PARENT_SCOPE)
