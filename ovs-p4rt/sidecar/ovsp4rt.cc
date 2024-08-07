@@ -380,8 +380,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
           param->set_param_id(GetParamId(
               p4info, L2_FWD_TX_TABLE_ACTION_POP_VLAN_SET_VXLAN_UNDERLAY_V6,
               ACTION_PARAM_TUNNEL_ID));
-          // TODO(derek): 8-bit vni (es2k, ipv6)
-          param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
+          param->set_value(EncodeVniValue(learn_info.tnl_info.vni));
         }
       } else {
         action->set_action_id(
@@ -1361,7 +1360,8 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
 #if defined(ES2K_TARGET)
   table_entry->set_table_id(GetTableId(p4info, IPV4_TUNNEL_TERM_TABLE));
 
-  // match bridge_id
+  // TODO(derek): ipv4_tunnel_term_table does not have a bridge_id
+  // match field. What gives?
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
                                       IPV4_TUNNEL_TERM_TABLE_KEY_BRIDGE_ID));

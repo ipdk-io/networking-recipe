@@ -20,6 +20,25 @@ option(TEST_COVERAGE OFF "Measure unit test code coverage")
 set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
 
 #-----------------------------------------------------------------------
+# define_ovsp4rt_test()
+#-----------------------------------------------------------------------
+macro(define_ovsp4rt_test TARGET)
+  add_executable(${TARGET}
+    ${TARGET}.cc
+    p4info_text.h
+    test_main.cc
+  )
+
+  set_test_properties(${TARGET})
+
+  target_link_libraries(${TARGET} PUBLIC
+    absl::flags_parse
+  )
+
+  list(APPEND UNIT_TEST_NAMES ${TARGET})
+endmacro(define_ovsp4rt_test)
+
+#-----------------------------------------------------------------------
 # ipv4_test_utils
 #-----------------------------------------------------------------------
 add_library(ipv4_test_utils STATIC
@@ -32,6 +51,43 @@ add_library(ipv4_test_utils STATIC
 target_link_libraries(ipv4_test_utils PUBLIC
   absl::flags_parse
 )
+
+#-----------------------------------------------------------------------
+# base_table_test
+#-----------------------------------------------------------------------
+add_library(base_table_test INTERFACE
+  base_table_test.h
+  p4info_helper.h
+  p4info_text.h
+)
+
+target_include_directories(base_table_test INTERFACE
+  ${SIDECAR_SOURCE_DIR}
+  ${STRATUM_SOURCE_DIR}
+)
+
+target_link_libraries(base_table_test INTERFACE
+  absl::flags_parse
+  p4runtime_proto
+  stratum_utils
+)
+
+#-----------------------------------------------------------------------
+# define_ipv4_tunnel_test()
+#-----------------------------------------------------------------------
+macro(define_ipv4_tunnel_test TARGET)
+  add_executable(${TARGET}
+    ${TARGET}.cc
+  )
+
+  set_test_properties(${TARGET})
+
+  target_link_libraries(${TARGET} PUBLIC
+    ipv4_test_utils
+  )
+
+  list(APPEND UNIT_TEST_NAMES ${TARGET})
+endmacro(define_ipv4_tunnel_test)
 
 #-----------------------------------------------------------------------
 # ipv6_test_utils
@@ -48,7 +104,24 @@ target_link_libraries(ipv6_test_utils PUBLIC
 )
 
 #-----------------------------------------------------------------------
-# encode_host_port_value_test
+# define_ipv6_tunnel_test()
+#-----------------------------------------------------------------------
+macro(define_ipv6_tunnel_test TARGET)
+  add_executable(${TARGET}
+    ${TARGET}.cc
+  )
+
+  set_test_properties(${TARGET})
+
+  target_link_libraries(${TARGET} PUBLIC
+    ipv4_test_utils
+  )
+
+  list(APPEND UNIT_TEST_NAMES ${TARGET})
+endmacro(define_ipv6_tunnel_test)
+
+#-----------------------------------------------------------------------
+# encode_host_port_value_test (DPDK, ES2K)
 #-----------------------------------------------------------------------
 add_executable(encode_host_port_value_test
   encode_host_port_value_test.cc
@@ -64,171 +137,37 @@ target_link_libraries(encode_host_port_value_test PUBLIC
 list(APPEND UNIT_TEST_NAMES encode_host_port_value_test)
 
 if(ES2K_TARGET)
-
 #-----------------------------------------------------------------------
-# base_table_test
+# ES2K unit tests
 #-----------------------------------------------------------------------
-add_library(base_table_test STATIC
-  p4info_text.h
-  base_table_test.cc
-  base_table_test.h
-)
+define_ovsp4rt_test(fdb_rx_vlan_entry_test)
+define_ovsp4rt_test(fdb_smac_entry_test)
+define_ovsp4rt_test(fdb_tx_geneve_entry_test)
+define_ovsp4rt_test(fdb_tx_vlan_entry_test)
+define_ovsp4rt_test(fdb_tx_vxlan_entry_test)
 
-target_include_directories(base_table_test PUBLIC
-  ${SIDECAR_SOURCE_DIR}
-  ${STRATUM_SOURCE_DIR}
-)
+define_ipv4_tunnel_test(geneve_encap_v4_table_entry_test)
+define_ipv6_tunnel_test(geneve_encap_v6_table_entry_test)
+define_ipv4_tunnel_test(geneve_encap_v4_vlan_pop_test)
 
-target_link_libraries(base_table_test PUBLIC
-  absl::flags_parse
-  p4runtime_proto
-  stratum_utils
-)
+define_ovsp4rt_test(l2_to_v4_tunnel_test)
+define_ovsp4rt_test(l2_to_v6_tunnel_test)
 
-#-----------------------------------------------------------------------
-# geneve_encap_v4_table_entry_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(geneve_encap_v4_table_entry_test
-  geneve_encap_v4_table_entry_test.cc
-)
+define_ovsp4rt_test(rx_tunnel_v4_table_test)
 
-set_test_properties(geneve_encap_v4_table_entry_test)
+define_ovsp4rt_test(tunnel_term_v4_table_test)
+define_ovsp4rt_test(tunnel_term_v6_table_test)
 
-target_link_libraries(geneve_encap_v4_table_entry_test PUBLIC
-  ipv4_test_utils
-)
+define_ovsp4rt_test(vlan_pop_table_test)
 
-list(APPEND UNIT_TEST_NAMES geneve_encap_v4_table_entry_test)
+define_ovsp4rt_test(vxlan_decap_mod_entry_test)
 
-#-----------------------------------------------------------------------
-# geneve_encap_v6_table_entry_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(geneve_encap_v6_table_entry_test
-  geneve_encap_v6_table_entry_test.cc
-)
-
-set_test_properties(geneve_encap_v6_table_entry_test)
-
-target_link_libraries(geneve_encap_v6_table_entry_test PUBLIC
-  ipv6_test_utils
-)
-
-list(APPEND UNIT_TEST_NAMES geneve_encap_v6_table_entry_test)
-
-#-----------------------------------------------------------------------
-# geneve_encap_v4_vlan_pop_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(geneve_encap_v4_vlan_pop_test
-  geneve_encap_v4_vlan_pop_test.cc
-)
-
-set_test_properties(geneve_encap_v4_vlan_pop_test)
-
-target_link_libraries(geneve_encap_v4_vlan_pop_test PUBLIC
-  ipv4_test_utils
-)
-
-list(APPEND UNIT_TEST_NAMES geneve_encap_v4_vlan_pop_test)
-
-#-----------------------------------------------------------------------
-# prepare_l2_to_tunnel_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(prepare_l2_to_tunnel_test
-  prepare_l2_to_tunnel_test.cc
-  p4info_text.h
-  test_main.cc
-)
-
-set_test_properties(prepare_l2_to_tunnel_test)
-
-target_link_libraries(prepare_l2_to_tunnel_test PUBLIC
-  absl::flags_parse
-)
-
-list(APPEND UNIT_TEST_NAMES prepare_l2_to_tunnel_test)
-
-#-----------------------------------------------------------------------
-# prepare_fdb_smac_entry_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(prepare_fdb_smac_entry_test
-  prepare_fdb_smac_entry_test.cc
-  p4info_text.h
-  test_main.cc
-)
-
-set_test_properties(prepare_fdb_smac_entry_test)
-
-target_link_libraries(prepare_fdb_smac_entry_test PUBLIC
-  absl::flags_parse
-)
-
-list(APPEND UNIT_TEST_NAMES prepare_fdb_smac_entry_test)
+define_ipv4_tunnel_test(vxlan_encap_v4_table_entry_test)
+define_ipv6_tunnel_test(vxlan_encap_v6_table_entry_test)
+define_ipv4_tunnel_test(vxlan_encap_v4_vlan_pop_test)
+define_ipv6_tunnel_test(vxlan_encap_v6_vlan_pop_test)
 
 endif(ES2K_TARGET)
 
-#-----------------------------------------------------------------------
-# vxlan_encap_v4_table_entry_test (DPDK, ES2K)
-#-----------------------------------------------------------------------
-add_executable(vxlan_encap_v4_table_entry_test
-  vxlan_encap_v4_table_entry_test.cc
-)
-
-set_test_properties(vxlan_encap_v4_table_entry_test)
-
-target_link_libraries(vxlan_encap_v4_table_entry_test PUBLIC
-  ipv4_test_utils
-)
-
-list(APPEND UNIT_TEST_NAMES vxlan_encap_v4_table_entry_test)
-
-if(ES2K_TARGET)
-
-#-----------------------------------------------------------------------
-# vxlan_encap_v6_table_entry_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(vxlan_encap_v6_table_entry_test
-  vxlan_encap_v6_table_entry_test.cc
-)
-
-set_test_properties(vxlan_encap_v6_table_entry_test)
-
-target_link_libraries(vxlan_encap_v6_table_entry_test PUBLIC
-  ipv6_test_utils
-)
-
-list(APPEND UNIT_TEST_NAMES vxlan_encap_v6_table_entry_test)
-
-#-----------------------------------------------------------------------
-# vxlan_encap_v4_vlan_pop_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(vxlan_encap_v4_vlan_pop_test
-  vxlan_encap_v4_vlan_pop_test.cc
-)
-
-set_test_properties(vxlan_encap_v4_vlan_pop_test)
-
-target_link_libraries(vxlan_encap_v4_vlan_pop_test PUBLIC
-  ipv4_test_utils
-)
-
-list(APPEND UNIT_TEST_NAMES vxlan_encap_v4_vlan_pop_test)
-
-#-----------------------------------------------------------------------
-# vxlan_encap_v6_vlan_pop_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(vxlan_encap_v6_vlan_pop_test
-  vxlan_encap_v6_vlan_pop_test.cc
-)
-
-set_test_properties(vxlan_encap_v6_vlan_pop_test)
-
-target_link_libraries(vxlan_encap_v6_vlan_pop_test PUBLIC
-  ipv6_test_utils
-)
-
-list(APPEND UNIT_TEST_NAMES vxlan_encap_v6_vlan_pop_test)
-
-endif(ES2K_TARGET)
-
-# Export updated list of unit tests.
+# Export list of unit tests.
 set(UNIT_TEST_NAMES "${UNIT_TEST_NAMES}" PARENT_SCOPE)
