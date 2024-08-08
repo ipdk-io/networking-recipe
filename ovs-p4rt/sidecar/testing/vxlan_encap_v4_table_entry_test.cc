@@ -1,6 +1,12 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// Unit test for PrepareVxlanEncapTableEntry().
+
+// TODO(derek):
+// - Replace hard-coded IDs with p4info lookups.
+// - Check all action params.
+
 #include <stdint.h>
 
 #include "absl/types/optional.h"
@@ -16,6 +22,10 @@ constexpr bool REMOVE_ENTRY = false;
 
 constexpr uint32_t TABLE_ID = 40763773U;
 constexpr uint32_t ACTION_ID = 20733968U;
+
+enum {
+  MF_MOD_BLOB_PTR = 1,
+};
 
 enum {
   SRC_PORT_PARAM_ID = 3,
@@ -56,14 +66,14 @@ class VxlanEncapV4TableEntryTest : public Ipv4TunnelTest {
       }
     }
 
-  #if defined(ES2K_TARGET)
+#if defined(ES2K_TARGET)
     ASSERT_TRUE(src_port.has_value());
 
     // To work around a bug in the Linux Networking P4 program, we
     // ignore the src_port value specified by the caller and instead
     // set the src_port param to (dst_port * 2).
     EXPECT_EQ(src_port.value(), DST_PORT * 2);  // SRC_PORT
-  #endif
+#endif
 
     ASSERT_TRUE(dst_port.has_value());
     EXPECT_EQ(dst_port.value(), DST_PORT);
@@ -72,9 +82,30 @@ class VxlanEncapV4TableEntryTest : public Ipv4TunnelTest {
     EXPECT_EQ(vni.value(), VNI);
   }
 
-  void CheckNoAction() const {
-    ASSERT_FALSE(table_entry.has_action());
+  void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
+
+  void CheckMatches() const {
+    ASSERT_EQ(table_entry.match_size(), 1);
+
+    auto& match = table_entry.match()[0];
+    ASSERT_EQ(match.field_id(), MF_MOD_BLOB_PTR);
+
+    CheckVniMatch(match);
   }
+
+  void CheckVniMatch(const ::p4::v1::FieldMatch& match) const {
+    constexpr int VNI_SIZE = 3;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+
+    ASSERT_EQ(match_value.size(), VNI_SIZE);
+
+    uint32_t vni_value = DecodeVniValue(match_value);
+    EXPECT_EQ(vni_value, tunnel_info.vni);
+  }
+
+  void CheckTableEntry() const { ASSERT_EQ(table_entry.table_id(), TABLE_ID); }
 };
 
 //----------------------------------------------------------------------
@@ -90,7 +121,8 @@ TEST_F(VxlanEncapV4TableEntryTest, remove_entry) {
   DumpTableEntry(table_entry);
 
   // Assert
-  ASSERT_EQ(table_entry.table_id(), TABLE_ID);
+  CheckTableEntry();
+  CheckMatches();
   CheckNoAction();
 }
 
@@ -103,7 +135,7 @@ TEST_F(VxlanEncapV4TableEntryTest, insert_entry) {
   DumpTableEntry(table_entry);
 
   // Assert
-  ASSERT_EQ(table_entry.table_id(), TABLE_ID);
+  CheckTableEntry();
   CheckAction();
 }
 
