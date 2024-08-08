@@ -10,50 +10,16 @@
 #include <string>
 #include <vector>
 
-#ifdef DUMP_JSON
-#include "absl/flags/flag.h"
-#include "google/protobuf/util/json_util.h"
-#endif
+#include "base_table_test.h"
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
-#include "p4/config/v1/p4info.pb.h"
-#include "p4/v1/p4runtime.pb.h"
-#include "p4info_helper.h"
-#include "p4info_text.h"
-#include "stratum/lib/utils.h"
-
-#ifdef DUMP_JSON
-ABSL_FLAG(bool, dump_json, false, "Dump output table_entry in JSON");
-#endif
 
 namespace ovsp4rt {
 
-#ifdef DUMP_JSON
-using google::protobuf::util::JsonPrintOptions;
-using google::protobuf::util::MessageToJsonString;
-#endif
-using stratum::ParseProtoFromString;
-
-constexpr bool INSERT_ENTRY = true;
-constexpr bool REMOVE_ENTRY = false;
-
-static ::p4::config::v1::P4Info p4info;
-
-class TunnelTermV6TableTest : public ::testing::Test {
+class TunnelTermV6TableTest : public BaseTableTest {
  protected:
-  TunnelTermV6TableTest() : helper(p4info) {
-#ifdef DUMP_JSON
-    dump_json_ = absl::GetFlag(FLAGS_dump_json);
-#endif
-  }
-
-  static void SetUpTestSuite() {
-    ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
-    if (!status.ok()) {
-      std::exit(EXIT_FAILURE);
-    }
-  }
+  TunnelTermV6TableTest() {}
 
   void SetUp() { helper.SelectTable("ipv6_tunnel_term_table"); }
 
@@ -75,31 +41,6 @@ class TunnelTermV6TableTest : public ::testing::Test {
       }
       ipv6_addr.push_back(ntohl(word_value));
     }
-  }
-
-  static uint16_t DecodeVniValue(const std::string& string_value) {
-    return DecodeWordValue(string_value) & 0xffff;
-  }
-
-  static uint32_t DecodeWordValue(const std::string& string_value) {
-    uint32_t word_value = 0;
-    for (int i = 0; i < string_value.size(); i++) {
-      word_value = (word_value << 8) | (string_value[i] & 0xff);
-    }
-    return word_value;
-  }
-
-  void DumpTableEntry() {
-#ifdef DUMP_JSON
-    if (dump_json_) {
-      JsonPrintOptions options;
-      options.add_whitespace = true;
-      options.preserve_proto_field_names = true;
-      std::string output;
-      ASSERT_TRUE(MessageToJsonString(table_entry, &output, options).ok());
-      std::cout << output << std::endl;
-    }
-#endif
   }
 
   static inline uint32_t Ipv6AddrWord(const struct p4_ipaddr& ipaddr, int i) {
@@ -169,7 +110,6 @@ class TunnelTermV6TableTest : public ::testing::Test {
   //----------------------------
   // CheckAction()
   //----------------------------
-
   void CheckAction() const {
     const int TUNNEL_ID = helper.GetParamId("tunnel_id");
     ASSERT_NE(TUNNEL_ID, -1);
@@ -206,7 +146,6 @@ class TunnelTermV6TableTest : public ::testing::Test {
   //----------------------------
   // CheckMatches()
   //----------------------------
-
   void CheckMatches() const {
     const int MFID_IPV6_SRC = helper.GetMatchFieldId("ipv6_src");
     const int MFID_VNI = helper.GetMatchFieldId("vni");
@@ -261,7 +200,6 @@ class TunnelTermV6TableTest : public ::testing::Test {
   //----------------------------
   // CheckTableEntry()
   //----------------------------
-
   void CheckTableEntry() const {
     ASSERT_TRUE(helper.has_table());
     EXPECT_EQ(table_entry.table_id(), helper.table_id());
@@ -270,17 +208,12 @@ class TunnelTermV6TableTest : public ::testing::Test {
   //----------------------------
   // Protected member data
   //----------------------------
-
-  P4InfoHelper helper;
-
-  ::p4::v1::TableEntry table_entry;
   struct tunnel_info tunnel_info = {0};
 
  private:
   //----------------------------
   // Private member data
   //----------------------------
-
 #ifdef DUMP_JSON
   bool dump_json_ = false;
 #endif
