@@ -153,6 +153,7 @@ define_ovsp4rt_test(l2_to_v4_tunnel_test)
 define_ovsp4rt_test(l2_to_v6_tunnel_test)
 
 define_ovsp4rt_test(rx_tunnel_v4_table_test)
+define_ovsp4rt_test(rx_tunnel_v6_table_test)
 
 define_ovsp4rt_test(tunnel_term_v4_table_test)
 define_ovsp4rt_test(tunnel_term_v6_table_test)
