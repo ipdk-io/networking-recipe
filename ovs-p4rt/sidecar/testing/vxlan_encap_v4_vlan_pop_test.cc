@@ -1,6 +1,12 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// Unit test for PrepareVxlanEncapAndVlanPopTableEntry().
+
+// TODO(derek):
+// - Replace hard-coded IDs with p4info lookups.
+// - Check all action params.
+
 #include <stdint.h>
 
 #include "absl/types/optional.h"
@@ -16,6 +22,10 @@ constexpr bool REMOVE_ENTRY = false;
 
 constexpr uint32_t TABLE_ID = 39675860U;
 constexpr uint32_t ACTION_ID = 26114242U;
+
+enum {
+  MF_MOD_BLOB_PTR = 1,
+};
 
 enum {
   SRC_PORT_PARAM_ID = 3,
@@ -70,9 +80,30 @@ class VxlanEncapV4VlanPopTest : public Ipv4TunnelTest {
     EXPECT_EQ(vni.value(), VNI);
   }
 
-  void CheckNoAction() const {
-    ASSERT_FALSE(table_entry.has_action());
+  void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
+
+  void CheckMatches() const {
+    ASSERT_EQ(table_entry.match_size(), 1);
+
+    auto& match = table_entry.match()[0];
+    ASSERT_EQ(match.field_id(), MF_MOD_BLOB_PTR);
+
+    CheckVniMatch(match);
   }
+
+  void CheckVniMatch(const ::p4::v1::FieldMatch& match) const {
+    constexpr int VNI_SIZE = 3;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+
+    ASSERT_EQ(match_value.size(), VNI_SIZE);
+
+    uint32_t vni_value = DecodeVniValue(match_value);
+    EXPECT_EQ(vni_value, tunnel_info.vni);
+  }
+
+  void CheckTableEntry() const { ASSERT_EQ(table_entry.table_id(), TABLE_ID); }
 };
 
 //----------------------------------------------------------------------
@@ -89,7 +120,8 @@ TEST_F(VxlanEncapV4VlanPopTest, remove_entry) {
   DumpTableEntry(table_entry);
 
   // Assert
-  ASSERT_EQ(table_entry.table_id(), TABLE_ID);
+  CheckTableEntry();
+  CheckMatches();
   CheckNoAction();
 }
 
@@ -103,7 +135,7 @@ TEST_F(VxlanEncapV4VlanPopTest, insert_entry) {
   DumpTableEntry(table_entry);
 
   // Assert
-  ASSERT_EQ(table_entry.table_id(), TABLE_ID);
+  CheckTableEntry();
   CheckAction();
 }
 
