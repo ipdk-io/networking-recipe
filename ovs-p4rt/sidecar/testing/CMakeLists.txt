@@ -20,19 +20,38 @@ option(TEST_COVERAGE OFF "Measure unit test code coverage")
 set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
 
 #-----------------------------------------------------------------------
+# base_table_test
+#-----------------------------------------------------------------------
+add_library(base_table_test INTERFACE
+  base_table_test.h
+  p4info_helper.h
+  p4info_text.h
+)
+
+target_include_directories(base_table_test INTERFACE
+  ${SIDECAR_SOURCE_DIR}
+  ${STRATUM_SOURCE_DIR}
+)
+
+target_link_libraries(base_table_test INTERFACE
+  absl::flags_parse
+  p4runtime_proto
+  stratum_utils
+)
+
+#-----------------------------------------------------------------------
 # define_ovsp4rt_test()
 #-----------------------------------------------------------------------
 macro(define_ovsp4rt_test TARGET)
   add_executable(${TARGET}
     ${TARGET}.cc
-    p4info_text.h
     test_main.cc
   )
 
   set_test_properties(${TARGET})
 
   target_link_libraries(${TARGET} PUBLIC
-    absl::flags_parse
+    base_table_test
   )
 
   list(APPEND UNIT_TEST_NAMES ${TARGET})
@@ -138,6 +157,8 @@ define_ovsp4rt_test(rx_tunnel_v6_table_test)
 
 define_ovsp4rt_test(tunnel_term_v4_table_test)
 define_ovsp4rt_test(tunnel_term_v6_table_test)
+
+define_ovsp4rt_test(vlan_pop_table_test)
 
 define_ovsp4rt_test(vxlan_decap_mod_entry_test)
 
