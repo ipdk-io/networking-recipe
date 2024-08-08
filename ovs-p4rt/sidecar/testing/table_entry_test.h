@@ -29,9 +29,7 @@ static ::p4::config::v1::P4Info p4info;
 
 class TableEntryTest : public ::testing::Test {
  protected:
-  TableEntryTest() {
-    dump_json_ = absl::GetFlag(FLAGS_dump_json);
-  };
+  TableEntryTest() { dump_json_ = absl::GetFlag(FLAGS_dump_json); };
 
   static void SetUpTestSuite() {
     ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
