@@ -4,6 +4,7 @@
 #ifndef BASE_TABLE_TEST_H_
 #define BASE_TABLE_TEST_H_
 
+#include <arpa/inet.h>
 #include <stdint.h>
 
 #include <iostream>
