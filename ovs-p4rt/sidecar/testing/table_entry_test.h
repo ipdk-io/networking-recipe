@@ -18,7 +18,6 @@
 #include "stratum/lib/utils.h"
 
 ABSL_FLAG(bool, dump_json, false, "Dump output object in JSON");
-ABSL_FLAG(bool, check_src_port, true, "Verify src_port field");
 
 namespace ovsp4rt {
 
@@ -31,7 +30,6 @@ static ::p4::config::v1::P4Info p4info;
 class TableEntryTest : public ::testing::Test {
  protected:
   TableEntryTest() {
-    check_src_port_ = absl::GetFlag(FLAGS_check_src_port);
     dump_json_ = absl::GetFlag(FLAGS_dump_json);
   };
 
@@ -71,7 +69,6 @@ class TableEntryTest : public ::testing::Test {
     }
   }
 
-  bool check_src_port_;
   bool dump_json_;
 };
 
