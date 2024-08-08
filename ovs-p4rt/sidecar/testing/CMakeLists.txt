@@ -47,26 +47,6 @@ target_link_libraries(ipv6_test_utils PUBLIC
   absl::flags_parse
 )
 
-if(ES2K_TARGET)
-
-#-----------------------------------------------------------------------
-# encode_tunnel_id_test
-#-----------------------------------------------------------------------
-add_executable(encode_tunnel_id_test
-  encode_tunnel_id_test.cc
-  p4info_text.h
-)
-
-set_test_properties(encode_tunnel_id_test)
-
-target_link_libraries(encode_tunnel_id_test PUBLIC
-  GTest::gtest_main
-)
-
-list(APPEND UNIT_TEST_NAMES encode_tunnel_id_test)
-
-endif(ES2K_TARGET)
-
 #-----------------------------------------------------------------------
 # encode_host_port_value_test
 #-----------------------------------------------------------------------
@@ -163,40 +143,6 @@ target_link_libraries(prepare_fdb_smac_entry_test PUBLIC
 )
 
 list(APPEND UNIT_TEST_NAMES prepare_fdb_smac_entry_test)
-
-#-----------------------------------------------------------------------
-# tunnel_term_v4_table_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(tunnel_term_v4_table_test
-  tunnel_term_v4_table_test.cc
-  p4info_text.h
-  test_main.cc
-)
-
-set_test_properties(tunnel_term_v4_table_test)
-
-target_link_libraries(tunnel_term_v4_table_test PUBLIC
-  absl::flags_parse
-)
-
-list(APPEND UNIT_TEST_NAMES tunnel_term_v4_table_test)
-
-#-----------------------------------------------------------------------
-# tunnel_term_v6_table_test (ES2K)
-#-----------------------------------------------------------------------
-add_executable(tunnel_term_v6_table_test
-  tunnel_term_v6_table_test.cc
-  p4info_text.h
-  test_main.cc
-)
-
-set_test_properties(tunnel_term_v6_table_test)
-
-target_link_libraries(tunnel_term_v6_table_test PUBLIC
-  absl::flags_parse
-)
-
-list(APPEND UNIT_TEST_NAMES tunnel_term_v6_table_test)
 
 endif(ES2K_TARGET)
 
