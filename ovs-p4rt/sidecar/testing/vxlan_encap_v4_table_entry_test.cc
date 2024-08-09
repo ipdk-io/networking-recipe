@@ -50,7 +50,7 @@ class VxlanEncapV4TableEntryTest : public Ipv4TunnelTest {
 
     absl::optional<uint16_t> src_port;
     absl::optional<uint16_t> dst_port;
-    absl::optional<uint16_t> vni;
+    absl::optional<uint32_t> vni;
 
     for (int i = 0; i < num_params; ++i) {
       auto param = params[i];
@@ -79,7 +79,7 @@ class VxlanEncapV4TableEntryTest : public Ipv4TunnelTest {
     EXPECT_EQ(dst_port.value(), DST_PORT);
 
     ASSERT_TRUE(vni.has_value());
-    EXPECT_EQ(vni.value(), VNI);
+    EXPECT_EQ(vni.value(), tunnel_info.vni);
   }
 
   void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
