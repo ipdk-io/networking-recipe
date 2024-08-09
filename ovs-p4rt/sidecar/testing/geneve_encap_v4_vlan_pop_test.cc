@@ -49,7 +49,7 @@ class GeneveEncapV4VlanPopTest : public Ipv4TunnelTest {
 
     absl::optional<uint16_t> src_port;
     absl::optional<uint16_t> dst_port;
-    absl::optional<uint32_t> vni;
+    absl::optional<uint16_t> vni;
 
     for (int i = 0; i < num_params; ++i) {
       auto param = params[i];
