@@ -6,6 +6,12 @@
 
 option(BUILD_JOURNAL "Build ovs-p4rt with Journal class" OFF)
 option(BUILD_SPIES "Build ovs-p4rt with spies" OFF)
+option(WIDE_VNI_VALUES "Support 24-bit VNI values" OFF)
+
+if(WIDE_VNI_VALUES)
+  add_compile_definitions(WIDE_VNI_VALUES)
+  message("24-bit VNI values enabled")
+endif()
 
 set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
