@@ -33,6 +33,9 @@ using google::protobuf::util::MessageToJsonString;
 #endif
 using stratum::ParseProtoFromString;
 
+constexpr uint32_t VNI_VALUE_MASK = 0x0000ffffU;
+constexpr uint32_t TUNNEL_ID_MASK = 0x00ffffffU;
+
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
 
@@ -59,22 +62,24 @@ class BaseTableTest : public ::testing::Test {
   // Utility methods
   //----------------------------
 
+  // Decodes a port value and returns it as an unsigned integer.
   static uint16_t DecodePortValue(const std::string& string_value) {
     uint16_t port_value = DecodeWordValue(string_value) & 0xffff;
     // Port values are encoded low byte first.
     return ntohs(port_value);
   }
 
-  // Decodes a 24-bit parameter and returns its value as an unsigned integer.
+  // Decodes a tunnel_id value and returns it as an unsigned integer.
   static uint32_t DecodeTunnelId(const std::string& string_value) {
-    return DecodeWordValue(string_value) & 0xffffff;
+    return DecodeWordValue(string_value) & TUNNEL_ID_MASK;
   }
 
+  // Decodes a vni value and returns it as an unsigned integer.
   static uint16_t DecodeVniValue(const std::string& string_value) {
-    return DecodeWordValue(string_value) & 0xffff;
+    return DecodeWordValue(string_value) & VNI_VALUE_MASK;
   }
 
-  // Decodes a parameter and returns its value as an unsigned integer.
+  // Decodes a parameter value and returns it as an unsigned integer.
   static uint32_t DecodeWordValue(const std::string& string_value) {
     uint32_t word_value = 0;
     for (int i = 0; i < string_value.size(); i++) {
