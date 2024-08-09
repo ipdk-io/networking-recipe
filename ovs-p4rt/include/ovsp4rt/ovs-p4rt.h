@@ -86,7 +86,11 @@ struct tunnel_info {
   struct p4_ipaddr local_ip;
   struct p4_ipaddr remote_ip;
   uint16_t dst_port;  // bit<16>
-  uint16_t vni;       // bit<24>
+#ifdef WIDE_VNI_VALUES
+  uint32_t vni;       // bit<24>
+#else
+  uint16_t vni;       // bit<24> (truncated)
+#endif
   struct port_vlan_info vlan_info;
   uint8_t bridge_id;    // bit<8>
   uint8_t tunnel_type;  // ovs_tunnel_type

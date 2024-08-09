@@ -136,4 +136,38 @@ TEST_F(GeneveEncapV4TableEntryTest, insert_entry) {
   CheckAction();
 }
 
+#ifdef WIDE_VNI_VALUES
+
+TEST_F(GeneveEncapV4TableEntryTest, insert_entry_with_20_bit_vni) {
+  // Arrange
+  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  tunnel_info.vni = 0x95054;  // 20-bit value
+
+  // Act
+  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
+  DumpTableEntry(table_entry);
+
+  // Assert
+  CheckTableEntry();
+  CheckMatches();
+  CheckAction();
+}
+
+TEST_F(GeneveEncapV4TableEntryTest, insert_entry_with_24_bit_vni) {
+  // Arrange
+  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  tunnel_info.vni = 0x995054;  // 24-bit value
+
+  // Act
+  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
+  DumpTableEntry(table_entry);
+
+  // Assert
+  CheckTableEntry();
+  CheckMatches();
+  CheckAction();
+}
+
+#endif  // WIDE_VNI_VALUES
+
 }  // namespace ovsp4rt
