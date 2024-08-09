@@ -52,7 +52,7 @@ class VxlanDecapModEntryTest : public BaseTableTest {
     auto& match = table_entry.match()[0];
     ASSERT_EQ(match.field_id(), MF_MOD_BLOB_PTR);
 
-    CheckVniValue(match);
+    CheckVniMatch(match);
   }
 
   void CheckNoAction() const { EXPECT_FALSE(table_entry.has_action()); }
@@ -62,7 +62,7 @@ class VxlanDecapModEntryTest : public BaseTableTest {
     EXPECT_EQ(table_entry.table_id(), helper.table_id());
   }
 
-  void CheckVniValue(const ::p4::v1::FieldMatch& match) const {
+  void CheckVniMatch(const ::p4::v1::FieldMatch& match) const {
     constexpr int VNI_SIZE = 3;
 
     ASSERT_TRUE(match.has_exact());

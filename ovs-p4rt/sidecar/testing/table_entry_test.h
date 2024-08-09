@@ -25,6 +25,8 @@ using google::protobuf::util::JsonPrintOptions;
 using google::protobuf::util::MessageToJsonString;
 using stratum::ParseProtoFromString;
 
+constexpr uint32_t VNI_VALUE_MASK = 0x00ffffffU;
+
 static ::p4::config::v1::P4Info p4info;
 
 class TableEntryTest : public ::testing::Test {
@@ -44,8 +46,8 @@ class TableEntryTest : public ::testing::Test {
     return ntohs(port_value);
   }
 
-  static uint16_t DecodeVniValue(const std::string& string_value) {
-    return DecodeWordValue(string_value) & 0xffff;
+  static uint32_t DecodeVniValue(const std::string& string_value) {
+    return DecodeWordValue(string_value) & VNI_VALUE_MASK;
   }
 
   static uint32_t DecodeWordValue(const std::string& string_value) {
