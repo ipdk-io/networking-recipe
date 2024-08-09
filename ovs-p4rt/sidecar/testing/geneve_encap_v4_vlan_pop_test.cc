@@ -76,7 +76,7 @@ class GeneveEncapV4VlanPopTest : public Ipv4TunnelTest {
     EXPECT_EQ(dst_port.value(), DST_PORT);
 
     ASSERT_TRUE(vni.has_value());
-    EXPECT_EQ(vni.value(), VNI);
+    EXPECT_EQ(vni.value(), tunnel_info.vni);
   }
 
   void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
