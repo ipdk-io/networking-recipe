@@ -75,7 +75,7 @@ class BaseTableTest : public ::testing::Test {
   }
 
   // Decodes a vni value and returns it as an unsigned integer.
-  static uint16_t DecodeVniValue(const std::string& string_value) {
+  static uint32_t DecodeVniValue(const std::string& string_value) {
     return DecodeWordValue(string_value) & VNI_VALUE_MASK;
   }
 
