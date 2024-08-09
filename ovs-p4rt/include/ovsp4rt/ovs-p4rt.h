@@ -87,9 +87,9 @@ struct tunnel_info {
   struct p4_ipaddr remote_ip;
   uint16_t dst_port;  // bit<16>
 #ifdef WIDE_VNI_VALUES
-  uint32_t vni;       // bit<24>
+  uint32_t vni;  // bit<24>
 #else
-  uint16_t vni;       // bit<24> (truncated)
+  uint16_t vni;  // bit<24> (truncated)
 #endif
   struct port_vlan_info vlan_info;
   uint8_t bridge_id;    // bit<8>
