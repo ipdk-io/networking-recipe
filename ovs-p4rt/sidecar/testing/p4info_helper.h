@@ -21,6 +21,17 @@ class P4InfoHelper {
         table_id_(-1),
         action_id_(-1) {}
 
+  int GetActionId(const std::string& action_name) const {
+    for (const auto& action : p4info_.actions()) {
+      const auto& pre = action.preamble();
+      if (pre.name() == action_name || pre.alias() == action_name) {
+        return pre.id();
+      }
+    }
+    std::cerr << "Action '" << action_name << "' not found!\n";
+    return -1;
+  }
+
   int GetMatchFieldId(const std::string& mf_name) const {
     for (const auto& mf : table_->match_fields()) {
       if (mf.name() == mf_name) {
