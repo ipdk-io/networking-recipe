@@ -82,17 +82,11 @@ class BaseTableTest : public ::testing::Test {
     helper.SelectTable(table_name);
   }
 
-  inline int ActionId() const {
-    return helper.action_id();
-  }
+  inline int ActionId() const { return helper.action_id(); }
 
-  inline bool HasTable() const {
-    return helper.has_table();
-  }
+  inline bool HasTable() const { return helper.has_table(); }
 
-  inline int TableId() const {
-    return helper.table_id();
-  }
+  inline int TableId() const { return helper.table_id(); }
 
   //----------------------------
   // Utility methods
