@@ -8,17 +8,12 @@
 #include <iostream>
 #include <string>
 
+#include "base_table_test.h"
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
-#include "p4/config/v1/p4info.pb.h"
-#include "p4/v1/p4runtime.pb.h"
-#include "p4info_text.h"
-#include "stratum/lib/utils.h"
 
 namespace ovsp4rt {
-
-using stratum::ParseProtoFromString;
 
 constexpr char SET_GENEVE_UNDERLAY_V4[] = "set_geneve_underlay_v4";
 constexpr char POP_VLAN_SET_GENEVE_UNDERLAY_V4[] =
@@ -28,31 +23,15 @@ constexpr char SET_GENEVE_UNDERLAY_V6[] = "set_geneve_underlay_v6";
 constexpr char POP_VLAN_SET_GENEVE_UNDERLAY_V6[] =
     "pop_vlan_set_geneve_underlay_v6";
 
-constexpr bool INSERT_ENTRY = true;
-constexpr bool REMOVE_ENTRY = false;
-
-static ::p4::config::v1::P4Info p4info;
-
-class FdbTxGeneveEntryTest : public ::testing::Test {
+class FdbTxGeneveEntryTest : public BaseTableTest {
  protected:
   FdbTxGeneveEntryTest() {}
 
-  static void SetUpTestSuite() {
-    ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
-    if (!status.ok()) {
-      std::exit(EXIT_FAILURE);
-    }
-  }
-
   void SetUp() { SelectTable("l2_fwd_tx_table"); }
 
-  static uint32_t DecodeWordValue(const std::string& string_value) {
-    uint32_t word_value = 0;
-    for (int i = 0; i < string_value.size(); i++) {
-      word_value = (word_value << 8) | (string_value[i] & 0xff);
-    }
-    return word_value;
-  }
+  //----------------------------
+  // Initialization methods
+  //----------------------------
 
   void InitLearnInfo(uint8_t tunnel_type) {
     constexpr uint8_t MAC_ADDR[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
@@ -66,7 +45,7 @@ class FdbTxGeneveEntryTest : public ::testing::Test {
     learn_info.tnl_info.remote_ip.family = AF_INET;
     learn_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
     learn_info.tnl_info.vni = 0x1984U;
-    ACTION_ID = GetActionId(action_name);
+    SelectAction(action_name);
   }
 
   void InitV4NativeUntagged(const std::string& action_name) {
@@ -74,7 +53,7 @@ class FdbTxGeneveEntryTest : public ::testing::Test {
     learn_info.tnl_info.remote_ip.family = AF_INET;
     learn_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
     learn_info.tnl_info.vni = 0x1776U;
-    ACTION_ID = GetActionId(action_name);
+    SelectAction(action_name);
   }
 
   void InitV6NativeTagged(const std::string& action_name) {
@@ -82,7 +61,7 @@ class FdbTxGeneveEntryTest : public ::testing::Test {
     learn_info.tnl_info.remote_ip.family = AF_INET6;
     learn_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_TAGGED;
     learn_info.tnl_info.vni = 0xFACEU;
-    ACTION_ID = GetActionId(action_name);
+    SelectAction(action_name);
   }
 
   void InitV6NativeUntagged(const std::string& action_name) {
@@ -90,25 +69,26 @@ class FdbTxGeneveEntryTest : public ::testing::Test {
     learn_info.tnl_info.remote_ip.family = AF_INET6;
     learn_info.vlan_info.port_vlan_mode = P4_PORT_VLAN_NATIVE_UNTAGGED;
     learn_info.tnl_info.vni = 0xCEDEU;
-    ACTION_ID = GetActionId(action_name);
+    SelectAction(action_name);
   }
 
-  void CheckResults() const {
-    ASSERT_FALSE(TABLE == nullptr);
+  //----------------------------
+  // CheckAction()
+  //----------------------------
 
-    EXPECT_EQ(table_entry.table_id(), TABLE_ID);
+  void CheckAction() const {
+    constexpr uint32_t PARAM_ID = 1;
+
     ASSERT_TRUE(table_entry.has_action());
-    auto table_action = table_entry.action();
+    const auto& table_action = table_entry.action();
 
-    auto action = table_action.action();
-    if (ACTION_ID) {
-      EXPECT_EQ(action.action_id(), ACTION_ID);
-    }
+    const auto& action = table_action.action();
+    ASSERT_EQ(action.action_id(), ActionId());
 
-    auto params = action.params();
+    const auto& params = action.params();
     ASSERT_EQ(action.params_size(), 1);
 
-    auto param = params[0];
+    const auto& param = params[0];
     ASSERT_EQ(param.param_id(), PARAM_ID);
     CheckTunnelIdParam(param.value());
   }
@@ -124,45 +104,30 @@ class FdbTxGeneveEntryTest : public ::testing::Test {
         << std::setw(0) << std::dec;
   }
 
+  //----------------------------
+  // CheckMatches()
+  //----------------------------
+
+  void CheckMatches() const {
+    // TODO(derek): check match fields
+  }
+
+  //----------------------------
+  // CheckTableEntry()
+  //----------------------------
+
+  void CheckTableEntry() const {
+    ASSERT_TRUE(HasTable());
+    EXPECT_EQ(table_entry.table_id(), TableId());
+  }
+
   // Working variables
-  ::p4::v1::TableEntry table_entry;
   struct mac_learning_info learn_info = {0};
   DiagDetail detail;
-
-  // Values to check against
-  uint32_t TABLE_ID;
-  uint32_t ACTION_ID = -1;
-  uint32_t PARAM_ID = 1;
-
- private:
-  void SelectTable(const std::string& table_name) {
-    for (const auto& table : p4info.tables()) {
-      const auto& pre = table.preamble();
-      if (pre.name() == table_name || pre.alias() == table_name) {
-        TABLE = &table;
-        TABLE_ID = pre.id();
-        return;
-      }
-    }
-    std::cerr << "Table '" << table_name << "' not found\n";
-  }
-
-  uint32_t GetActionId(const std::string& action_name) const {
-    for (const auto& action : p4info.actions()) {
-      const auto& pre = action.preamble();
-      if (pre.name() == action_name || pre.alias() == action_name) {
-        return pre.id();
-      }
-    }
-    std::cerr << "Action '" << action_name << "' not found\n";
-    return -1;
-  }
-
-  const ::p4::config::v1::Table* TABLE = nullptr;
 };
 
 //----------------------------------------------------------------------
-// PrepareFdbTableEntryforV4GeneveTunnel()
+// Test cases
 //----------------------------------------------------------------------
 
 TEST_F(FdbTxGeneveEntryTest, insert_v4_tagged_entry_minimal) {
@@ -175,7 +140,8 @@ TEST_F(FdbTxGeneveEntryTest, insert_v4_tagged_entry_minimal) {
                                         INSERT_ENTRY, detail);
 
   // Assert
-  CheckResults();
+  CheckTableEntry();
+  CheckAction();
 }
 
 TEST_F(FdbTxGeneveEntryTest, insert_v4_untagged_entry_minimal) {
@@ -188,7 +154,8 @@ TEST_F(FdbTxGeneveEntryTest, insert_v4_untagged_entry_minimal) {
                                         INSERT_ENTRY, detail);
 
   // Assert
-  CheckResults();
+  CheckTableEntry();
+  CheckAction();
 }
 
 TEST_F(FdbTxGeneveEntryTest, insert_v6_tagged_entry_minimal) {
@@ -201,7 +168,8 @@ TEST_F(FdbTxGeneveEntryTest, insert_v6_tagged_entry_minimal) {
                                         INSERT_ENTRY, detail);
 
   // Assert
-  CheckResults();
+  CheckTableEntry();
+  CheckAction();
 }
 
 TEST_F(FdbTxGeneveEntryTest, insert_v6_untagged_entry_minimal) {
@@ -214,7 +182,8 @@ TEST_F(FdbTxGeneveEntryTest, insert_v6_untagged_entry_minimal) {
                                         INSERT_ENTRY, detail);
 
   // Assert
-  CheckResults();
+  CheckTableEntry();
+  CheckAction();
 }
 
 }  // namespace ovsp4rt
