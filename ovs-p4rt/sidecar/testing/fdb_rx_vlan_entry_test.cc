@@ -39,31 +39,68 @@ class FdbRxVlanEntryTest : public BaseTableTest {
   }
 
   //----------------------------
-  // Test-specific methods
+  // CheckAction()
   //----------------------------
 
   void CheckAction() const {
-    ASSERT_NE(ActionId(), -1);
-
-    const int PORT_PARAM = GetParamId("port");
-    ASSERT_NE(PORT_PARAM, -1);
-
     ASSERT_TRUE(table_entry.has_action());
     const auto& table_action = table_entry.action();
 
     const auto& action = table_action.action();
     EXPECT_EQ(action.action_id(), ActionId());
 
+    const int PORT_PARAM_ID = GetParamId("port");
+    ASSERT_NE(PORT_PARAM_ID, -1);
+
     const auto& params = action.params();
     ASSERT_EQ(action.params_size(), 1);
 
     const auto& param = params[0];
-    ASSERT_EQ(param.param_id(), PORT_PARAM);
+    ASSERT_EQ(param.param_id(), PORT_PARAM_ID);
     uint32_t port = DecodeWordValue(param.value());
     EXPECT_EQ(port, fdb_info.rx_src_port);
   }
 
-  void CheckBridgeId(const ::p4::v1::FieldMatch& match) const {
+  //----------------------------
+  // CheckNoAction()
+  //----------------------------
+
+  void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
+
+  //----------------------------
+  // CheckDetail()
+  //----------------------------
+
+  void CheckDetail() const { EXPECT_EQ(detail.table_id, LOG_L2_FWD_RX_TABLE); }
+
+  //----------------------------
+  // CheckMatches()
+  //----------------------------
+
+  void CheckMatches() const {
+    constexpr char BRIDGE_ID_KEY[] = "user_meta.pmeta.bridge_id";
+    const int MFID_BRIDGE_ID = GetMatchFieldId(BRIDGE_ID_KEY);
+    ASSERT_NE(MFID_BRIDGE_ID, -1);
+
+    const int MFID_DST_MAC = GetMatchFieldId("dst_mac");
+    ASSERT_NE(MFID_DST_MAC, -1);
+
+    // number of match fields
+    ASSERT_EQ(table_entry.match_size(), 2);
+
+    for (const auto& match : table_entry.match()) {
+      auto field_id = match.field_id();
+      if (field_id == MFID_DST_MAC) {
+        CheckMacAddrMatch(match);
+      } else if (field_id == MFID_BRIDGE_ID) {
+        CheckBridgeIdMatch(match);
+      } else {
+        FAIL() << "Unexpected field_id (" << field_id << ")";
+      }
+    }
+  }
+
+  void CheckBridgeIdMatch(const ::p4::v1::FieldMatch& match) const {
     constexpr int BRIDGE_ID_SIZE = 1;
 
     ASSERT_TRUE(match.has_exact());
@@ -74,9 +111,7 @@ class FdbRxVlanEntryTest : public BaseTableTest {
     ASSERT_EQ(uint32_t(match_value[0]), uint32_t(fdb_info.bridge_id));
   }
 
-  void CheckDetail() const { EXPECT_EQ(detail.table_id, LOG_L2_FWD_RX_TABLE); }
-
-  void CheckMacAddr(const ::p4::v1::FieldMatch& match) const {
+  void CheckMacAddrMatch(const ::p4::v1::FieldMatch& match) const {
     constexpr int MAC_ADDR_SIZE = 6;
 
     ASSERT_TRUE(match.has_exact());
@@ -89,27 +124,9 @@ class FdbRxVlanEntryTest : public BaseTableTest {
     }
   }
 
-  void CheckMatches() const {
-    constexpr char BRIDGE_ID_KEY[] = "user_meta.pmeta.bridge_id";
-    constexpr char DST_MAC_KEY[] = "dst_mac";
-
-    const int MFID_BRIDGE_ID = GetMatchFieldId(BRIDGE_ID_KEY);
-    const int MFID_DST_MAC = GetMatchFieldId(DST_MAC_KEY);
-
-    // number of match fields
-    ASSERT_EQ(table_entry.match_size(), 2);
-
-    for (const auto& match : table_entry.match()) {
-      auto field_id = match.field_id();
-      if (field_id == MFID_DST_MAC) {
-        CheckMacAddr(match);
-      } else if (field_id == MFID_BRIDGE_ID) {
-        CheckBridgeId(match);
-      } else {
-        FAIL() << "Unexpected field_id (" << field_id << ")";
-      }
-    }
-  }
+  //----------------------------
+  // CheckTableEntry()
+  //----------------------------
 
   void CheckTableEntry() const {
     ASSERT_TRUE(HasTable());
@@ -142,6 +159,7 @@ TEST_F(FdbRxVlanEntryTest, remove_entry) {
   CheckDetail();
   CheckTableEntry();
   CheckMatches();
+  CheckNoAction();
 }
 
 TEST_F(FdbRxVlanEntryTest, insert_entry) {
