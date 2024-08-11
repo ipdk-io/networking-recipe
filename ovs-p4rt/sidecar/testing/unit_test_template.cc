@@ -28,20 +28,52 @@ class TemplateTest : public BaseTableTest {
 
   void InitInputInfo() {}
 
-  void CheckAction() const {}
+  //----------------------------
+  // CheckAction()
+  //----------------------------
+
+  void CheckAction() const {
+    ASSERT_TRUE(table_entry.has_action());
+    const auto& table_action = table_entry.action();
+
+    const auto& action = table_action.action();
+    EXPECT_EQ(action.action_id(), helper.action_id());
+
+    // your code goes here
+  }
+
+  //----------------------------
+  // CheckNoAction()
+  //----------------------------
 
   void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
 
 #ifdef DIAG_DETAIL
+  //----------------------------
+  // CheckDetail()
+  //----------------------------
+
   void CheckDetail() const { EXPECT_EQ(detail.table_id, LOG_TEMPLATE_TABLE); }
 #endif
 
+  //----------------------------
+  // CheckMatches()
+  //----------------------------
+
   void CheckMatches() const {}
+
+  //----------------------------
+  // CheckTableEntry()
+  //----------------------------
 
   void CheckTableEntry() const {
     ASSERT_TRUE(HasTable());
     EXPECT_EQ(table_entry.table_id(), TableId());
   }
+
+  //----------------------------
+  // Protected member data
+  //----------------------------
 
   struct template_info input_info = {0};
 #ifdef DIAG_DETAIL
