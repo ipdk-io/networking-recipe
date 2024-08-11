@@ -1,7 +1,7 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareDstIpMacMapTableEntry()
+// Unit test for PrepareDstIpMacMapTableEntry().
 
 //#define DUMP_JSON
 
@@ -66,7 +66,7 @@ class DstIpMacMapTableTest : public BaseTableTest {
     const int DMAC_LOW = GetParamId("dmac_low");
     ASSERT_NE(DMAC_LOW, -1);
 
-    auto params = action.params();
+    const auto& params = action.params();
     ASSERT_EQ(action.params_size(), 3);
 
     for (const auto& param : params) {
@@ -91,13 +91,9 @@ class DstIpMacMapTableTest : public BaseTableTest {
   }
 
   void CheckMacByte(uint16_t actual, int index) const {
-    EXPECT_EQ(actual, uint16_t(map_info.dst_mac_addr[index]))
+    auto expected = uint16_t(map_info.dst_mac_addr[index]);
+    EXPECT_EQ(actual, expected)
         << "dst_mac_addr[" << index << "] does not match";
-  }
-
-  void CheckMacByte(const std::string& param_value, int actual_index,
-                    int expected_index) {
-    ASSERT_EQ(param_value.size(), 2);
   }
 
   void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
