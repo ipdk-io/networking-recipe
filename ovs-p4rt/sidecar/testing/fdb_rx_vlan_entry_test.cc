@@ -43,9 +43,10 @@ class FdbRxVlanEntryTest : public BaseTableTest {
   //----------------------------
 
   void CheckAction() const {
-    const int PORT_PARAM = GetParamId("port");
-
     ASSERT_NE(ActionId(), -1);
+
+    const int PORT_PARAM = GetParamId("port");
+    ASSERT_NE(PORT_PARAM, -1);
 
     ASSERT_TRUE(table_entry.has_action());
     const auto& table_action = table_entry.action();
@@ -53,10 +54,10 @@ class FdbRxVlanEntryTest : public BaseTableTest {
     const auto& action = table_action.action();
     EXPECT_EQ(action.action_id(), ActionId());
 
-    auto params = action.params();
+    const auto& params = action.params();
     ASSERT_EQ(action.params_size(), 1);
 
-    auto param = params[0];
+    const auto& param = params[0];
     ASSERT_EQ(param.param_id(), PORT_PARAM);
     uint32_t port = DecodeWordValue(param.value());
     EXPECT_EQ(port, fdb_info.rx_src_port);
