@@ -77,19 +77,20 @@ class FdbTxGeneveEntryTest : public BaseTableTest {
   //----------------------------
 
   void CheckAction() const {
-    constexpr uint32_t PARAM_ID = 1;
-
     ASSERT_TRUE(table_entry.has_action());
     const auto& table_action = table_entry.action();
 
     const auto& action = table_action.action();
     ASSERT_EQ(action.action_id(), ActionId());
 
+    const int TUNNEL_ID_PARAM = GetParamId("tunnel_id");
+    ASSERT_NE(TUNNEL_ID_PARAM, -1);
+
     const auto& params = action.params();
     ASSERT_EQ(action.params_size(), 1);
 
     const auto& param = params[0];
-    ASSERT_EQ(param.param_id(), PARAM_ID);
+    ASSERT_EQ(param.param_id(), TUNNEL_ID_PARAM);
     CheckTunnelIdParam(param.value());
   }
 
