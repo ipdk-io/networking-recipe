@@ -30,18 +30,25 @@ class VxlanDecapModEntryTest : public BaseTableTest {
   void InitTunnelInfo() { tunnel_info.vni = 0x1776; }
 
   //----------------------------
-  // Test-specific methods
+  // CheckAction()
   //----------------------------
 
   void CheckAction() const {
     ASSERT_TRUE(table_entry.has_action());
-    auto table_action = table_entry.action();
+    const auto& table_action = table_entry.action();
 
-    auto action = table_action.action();
+    const auto& action = table_action.action();
     EXPECT_EQ(action.action_id(), helper.action_id());
 
+    // Action has no parameters.
     EXPECT_EQ(action.params_size(), 0);
   }
+
+  void CheckNoAction() const { EXPECT_FALSE(table_entry.has_action()); }
+
+  //----------------------------
+  // CheckMatches()
+  //----------------------------
 
   void CheckMatches() const {
     constexpr char MOD_BLOB_PTR[] = "vmeta.common.mod_blob_ptr";
@@ -49,17 +56,10 @@ class VxlanDecapModEntryTest : public BaseTableTest {
 
     ASSERT_EQ(table_entry.match_size(), 1);
 
-    auto& match = table_entry.match()[0];
+    const auto& match = table_entry.match()[0];
     ASSERT_EQ(match.field_id(), MF_MOD_BLOB_PTR);
 
     CheckVniMatch(match);
-  }
-
-  void CheckNoAction() const { EXPECT_FALSE(table_entry.has_action()); }
-
-  void CheckTableEntry() const {
-    ASSERT_TRUE(helper.has_table());
-    EXPECT_EQ(table_entry.table_id(), helper.table_id());
   }
 
   void CheckVniMatch(const ::p4::v1::FieldMatch& match) const {
@@ -72,6 +72,15 @@ class VxlanDecapModEntryTest : public BaseTableTest {
 
     uint32_t vni_value = DecodeVniValue(match_value);
     EXPECT_EQ(vni_value, tunnel_info.vni);
+  }
+
+  //----------------------------
+  // CheckTableEntry()
+  //----------------------------
+
+  void CheckTableEntry() const {
+    ASSERT_TRUE(helper.has_table());
+    EXPECT_EQ(table_entry.table_id(), helper.table_id());
   }
 
   //----------------------------
