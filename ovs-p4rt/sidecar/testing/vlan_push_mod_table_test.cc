@@ -40,6 +40,12 @@ class VlanPushModTableTest : public BaseTableTest {
   //----------------------------
 
   void CheckAction() const {
+    ASSERT_TRUE(table_entry.has_action());
+    const auto& table_action = table_entry.action();
+
+    const auto& action = table_action.action();
+    EXPECT_EQ(action.action_id(), ActionId());
+
     const int PCP_PARAM = GetParamId("pcp");
     ASSERT_NE(PCP_PARAM, -1);
 
@@ -48,12 +54,6 @@ class VlanPushModTableTest : public BaseTableTest {
 
     const int VLAN_PARAM = GetParamId("vlan_id");
     ASSERT_NE(VLAN_PARAM, -1);
-
-    ASSERT_TRUE(table_entry.has_action());
-    const auto& table_action = table_entry.action();
-
-    const auto& action = table_action.action();
-    EXPECT_EQ(action.action_id(), ActionId());
 
     EXPECT_EQ(action.params_size(), 3);
     const auto& params = action.params();
@@ -90,8 +90,8 @@ class VlanPushModTableTest : public BaseTableTest {
   }
 
   void CheckVlanIdParam(const std::string& value) const {
-    constexpr int VLAN_SIZE = 1;
-    EXPECT_EQ(value.size(), VLAN_SIZE);
+    constexpr int VLAN_PARAM_SIZE = 1;
+    EXPECT_EQ(value.size(), VLAN_PARAM_SIZE);
 
     uint32_t vlan_param = DecodeWordValue(value);
     EXPECT_EQ(vlan_param, push_info.vlan_id);
