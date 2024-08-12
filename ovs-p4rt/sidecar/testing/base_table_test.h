@@ -1,6 +1,10 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// #define DUMP_JSON before including this header file to
+// enable the --dump_json command-line flag and the body
+// of the DumpTableEntry() method.
+
 #ifndef BASE_TABLE_TEST_H_
 #define BASE_TABLE_TEST_H_
 
@@ -57,6 +61,36 @@ class BaseTableTest : public ::testing::Test {
       std::exit(EXIT_FAILURE);
     }
   }
+
+  //----------------------------
+  // P4Info lookup methods
+  //----------------------------
+
+  inline int GetActionId(const std::string& action_name) const {
+    return helper.GetActionId(action_name);
+  }
+
+  inline int GetMatchFieldId(const std::string& mf_name) const {
+    return helper.GetMatchFieldId(mf_name);
+  }
+
+  inline int GetParamId(const std::string& param_name) const {
+    return helper.GetParamId(param_name);
+  }
+
+  inline void SelectAction(const std::string& action_name) {
+    helper.SelectAction(action_name);
+  }
+
+  inline void SelectTable(const std::string& table_name) {
+    helper.SelectTable(table_name);
+  }
+
+  inline int ActionId() const { return helper.action_id(); }
+
+  inline bool HasTable() const { return helper.has_table(); }
+
+  inline int TableId() const { return helper.table_id(); }
 
   //----------------------------
   // Utility methods
