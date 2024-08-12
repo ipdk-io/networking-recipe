@@ -1,6 +1,10 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// #define DUMP_JSON before including this header file to
+// enable the --dump_json command-line flag and the body
+// of the DumpTableEntry() method.
+
 #ifndef BASE_TABLE_TEST_H_
 #define BASE_TABLE_TEST_H_
 
@@ -33,8 +37,8 @@ using google::protobuf::util::MessageToJsonString;
 #endif
 using stratum::ParseProtoFromString;
 
-constexpr uint32_t VNI_VALUE_MASK = 0x0000ffffU;
-constexpr uint32_t TUNNEL_ID_MASK = 0x00ffffffU;
+constexpr uint32_t VNI_VALUE_MASK = 0x00ffffffU;  // bit<24>
+constexpr uint32_t TUNNEL_ID_MASK = 0x000fffffU;  // bit<20>
 
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
