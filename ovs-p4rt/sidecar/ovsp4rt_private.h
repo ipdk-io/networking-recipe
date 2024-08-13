@@ -35,6 +35,11 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
 
 #if defined(ES2K_TARGET)
 
+void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
+                                  struct ip_mac_map_info& ip_info,
+                                  const ::p4::config::v1::P4Info& p4info,
+                                  bool insert_entry, DiagDetail& detail);
+
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
@@ -59,6 +64,11 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
                                 bool insert_entry, DiagDetail& detail);
+
+void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
+                                  struct ip_mac_map_info& ip_info,
+                                  const ::p4::config::v1::P4Info& p4info,
+                                  bool insert_entry, DiagDetail& detail);
 
 void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
@@ -93,6 +103,11 @@ void PrepareV6RxTunnelTableEntry(p4::v1::TableEntry* table_entry,
                                  const struct tunnel_info& tunnel_info,
                                  const ::p4::config::v1::P4Info& p4info,
                                  bool insert_entry);
+
+void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
+                              const struct src_port_info& sp,
+                              const ::p4::config::v1::P4Info& p4info,
+                              bool insert_entry);
 
 void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                  const struct tunnel_info& tunnel_info,
