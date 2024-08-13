@@ -1,7 +1,7 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareVxlanEncapTableEntry().
+// Unit test for PrepareV6GeneveEncapTableEntry().
 
 // TODO(derek):
 // - Replace hard-coded IDs with p4info lookups.
@@ -13,34 +13,33 @@
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
-#include "testing/ipv4_tunnel_test.h"
+#include "testing/ipv6_tunnel_test.h"
 
 namespace ovsp4rt {
 
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
 
-constexpr uint32_t TABLE_ID = 40763773U;
-constexpr uint32_t ACTION_ID = 20733968U;
+constexpr uint32_t TABLE_ID = 42283616U;
+constexpr uint32_t ACTION_ID = 29610186U;
 
 enum {
   MF_MOD_BLOB_PTR = 1,
 };
 
 enum {
-  SRC_PORT_PARAM_ID = 3,
-  DST_PORT_PARAM_ID = 4,
-  VNI_PARAM_ID = 5,
+  SRC_PORT_PARAM_ID = 7,
+  DST_PORT_PARAM_ID = 8,
+  VNI_PARAM_ID = 9,
 };
 
-class VxlanEncapV4TableEntryTest : public Ipv4TunnelTest {
+class GeneveEncapV6TableTest : public Ipv6TunnelTest {
  protected:
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
 
   void CheckAction() const {
     ASSERT_TRUE(table_entry.has_action());
-
     auto table_action = table_entry.action();
     auto action = table_action.action();
     ASSERT_EQ(action.action_id(), ACTION_ID);
@@ -66,14 +65,12 @@ class VxlanEncapV4TableEntryTest : public Ipv4TunnelTest {
       }
     }
 
-#if defined(ES2K_TARGET)
     ASSERT_TRUE(src_port.has_value());
 
     // To work around a bug in the Linux Networking P4 program, we
     // ignore the src_port value specified by the caller and instead
     // set the src_port param to (dst_port * 2).
     EXPECT_EQ(src_port.value(), DST_PORT * 2);  // SRC_PORT
-#endif
 
     ASSERT_TRUE(dst_port.has_value());
     EXPECT_EQ(dst_port.value(), DST_PORT);
@@ -109,15 +106,16 @@ class VxlanEncapV4TableEntryTest : public Ipv4TunnelTest {
 };
 
 //----------------------------------------------------------------------
-// PrepareVxlanEncapTableEntry()
+// PrepareV6GeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(VxlanEncapV4TableEntryTest, remove_entry) {
+TEST_F(GeneveEncapV6TableTest, remove_entry) {
   // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
+  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
   // Act
-  PrepareVxlanEncapTableEntry(&table_entry, tunnel_info, p4info, REMOVE_ENTRY);
+  PrepareV6GeneveEncapTableEntry(&table_entry, tunnel_info, p4info,
+                                 REMOVE_ENTRY);
   DumpTableEntry(table_entry);
 
   // Assert
@@ -126,12 +124,13 @@ TEST_F(VxlanEncapV4TableEntryTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(VxlanEncapV4TableEntryTest, insert_entry) {
+TEST_F(GeneveEncapV6TableTest, insert_entry) {
   // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
+  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
   // Act
-  PrepareVxlanEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
+  PrepareV6GeneveEncapTableEntry(&table_entry, tunnel_info, p4info,
+                                 INSERT_ENTRY);
   DumpTableEntry(table_entry);
 
   // Assert
