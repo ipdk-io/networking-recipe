@@ -29,9 +29,9 @@ class VxlanDecapModVlanPushTest : public BaseTableTest {
 
   void InitTunnelInfo() {
     // TODO(derek): vni encoded as bit<16>.
-    tunnel_info.vni = 0xFACE;                 // bit<16>
+    tunnel_info.vni = 0xFACE;  // bit<16>
     // TODO(derek): port_vlan encoded as bit<8>.
-    tunnel_info.vlan_info.port_vlan = 0xED;   // bit<8>
+    tunnel_info.vlan_info.port_vlan = 0xED;  // bit<8>
   }
 
   //----------------------------
