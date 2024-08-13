@@ -1915,7 +1915,7 @@ void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
   match->set_field_id(GetMatchFieldId(p4info, SRC_IP_MAC_MAP_TABLE,
                                       SRC_IP_MAC_MAP_TABLE_KEY_SRC_IP));
   match->mutable_exact()->set_value(
-      CanonicalizeIp((ip_info.src_ip_addr.ip.v4addr.s_addr)));
+      CanonicalizeIp(ip_info.src_ip_addr.ip.v4addr.s_addr));
 
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();

@@ -1,7 +1,7 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareVxlanDecapModTableEntry().
+// Unit test for PrepareGeneveDecapModTableEntry()
 
 #include <stdint.h>
 
@@ -15,19 +15,18 @@
 
 namespace ovsp4rt {
 
-class VxlanDecapModEntryTest : public BaseTableTest {
+class GeneveDecapModTableTest : public BaseTableTest {
  protected:
-  VxlanDecapModEntryTest() {}
+  GeneveDecapModTableTest() {}
 
-  void SetUp() { helper.SelectTable("vxlan_decap_mod_table"); }
+  void SetUp() { SelectTable("geneve_decap_mod_table"); }
 
-  //----------------------------
-  // Initialization methods
-  //----------------------------
+  void InitAction() { SelectAction("geneve_decap_outer_hdr"); }
 
-  void InitAction() { helper.SelectAction("vxlan_decap_outer_hdr"); }
-
-  void InitTunnelInfo() { tunnel_info.vni = 0x1776; }
+  void InitTunnelInfo() {
+    tunnel_info.vni = 0x1234;
+    tunnel_info.tunnel_type = OVS_TUNNEL_GENEVE;
+  }
 
   //----------------------------
   // CheckAction()
@@ -44,7 +43,7 @@ class VxlanDecapModEntryTest : public BaseTableTest {
     EXPECT_EQ(action.params_size(), 0);
   }
 
-  void CheckNoAction() const { EXPECT_FALSE(table_entry.has_action()); }
+  void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
 
   //----------------------------
   // CheckMatches()
@@ -53,6 +52,7 @@ class VxlanDecapModEntryTest : public BaseTableTest {
   void CheckMatches() const {
     constexpr char MOD_BLOB_PTR[] = "vmeta.common.mod_blob_ptr";
     const int MF_MOD_BLOB_PTR = helper.GetMatchFieldId(MOD_BLOB_PTR);
+    ASSERT_NE(MF_MOD_BLOB_PTR, -1);
 
     ASSERT_EQ(table_entry.match_size(), 1);
 
@@ -79,8 +79,8 @@ class VxlanDecapModEntryTest : public BaseTableTest {
   //----------------------------
 
   void CheckTableEntry() const {
-    ASSERT_TRUE(helper.has_table());
-    EXPECT_EQ(table_entry.table_id(), helper.table_id());
+    ASSERT_TRUE(HasTable());
+    EXPECT_EQ(table_entry.table_id(), TableId());
   }
 
   //----------------------------
@@ -91,16 +91,16 @@ class VxlanDecapModEntryTest : public BaseTableTest {
 };
 
 //----------------------------------------------------------------------
-// PrepareVxlanDecapModTableEntry()
+// Test cases
 //----------------------------------------------------------------------
 
-TEST_F(VxlanDecapModEntryTest, remove_entry) {
+TEST_F(GeneveDecapModTableTest, remove_entry) {
   // Arrange
   InitTunnelInfo();
 
   // Act
-  PrepareVxlanDecapModTableEntry(&table_entry, tunnel_info, p4info,
-                                 REMOVE_ENTRY);
+  PrepareGeneveDecapModTableEntry(&table_entry, tunnel_info, p4info,
+                                  REMOVE_ENTRY);
 
   // Assert
   CheckTableEntry();
@@ -108,16 +108,17 @@ TEST_F(VxlanDecapModEntryTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(VxlanDecapModEntryTest, insert_entry) {
+TEST_F(GeneveDecapModTableTest, insert_entry) {
   // Arrange
   InitTunnelInfo();
   InitAction();
 
   // Act
-  PrepareVxlanDecapModTableEntry(&table_entry, tunnel_info, p4info,
-                                 INSERT_ENTRY);
+  PrepareGeneveDecapModTableEntry(&table_entry, tunnel_info, p4info,
+                                  INSERT_ENTRY);
 
   // Assert
+  CheckTableEntry();
   CheckAction();
 }
 
