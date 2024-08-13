@@ -33,7 +33,7 @@ enum {
   VNI_PARAM_ID = 5,
 };
 
-class GeneveEncapV4TableEntryTest : public Ipv4TunnelTest {
+class GeneveEncapV4TableTest : public Ipv4TunnelTest {
  protected:
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
@@ -109,7 +109,7 @@ class GeneveEncapV4TableEntryTest : public Ipv4TunnelTest {
 // Test PrepareGeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(GeneveEncapV4TableEntryTest, remove_entry) {
+TEST_F(GeneveEncapV4TableTest, remove_entry) {
   // Arrange
   InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
@@ -123,7 +123,7 @@ TEST_F(GeneveEncapV4TableEntryTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(GeneveEncapV4TableEntryTest, insert_entry) {
+TEST_F(GeneveEncapV4TableTest, insert_entry) {
   // Arrange
   InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
