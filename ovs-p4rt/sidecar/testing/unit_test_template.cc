@@ -1,93 +1,30 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareSampleTableEntry()
+// Unit test for PrepareTemplateTableEntry()
 
 #include <stdint.h>
 
 #include <iostream>
 #include <string>
 
-#ifdef DUMP_JSON
-#include "absl/flags/flag.h"
-#include "google/protobuf/util/json_util.h"
-#endif
+#include "base_table_test.h"
 #include "gtest/gtest.h"
 #ifdef DIAG_DETAIL
 #include "logging/ovsp4rt_diag_detail.h"
 #endif
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
-#include "p4/config/v1/p4info.pb.h"
-#include "p4/v1/p4runtime.pb.h"
-#include "p4info_helper.h"
-#include "p4info_text.h"
-#include "stratum/lib/utils.h"
-
-#ifdef DUMP_JSON
-ABSL_FLAG(bool, dump_json, false, "Dump output table_entry in JSON");
-#endif
 
 namespace ovsp4rt {
 
-#ifdef DUMP_JSON
-using google::protobuf::util::JsonPrintOptions;
-using google::protobuf::util::MessageToJsonString;
-#endif
-using stratum::ParseProtoFromString;
-
-constexpr bool INSERT_ENTRY = true;
-constexpr bool REMOVE_ENTRY = false;
-
-static ::p4::config::v1::P4Info p4info;
-
-class TemplateTest : public ::testing::Test {
+class TemplateTest : public BaseTableTest {
  protected:
-  TemplateTest() : helper(p4info) {
-#ifdef DUMP_JSON
-    dump_json_ = absl::GetFlag(FLAGS_dump_json);
-#endif
-  }
+  TemplateTest() {}
 
-  static void SetUpTestSuite() {
-    ::util::Status status = ParseProtoFromString(P4INFO_TEXT, &p4info);
-    if (!status.ok()) {
-      std::exit(EXIT_FAILURE);
-    }
-  }
+  void SetUp() { SelectTable("template_table"); }
 
-  void SetUp() { helper.SelectTable("sample_table"); }
-
-  //----------------------------
-  // Utility methods
-  //----------------------------
-
-  static uint32_t DecodeWordValue(const std::string& string_value) {
-    uint32_t word_value = 0;
-    for (int i = 0; i < string_value.size(); i++) {
-      word_value = (word_value << 8) | (string_value[i] & 0xff);
-    }
-    return word_value;
-  }
-
-#ifdef DUMP_JSON
-  void DumpTableEntry() {
-    if (dump_json_) {
-      JsonPrintOptions options;
-      options.add_whitespace = true;
-      options.preserve_proto_field_names = true;
-      std::string output;
-      ASSERT_TRUE(MessageToJsonString(table_entry, &output, options).ok());
-      std::cout << output << std::endl;
-    }
-  }
-#endif
-
-  //----------------------------
-  // Initialization methods
-  //----------------------------
-
-  void InitAction() { helper.SelectAction("sample_action"); }
+  void InitAction() { SelectAction("template_action"); }
 
   void InitInputInfo() {}
 
@@ -95,7 +32,19 @@ class TemplateTest : public ::testing::Test {
   // CheckAction()
   //----------------------------
 
-  void CheckAction() const {}
+  void CheckAction() const {
+    ASSERT_TRUE(table_entry.has_action());
+    const auto& table_action = table_entry.action();
+
+    const auto& action = table_action.action();
+    EXPECT_EQ(action.action_id(), helper.action_id());
+
+    // your code goes here
+  }
+
+  //----------------------------
+  // CheckNoAction()
+  //----------------------------
 
   void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
 
@@ -118,34 +67,22 @@ class TemplateTest : public ::testing::Test {
   //----------------------------
 
   void CheckTableEntry() const {
-    ASSERT_TRUE(helper.has_table());
-    EXPECT_EQ(table_entry.table_id(), helper.table_id());
+    ASSERT_TRUE(HasTable());
+    EXPECT_EQ(table_entry.table_id(), TableId());
   }
 
   //----------------------------
   // Protected member data
   //----------------------------
 
-  P4InfoHelper helper;
-
-  struct input_info input_info = {0};
-  ::p4::v1::TableEntry table_entry;
+  struct template_info input_info = {0};
 #ifdef DIAG_DETAIL
   DiagDetail detail;
-#endif
-
-#ifdef DUMP_JSON
- private:
-  //----------------------------
-  // Private member data
-  //----------------------------
-
-  bool dump_json_ = false;
 #endif
 };
 
 //----------------------------------------------------------------------
-// PrepareSampleTableEntry()
+// Test cases
 //----------------------------------------------------------------------
 
 TEST_F(TemplateTest, remove_entry) {
@@ -153,15 +90,12 @@ TEST_F(TemplateTest, remove_entry) {
   InitInputInfo();
 
   // Act
-  PrepareSampleTableEntry(&table_entry, input_info, p4info, REMOVE_ENTRY
+  PrepareTemplateTableEntry(&table_entry, input_info, p4info, REMOVE_ENTRY
 #ifdef DIAG_DETAIL
-                          ,
-                          detail
+                            ,
+                            detail
 #endif
   );
-#ifdef DUMP_JSON
-  DumpTableEntry();
-#endif
 
   // Assert
 #ifdef DIAG_DETAIL
@@ -178,17 +112,15 @@ TEST_F(TemplateTest, insert_entry) {
   InitAction();
 
   // Act
-  PrepareSampleTableEntry(&table_entry, input_info, p4info, INSERT_ENTRY
+  PrepareTemplateTableEntry(&table_entry, input_info, p4info, INSERT_ENTRY
 #ifdef DIAG_DETAIL
-                          ,
-                          detail
+                            ,
+                            detail
 #endif
   );
-#ifdef DUMP_JSON
-  DumpTableEntry();
-#endif
 
   // Assert
+  CheckTableEntry();
   CheckAction();
 }
 
