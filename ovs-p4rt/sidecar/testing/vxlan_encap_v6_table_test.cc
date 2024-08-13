@@ -33,7 +33,7 @@ enum {
   VNI_PARAM_ID = 9,
 };
 
-class EncapV6TableEntryTest : public Ipv6TunnelTest {
+class VxlanEncapV6TableTest : public Ipv6TunnelTest {
  protected:
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
@@ -109,7 +109,7 @@ class EncapV6TableEntryTest : public Ipv6TunnelTest {
 // PrepareV6VxlanEncapTableEntry
 //----------------------------------------------------------------------
 
-TEST_F(EncapV6TableEntryTest, remove_entry) {
+TEST_F(VxlanEncapV6TableTest, remove_entry) {
   // Arrange
   InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
@@ -124,7 +124,7 @@ TEST_F(EncapV6TableEntryTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(EncapV6TableEntryTest, insert_entry) {
+TEST_F(VxlanEncapV6TableTest, insert_entry) {
   // Arrange
   InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
