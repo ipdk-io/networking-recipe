@@ -15,9 +15,9 @@
 
 namespace ovsp4rt {
 
-class GeneveEncapModTableTest : public BaseTableTest {
+class GeneveDecapModTableTest : public BaseTableTest {
  protected:
-  GeneveEncapModTableTest() {}
+  GeneveDecapModTableTest() {}
 
   void SetUp() { SelectTable("geneve_decap_mod_table"); }
 
@@ -94,7 +94,7 @@ class GeneveEncapModTableTest : public BaseTableTest {
 // Test cases
 //----------------------------------------------------------------------
 
-TEST_F(GeneveEncapModTableTest, remove_entry) {
+TEST_F(GeneveDecapModTableTest, remove_entry) {
   // Arrange
   InitTunnelInfo();
 
@@ -108,7 +108,7 @@ TEST_F(GeneveEncapModTableTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(GeneveEncapModTableTest, insert_entry) {
+TEST_F(GeneveDecapModTableTest, insert_entry) {
   // Arrange
   InitTunnelInfo();
   InitAction();
