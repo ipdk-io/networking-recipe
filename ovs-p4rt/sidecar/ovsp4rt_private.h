@@ -35,6 +35,11 @@ void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
 
 #if defined(ES2K_TARGET)
 
+void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
+                                  struct ip_mac_map_info& ip_info,
+                                  const ::p4::config::v1::P4Info& p4info,
+                                  bool insert_entry, DiagDetail& detail);
+
 void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info,
