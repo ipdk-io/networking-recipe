@@ -7,7 +7,7 @@
 
    ```bash
    unifdef unit_test_template.cc -ovlan_pop_table_test.cc \
-       -UDIAG_DETAIL -DDUMP_JSON -DSELECT_ACTION
+       -UDIAG_DETAIL
    ```
 
    unifdef options:
@@ -18,20 +18,25 @@
 
    Preprocessor symbols:
 
-   - `DIAG_DETAIL`
-   - `DUMP_JSON`
-   - `SELECT_ACTION`
+   - `DIAG_DETAIL` if the function accepts a _detail_ parameter.
 
    If you do not specify `-D` or `-U` for a symbol, the conditional
    block will be unchanged in the output file.
 
 2. Rename placeholders in the new source file.
 
-   - Change "PrepareSampleTableEntry" to the name of the function.
-   - Change "InitInputInfo" to reflect the name of the info struct.
-   - Change "input_info" to the name of the info struct.
-   - Change "sample_table" to the name or alias of the table.
-   - Change "sample_action" to the name or alias of the action.
+   - Change all occurrences of _PrepareTemplateTableEntry_ to the name
+     of the function.
+   - Change all occurrences of _TemplateTest_ to the name of the test.
+   - Change _"template_table"_ to the name or alias of the table.
+   - Change _"template_action"_ to the name or alias of the action,
+     or delete the _SetUp()_ method if you will be selecting the action
+     elsewhere in the test.
+   - Optionally change _InitInputInfo_ to something appropriate to the test.
+   - Change _LOG_TEMPLATE_TABLE_ to the enum for the table (if
+     DIAG_DETAIL is enabled).
+   - Change _template_info_ to the name of the info struct.
+   - Optionally change _input_info_ to something appropriate to the test.
 
 3. Run `clang-format` to clean up after the edits.
 

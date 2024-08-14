@@ -1,11 +1,10 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareGeneveEncapTableEntry().
+// Unit test for PrepareV6GeneveEncapTableEntry().
 
-// TODO(derek):
-// - Replace hard-coded IDs with p4info lookups.
-// - Make sure all action params are checked.
+// TODO(derek): Replace hard-coded IDs with p4info lookups.
+// TODO(derek): Check all action params.
 
 #include <stdint.h>
 
@@ -13,27 +12,27 @@
 #include "gtest/gtest.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
-#include "testing/ipv4_tunnel_test.h"
+#include "testing/ipv6_tunnel_test.h"
 
 namespace ovsp4rt {
 
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
 
-constexpr uint32_t TABLE_ID = 41319073U;
-constexpr uint32_t ACTION_ID = 25818889U;
+constexpr uint32_t TABLE_ID = 42283616U;
+constexpr uint32_t ACTION_ID = 29610186U;
 
 enum {
   MF_MOD_BLOB_PTR = 1,
 };
 
 enum {
-  SRC_PORT_PARAM_ID = 3,
-  DST_PORT_PARAM_ID = 4,
-  VNI_PARAM_ID = 5,
+  SRC_PORT_PARAM_ID = 7,
+  DST_PORT_PARAM_ID = 8,
+  VNI_PARAM_ID = 9,
 };
 
-class GeneveEncapV4TableEntryTest : public Ipv4TunnelTest {
+class GeneveEncapV6TableTest : public Ipv6TunnelTest {
  protected:
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
@@ -106,15 +105,16 @@ class GeneveEncapV4TableEntryTest : public Ipv4TunnelTest {
 };
 
 //----------------------------------------------------------------------
-// Test PrepareGeneveEncapTableEntry()
+// PrepareV6GeneveEncapTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(GeneveEncapV4TableEntryTest, remove_entry) {
+TEST_F(GeneveEncapV6TableTest, remove_entry) {
   // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
   // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, REMOVE_ENTRY);
+  PrepareV6GeneveEncapTableEntry(&table_entry, tunnel_info, p4info,
+                                 REMOVE_ENTRY);
   DumpTableEntry(table_entry);
 
   // Assert
@@ -123,51 +123,18 @@ TEST_F(GeneveEncapV4TableEntryTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(GeneveEncapV4TableEntryTest, insert_entry) {
+TEST_F(GeneveEncapV6TableTest, insert_entry) {
   // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
 
   // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
+  PrepareV6GeneveEncapTableEntry(&table_entry, tunnel_info, p4info,
+                                 INSERT_ENTRY);
   DumpTableEntry(table_entry);
 
   // Assert
   CheckTableEntry();
   CheckAction();
 }
-
-#ifdef WIDE_VNI_VALUES
-
-TEST_F(GeneveEncapV4TableEntryTest, insert_entry_with_20_bit_vni) {
-  // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
-  tunnel_info.vni = 0x95054;  // 20-bit value
-
-  // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
-  DumpTableEntry(table_entry);
-
-  // Assert
-  CheckTableEntry();
-  CheckMatches();
-  CheckAction();
-}
-
-TEST_F(GeneveEncapV4TableEntryTest, insert_entry_with_24_bit_vni) {
-  // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
-  tunnel_info.vni = 0x995054;  // 24-bit value
-
-  // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
-  DumpTableEntry(table_entry);
-
-  // Assert
-  CheckTableEntry();
-  CheckMatches();
-  CheckAction();
-}
-
-#endif  // WIDE_VNI_VALUES
 
 }  // namespace ovsp4rt

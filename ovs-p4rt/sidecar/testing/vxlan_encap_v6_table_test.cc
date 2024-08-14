@@ -1,11 +1,10 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareV6GeneveEncapTableEntry().
+// Unit test for PrepareV6VxlanEncapTableEntry().
 
-// TODO(derek):
-// - Replace hard-coded IDs with p4info lookups.
-// - Check all action params.
+// TODO(derek): Replace hard-coded IDs with p4info lookups.
+// TODO(derek): Check all action params.
 
 #include <stdint.h>
 
@@ -20,8 +19,8 @@ namespace ovsp4rt {
 constexpr bool INSERT_ENTRY = true;
 constexpr bool REMOVE_ENTRY = false;
 
-constexpr uint32_t TABLE_ID = 42283616U;
-constexpr uint32_t ACTION_ID = 29610186U;
+constexpr uint32_t TABLE_ID = 46225003U;
+constexpr uint32_t ACTION_ID = 30345128U;
 
 enum {
   MF_MOD_BLOB_PTR = 1,
@@ -33,7 +32,7 @@ enum {
   VNI_PARAM_ID = 9,
 };
 
-class GeneveEncapV6TableEntryTest : public Ipv6TunnelTest {
+class VxlanEncapV6TableTest : public Ipv6TunnelTest {
  protected:
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
@@ -106,16 +105,16 @@ class GeneveEncapV6TableEntryTest : public Ipv6TunnelTest {
 };
 
 //----------------------------------------------------------------------
-// PrepareV6GeneveEncapTableEntry()
+// PrepareV6VxlanEncapTableEntry
 //----------------------------------------------------------------------
 
-TEST_F(GeneveEncapV6TableEntryTest, remove_entry) {
+TEST_F(VxlanEncapV6TableTest, remove_entry) {
   // Arrange
-  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
   // Act
-  PrepareV6GeneveEncapTableEntry(&table_entry, tunnel_info, p4info,
-                                 REMOVE_ENTRY);
+  PrepareV6VxlanEncapTableEntry(&table_entry, tunnel_info, p4info,
+                                REMOVE_ENTRY);
   DumpTableEntry(table_entry);
 
   // Assert
@@ -124,13 +123,13 @@ TEST_F(GeneveEncapV6TableEntryTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(GeneveEncapV6TableEntryTest, insert_entry) {
+TEST_F(VxlanEncapV6TableTest, insert_entry) {
   // Arrange
-  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
   // Act
-  PrepareV6GeneveEncapTableEntry(&table_entry, tunnel_info, p4info,
-                                 INSERT_ENTRY);
+  PrepareV6VxlanEncapTableEntry(&table_entry, tunnel_info, p4info,
+                                INSERT_ENTRY);
   DumpTableEntry(table_entry);
 
   // Assert
