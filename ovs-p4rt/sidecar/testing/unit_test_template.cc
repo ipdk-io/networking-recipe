@@ -37,7 +37,7 @@ class TemplateTest : public BaseTableTest {
     const auto& table_action = table_entry.action();
 
     const auto& action = table_action.action();
-    EXPECT_EQ(action.action_id(), helper.action_id());
+    EXPECT_EQ(action.action_id(), ActionId());
 
     // your code goes here
   }

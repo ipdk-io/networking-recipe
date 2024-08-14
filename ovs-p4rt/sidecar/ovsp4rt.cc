@@ -1670,7 +1670,7 @@ void PrepareVxlanDecapModAndVlanPushTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_VXLAN_DECAP_AND_PUSH_VLAN,
                      ACTION_VXLAN_DECAP_AND_PUSH_VLAN_PARAM_VLAN_ID));
-      // note: 8-bit vlan_id
+      // TODO(derek): port_vlan encoded as bit<8>.
       param->set_value(EncodeByteValue(1, tunnel_info.vlan_info.port_vlan));
     }
   }
