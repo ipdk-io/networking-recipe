@@ -200,6 +200,7 @@ define_ovsp4rt_test(vlan_pop_table_test)
 define_ovsp4rt_test(vlan_push_mod_table_test)
 
 define_ovsp4rt_test(vxlan_decap_mod_entry_test)
+define_ovsp4rt_test(vxlan_decap_mod_vlan_push_test)
 
 define_ipv4_tunnel_test(vxlan_encap_v4_table_test)
 define_ipv6_tunnel_test(vxlan_encap_v6_table_test)
