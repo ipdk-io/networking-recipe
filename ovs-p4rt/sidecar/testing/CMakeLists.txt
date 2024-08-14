@@ -197,6 +197,8 @@ define_ovsp4rt_test(rx_tunnel_v6_table_test)
 define_ovsp4rt_test(tunnel_term_v4_table_test)
 define_ovsp4rt_test(tunnel_term_v6_table_test)
 
+define_ovsp4rt_test(tx_acc_vsi_table_test)
+
 define_ovsp4rt_test(vlan_pop_table_test)
 define_ovsp4rt_test(vlan_push_mod_table_test)
 

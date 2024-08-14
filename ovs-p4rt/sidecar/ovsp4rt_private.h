@@ -123,6 +123,9 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                  const ::p4::config::v1::P4Info& p4info,
                                  bool insert_entry);
 
+void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
+                               const ::p4::config::v1::P4Info& p4info);
+
 void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,

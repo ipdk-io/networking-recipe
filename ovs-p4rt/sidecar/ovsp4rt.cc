@@ -2009,6 +2009,7 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
   auto match = table_entry->add_match();
   match->set_field_id(
       GetMatchFieldId(p4info, TX_ACC_VSI_TABLE, TX_ACC_VSI_TABLE_KEY_VSI));
+  // TODO(derek): vsi field is bit<11>
   match->mutable_exact()->set_value(
       EncodeByteValue(1, (sp - ES2K_VPORT_ID_OFFSET)));
 
