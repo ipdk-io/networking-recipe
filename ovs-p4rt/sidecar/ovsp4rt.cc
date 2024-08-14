@@ -1670,7 +1670,7 @@ void PrepareVxlanDecapModAndVlanPushTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_VXLAN_DECAP_AND_PUSH_VLAN,
                      ACTION_VXLAN_DECAP_AND_PUSH_VLAN_PARAM_VLAN_ID));
-      // note: 8-bit vlan_id
+      // TODO(derek): port_vlan encoded as bit<8>.
       param->set_value(EncodeByteValue(1, tunnel_info.vlan_info.port_vlan));
     }
   }
@@ -1915,7 +1915,7 @@ void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
   match->set_field_id(GetMatchFieldId(p4info, SRC_IP_MAC_MAP_TABLE,
                                       SRC_IP_MAC_MAP_TABLE_KEY_SRC_IP));
   match->mutable_exact()->set_value(
-      CanonicalizeIp((ip_info.src_ip_addr.ip.v4addr.s_addr)));
+      CanonicalizeIp(ip_info.src_ip_addr.ip.v4addr.s_addr));
 
   if (insert_entry) {
     auto table_action = table_entry->mutable_action();
@@ -2009,6 +2009,7 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
   auto match = table_entry->add_match();
   match->set_field_id(
       GetMatchFieldId(p4info, TX_ACC_VSI_TABLE, TX_ACC_VSI_TABLE_KEY_VSI));
+  // TODO(derek): vsi field is bit<11>
   match->mutable_exact()->set_value(
       EncodeByteValue(1, (sp - ES2K_VPORT_ID_OFFSET)));
 

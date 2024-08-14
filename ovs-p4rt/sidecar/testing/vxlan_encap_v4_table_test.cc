@@ -3,9 +3,8 @@
 
 // Unit test for PrepareVxlanEncapTableEntry().
 
-// TODO(derek):
-// - Replace hard-coded IDs with p4info lookups.
-// - Check all action params.
+// TODO(derek): Replace hard-coded IDs with p4info lookups.
+// TODO(derek): Check all action params.
 
 #include <stdint.h>
 
@@ -33,7 +32,7 @@ enum {
   VNI_PARAM_ID = 5,
 };
 
-class VxlanEncapV4TableEntryTest : public Ipv4TunnelTest {
+class VxlanEncapV4TableTest : public Ipv4TunnelTest {
  protected:
   struct tunnel_info tunnel_info = {0};
   p4::v1::TableEntry table_entry;
@@ -112,7 +111,7 @@ class VxlanEncapV4TableEntryTest : public Ipv4TunnelTest {
 // PrepareVxlanEncapTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(VxlanEncapV4TableEntryTest, remove_entry) {
+TEST_F(VxlanEncapV4TableTest, remove_entry) {
   // Arrange
   InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
@@ -126,7 +125,7 @@ TEST_F(VxlanEncapV4TableEntryTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(VxlanEncapV4TableEntryTest, insert_entry) {
+TEST_F(VxlanEncapV4TableTest, insert_entry) {
   // Arrange
   InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
 
