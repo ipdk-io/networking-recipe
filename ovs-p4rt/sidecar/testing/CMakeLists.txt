@@ -113,11 +113,42 @@ macro(define_ipv6_tunnel_test TARGET)
   set_test_properties(${TARGET})
 
   target_link_libraries(${TARGET} PUBLIC
-    ipv4_test_utils
+    ipv6_test_utils
   )
 
   list(APPEND UNIT_TEST_NAMES ${TARGET})
 endmacro(define_ipv6_tunnel_test)
+
+#-----------------------------------------------------------------------
+# tunnel_test_utils
+#-----------------------------------------------------------------------
+add_library(tunnel_test_utils STATIC
+  base_table_test.h
+  base_tunnel_test.h
+  p4info_text.h
+  test_main.cc
+)
+
+target_link_libraries(tunnel_test_utils PUBLIC
+  absl::flags_parse
+)
+
+#-----------------------------------------------------------------------
+# define_tunnel_test()
+#-----------------------------------------------------------------------
+macro(define_tunnel_test TARGET)
+  add_executable(${TARGET}
+    ${TARGET}.cc
+  )
+
+  set_test_properties(${TARGET})
+
+  target_link_libraries(${TARGET} PUBLIC
+    tunnel_test_utils
+  )
+
+  list(APPEND UNIT_TEST_NAMES ${TARGET})
+endmacro(define_tunnel_test)
 
 #-----------------------------------------------------------------------
 # encode_host_port_value_test (DPDK, ES2K)
