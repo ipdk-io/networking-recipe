@@ -123,7 +123,7 @@ TEST_F(VxlanDecapModTableTest, insert_entry) {
 
 #ifdef WIDE_VNI_VALUES
 
-TEST_F(VxlanDecapModEntryTest, insert_entry_with_20_bit_vni) {
+TEST_F(VxlanDecapModTableTest, insert_entry_with_20_bit_vni) {
   // Arrange
   InitTunnelInfo();
   InitAction();
@@ -139,7 +139,7 @@ TEST_F(VxlanDecapModEntryTest, insert_entry_with_20_bit_vni) {
   CheckAction();
 }
 
-TEST_F(VxlanDecapModEntryTest, insert_entry_with_24_bit_vni) {
+TEST_F(VxlanDecapModTableTest, insert_entry_with_24_bit_vni) {
   // Arrange
   InitTunnelInfo();
   InitAction();
