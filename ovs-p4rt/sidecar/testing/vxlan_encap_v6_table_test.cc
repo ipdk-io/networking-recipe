@@ -3,9 +3,8 @@
 
 // Unit test for PrepareV6VxlanEncapTableEntry().
 
-// TODO(derek):
-// - Replace hard-coded IDs with p4info lookups.
-// - Check all action params.
+// TODO(derek): Replace hard-coded IDs with p4info lookups.
+// TODO(derek): Check all action params.
 
 #include <stdint.h>
 
