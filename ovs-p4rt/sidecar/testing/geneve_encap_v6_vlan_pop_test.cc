@@ -1,9 +1,12 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareGeneveEncapTableEntry().
+// Unit test for PrepareV6GeneveEncapAndVlanPopTableEntry().
 
 #include <stdint.h>
+
+#include <iostream>
+#include <string>
 
 #include "base_tunnel_test.h"
 #include "gtest/gtest.h"
@@ -12,13 +15,13 @@
 
 namespace ovsp4rt {
 
-class GeneveEncapV4TableTest : public BaseTunnelTest {
+class GeneveEncapV6VlanPopTest : public BaseTunnelTest {
  protected:
-  GeneveEncapV4TableTest() {}
+  GeneveEncapV6VlanPopTest() {}
 
-  void SetUp() { SelectTable("geneve_encap_mod_table"); }
+  void SetUp() { SelectTable("geneve_encap_v6_vlan_pop_mod_table"); }
 
-  void InitAction() { SelectAction("geneve_encap"); }
+  void InitAction() { SelectAction("geneve_encap_v6_vlan_pop"); }
 
   //----------------------------
   // CheckAction()
@@ -29,23 +32,23 @@ class GeneveEncapV4TableTest : public BaseTunnelTest {
     const auto& table_action = table_entry.action();
 
     const auto& action = table_action.action();
-    ASSERT_EQ(action.action_id(), ActionId());
+    EXPECT_EQ(action.action_id(), ActionId());
 
-    // Get parameter IDs.
+    // Get param IDs.
     const int SRC_ADDR_PARAM_ID = GetParamId("src_addr");
-    ASSERT_NE(SRC_ADDR_PARAM_ID, -1);
+    EXPECT_NE(SRC_ADDR_PARAM_ID, -1);
 
     const int DST_ADDR_PARAM_ID = GetParamId("dst_addr");
-    ASSERT_NE(DST_ADDR_PARAM_ID, -1);
+    EXPECT_NE(DST_ADDR_PARAM_ID, -1);
 
     const int SRC_PORT_PARAM_ID = GetParamId("src_port");
-    ASSERT_NE(SRC_PORT_PARAM_ID, -1);
+    EXPECT_NE(SRC_PORT_PARAM_ID, -1);
 
     const int DST_PORT_PARAM_ID = GetParamId("dst_port");
-    ASSERT_NE(DST_PORT_PARAM_ID, -1);
+    EXPECT_NE(DST_PORT_PARAM_ID, -1);
 
     const int VNI_PARAM_ID = GetParamId("vni");
-    ASSERT_NE(VNI_PARAM_ID, -1);
+    EXPECT_NE(VNI_PARAM_ID, -1);
 
     // Process action parameters.
     const auto& params = action.params();
@@ -69,7 +72,6 @@ class GeneveEncapV4TableTest : public BaseTunnelTest {
       }
     }
   }
-
   void CheckSrcAddrParam(const std::string& value) const {
     // TODO(derek): implement CheckSrcAddrParam().
   }
@@ -118,12 +120,14 @@ class GeneveEncapV4TableTest : public BaseTunnelTest {
 
   void CheckMatches() const {
     ASSERT_EQ(table_entry.match_size(), 1);
-    auto& match = table_entry.match()[0];
+    const auto& match = table_entry.match()[0];
 
-    const int MF_MOD_BLOB_PTR = GetMatchFieldId("vmeta.common.mod_blob_ptr");
+    constexpr char MOD_BLOB_PTR[] = "vmeta.common.mod_blob_ptr";
+    const int MF_MOD_BLOB_PTR = GetMatchFieldId(MOD_BLOB_PTR);
     ASSERT_NE(MF_MOD_BLOB_PTR, -1);
 
     ASSERT_EQ(match.field_id(), MF_MOD_BLOB_PTR);
+
     CheckVniMatch(match);
   }
 
@@ -139,20 +143,33 @@ class GeneveEncapV4TableTest : public BaseTunnelTest {
     EXPECT_EQ(vni_value, tunnel_info.vni);
   }
 
-  void CheckTableEntry() const { ASSERT_EQ(table_entry.table_id(), TableId()); }
+  //----------------------------
+  // CheckTableEntry()
+  //----------------------------
+
+  void CheckTableEntry() const {
+    ASSERT_TRUE(HasTable());
+    EXPECT_EQ(table_entry.table_id(), TableId());
+  }
+
+  //----------------------------
+  // Protected member data
+  //----------------------------
+
+  struct tunnel_info tunnel_info = {0};
 };
 
 //----------------------------------------------------------------------
-// Test PrepareGeneveEncapTableEntry()
+// Test cases
 //----------------------------------------------------------------------
 
-TEST_F(GeneveEncapV4TableTest, remove_entry) {
+TEST_F(GeneveEncapV6VlanPopTest, remove_entry) {
   // Arrange
-  InitV4TunnelInfo(OVS_TUNNEL_GENEVE);
+  InitV6TunnelInfo(OVS_TUNNEL_GENEVE);
 
   // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, REMOVE_ENTRY);
-  DumpTableEntry();
+  PrepareV6GeneveEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,
+                                           REMOVE_ENTRY);
 
   // Assert
   CheckTableEntry();
@@ -160,14 +177,14 @@ TEST_F(GeneveEncapV4TableTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(GeneveEncapV4TableTest, insert_entry) {
+TEST_F(GeneveEncapV6VlanPopTest, insert_entry) {
   // Arrange
-  InitV4TunnelInfo(OVS_TUNNEL_GENEVE);
+  InitV6TunnelInfo(OVS_TUNNEL_GENEVE);
   InitAction();
 
   // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
-  DumpTableEntry();
+  PrepareV6GeneveEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,
+                                           INSERT_ENTRY);
 
   // Assert
   CheckTableEntry();
@@ -176,14 +193,15 @@ TEST_F(GeneveEncapV4TableTest, insert_entry) {
 
 #ifdef WIDE_VNI_VALUE
 
-TEST_F(GeneveEncapV4TableTest, insert_entry_with_24_bit_vni) {
+TEST_F(GeneveEncapV6VlanPopTest, insert_entry_with_24_bit_vni) {
   // Arrange
   InitV4TunnelInfo(OVS_TUNNEL_GENEVE);
   tunnel_info.vni = 0x95054;
   InitAction();
 
   // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
+  PrepareV6GeneveEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,
+                                           INSERT_ENTRY);
   DumpTableEntry();
 
   // Assert
