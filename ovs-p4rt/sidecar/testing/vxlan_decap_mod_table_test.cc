@@ -15,9 +15,9 @@
 
 namespace ovsp4rt {
 
-class VxlanDecapModEntryTest : public BaseTableTest {
+class VxlanDecapModTableTest : public BaseTableTest {
  protected:
-  VxlanDecapModEntryTest() {}
+  VxlanDecapModTableTest() {}
 
   void SetUp() { helper.SelectTable("vxlan_decap_mod_table"); }
 
@@ -94,7 +94,7 @@ class VxlanDecapModEntryTest : public BaseTableTest {
 // PrepareVxlanDecapModTableEntry()
 //----------------------------------------------------------------------
 
-TEST_F(VxlanDecapModEntryTest, remove_entry) {
+TEST_F(VxlanDecapModTableTest, remove_entry) {
   // Arrange
   InitTunnelInfo();
 
@@ -108,7 +108,7 @@ TEST_F(VxlanDecapModEntryTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(VxlanDecapModEntryTest, insert_entry) {
+TEST_F(VxlanDecapModTableTest, insert_entry) {
   // Arrange
   InitTunnelInfo();
   InitAction();
