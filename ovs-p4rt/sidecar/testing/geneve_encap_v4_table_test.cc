@@ -148,7 +148,7 @@ class GeneveEncapV4TableTest : public BaseTunnelTest {
 
 TEST_F(GeneveEncapV4TableTest, remove_entry) {
   // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  InitV4TunnelInfo(OVS_TUNNEL_GENEVE);
 
   // Act
   PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, REMOVE_ENTRY);
@@ -162,7 +162,7 @@ TEST_F(GeneveEncapV4TableTest, remove_entry) {
 
 TEST_F(GeneveEncapV4TableTest, insert_entry) {
   // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  InitV4TunnelInfo(OVS_TUNNEL_GENEVE);
   InitAction();
 
   // Act
@@ -178,7 +178,7 @@ TEST_F(GeneveEncapV4TableTest, insert_entry) {
 
 TEST_F(GeneveEncapV4TableTest, insert_entry_with_24_bit_vni) {
   // Arrange
-  InitV4TunnelInfo(tunnel_info, OVS_TUNNEL_GENEVE);
+  InitV4TunnelInfo(OVS_TUNNEL_GENEVE);
   tunnel_info.vni = 0x95054;
   InitAction();
 
