@@ -121,4 +121,40 @@ TEST_F(VxlanDecapModTableTest, insert_entry) {
   CheckAction();
 }
 
+#ifdef WIDE_VNI_VALUES
+
+TEST_F(VxlanDecapModTableTest, insert_entry_with_20_bit_vni) {
+  // Arrange
+  InitTunnelInfo();
+  InitAction();
+  tunnel_info.vni = 0x87124;  // 20-bit value
+
+  // Act
+  PrepareVxlanDecapModTableEntry(&table_entry, tunnel_info, p4info,
+                                 INSERT_ENTRY);
+
+  // Assert
+  CheckTableEntry();
+  CheckMatches();
+  CheckAction();
+}
+
+TEST_F(VxlanDecapModTableTest, insert_entry_with_24_bit_vni) {
+  // Arrange
+  InitTunnelInfo();
+  InitAction();
+  tunnel_info.vni = 0x871244;  // 24-bit value
+
+  // Act
+  PrepareVxlanDecapModTableEntry(&table_entry, tunnel_info, p4info,
+                                 INSERT_ENTRY);
+
+  // Assert
+  CheckTableEntry();
+  CheckMatches();
+  CheckAction();
+}
+
+#endif  // WIDE_VNI_VALUES
+
 }  // namespace ovsp4rt
