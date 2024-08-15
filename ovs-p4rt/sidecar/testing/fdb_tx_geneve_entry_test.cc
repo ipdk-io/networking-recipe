@@ -106,11 +106,66 @@ class FdbTxGeneveEntryTest : public BaseTableTest {
   }
 
   //----------------------------
+  // CheckNoAction()
+  //----------------------------
+
+  void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
+
+  //----------------------------
+  // CheckDetail()
+  //----------------------------
+
+  void CheckDetail() const { EXPECT_EQ(detail.table_id, LOG_L2_FWD_TX_TABLE); }
+
+  //----------------------------
   // CheckMatches()
   //----------------------------
 
   void CheckMatches() const {
-    // TODO(derek): check match fields
+    constexpr char BRIDGE_ID_KEY[] = "user_meta.pmeta.bridge_id";
+    const int MFID_BRIDGE_ID = GetMatchFieldId(BRIDGE_ID_KEY);
+    ASSERT_NE(MFID_BRIDGE_ID, -1);
+
+    const int MFID_DST_MAC = GetMatchFieldId("dst_mac");
+    ASSERT_NE(MFID_DST_MAC, -1);
+
+    // number of match fields
+    ASSERT_EQ(table_entry.match_size(), 2);
+
+    for (const auto& match : table_entry.match()) {
+      auto field_id = match.field_id();
+      if (field_id == MFID_DST_MAC) {
+        CheckMacAddrMatch(match);
+      } else if (field_id == MFID_BRIDGE_ID) {
+        CheckBridgeIdMatch(match);
+      } else {
+        FAIL() << "Unexpected field_id (" << field_id << ")";
+      }
+    }
+  }
+
+  void CheckBridgeIdMatch(const ::p4::v1::FieldMatch& match) const {
+    constexpr int BRIDGE_ID_SIZE = 1;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+    ASSERT_EQ(match_value.size(), BRIDGE_ID_SIZE);
+
+    // widen so values will be treated as ints
+    ASSERT_EQ(uint32_t(match_value[0]), uint32_t(learn_info.bridge_id));
+  }
+
+  void CheckMacAddrMatch(const ::p4::v1::FieldMatch& match) const {
+    constexpr int MAC_ADDR_SIZE = 6;
+
+    ASSERT_TRUE(match.has_exact());
+    const auto& match_value = match.exact().value();
+    ASSERT_EQ(match_value.size(), MAC_ADDR_SIZE);
+
+    for (int i = 0; i < MAC_ADDR_SIZE; i++) {
+      EXPECT_EQ(match_value[i], learn_info.mac_addr[i])
+          << "mac_addr[" << i << "] is incorrect";
+    }
   }
 
   //----------------------------
@@ -131,7 +186,23 @@ class FdbTxGeneveEntryTest : public BaseTableTest {
 // Test cases
 //----------------------------------------------------------------------
 
-TEST_F(FdbTxGeneveEntryTest, insert_v4_tagged_entry_minimal) {
+TEST_F(FdbTxGeneveEntryTest, remove_v4_tagged_entry) {
+  // Arrange
+  InitLearnInfo(OVS_TUNNEL_GENEVE);
+  InitV4NativeTagged(SET_GENEVE_UNDERLAY_V4);
+
+  // Act
+  PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
+                                        REMOVE_ENTRY, detail);
+
+  // Assert
+  CheckDetail();
+  CheckTableEntry();
+  CheckMatches();
+  CheckNoAction();
+}
+
+TEST_F(FdbTxGeneveEntryTest, insert_v4_tagged_entry) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_GENEVE);
   InitV4NativeTagged(SET_GENEVE_UNDERLAY_V4);
@@ -145,7 +216,7 @@ TEST_F(FdbTxGeneveEntryTest, insert_v4_tagged_entry_minimal) {
   CheckAction();
 }
 
-TEST_F(FdbTxGeneveEntryTest, insert_v4_untagged_entry_minimal) {
+TEST_F(FdbTxGeneveEntryTest, insert_v4_untagged_entry) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_GENEVE);
   InitV4NativeUntagged(POP_VLAN_SET_GENEVE_UNDERLAY_V4);
@@ -159,7 +230,7 @@ TEST_F(FdbTxGeneveEntryTest, insert_v4_untagged_entry_minimal) {
   CheckAction();
 }
 
-TEST_F(FdbTxGeneveEntryTest, insert_v6_tagged_entry_minimal) {
+TEST_F(FdbTxGeneveEntryTest, insert_v6_tagged_entry) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_GENEVE);
   InitV6NativeTagged(SET_GENEVE_UNDERLAY_V6);
@@ -173,7 +244,7 @@ TEST_F(FdbTxGeneveEntryTest, insert_v6_tagged_entry_minimal) {
   CheckAction();
 }
 
-TEST_F(FdbTxGeneveEntryTest, insert_v6_untagged_entry_minimal) {
+TEST_F(FdbTxGeneveEntryTest, insert_v6_untagged_entry) {
   // Arrange
   InitLearnInfo(OVS_TUNNEL_GENEVE);
   InitV6NativeUntagged(POP_VLAN_SET_GENEVE_UNDERLAY_V6);
