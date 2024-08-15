@@ -124,7 +124,7 @@ endmacro(define_ipv6_tunnel_test)
 #-----------------------------------------------------------------------
 add_library(tunnel_test_utils STATIC
   base_table_test.h
-  base_tunnel_test.h
+  ip_tunnel_test.h
   p4info_text.h
   test_main.cc
 )
