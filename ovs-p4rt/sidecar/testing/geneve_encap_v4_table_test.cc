@@ -5,14 +5,14 @@
 
 #include <stdint.h>
 
-#include "base_tunnel_test.h"
 #include "gtest/gtest.h"
+#include "ip_tunnel_test.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
 
 namespace ovsp4rt {
 
-class GeneveEncapV4TableTest : public BaseTunnelTest {
+class GeneveEncapV4TableTest : public IpTunnelTest {
  protected:
   GeneveEncapV4TableTest() {}
 

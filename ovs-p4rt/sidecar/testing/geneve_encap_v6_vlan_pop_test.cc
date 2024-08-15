@@ -8,14 +8,14 @@
 #include <iostream>
 #include <string>
 
-#include "base_tunnel_test.h"
 #include "gtest/gtest.h"
+#include "ip_tunnel_test.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
 
 namespace ovsp4rt {
 
-class GeneveEncapV6VlanPopTest : public BaseTunnelTest {
+class GeneveEncapV6VlanPopTest : public IpTunnelTest {
  protected:
   GeneveEncapV6VlanPopTest() {}
 
