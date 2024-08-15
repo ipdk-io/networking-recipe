@@ -1,8 +1,8 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef BASE_TUNNEL_TEST_H_
-#define BASE_TUNNEL_TEST_H_
+#ifndef IP_TUNNEL_TEST_H_
+#define IP_TUNNEL_TEST_H_
 
 #include <arpa/inet.h>
 
@@ -12,9 +12,9 @@
 
 namespace ovsp4rt {
 
-class BaseTunnelTest : public BaseTableTest {
+class IpTunnelTest : public BaseTableTest {
  protected:
-  BaseTunnelTest() {}
+  IpTunnelTest() {}
 
   void InitV4TunnelInfo(uint8_t tunnel_type) {
     constexpr char IPV4_SRC_ADDR[] = "10.20.30.40";
@@ -79,4 +79,4 @@ class BaseTunnelTest : public BaseTableTest {
 
 }  // namespace ovsp4rt
 
-#endif  // BASE_TUNNEL_TEST_H_
+#endif  // IP_TUNNEL_TEST_H_
