@@ -17,17 +17,13 @@ function(set_test_properties TARGET)
 
   target_link_libraries(${TARGET} PUBLIC
     GTest::gtest
-    ovsp4rt
+    ovsp4rt_test
     p4runtime_proto
     stratum_utils
   )
 
   if(TEST_COVERAGE)
-      target_compile_options(${TARGET} PRIVATE
-          -fprofile-arcs
-          -ftest-coverage
-      )
-      target_link_libraries(${TARGET} PUBLIC gcov)
+    target_link_libraries(${TARGET} PUBLIC gcov)
   endif()
 
   add_test(NAME ${TARGET} COMMAND ${TARGET})
