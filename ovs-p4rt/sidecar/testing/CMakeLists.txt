@@ -167,9 +167,11 @@ target_link_libraries(encode_host_port_value_test PUBLIC
 list(APPEND UNIT_TEST_NAMES encode_host_port_value_test)
 
 if(ES2K_TARGET)
+
 #-----------------------------------------------------------------------
 # ES2K unit tests
 #-----------------------------------------------------------------------
+
 define_ovsp4rt_test(fdb_rx_vlan_entry_test)
 define_ovsp4rt_test(fdb_smac_entry_test)
 define_ovsp4rt_test(fdb_tx_geneve_entry_test)

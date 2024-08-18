@@ -3,87 +3,143 @@
 
 // Unit test for PrepareV6VxlanEncapAndVlanPopTableEntry().
 
-// TODO(derek): Replace hard-coded IDs with p4info lookups.
-// TODO(derek): Check all action params.
+#define DUMP_JSON
 
 #include <stdint.h>
 
-#include "absl/types/optional.h"
 #include "gtest/gtest.h"
+#include "ip_tunnel_test.h"
 #include "ovsp4rt/ovs-p4rt.h"
 #include "ovsp4rt_private.h"
-#include "testing/ipv6_tunnel_test.h"
 
 namespace ovsp4rt {
 
-constexpr bool INSERT_ENTRY = true;
-constexpr bool REMOVE_ENTRY = false;
-
-constexpr uint32_t TABLE_ID = 34318005U;
-constexpr uint32_t ACTION_ID = 28284062U;
-
-enum {
-  MF_MOD_BLOB_PTR = 1,
-};
-
-enum {
-  SRC_PORT_PARAM_ID = 7,
-  DST_PORT_PARAM_ID = 8,
-  VNI_PARAM_ID = 9,
-};
-
-class VxlanEncapV6VlanPopTest : public Ipv6TunnelTest {
+class VxlanEncapV6VlanPopTest : public IpTunnelTest {
  protected:
-  struct tunnel_info tunnel_info = {0};
-  p4::v1::TableEntry table_entry;
+  VxlanEncapV6VlanPopTest() {}
+
+  void SetUp() { SelectTable("vxlan_encap_v6_vlan_pop_mod_table"); }
+
+  void InitAction() { SelectAction("vxlan_encap_v6_vlan_pop"); }
+
+  //----------------------------
+  // CheckAction()
+  //----------------------------
 
   void CheckAction() const {
     ASSERT_TRUE(table_entry.has_action());
-    auto table_action = table_entry.action();
-    auto action = table_action.action();
-    ASSERT_EQ(action.action_id(), ACTION_ID);
+    const auto& table_action = table_entry.action();
 
-    auto params = action.params();
-    int num_params = action.params_size();
+    const auto& action = table_action.action();
+    ASSERT_EQ(action.action_id(), ActionId());
 
-    absl::optional<uint16_t> src_port;
-    absl::optional<uint16_t> dst_port;
-    absl::optional<uint32_t> vni;
+    // Get param IDs.
+    const int SRC_ADDR_PARAM_ID = GetParamId("src_addr");
+    EXPECT_NE(SRC_ADDR_PARAM_ID, -1);
 
-    for (int i = 0; i < num_params; ++i) {
-      auto param = params[i];
+    const int DST_ADDR_PARAM_ID = GetParamId("dst_addr");
+    EXPECT_NE(DST_ADDR_PARAM_ID, -1);
+
+    const int SRC_PORT_PARAM_ID = GetParamId("src_port");
+    EXPECT_NE(SRC_PORT_PARAM_ID, -1);
+
+    const int DST_PORT_PARAM_ID = GetParamId("dst_port");
+    EXPECT_NE(DST_PORT_PARAM_ID, -1);
+
+    const int VNI_PARAM_ID = GetParamId("vni");
+    EXPECT_NE(VNI_PARAM_ID, -1);
+
+    // Process action parameters.
+    const auto& params = action.params();
+
+    for (const auto& param : params) {
+      const auto& param_value = param.value();
       int param_id = param.param_id();
-      auto param_value = param.value();
 
-      if (param_id == SRC_PORT_PARAM_ID) {
-        src_port = DecodePortValue(param_value);
+      if (param_id == SRC_ADDR_PARAM_ID) {
+        CheckAddrParam("src_addr", param_value, tunnel_info.local_ip);
+      } else if (param_id == DST_ADDR_PARAM_ID) {
+        CheckAddrParam("dst_addr", param_value, tunnel_info.remote_ip);
+      } else if (param_id == SRC_PORT_PARAM_ID) {
+        CheckSrcPortParam(param_value);
       } else if (param_id == DST_PORT_PARAM_ID) {
-        dst_port = DecodePortValue(param_value);
+        CheckDstPortParam(param_value);
       } else if (param_id == VNI_PARAM_ID) {
-        vni = DecodeVniValue(param_value);
+        CheckVniParam(param_value);
+      } else {
+        FAIL() << "Unexpected param_id (" << param_id << ")";
       }
     }
+  }
 
-    ASSERT_TRUE(src_port.has_value());
+  void CheckAddrParam(const std::string& param_name, const std::string& value,
+                      const struct p4_ipaddr& ipaddr) const {
+    constexpr int IPV6_ADDR_SIZE = 16;
+    constexpr int IPV6_ADDR_WORDS = IPV6_ADDR_SIZE / 2;
 
+    ASSERT_EQ(value.size(), IPV6_ADDR_SIZE);
+
+    for (int word_num = 0; word_num < IPV6_ADDR_WORDS; ++word_num) {
+      int byte_num = word_num * 2;
+      uint16_t actual =
+          (value[byte_num] & 0xFF) | ((value[byte_num + 1] & 0xFF) << 8);
+      uint16_t expected = ipaddr.ip.v6addr.__in6_u.__u6_addr16[word_num];
+      EXPECT_EQ(actual, expected)
+          << param_name << "[" << word_num << "] does not match\n"
+          << "  actual:   0x" << std::setw(4) << std::setfill('0') << std::hex
+          << actual << '\n'
+          << "  expected: 0x" << std::setw(4) << std::setfill('0') << expected
+          << '\n'
+          << std::dec;
+    }
+  }
+
+  void CheckSrcPortParam(const std::string& value) const {
+    constexpr int PORT_PARAM_SIZE = 2;
+    EXPECT_EQ(value.size(), PORT_PARAM_SIZE);
+
+    auto src_port_param = DecodePortValue(value);
     // To work around a bug in the Linux Networking P4 program, we
     // ignore the src_port value specified by the caller and instead
     // set the src_port param to (dst_port * 2).
-    EXPECT_EQ(src_port.value(), DST_PORT * 2);  // SRC_PORT
-
-    ASSERT_TRUE(dst_port.has_value());
-    EXPECT_EQ(dst_port.value(), DST_PORT);
-
-    ASSERT_TRUE(vni.has_value());
-    EXPECT_EQ(vni.value(), tunnel_info.vni);
+    auto expected = tunnel_info.dst_port * 2;
+    EXPECT_EQ(src_port_param, expected);
   }
+
+  void CheckDstPortParam(const std::string& value) const {
+    constexpr int PORT_PARAM_SIZE = 2;
+    EXPECT_EQ(value.size(), PORT_PARAM_SIZE);
+
+    auto dst_port_param = DecodePortValue(value);
+    EXPECT_EQ(dst_port_param, tunnel_info.dst_port);
+  }
+
+  void CheckVniParam(const std::string& value) const {
+    constexpr int VNI_PARAM_SIZE = 3;
+    EXPECT_EQ(value.size(), VNI_PARAM_SIZE);
+
+    auto vni_param = DecodeVniValue(value);
+    EXPECT_EQ(vni_param, tunnel_info.vni);
+  }
+
+  //----------------------------
+  // CheckNoAction()
+  //----------------------------
 
   void CheckNoAction() const { ASSERT_FALSE(table_entry.has_action()); }
 
+  //----------------------------
+  // CheckMatches()
+  //----------------------------
+
   void CheckMatches() const {
     ASSERT_EQ(table_entry.match_size(), 1);
+    const auto& match = table_entry.match()[0];
 
-    auto& match = table_entry.match()[0];
+    constexpr char MOD_BLOB_PTR[] = "vmeta.common.mod_blob_ptr";
+    const int MF_MOD_BLOB_PTR = GetMatchFieldId(MOD_BLOB_PTR);
+    ASSERT_NE(MF_MOD_BLOB_PTR, -1);
+
     ASSERT_EQ(match.field_id(), MF_MOD_BLOB_PTR);
 
     CheckVniMatch(match);
@@ -101,21 +157,25 @@ class VxlanEncapV6VlanPopTest : public Ipv6TunnelTest {
     EXPECT_EQ(vni_value, tunnel_info.vni);
   }
 
-  void CheckTableEntry() const { ASSERT_EQ(table_entry.table_id(), TABLE_ID); }
+  //----------------------------
+  // CheckTableEntry()
+  //----------------------------
+
+  void CheckTableEntry() const { ASSERT_EQ(table_entry.table_id(), TableId()); }
 };
 
 //----------------------------------------------------------------------
-// PrepareV6VxlanEncapAndVlanPopTableEntry()
+// Test cases
 //----------------------------------------------------------------------
 
 TEST_F(VxlanEncapV6VlanPopTest, remove_entry) {
   // Arrange
-  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
+  InitV6TunnelInfo(OVS_TUNNEL_VXLAN);
 
   // Act
   PrepareV6VxlanEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,
                                           REMOVE_ENTRY);
-  DumpTableEntry(table_entry);
+  DumpTableEntry();
 
   // Assert
   CheckTableEntry();
@@ -125,12 +185,13 @@ TEST_F(VxlanEncapV6VlanPopTest, remove_entry) {
 
 TEST_F(VxlanEncapV6VlanPopTest, insert_entry) {
   // Arrange
-  InitV6TunnelInfo(tunnel_info, OVS_TUNNEL_VXLAN);
+  InitV6TunnelInfo(OVS_TUNNEL_VXLAN);
+  InitAction();
 
   // Act
   PrepareV6VxlanEncapAndVlanPopTableEntry(&table_entry, tunnel_info, p4info,
                                           INSERT_ENTRY);
-  DumpTableEntry(table_entry);
+  DumpTableEntry();
 
   // Assert
   CheckTableEntry();
