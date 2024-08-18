@@ -10,21 +10,14 @@
 #include "logging/ovsp4rt_logging.h"
 #include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
+#include "ovsp4rt_context.h"
 #include "ovsp4rt_private.h"
-#include "session/ovsp4rt_credentials.h"
-#include "session/ovsp4rt_session.h"
 
 #if defined(DPDK_TARGET)
 #include "dpdk/p4_name_mapping.h"
 #elif defined(ES2K_TARGET)
 #include "es2k/p4_name_mapping.h"
 #endif
-
-#define DEFAULT_OVS_P4RT_ROLE_NAME "ovs-p4rt"
-
-ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
-ABSL_FLAG(std::string, role_name, DEFAULT_OVS_P4RT_ROLE_NAME,
-          "P4 config role name.");
 
 namespace ovsp4rt {
 
@@ -2302,30 +2295,27 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  // Start a new client session.
-  auto status_or_session = ovsp4rt::OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
+  Context context;
+  absl::Status status;
 
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<ovsp4rt::OvsP4rtSession> session =
-      std::move(status_or_session).value();
-  ::p4::config::v1::P4Info p4info;
-  ::absl::Status status =
-      ovsp4rt::GetForwardingPipelineConfig(session.get(), &p4info);
+  // Start a new client session.
+  status = context.connect(grpc_addr);
   if (!status.ok()) return;
 
-  /* Hack: When we delete an FDB entry based on current logic  we will not know
-   * we will not know if it's a Tunnel learn FDB or regular VSI learn FDB.
-   * This hack, during delete case check if entry is present in l2_to_tunnel_v4
-   * and l2_to_tunnel_v6. if any of these 2 tables is true then go ahead and
-   * delete the entry.
+  // Fetch P4Info object from server.
+  ::p4::config::v1::P4Info p4info;
+  status = context.getPipelineConfig(&p4info);
+  if (!status.ok()) return;
+
+  /* When we delete an FDB entry based on current logic, we do not know
+   * if it's a Tunnel Learn FDB or a regular VSI learn FDB. To work
+   * around this, we check for an entry in either of the l2_to_tunnel
+   * tables, and set the tunnel attribute(s) if we find it.
    */
 
   if (!insert_entry) {
     auto status_or_read_response =
-        GetL2ToTunnelV4TableEntry(session.get(), learn_info, p4info);
+        GetL2ToTunnelV4TableEntry(context.session(), learn_info, p4info);
     if (status_or_read_response.ok()) {
       learn_info.is_tunnel = true;
     }
@@ -2335,7 +2325,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
      */
     if (!learn_info.is_tunnel) {
       status_or_read_response =
-          GetL2ToTunnelV6TableEntry(session.get(), learn_info, p4info);
+          GetL2ToTunnelV6TableEntry(context.session(), learn_info, p4info);
       if (status_or_read_response.ok()) {
         learn_info.is_tunnel = true;
         learn_info.tnl_info.local_ip.family = AF_INET6;
@@ -2347,41 +2337,41 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   if (learn_info.is_tunnel) {
     if (insert_entry) {
       auto status_or_read_response =
-          GetFdbTunnelTableEntry(session.get(), learn_info, p4info, true);
+          GetFdbTunnelTableEntry(context.session(), learn_info, p4info, true);
       if (status_or_read_response.ok()) {
         return;
       }
     }
 
-    status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbTunnelTableEntry(context.session(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) {
     }
 
-    status = ConfigL2TunnelTableEntry(session.get(), learn_info, p4info,
+    status = ConfigL2TunnelTableEntry(context.session(), learn_info, p4info,
                                       insert_entry);
     if (!status.ok()) {
     }
 
-    status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbSmacTableEntry(context.session(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok()) {
     }
   } else {
     if (insert_entry) {
       auto status_or_read_response =
-          GetFdbVlanTableEntry(session.get(), learn_info, p4info, true);
+          GetFdbVlanTableEntry(context.session(), learn_info, p4info, true);
       if (status_or_read_response.ok()) {
         return;
       }
 
-      status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
+      status = ConfigFdbRxVlanTableEntry(context.session(), learn_info, p4info,
                                          insert_entry);
       if (!status.ok()) {
       }
 
       status_or_read_response =
-          GetTxAccVsiTableEntry(session.get(), learn_info.src_port, p4info);
+          GetTxAccVsiTableEntry(context.session(), learn_info.src_port, p4info);
       if (!status_or_read_response.ok()) {
         return;
       }
@@ -2416,12 +2406,12 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       learn_info.src_port = host_sp;
     }
 
-    status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbTxVlanTableEntry(context.session(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) {
     }
 
-    status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbSmacTableEntry(context.session(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok()) {
     }
@@ -2436,23 +2426,20 @@ void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
                                         const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  // Start a new client session.
-  auto status_or_session = ovsp4rt::OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
+  Context context;
+  absl::Status status;
 
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<OvsP4rtSession> session =
-      std::move(status_or_session).value();
+  // Start a new client session.
+  status = context.connect(grpc_addr);
+  if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  status = context.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
-  status = ConfigRxTunnelSrcPortTableEntry(session.get(), tunnel_info, p4info,
-                                           insert_entry);
+  status = ConfigRxTunnelSrcPortTableEntry(context.session(), tunnel_info,
+                                           p4info, insert_entry);
   if (!status.ok()) return;
 }
 
@@ -2464,35 +2451,26 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
                                           const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  ::p4::v1::WriteRequest write_request;
-  ::p4::v1::TableEntry* table_entry;
+  Context context;
+  absl::Status status;
 
   // Start a new client session.
-  auto status_or_session = OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
-
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<OvsP4rtSession> session =
-      std::move(status_or_session).value();
+  status = context.connect(grpc_addr);
+  if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  status = context.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
-  if (insert_entry) {
-    table_entry =
-        ovsp4rt::SetupTableEntryToInsert(session.get(), &write_request);
-  } else {
-    table_entry =
-        ovsp4rt::SetupTableEntryToDelete(session.get(), &write_request);
-  }
+  ::p4::v1::WriteRequest write_request;
+  ::p4::v1::TableEntry* table_entry;
+
+  table_entry = context.initWriteRequest(&write_request, insert_entry);
 
   PrepareSrcPortTableEntry(table_entry, tnl_sp, p4info, insert_entry);
 
-  status = ovsp4rt::SendWriteRequest(session.get(), write_request);
+  status = context.sendWriteRequest(write_request);
 
   // TODO: handle error scenarios. For now return irrespective of the status.
   if (!status.ok()) return;
@@ -2505,23 +2483,20 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
                                    bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  // Start a new client session.
-  auto status_or_session = OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
+  Context context;
+  absl::Status status;
 
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<OvsP4rtSession> session =
-      std::move(status_or_session).value();
+  // Start a new client session.
+  status = context.connect(grpc_addr);
+  if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  status = context.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   auto status_or_read_response =
-      GetTxAccVsiTableEntry(session.get(), vsi_sp.src_port, p4info);
+      GetTxAccVsiTableEntry(context.session(), vsi_sp.src_port, p4info);
   if (!status_or_read_response.ok()) return;
 
   ::p4::v1::ReadResponse read_response =
@@ -2553,7 +2528,7 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
 
   vsi_sp.src_port = host_sp;
 
-  status = ConfigureVsiSrcPortTableEntry(session.get(), vsi_sp, p4info,
+  status = ConfigureVsiSrcPortTableEntry(context.session(), vsi_sp, p4info,
                                          insert_entry);
   if (!status.ok()) return;
 }
@@ -2565,27 +2540,24 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
                                const char* grpc_addr) {
   using namespace ovsp4rt;
 
+  Context context;
+  absl::Status status;
+
   // Start a new client session.
-  auto status_or_session = OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
+  status = context.connect(grpc_addr);
+  if (!status.ok()) return;
 
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<OvsP4rtSession> session =
-      std::move(status_or_session).value();
-
-  // Fetch P4Info object from the server.
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  status = context.getPipelineConfig(&p4info);
+  if (!status.ok()) return;
+
+  status = ConfigVlanPushTableEntry(context.session(), vlan_id, p4info,
+                                    insert_entry);
   if (!status.ok()) return;
 
   status =
-      ConfigVlanPushTableEntry(session.get(), vlan_id, p4info, insert_entry);
-  if (!status.ok()) return;
-
-  status =
-      ConfigVlanPopTableEntry(session.get(), vlan_id, p4info, insert_entry);
+      ConfigVlanPopTableEntry(context.session(), vlan_id, p4info, insert_entry);
   if (!status.ok()) return;
 }
 
@@ -2598,31 +2570,27 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
+  Context context;
+  absl::Status status;
+
   // Start a new client session.
-  auto status_or_session = ovsp4rt::OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
+  status = context.connect(grpc_addr);
+  if (!status.ok()) return;
 
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<ovsp4rt::OvsP4rtSession> session =
-      std::move(status_or_session).value();
-
-  // Fetch P4Info object from the server.
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  ::absl::Status status =
-      ovsp4rt::GetForwardingPipelineConfig(session.get(), &p4info);
+  status = context.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   if (learn_info.is_tunnel) {
-    status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbTunnelTableEntry(context.session(), learn_info, p4info,
                                        insert_entry);
   } else if (learn_info.is_vlan) {
-    status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbTxVlanTableEntry(context.session(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) return;
 
-    status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
+    status = ConfigFdbRxVlanTableEntry(context.session(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) return;
   }
@@ -2660,32 +2628,29 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
                                  bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
+  Context context;
+  absl::Status status;
+
   // Start a new client session.
-  auto status_or_session = OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
-
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<OvsP4rtSession> session =
-      std::move(status_or_session).value();
-
-  // Fetch P4Info object from the server.
-  ::p4::config::v1::P4Info p4info;
-  ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
+  status = context.connect(grpc_addr);
   if (!status.ok()) return;
 
-  status =
-      ConfigEncapTableEntry(session.get(), tunnel_info, p4info, insert_entry);
+  // Fetch P4Info object from server.
+  ::p4::config::v1::P4Info p4info;
+  status = context.getPipelineConfig(&p4info);
+  if (!status.ok()) return;
+
+  status = ConfigEncapTableEntry(context.session(), tunnel_info, p4info,
+                                 insert_entry);
   if (!status.ok()) return;
 
 #if defined(ES2K_TARGET)
-  status =
-      ConfigDecapTableEntry(session.get(), tunnel_info, p4info, insert_entry);
+  status = ConfigDecapTableEntry(context.session(), tunnel_info, p4info,
+                                 insert_entry);
   if (!status.ok()) return;
 #endif
 
-  status = ConfigTunnelTermTableEntry(session.get(), tunnel_info, p4info,
+  status = ConfigTunnelTermTableEntry(context.session(), tunnel_info, p4info,
                                       insert_entry);
   if (!status.ok()) return;
 }
@@ -2698,32 +2663,28 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
                                      bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
+  Context context;
+  absl::Status status;
+
   // Start a new client session.
-  auto status_or_session = ovsp4rt::OvsP4rtSession::Create(
-      grpc_addr, GenerateClientCredentials(), absl::GetFlag(FLAGS_device_id),
-      absl::GetFlag(FLAGS_role_name));
-  if (!status_or_session.ok()) return;
+  status = context.connect(grpc_addr);
+  if (!status.ok()) return;
 
-  // Unwrap the session from the StatusOr object.
-  std::unique_ptr<ovsp4rt::OvsP4rtSession> session =
-      std::move(status_or_session).value();
-
-  // Fetch P4Info object from the server.
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  ::absl::Status status =
-      ovsp4rt::GetForwardingPipelineConfig(session.get(), &p4info);
+  status = context.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   if (insert_entry) {
     auto status_or_read_response =
-        GetVmSrcTableEntry(session.get(), ip_info, p4info);
+        GetVmSrcTableEntry(context.session(), ip_info, p4info);
     if (status_or_read_response.ok()) {
       goto try_dstip;
     }
   }
 
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
-    status = ConfigSrcIpMacMapTableEntry(session.get(), ip_info, p4info,
+    status = ConfigSrcIpMacMapTableEntry(context.session(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
     }
@@ -2732,14 +2693,14 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
 try_dstip:
   if (insert_entry) {
     auto status_or_read_response =
-        GetVmDstTableEntry(session.get(), ip_info, p4info);
+        GetVmDstTableEntry(context.session(), ip_info, p4info);
     if (status_or_read_response.ok()) {
       return;
     }
   }
 
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
-    status = ConfigDstIpMacMapTableEntry(session.get(), ip_info, p4info,
+    status = ConfigDstIpMacMapTableEntry(context.session(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
     }
