@@ -208,7 +208,7 @@ define_ovsp4rt_test(vxlan_decap_mod_vlan_push_test)
 
 define_tunnel_test(vxlan_encap_v4_table_test)
 define_ipv6_tunnel_test(vxlan_encap_v6_table_test)
-define_ipv4_tunnel_test(vxlan_encap_v4_vlan_pop_test)
+define_tunnel_test(vxlan_encap_v4_vlan_pop_test)
 define_ipv6_tunnel_test(vxlan_encap_v6_vlan_pop_test)
 
 endif(ES2K_TARGET)
