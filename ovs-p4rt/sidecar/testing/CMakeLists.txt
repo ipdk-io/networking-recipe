@@ -179,10 +179,11 @@ define_ovsp4rt_test(fdb_tx_vlan_entry_test)
 define_ovsp4rt_test(fdb_tx_vxlan_entry_test)
 
 define_ovsp4rt_test(geneve_decap_mod_table_test)
+define_ovsp4rt_test(geneve_decap_mod_vlan_push_test)
 
 define_tunnel_test(geneve_encap_v4_table_test)
-define_ipv6_tunnel_test(geneve_encap_v6_table_test)
-define_ipv4_tunnel_test(geneve_encap_v4_vlan_pop_test)
+define_tunnel_test(geneve_encap_v6_table_test)
+define_tunnel_test(geneve_encap_v4_vlan_pop_test)
 define_tunnel_test(geneve_encap_v6_vlan_pop_test)
 
 define_ovsp4rt_test(src_ip_mac_map_table_test)
@@ -207,9 +208,9 @@ define_ovsp4rt_test(vlan_push_mod_table_test)
 define_ovsp4rt_test(vxlan_decap_mod_table_test)
 define_ovsp4rt_test(vxlan_decap_mod_vlan_push_test)
 
-define_ipv4_tunnel_test(vxlan_encap_v4_table_test)
-define_ipv6_tunnel_test(vxlan_encap_v6_table_test)
-define_ipv4_tunnel_test(vxlan_encap_v4_vlan_pop_test)
+define_tunnel_test(vxlan_encap_v4_table_test)
+define_tunnel_test(vxlan_encap_v6_table_test)
+define_tunnel_test(vxlan_encap_v4_vlan_pop_test)
 define_tunnel_test(vxlan_encap_v6_vlan_pop_test)
 
 endif(ES2K_TARGET)
