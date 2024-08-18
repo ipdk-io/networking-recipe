@@ -182,8 +182,6 @@ TEST_F(VxlanDecapModVlanPushTest, insert_entry) {
   CheckAction();
 }
 
-#ifdef WIDE_VNI_VALUES
-
 TEST_F(VxlanDecapModVlanPushTest, insert_entry_with_24_bit_vni) {
   // Arrange
   InitTunnelInfo();
@@ -199,7 +197,5 @@ TEST_F(VxlanDecapModVlanPushTest, insert_entry_with_24_bit_vni) {
   CheckMatches();
   CheckAction();
 }
-
-#endif  // WIDE_VNI_VALUES
 
 }  // namespace ovsp4rt

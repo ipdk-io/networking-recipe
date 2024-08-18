@@ -295,8 +295,6 @@ TEST_F(TunnelTermV4TableTest, geneve_insert_tagged_entry) {
   CheckAction();
 }
 
-#ifdef WIDE_VNI_VALUES
-
 TEST_F(TunnelTermV4TableTest, geneve_insert_untagged_entry_with_20_bit_vni) {
   // Arrange
   InitTunnelInfo();
@@ -311,7 +309,5 @@ TEST_F(TunnelTermV4TableTest, geneve_insert_untagged_entry_with_20_bit_vni) {
   CheckMatches();
   CheckAction();
 }
-
-#endif  // WIDE_VNI_VALUES
 
 }  // namespace ovsp4rt
