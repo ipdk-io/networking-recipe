@@ -1,7 +1,9 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareGeneveEncapTableEntry().
+// Unit test for PrepareV6VxlanEncapTableEntry().
+
+#define DUMP_JSON
 
 #include <stdint.h>
 
@@ -12,13 +14,13 @@
 
 namespace ovsp4rt {
 
-class GeneveEncapV4TableTest : public IpTunnelTest {
+class VxlanEncapV6TableTest : public IpTunnelTest {
  protected:
-  GeneveEncapV4TableTest() {}
+  VxlanEncapV6TableTest() {}
 
-  void SetUp() { SelectTable("geneve_encap_mod_table"); }
+  void SetUp() { SelectTable("vxlan_encap_v6_mod_table"); }
 
-  void InitAction() { SelectAction("geneve_encap"); }
+  void InitAction() { SelectAction("vxlan_encap_v6"); }
 
   //----------------------------
   // CheckAction()
@@ -31,21 +33,21 @@ class GeneveEncapV4TableTest : public IpTunnelTest {
     const auto& action = table_action.action();
     ASSERT_EQ(action.action_id(), ActionId());
 
-    // Get parameter IDs.
+    // Get param IDs.
     const int SRC_ADDR_PARAM_ID = GetParamId("src_addr");
-    ASSERT_NE(SRC_ADDR_PARAM_ID, -1);
+    EXPECT_NE(SRC_ADDR_PARAM_ID, -1);
 
     const int DST_ADDR_PARAM_ID = GetParamId("dst_addr");
-    ASSERT_NE(DST_ADDR_PARAM_ID, -1);
+    EXPECT_NE(DST_ADDR_PARAM_ID, -1);
 
     const int SRC_PORT_PARAM_ID = GetParamId("src_port");
-    ASSERT_NE(SRC_PORT_PARAM_ID, -1);
+    EXPECT_NE(SRC_PORT_PARAM_ID, -1);
 
     const int DST_PORT_PARAM_ID = GetParamId("dst_port");
-    ASSERT_NE(DST_PORT_PARAM_ID, -1);
+    EXPECT_NE(DST_PORT_PARAM_ID, -1);
 
     const int VNI_PARAM_ID = GetParamId("vni");
-    ASSERT_NE(VNI_PARAM_ID, -1);
+    EXPECT_NE(VNI_PARAM_ID, -1);
 
     // Process action parameters.
     const auto& params = action.params();
@@ -55,9 +57,9 @@ class GeneveEncapV4TableTest : public IpTunnelTest {
       int param_id = param.param_id();
 
       if (param_id == SRC_ADDR_PARAM_ID) {
-        CheckSrcAddrParam(param_value);
+        CheckAddrParam("src_addr", param_value, tunnel_info.local_ip);
       } else if (param_id == DST_ADDR_PARAM_ID) {
-        CheckDstAddrParam(param_value);
+        CheckAddrParam("dst_addr", param_value, tunnel_info.remote_ip);
       } else if (param_id == SRC_PORT_PARAM_ID) {
         CheckSrcPortParam(param_value);
       } else if (param_id == DST_PORT_PARAM_ID) {
@@ -70,12 +72,26 @@ class GeneveEncapV4TableTest : public IpTunnelTest {
     }
   }
 
-  void CheckSrcAddrParam(const std::string& value) const {
-    // TODO(derek): implement CheckSrcAddrParam().
-  }
+  void CheckAddrParam(const std::string& param_name, const std::string& value,
+                      const struct p4_ipaddr& ipaddr) const {
+    constexpr int IPV6_ADDR_SIZE = 16;
+    constexpr int IPV6_ADDR_WORDS = IPV6_ADDR_SIZE / 2;
 
-  void CheckDstAddrParam(const std::string& value) const {
-    // TODO(derek): implement CheckDstAddrParam().
+    ASSERT_EQ(value.size(), IPV6_ADDR_SIZE);
+
+    for (int word_num = 0; word_num < IPV6_ADDR_WORDS; ++word_num) {
+      int byte_num = word_num * 2;
+      uint16_t actual =
+          (value[byte_num] & 0xFF) | ((value[byte_num + 1] & 0xFF) << 8);
+      uint16_t expected = ipaddr.ip.v6addr.__in6_u.__u6_addr16[word_num];
+      EXPECT_EQ(actual, expected)
+          << param_name << "[" << word_num << "] does not match\n"
+          << "  actual:   0x" << std::setw(4) << std::setfill('0') << std::hex
+          << actual << '\n'
+          << "  expected: 0x" << std::setw(4) << std::setfill('0') << expected
+          << '\n'
+          << std::dec;
+    }
   }
 
   void CheckSrcPortParam(const std::string& value) const {
@@ -118,12 +134,14 @@ class GeneveEncapV4TableTest : public IpTunnelTest {
 
   void CheckMatches() const {
     ASSERT_EQ(table_entry.match_size(), 1);
-    auto& match = table_entry.match()[0];
+    const auto& match = table_entry.match()[0];
 
-    const int MF_MOD_BLOB_PTR = GetMatchFieldId("vmeta.common.mod_blob_ptr");
+    constexpr char MOD_BLOB_PTR[] = "vmeta.common.mod_blob_ptr";
+    const int MF_MOD_BLOB_PTR = GetMatchFieldId(MOD_BLOB_PTR);
     ASSERT_NE(MF_MOD_BLOB_PTR, -1);
 
     ASSERT_EQ(match.field_id(), MF_MOD_BLOB_PTR);
+
     CheckVniMatch(match);
   }
 
@@ -139,19 +157,24 @@ class GeneveEncapV4TableTest : public IpTunnelTest {
     EXPECT_EQ(vni_value, tunnel_info.vni);
   }
 
+  //----------------------------
+  // CheckTableEntry()
+  //----------------------------
+
   void CheckTableEntry() const { ASSERT_EQ(table_entry.table_id(), TableId()); }
 };
 
 //----------------------------------------------------------------------
-// Test PrepareGeneveEncapTableEntry()
+// Test cases
 //----------------------------------------------------------------------
 
-TEST_F(GeneveEncapV4TableTest, remove_entry) {
+TEST_F(VxlanEncapV6TableTest, remove_entry) {
   // Arrange
-  InitV4TunnelInfo(OVS_TUNNEL_GENEVE);
+  InitV6TunnelInfo(OVS_TUNNEL_VXLAN);
 
   // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, REMOVE_ENTRY);
+  PrepareV6VxlanEncapTableEntry(&table_entry, tunnel_info, p4info,
+                                REMOVE_ENTRY);
   DumpTableEntry();
 
   // Assert
@@ -160,38 +183,19 @@ TEST_F(GeneveEncapV4TableTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(GeneveEncapV4TableTest, insert_entry) {
+TEST_F(VxlanEncapV6TableTest, insert_entry) {
   // Arrange
-  InitV4TunnelInfo(OVS_TUNNEL_GENEVE);
+  InitV6TunnelInfo(OVS_TUNNEL_VXLAN);
   InitAction();
 
   // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
+  PrepareV6VxlanEncapTableEntry(&table_entry, tunnel_info, p4info,
+                                INSERT_ENTRY);
   DumpTableEntry();
 
   // Assert
   CheckTableEntry();
   CheckAction();
 }
-
-#ifdef WIDE_VNI_VALUE
-
-TEST_F(GeneveEncapV4TableTest, insert_entry_with_24_bit_vni) {
-  // Arrange
-  InitV4TunnelInfo(OVS_TUNNEL_GENEVE);
-  tunnel_info.vni = 0x95054;
-  InitAction();
-
-  // Act
-  PrepareGeneveEncapTableEntry(&table_entry, tunnel_info, p4info, INSERT_ENTRY);
-  DumpTableEntry();
-
-  // Assert
-  CheckTableEntry();
-  CheckMatches();
-  CheckAction();
-}
-
-#endif  // WIDE_VNI_VALUE
 
 }  // namespace ovsp4rt
