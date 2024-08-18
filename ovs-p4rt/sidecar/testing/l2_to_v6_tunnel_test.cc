@@ -39,9 +39,9 @@ class L2ToV6TunnelTest : public BaseTableTest {
 
   void CheckAction() const {
     ASSERT_TRUE(table_entry.has_action());
-    auto table_action = table_entry.action();
+    const auto& table_action = table_entry.action();
 
-    auto action = table_action.action();
+    const auto& action = table_action.action();
     EXPECT_EQ(action.action_id(), ActionId());
 
     ASSERT_EQ(action.params_size(), 4);
