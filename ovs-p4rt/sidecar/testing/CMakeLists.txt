@@ -58,68 +58,6 @@ macro(define_ovsp4rt_test TARGET)
 endmacro(define_ovsp4rt_test)
 
 #-----------------------------------------------------------------------
-# ipv4_test_utils
-#-----------------------------------------------------------------------
-add_library(ipv4_test_utils STATIC
-  ipv4_tunnel_test.h
-  p4info_text.h
-  table_entry_test.h
-  test_main.cc
-)
-
-target_link_libraries(ipv4_test_utils PUBLIC
-  absl::flags_parse
-)
-
-#-----------------------------------------------------------------------
-# define_ipv4_tunnel_test()
-#-----------------------------------------------------------------------
-macro(define_ipv4_tunnel_test TARGET)
-  add_executable(${TARGET}
-    ${TARGET}.cc
-  )
-
-  set_test_properties(${TARGET})
-
-  target_link_libraries(${TARGET} PUBLIC
-    ipv4_test_utils
-  )
-
-  list(APPEND UNIT_TEST_NAMES ${TARGET})
-endmacro(define_ipv4_tunnel_test)
-
-#-----------------------------------------------------------------------
-# ipv6_test_utils
-#-----------------------------------------------------------------------
-add_library(ipv6_test_utils STATIC
-  ipv6_tunnel_test.h
-  p4info_text.h
-  table_entry_test.h
-  test_main.cc
-)
-
-target_link_libraries(ipv6_test_utils PUBLIC
-  absl::flags_parse
-)
-
-#-----------------------------------------------------------------------
-# define_ipv6_tunnel_test()
-#-----------------------------------------------------------------------
-macro(define_ipv6_tunnel_test TARGET)
-  add_executable(${TARGET}
-    ${TARGET}.cc
-  )
-
-  set_test_properties(${TARGET})
-
-  target_link_libraries(${TARGET} PUBLIC
-    ipv6_test_utils
-  )
-
-  list(APPEND UNIT_TEST_NAMES ${TARGET})
-endmacro(define_ipv6_tunnel_test)
-
-#-----------------------------------------------------------------------
 # tunnel_test_utils
 #-----------------------------------------------------------------------
 add_library(tunnel_test_utils STATIC
