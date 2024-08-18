@@ -162,7 +162,7 @@ install(
 # Testing
 #-----------------------------------------------------------------------
 if(BUILD_TESTING)
-    add_subdirectory(testing)
+    add_subdirectory(tests)
 endif()
 
 add_custom_target(ovsp4rt-unit-tests

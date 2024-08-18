@@ -1,23 +1,8 @@
-# CMake build file for ovs-p4rt/sidecar/testing
+# CMake build file for ovs-p4rt/sidecar/tests/es2k
 #
 # Copyright 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
-
-#=======================================================================
-# Unit tests
-#=======================================================================
-
-include(FindGTest)
-mark_as_advanced(GTest_DIR)
-
-include(set_test_properties.cmake)
-
-option(TEST_COVERAGE OFF "Measure unit test code coverage")
-
-# Set the "ovsp4rt" label on all tests in this directory.
-# We can use this with ctest to filter the tests to be run.
-set_property(DIRECTORY PROPERTY LABELS ovsp4rt)
 
 #-----------------------------------------------------------------------
 # base_table_test
@@ -89,27 +74,8 @@ macro(define_tunnel_test TARGET)
 endmacro(define_tunnel_test)
 
 #-----------------------------------------------------------------------
-# encode_host_port_value_test (DPDK, ES2K)
+# Unit tests
 #-----------------------------------------------------------------------
-add_executable(encode_host_port_value_test
-  encode_host_port_value_test.cc
-  p4info_text.h
-)
-
-set_test_properties(encode_host_port_value_test)
-
-target_link_libraries(encode_host_port_value_test PUBLIC
-  GTest::gtest_main
-)
-
-list(APPEND UNIT_TEST_NAMES encode_host_port_value_test)
-
-if(ES2K_TARGET)
-
-#-----------------------------------------------------------------------
-# ES2K unit tests
-#-----------------------------------------------------------------------
-
 define_ovsp4rt_test(fdb_rx_vlan_entry_test)
 define_ovsp4rt_test(fdb_smac_entry_test)
 define_ovsp4rt_test(fdb_tx_geneve_entry_test)
@@ -150,8 +116,6 @@ define_tunnel_test(vxlan_encap_v4_table_test)
 define_tunnel_test(vxlan_encap_v6_table_test)
 define_tunnel_test(vxlan_encap_v4_vlan_pop_test)
 define_tunnel_test(vxlan_encap_v6_vlan_pop_test)
-
-endif(ES2K_TARGET)
 
 # Export list of unit tests.
 set(UNIT_TEST_NAMES "${UNIT_TEST_NAMES}" PARENT_SCOPE)
