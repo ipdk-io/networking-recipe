@@ -258,4 +258,24 @@ TEST_F(FdbTxGeneveEntryTest, insert_v6_untagged_entry) {
   CheckAction();
 }
 
+#ifdef WIDE_VNI_VALUES
+
+TEST_F(FdbTxGeneveEntryTest, insert_v6_untagged_entry_20_bit_vni) {
+  // Arrange
+  InitLearnInfo(OVS_TUNNEL_GENEVE);
+  InitV6NativeUntagged(POP_VLAN_SET_GENEVE_UNDERLAY_V6);
+  learn_info.tnl_info.vni = 0xFACED;
+
+  // Act
+  PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, learn_info, p4info,
+                                        INSERT_ENTRY, detail);
+
+  // Assert
+  CheckTableEntry();
+  CheckMatches();
+  CheckAction();
+}
+
+#endif  //WIDE_VNI_VALUES
+
 }  // namespace ovsp4rt
