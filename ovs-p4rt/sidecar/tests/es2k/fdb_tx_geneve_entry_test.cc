@@ -276,6 +276,6 @@ TEST_F(FdbTxGeneveEntryTest, insert_v6_untagged_entry_20_bit_vni) {
   CheckAction();
 }
 
-#endif  //WIDE_VNI_VALUES
+#endif  // WIDE_VNI_VALUES
 
 }  // namespace ovsp4rt
