@@ -71,11 +71,19 @@ class GeneveEncapV4TableTest : public IpTunnelTest {
   }
 
   void CheckSrcAddrParam(const std::string& value) const {
-    // TODO(derek): implement CheckSrcAddrParam().
+    constexpr int SRC_ADDR_SIZE = 4;
+    ASSERT_EQ(value.size(), SRC_ADDR_SIZE);
+
+    auto word_value = ntohl(DecodeWordValue(value));
+    ASSERT_EQ(word_value, tunnel_info.local_ip.ip.v4addr.s_addr);
   }
 
   void CheckDstAddrParam(const std::string& value) const {
-    // TODO(derek): implement CheckDstAddrParam().
+    constexpr int DST_ADDR_SIZE = 4;
+    ASSERT_EQ(value.size(), DST_ADDR_SIZE);
+
+    auto word_value = ntohl(DecodeWordValue(value));
+    ASSERT_EQ(word_value, tunnel_info.remote_ip.ip.v4addr.s_addr);
   }
 
   void CheckSrcPortParam(const std::string& value) const {
