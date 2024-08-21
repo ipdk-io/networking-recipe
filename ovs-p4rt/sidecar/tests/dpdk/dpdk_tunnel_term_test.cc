@@ -1,6 +1,9 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// Unit test for PrepareTunnelTermTableEntry().
+// DPDK edition.
+
 #define DUMP_JSON
 
 #include <arpa/inet.h>

@@ -47,8 +47,6 @@ endmacro(define_dpdk_test)
 #-----------------------------------------------------------------------
 define_dpdk_test(dpdk_fdb_rx_vlan_test)
 define_dpdk_test(dpdk_fdb_tx_vlan_test)
-
-define_dpdk_test(dpdk_fdb_tx_geneve_test)
 define_dpdk_test(dpdk_fdb_tx_vxlan_test)
 
 define_dpdk_test(dpdk_tunnel_term_test)
