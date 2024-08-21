@@ -53,5 +53,7 @@ define_dpdk_test(dpdk_fdb_tx_vxlan_test)
 
 define_dpdk_test(dpdk_tunnel_term_test)
 
+define_dpdk_test(dpdk_vxlan_encap_test)
+
 # Export list of unit tests.
 set(UNIT_TEST_NAMES "${UNIT_TEST_NAMES}" PARENT_SCOPE)

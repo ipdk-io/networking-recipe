@@ -44,11 +44,6 @@ extern void PrepareFdbTxVlanTableEntry(
     const ::p4::config::v1::P4Info& p4info, bool insert_entry,
     DiagDetail& detail);
 
-extern void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
-                                         const struct tunnel_info& tunnel_info,
-                                         const ::p4::config::v1::P4Info& p4info,
-                                         bool insert_entry);
-
 extern void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
@@ -97,6 +92,11 @@ extern void PrepareGeneveDecapModTableEntry(
 extern void PrepareGeneveDecapModAndVlanPushTableEntry(
     p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
+
+extern void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
+                                         const struct tunnel_info& tunnel_info,
+                                         const ::p4::config::v1::P4Info& p4info,
+                                         bool insert_entry);
 
 extern void PrepareGeneveEncapAndVlanPopTableEntry(
     p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
