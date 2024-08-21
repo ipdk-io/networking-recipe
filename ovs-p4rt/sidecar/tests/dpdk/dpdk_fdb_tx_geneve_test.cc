@@ -4,6 +4,7 @@
 // Unit test for PrepareFdbTableEntryforV4GeneveTunnel().
 // DPDK version.
 
+#include <arpa/inet.h>
 #include <stdint.h>
 
 #include <iostream>
@@ -58,7 +59,7 @@ class DpdkFdbTxGeneveTest : public BaseTableTest {
     const auto& table_action = table_entry.action();
 
     const auto& action = table_action.action();
-    ASSERT_EQ(action.action_id(), ActionId());
+    EXPECT_EQ(action.action_id(), ActionId());
 
     const auto& params = action.params();
     ASSERT_EQ(action.params_size(), 2);
@@ -91,6 +92,7 @@ class DpdkFdbTxGeneveTest : public BaseTableTest {
   }
 
   void CheckTunnelIdParam(const std::string& param_value) const {
+    // TODO(derek): 8-bit value for 24-bit action parameter.
     EXPECT_EQ(param_value.size(), 1);
 
     uint32_t tunnel_id = DecodeWordValue(param_value);
@@ -98,7 +100,7 @@ class DpdkFdbTxGeneveTest : public BaseTableTest {
         << "In hexadecimal:\n"
         << "  tunnel_id is 0x" << std::hex << tunnel_id << '\n'
         << "  tnl_info.vni is 0x" << fdb_info.tnl_info.vni << '\n'
-        << std::setw(0) << std::dec;
+        << std::dec;
   }
 
   //----------------------------
@@ -152,7 +154,10 @@ class DpdkFdbTxGeneveTest : public BaseTableTest {
     EXPECT_EQ(table_entry.table_id(), TableId());
   }
 
-  // Working variables
+  //----------------------------
+  // Protected member data
+  //----------------------------
+
   struct mac_learning_info fdb_info = {0};
   DiagDetail detail;
 };
