@@ -147,7 +147,6 @@ _set_sde_pkg_config_path()
 #-----------------------------------------------------------------------
 # Use pkg-config to find DPDK module
 #-----------------------------------------------------------------------
-include(FindPkgConfig)
 pkg_check_modules(DpdkDriver REQUIRED libdpdk)
 
 #-----------------------------------------------------------------------
