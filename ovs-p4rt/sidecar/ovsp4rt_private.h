@@ -24,6 +24,16 @@ extern std::string EncodeByteValue(int arg_count...);
 // Target-neutral functions
 //----------------------------------------------------------------------
 
+extern void PrepareFdbTableEntryforV4GeneveTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
+    DiagDetail& detail);
+
+extern void PrepareFdbTableEntryforV4VxlanTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
+    DiagDetail& detail);
+
 extern void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
@@ -49,16 +59,6 @@ extern void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                                      const struct mac_learning_info& learn_info,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry, DiagDetail& detail);
-
-extern void PrepareFdbTableEntryforV4GeneveTunnel(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
-    DiagDetail& detail);
-
-extern void PrepareFdbTableEntryforV4VxlanTunnel(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
-    DiagDetail& detail);
 
 extern void PrepareFdbTxVlanTableEntry(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
