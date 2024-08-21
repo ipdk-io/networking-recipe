@@ -21,8 +21,13 @@ namespace ovsp4rt {
 extern std::string EncodeByteValue(int arg_count...);
 
 //----------------------------------------------------------------------
-// Target-neutral functions
+// Common functions
 //----------------------------------------------------------------------
+
+extern void PrepareFdbRxVlanTableEntry(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
+    DiagDetail& detail);
 
 extern void PrepareFdbTableEntryforV4GeneveTunnel(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
@@ -30,6 +35,11 @@ extern void PrepareFdbTableEntryforV4GeneveTunnel(
     DiagDetail& detail);
 
 extern void PrepareFdbTableEntryforV4VxlanTunnel(
+    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
+    DiagDetail& detail);
+
+extern void PrepareFdbTxVlanTableEntry(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry,
     DiagDetail& detail);
@@ -50,20 +60,10 @@ extern void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
                                          const ::p4::config::v1::P4Info& p4info,
                                          bool insert_entry, DiagDetail& detail);
 
-extern void PrepareFdbRxVlanTableEntry(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
-    DiagDetail& detail);
-
 extern void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
                                      const struct mac_learning_info& learn_info,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry, DiagDetail& detail);
-
-extern void PrepareFdbTxVlanTableEntry(
-    p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool insert_entry,
-    DiagDetail& detail);
 
 extern void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
                                          struct ip_mac_map_info& ip_info,
