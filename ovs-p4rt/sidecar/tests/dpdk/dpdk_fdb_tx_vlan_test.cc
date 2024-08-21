@@ -62,7 +62,7 @@ class DpdkFdbTxVlanTest : public BaseTableTest {
   }
 
   void CheckPortParam(const std::string& param_value) const {
-    // TODO(derek): unusual value semantics. 
+    // TODO(derek): unusual value semantics.
     // TODO(derek) port param is bit<32>. vlan_id is bit<12>.
     EXPECT_EQ(param_value.size(), 1);
     uint32_t port = DecodeWordValue(param_value);
