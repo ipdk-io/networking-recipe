@@ -45,6 +45,7 @@ endmacro(define_dpdk_test)
 #-----------------------------------------------------------------------
 # DPDK unit tests
 #-----------------------------------------------------------------------
+define_dpdk_test(dpdk_fdb_tx_geneve_test)
 define_dpdk_test(dpdk_fdb_tx_vxlan_test)
 
 # Export list of unit tests.

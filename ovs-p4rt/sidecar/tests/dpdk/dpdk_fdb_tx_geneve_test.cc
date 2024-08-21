@@ -1,10 +1,9 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Unit test for PrepareFdbTableEntryforV4VxlanTunnel().
+// Unit test for PrepareFdbTableEntryforV4GeneveTunnel().
 // DPDK version.
 
-#include <arpa/inet.h>
 #include <stdint.h>
 
 #include <iostream>
@@ -17,9 +16,9 @@
 
 namespace ovsp4rt {
 
-class DpdkFdbTxVxlanTest : public BaseTableTest {
+class DpdkFdbTxGeneveTest : public BaseTableTest {
  protected:
-  DpdkFdbTxVxlanTest() {}
+  DpdkFdbTxGeneveTest() {}
 
   void SetUp() { SelectTable("l2_fwd_tx_table"); }
 
@@ -34,8 +33,8 @@ class DpdkFdbTxVxlanTest : public BaseTableTest {
   }
 
   void InitAction() {
-    constexpr char IPV4_DST_ADDR[] = "192.168.17.5";
-    constexpr int IPV4_PREFIX_LEN = 24;
+    constexpr char IPV4_DST_ADDR[] = "10.20.30.40";
+    constexpr int IPV4_PREFIX_LEN = 8;
 
     EXPECT_EQ(inet_pton(AF_INET, IPV4_DST_ADDR,
                         &fdb_info.tnl_info.remote_ip.ip.v4addr.s_addr),
@@ -45,7 +44,7 @@ class DpdkFdbTxVxlanTest : public BaseTableTest {
     fdb_info.tnl_info.remote_ip.prefix_len = IPV4_PREFIX_LEN;
 
     // TODO(derek): 8-bit VNI (tunnel_id)
-    fdb_info.tnl_info.vni = 42;
+    fdb_info.tnl_info.vni = 86;
 
     SelectAction("set_tunnel");
   }
@@ -59,7 +58,7 @@ class DpdkFdbTxVxlanTest : public BaseTableTest {
     const auto& table_action = table_entry.action();
 
     const auto& action = table_action.action();
-    EXPECT_EQ(action.action_id(), ActionId());
+    ASSERT_EQ(action.action_id(), ActionId());
 
     const auto& params = action.params();
     ASSERT_EQ(action.params_size(), 2);
@@ -92,7 +91,6 @@ class DpdkFdbTxVxlanTest : public BaseTableTest {
   }
 
   void CheckTunnelIdParam(const std::string& param_value) const {
-    // TODO(derek): 8-bit value for 24-bit action parameter.
     EXPECT_EQ(param_value.size(), 1);
 
     uint32_t tunnel_id = DecodeWordValue(param_value);
@@ -100,7 +98,7 @@ class DpdkFdbTxVxlanTest : public BaseTableTest {
         << "In hexadecimal:\n"
         << "  tunnel_id is 0x" << std::hex << tunnel_id << '\n'
         << "  tnl_info.vni is 0x" << fdb_info.tnl_info.vni << '\n'
-        << std::dec;
+        << std::setw(0) << std::dec;
   }
 
   //----------------------------
@@ -154,10 +152,7 @@ class DpdkFdbTxVxlanTest : public BaseTableTest {
     EXPECT_EQ(table_entry.table_id(), TableId());
   }
 
-  //----------------------------
-  // Protected member data
-  //----------------------------
-
+  // Working variables
   struct mac_learning_info fdb_info = {0};
   DiagDetail detail;
 };
@@ -166,13 +161,13 @@ class DpdkFdbTxVxlanTest : public BaseTableTest {
 // Test cases
 //----------------------------------------------------------------------
 
-TEST_F(DpdkFdbTxVxlanTest, remove_entry) {
+TEST_F(DpdkFdbTxGeneveTest, remove_entry) {
   // Arrange
-  InitFdbInfo(OVS_TUNNEL_VXLAN);
+  InitFdbInfo(OVS_TUNNEL_GENEVE);
 
   // Act
-  PrepareFdbTableEntryforV4VxlanTunnel(&table_entry, fdb_info, p4info,
-                                       REMOVE_ENTRY, detail);
+  PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, fdb_info, p4info,
+                                        REMOVE_ENTRY, detail);
 
   // Assert
   CheckDetail();
@@ -181,14 +176,14 @@ TEST_F(DpdkFdbTxVxlanTest, remove_entry) {
   CheckNoAction();
 }
 
-TEST_F(DpdkFdbTxVxlanTest, insert_entry) {
+TEST_F(DpdkFdbTxGeneveTest, insert_entry) {
   // Arrange
-  InitFdbInfo(OVS_TUNNEL_VXLAN);
+  InitFdbInfo(OVS_TUNNEL_GENEVE);
   InitAction();
 
   // Act
-  PrepareFdbTableEntryforV4VxlanTunnel(&table_entry, fdb_info, p4info,
-                                       INSERT_ENTRY, detail);
+  PrepareFdbTableEntryforV4GeneveTunnel(&table_entry, fdb_info, p4info,
+                                        INSERT_ENTRY, detail);
 
   // Assert
   CheckTableEntry();
