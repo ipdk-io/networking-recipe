@@ -35,6 +35,8 @@ list(APPEND UNIT_TEST_NAMES encode_host_port_value_test)
 #-----------------------------------------------------------------------
 if(ES2K_TARGET)
   add_subdirectory(es2k)
+elseif(DPDK_TARGET)
+  add_subdirectory(dpdk)
 endif()
 
 # Export list of unit tests.
