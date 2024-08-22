@@ -408,6 +408,9 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
 #endif
 }
 
+#ifdef ES2K_TARGET
+
+// Never called when DPDK_TARGET is enabled.
 void PrepareFdbTableEntryforV4GeneveTunnel(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry,
@@ -510,8 +513,6 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
 #error "ASSERT: Unknown TARGET type!"
 #endif
 }
-
-#if defined(ES2K_TARGET)
 
 void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
