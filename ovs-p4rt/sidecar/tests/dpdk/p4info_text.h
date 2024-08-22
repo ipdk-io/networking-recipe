@@ -1,0 +1,558 @@
+// Copyright 2024 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+
+#ifndef ES2K_P4INFO_TEXT_H_
+#define ES2K_P4INFO_TEXT_H_
+
+// P4Info for ES2K Linux Networking.
+constexpr char P4INFO_TEXT[] = R"p4(
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "pna"
+}
+tables {
+  preamble {
+    id: 40763773
+    name: "linux_networking_control.vxlan_encap_mod_table"
+    alias: "vxlan_encap_mod_table"
+  }
+  match_fields {
+    id: 1
+    name: "vendormeta_mod_data_ptr"
+    bitwidth: 24
+    match_type: EXACT
+  }
+  action_refs {
+    id: 20733968
+  }
+  action_refs {
+    id: 21257015
+  }
+  const_default_action_id: 21257015
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43691980
+    name: "linux_networking_control.rif_mod_table"
+    alias: "rif_mod_table"
+  }
+  match_fields {
+    id: 1
+    name: "local_metadata.rif_mod_map_id"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32436111
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 21257015
+  size: 512
+}
+tables {
+  preamble {
+    id: 36439154
+    name: "linux_networking_control.neighbor_mod_table"
+    alias: "neighbor_mod_table"
+  }
+  match_fields {
+    id: 1
+    name: "vendormeta_mod_data_ptr"
+    bitwidth: 24
+    match_type: EXACT
+  }
+  action_refs {
+    id: 31671750
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 21257015
+  size: 65536
+}
+tables {
+  preamble {
+    id: 47484925
+    name: "linux_networking_control.ipv4_tunnel_term_table"
+    alias: "ipv4_tunnel_term_table"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_type"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_src"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_dst"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32579284
+    annotations: "@tableonly"
+    scope: TABLE_ONLY
+  }
+  action_refs {
+    id: 29238102
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 44842501
+    name: "linux_networking_control.l2_fwd_rx_table"
+    alias: "l2_fwd_rx_table"
+  }
+  match_fields {
+    id: 1
+    name: "dst_mac"
+    annotations: "@format(MAC_ADDRESS)"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 19169916
+  }
+  action_refs {
+    id: 29238102
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 29238102
+  size: 65536
+}
+tables {
+  preamble {
+    id: 46049425
+    name: "linux_networking_control.l2_fwd_rx_with_tunnel_table"
+    alias: "l2_fwd_rx_with_tunnel_table"
+  }
+  match_fields {
+    id: 1
+    name: "dst_mac"
+    annotations: "@format(MAC_ADDRESS)"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 19169916
+  }
+  action_refs {
+    id: 29238102
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 29238102
+  size: 65536
+}
+tables {
+  preamble {
+    id: 40240205
+    name: "linux_networking_control.l2_fwd_tx_table"
+    alias: "l2_fwd_tx_table"
+  }
+  match_fields {
+    id: 1
+    name: "dst_mac"
+    annotations: "@format(MAC_ADDRESS)"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 19169916
+  }
+  action_refs {
+    id: 22384992
+  }
+  action_refs {
+    id: 29238102
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 29238102
+  size: 65536
+}
+tables {
+  preamble {
+    id: 37894008
+    name: "linux_networking_control.nexthop_table"
+    alias: "nexthop_table"
+  }
+  match_fields {
+    id: 1
+    name: "local_metadata.nexthop_id"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 31297949
+  }
+  action_refs {
+    id: 29238102
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 29238102
+  size: 65536
+}
+tables {
+  preamble {
+    id: 37566509
+    name: "linux_networking_control.ipv4_table"
+    alias: "ipv4_table"
+  }
+  match_fields {
+    id: 1
+    name: "local_metadata.ipv4_dst_match"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 29883644
+  }
+  action_refs {
+    id: 29238102
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  implementation_id: 298988277
+  size: 65536
+}
+tables {
+  preamble {
+    id: 41529896
+    name: "linux_networking_control.handle_rx_control_pkts_table"
+    alias: "handle_rx_control_pkts_table"
+  }
+  match_fields {
+    id: 1
+    name: "istd.input_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  action_refs {
+    id: 31030905
+  }
+  action_refs {
+    id: 29238102
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 29238102
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49330316
+    name: "linux_networking_control.handle_tx_control_vlan_pkts_table"
+    alias: "handle_tx_control_vlan_pkts_table"
+  }
+  match_fields {
+    id: 1
+    name: "istd.input_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  match_fields {
+    id: 2
+    name: "local_metadata.vlan_id"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 27571656
+  }
+  action_refs {
+    id: 29238102
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 29238102
+  size: 1024
+}
+tables {
+  preamble {
+    id: 35677768
+    name: "linux_networking_control.handle_tx_control_pkts_table"
+    alias: "handle_tx_control_pkts_table"
+  }
+  match_fields {
+    id: 1
+    name: "istd.input_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  action_refs {
+    id: 26888899
+  }
+  action_refs {
+    id: 31030905
+  }
+  action_refs {
+    id: 29238102
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 29238102
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 29238102
+    name: "linux_networking_control.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 20733968
+    name: "linux_networking_control.vxlan_encap"
+    alias: "vxlan_encap"
+  }
+  params {
+    id: 1
+    name: "src_addr"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "dst_addr"
+    bitwidth: 32
+  }
+  params {
+    id: 3
+    name: "dst_port"
+    bitwidth: 16
+  }
+  params {
+    id: 4
+    name: "vni"
+    bitwidth: 24
+  }
+}
+actions {
+  preamble {
+    id: 18904286
+    name: "linux_networking_control.vxlan_decap_outer_ipv4"
+    alias: "vxlan_decap_outer_ipv4"
+  }
+}
+actions {
+  preamble {
+    id: 32436111
+    name: "linux_networking_control.set_src_mac"
+    alias: "set_src_mac"
+  }
+  params {
+    id: 1
+    name: "src_mac_addr"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 31671750
+    name: "linux_networking_control.set_outer_mac"
+    alias: "set_outer_mac"
+  }
+  params {
+    id: 1
+    name: "dst_mac_addr"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 32579284
+    name: "linux_networking_control.decap_outer_ipv4"
+    alias: "decap_outer_ipv4"
+  }
+  params {
+    id: 1
+    name: "tunnel_id"
+    bitwidth: 24
+  }
+}
+actions {
+  preamble {
+    id: 22384992
+    name: "linux_networking_control.set_tunnel"
+    alias: "set_tunnel"
+  }
+  params {
+    id: 1
+    name: "tunnel_id"
+    bitwidth: 24
+  }
+  params {
+    id: 2
+    name: "dst_addr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 19169916
+    name: "linux_networking_control.l2_fwd"
+    alias: "l2_fwd"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 31297949
+    name: "linux_networking_control.set_nexthop"
+    alias: "set_nexthop"
+  }
+  params {
+    id: 1
+    name: "router_interface_id"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "neighbor_id"
+    bitwidth: 24
+  }
+  params {
+    id: 3
+    name: "egress_port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 29883644
+    name: "linux_networking_control.set_nexthop_id"
+    alias: "set_nexthop_id"
+  }
+  params {
+    id: 1
+    name: "nexthop_id"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 31030905
+    name: "linux_networking_control.set_control_dest"
+    alias: "set_control_dest"
+  }
+  params {
+    id: 1
+    name: "port_id"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 26888899
+    name: "linux_networking_control.push_vlan_fwd"
+    alias: "push_vlan_fwd"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  params {
+    id: 2
+    name: "vlan_tag"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 27571656
+    name: "linux_networking_control.pop_vlan_fwd"
+    alias: "pop_vlan_fwd"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+action_profiles {
+  preamble {
+    id: 298988277
+    name: "linux_networking_control.as_ecmp"
+    alias: "as_ecmp"
+  }
+  table_ids: 37566509
+  with_selector: true
+  size: 128
+}
+type_info {
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/pna/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}
+)p4";
+
+#endif  // ES2K_P4INFO_TEXT_H_

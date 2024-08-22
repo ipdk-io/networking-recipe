@@ -21,34 +21,13 @@ namespace ovsp4rt {
 extern std::string EncodeByteValue(int arg_count...);
 
 //----------------------------------------------------------------------
-// Target-neutral functions
+// Common functions
 //----------------------------------------------------------------------
-
-extern void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
-                                        const struct tunnel_info& tunnel_info,
-                                        const ::p4::config::v1::P4Info& p4info,
-                                        bool insert_entry);
-
-//----------------------------------------------------------------------
-// ES2K-specific functions
-//----------------------------------------------------------------------
-
-#if defined(ES2K_TARGET)
-
-extern void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
-                                         struct ip_mac_map_info& ip_info,
-                                         const ::p4::config::v1::P4Info& p4info,
-                                         bool insert_entry, DiagDetail& detail);
 
 extern void PrepareFdbRxVlanTableEntry(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry,
     DiagDetail& detail);
-
-extern void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
-                                     const struct mac_learning_info& learn_info,
-                                     const ::p4::config::v1::P4Info& p4info,
-                                     bool insert_entry, DiagDetail& detail);
 
 extern void PrepareFdbTableEntryforV4GeneveTunnel(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
@@ -64,6 +43,32 @@ extern void PrepareFdbTxVlanTableEntry(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry,
     DiagDetail& detail);
+
+extern void PrepareVxlanEncapTableEntry(p4::v1::TableEntry* table_entry,
+                                        const struct tunnel_info& tunnel_info,
+                                        const ::p4::config::v1::P4Info& p4info,
+                                        bool insert_entry);
+
+extern void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
+                                        const struct tunnel_info& tunnel_info,
+                                        const ::p4::config::v1::P4Info& p4info,
+                                        bool insert_entry);
+
+//----------------------------------------------------------------------
+// ES2K-specific functions
+//----------------------------------------------------------------------
+
+#if defined(ES2K_TARGET)
+
+extern void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
+                                         struct ip_mac_map_info& ip_info,
+                                         const ::p4::config::v1::P4Info& p4info,
+                                         bool insert_entry, DiagDetail& detail);
+
+extern void PrepareFdbSmacTableEntry(p4::v1::TableEntry* table_entry,
+                                     const struct mac_learning_info& learn_info,
+                                     const ::p4::config::v1::P4Info& p4info,
+                                     bool insert_entry, DiagDetail& detail);
 
 extern void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
                                          struct ip_mac_map_info& ip_info,
@@ -88,6 +93,11 @@ extern void PrepareGeneveDecapModAndVlanPushTableEntry(
     p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
 
+extern void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
+                                         const struct tunnel_info& tunnel_info,
+                                         const ::p4::config::v1::P4Info& p4info,
+                                         bool insert_entry);
+
 extern void PrepareGeneveEncapAndVlanPopTableEntry(
     p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
@@ -95,11 +105,6 @@ extern void PrepareGeneveEncapAndVlanPopTableEntry(
 extern void PrepareV6GeneveEncapAndVlanPopTableEntry(
     p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry);
-
-extern void PrepareGeneveEncapTableEntry(p4::v1::TableEntry* table_entry,
-                                         const struct tunnel_info& tunnel_info,
-                                         const ::p4::config::v1::P4Info& p4info,
-                                         bool insert_entry);
 
 extern void PrepareV6GeneveEncapTableEntry(
     p4::v1::TableEntry* table_entry, const struct tunnel_info& tunnel_info,
@@ -119,11 +124,6 @@ extern void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
                                      const struct src_port_info& sp,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry);
-
-extern void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
-                                        const struct tunnel_info& tunnel_info,
-                                        const ::p4::config::v1::P4Info& p4info,
-                                        bool insert_entry);
 
 extern void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry,
                                       uint32_t sp,

@@ -337,7 +337,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL,
                                      ACTION_SET_TUNNEL_PARAM_TUNNEL_ID));
-      // note: 8-bit vni (dpdk)
+      // TODO(derek): 8-bit value for 24-bit action parameter.
       param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
     }
 
