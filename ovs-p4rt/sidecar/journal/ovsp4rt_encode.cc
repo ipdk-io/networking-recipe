@@ -11,8 +11,13 @@
 #include "ovsp4rt/ovs-p4rt.h"
 
 namespace {
+
 constexpr uint32_t LEARN_INFO_SCHEMA = 1;
 constexpr uint32_t PORT_INFO_SCHEMA = 1;
+constexpr uint32_t TUNNEL_INFO_SCHEMA = 1;
+constexpr uint32_t VLAN_ID_SCHEMA = 1;
+constexpr uint32_t IP_MAC_MAP_INFO_SCHEMA = 1;
+
 }  // namespace
 
 namespace ovsp4rt {
@@ -110,9 +115,26 @@ void VlanInfoToJson(nlohmann::json& json, const struct vlan_info& info) {
 // Return JSON representation of API input.
 //----------------------------------------------------------------------
 
+// ovsp4rt_config_ip_mac_map_entry()
+nlohmann::json EncodeIpMacMapInfo(const char* func_name,
+                                  const struct ip_mac_map_info& info,
+                                  bool insert_entry) {
+  nlohmann::json json;
+
+  json["func_name"] = func_name;
+  json["schema"] = IP_MAC_MAP_INFO_SCHEMA;
+  json["struct_name"] = "ip_mac_map_info";
+
+  auto& params = json["params"];
+  IpMacMapInfoToJson(params["ip_mac_map_info"], info);
+  params["insert_entry"] = insert_entry;
+
+  return json;
+}
+
 // ovsp4rt_config_fdb_entry()
 nlohmann::json EncodeMacLearningInfo(const char* func_name,
-                                     const struct mac_learning_info& learn_info,
+                                     const struct mac_learning_info& info,
                                      bool insert_entry) {
   nlohmann::json json;
 
@@ -121,16 +143,17 @@ nlohmann::json EncodeMacLearningInfo(const char* func_name,
   json["struct_name"] = "mac_learning_info";
 
   auto& params = json["params"];
-  MacLearningInfoToJson(params["learn_info"], learn_info);
+  MacLearningInfoToJson(params["learn_info"], info);
   params["insert_entry"] = insert_entry;
 
   return json;
 }
 
+// ovsp4rt_config_rx_tunnel_src_entry()
 // ovsp4rt_config_src_port_entry()
 // ovsp4rt_config_tunnel_src_port_entry()
 nlohmann::json EncodeSrcPortInfo(const char* func_name,
-                                 const struct src_port_info& sp_info,
+                                 const struct src_port_info& info,
                                  bool insert_entry) {
   nlohmann::json json;
 
@@ -139,7 +162,40 @@ nlohmann::json EncodeSrcPortInfo(const char* func_name,
   json["struct_name"] = "src_port_info";
 
   auto& params = json["params"];
-  SrcPortInfoToJson(params["port_info"], sp_info);
+  SrcPortInfoToJson(params["port_info"], info);
+  params["insert_entry"] = insert_entry;
+
+  return json;
+}
+
+// ovsp4rt_config_rx_tunnel_src_entry()
+// ovsp4rt_config_tunnel_entry()
+nlohmann::json EncodeTunnelInfo(const char* func_name,
+                                const struct tunnel_info& info,
+                                bool insert_entry) {
+  nlohmann::json json;
+
+  json["func_name"] = func_name;
+  json["schema"] = TUNNEL_INFO_SCHEMA;
+  json["struct_name"] = "tunnel_info";
+
+  auto& params = json["params"];
+  TunnelInfoToJson(json["tunnel_info"], info);
+  params["insert_entry"] = insert_entry;
+
+  return json;
+}
+
+// ovsp4rt_config_rx_tunnel_src_entry()
+nlohmann::json EncodeVlanId(const char* func_name, uint16_t vlan_id,
+                            bool insert_entry) {
+  nlohmann::json json;
+
+  json["func_name"] = func_name;
+  json["schema"] = VLAN_ID_SCHEMA;
+
+  auto& params = json["params"];
+  params["vlan_id"] = vlan_id;
   params["insert_entry"] = insert_entry;
 
   return json;
