@@ -2222,14 +2222,15 @@ enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
 
 #if defined(ES2K_TARGET)
 
+namespace ovsp4rt {
 //----------------------------------------------------------------------
-// ovsp4rt_config_fdb_entry (ES2K)
+// ConfigFdbEntry (ES2K)
+//
+// learn_info is passed by value because this function makes local
+// modifications to it.
 //----------------------------------------------------------------------
-void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
-                              bool insert_entry, const char* grpc_addr) {
-  using namespace ovsp4rt;
-
-  Context context;
+void ConfigFdbEntry(Context& context, struct mac_learning_info learn_info,
+                    bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2349,16 +2350,27 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     }
   }
 }
+}  // namespace ovsp4rt
 
 //----------------------------------------------------------------------
-// ovsp4rt_config_rx_tunnel_src_entry (ES2K)
+// ovsp4rt_config_fdb_entry (ES2K)
 //----------------------------------------------------------------------
-void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
-                                        bool insert_entry,
-                                        const char* grpc_addr) {
+void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
+                              bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
   Context context;
+
+  ConfigFdbEntry(context, learn_info, insert_entry, grpc_addr);
+}
+
+namespace ovsp4rt {
+//----------------------------------------------------------------------
+// ConfigRxTunnelSrcEntry (ES2K)
+//----------------------------------------------------------------------
+void ConfigRxTunnelSrcEntry(Context& context,
+                            const struct tunnel_info& tunnel_info,
+                            bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2374,16 +2386,28 @@ void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
                                            insert_entry);
   if (!status.ok()) return;
 }
+}  // namespace ovsp4rt
 
 //----------------------------------------------------------------------
-// ovsp4rt_config_tunnel_src_port_entry (ES2K)
+// ovsp4rt_config_rx_tunnel_src_entry (ES2K)
 //----------------------------------------------------------------------
-void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
-                                          bool insert_entry,
-                                          const char* grpc_addr) {
+void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
+                                        bool insert_entry,
+                                        const char* grpc_addr) {
   using namespace ovsp4rt;
 
   Context context;
+
+  ConfigRxTunnelSrcEntry(context, tunnel_info, insert_entry, grpc_addr);
+}
+
+namespace ovsp4rt {
+//----------------------------------------------------------------------
+// ConfigTunnelSrcPortEntry (ES2K)
+//----------------------------------------------------------------------
+void ConfigTunnelSrcPortEntry(Context& context,
+                              const struct src_port_info& tnl_sp,
+                              bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2407,15 +2431,30 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
   // TODO: handle error scenarios. For now return irrespective of the status.
   if (!status.ok()) return;
 }
+}  // namespace ovsp4rt
 
 //----------------------------------------------------------------------
-// ovsp4rt_config_src_port_entry (ES2K)
+// ovsp4rt_config_tunnel_src_port_entry (ES2K)
 //----------------------------------------------------------------------
-void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
-                                   bool insert_entry, const char* grpc_addr) {
+void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
+                                          bool insert_entry,
+                                          const char* grpc_addr) {
   using namespace ovsp4rt;
 
   Context context;
+
+  ConfigTunnelSrcPortEntry(context, tnl_sp, insert_entry, grpc_addr);
+}
+
+namespace ovsp4rt {
+//----------------------------------------------------------------------
+// ConfigSrcPortEntry (ES2K)
+//
+// vsi_sp is passed by value because this function makes local
+// modifications to it.
+//----------------------------------------------------------------------
+void ConfigSrcPortEntry(Context& context, struct src_port_info vsi_sp,
+                        bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2463,15 +2502,26 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
   status = ConfigureVsiSrcPortTableEntry(context, vsi_sp, p4info, insert_entry);
   if (!status.ok()) return;
 }
+}  // namespace ovsp4rt
 
 //----------------------------------------------------------------------
-// ovsp4rt_config_vlan_entry (ES2K)
+// ovsp4rt_config_src_port_entry (ES2K)
 //----------------------------------------------------------------------
-void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
-                               const char* grpc_addr) {
+void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
+                                   bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
   Context context;
+
+  ConfigSrcPortEntry(context, vsi_sp, insert_entry, grpc_addr);
+}
+
+namespace ovsp4rt {
+//----------------------------------------------------------------------
+// ConfigVlanEntry (ES2K)
+//----------------------------------------------------------------------
+void ConfigVlanEntry(Context& context, uint16_t vlan_id, bool insert_entry,
+                     const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2489,17 +2539,29 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
   status = ConfigVlanPopTableEntry(context, vlan_id, p4info, insert_entry);
   if (!status.ok()) return;
 }
-
-#elif defined(DPDK_TARGET)
+}  // namespace ovsp4rt
 
 //----------------------------------------------------------------------
-// ovsp4rt_config_fdb_entry (DPDK)
+// ovsp4rt_config_vlan_entry (ES2K)
 //----------------------------------------------------------------------
-void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
-                              bool insert_entry, const char* grpc_addr) {
+void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
+                               const char* grpc_addr) {
   using namespace ovsp4rt;
 
   Context context;
+
+  ConfigVlanEntry(context, vlan_id, insert_entry, grpc_addr);
+}
+
+#elif defined(DPDK_TARGET)
+
+namespace ovsp4rt {
+//----------------------------------------------------------------------
+// ConfigFdbEntry (DPDK)
+//----------------------------------------------------------------------
+void ConfigFdbEntry(Context& context,
+                    const struct mac_learning_info& learn_info,
+                    bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2523,6 +2585,19 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
         ConfigFdbRxVlanTableEntry(context, learn_info, p4info, insert_entry);
     if (!status.ok()) return;
   }
+}
+}  // namespace ovsp4rt
+
+//----------------------------------------------------------------------
+// ovsp4rt_config_fdb_entry (DPDK)
+//----------------------------------------------------------------------
+void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
+                              bool insert_entry, const char* grpc_addr) {
+  using namespace ovsp4rt;
+
+  Context context;
+
+  ConfigFdbEntry(context, learn_info, insert_entry, grpc_addr);
 }
 
 //----------------------------------------------------------------------
@@ -2550,14 +2625,12 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
 #error "ASSERT: Unknown TARGET type!"
 #endif
 
+namespace ovsp4rt {
 //----------------------------------------------------------------------
-// ovsp4rt_config_tunnel_entry (common)
+// ConfigTunnelEntry (common)
 //----------------------------------------------------------------------
-void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
-                                 bool insert_entry, const char* grpc_addr) {
-  using namespace ovsp4rt;
-
-  Context context;
+void ConfigTunnelEntry(Context& context, const struct tunnel_info& tunnel_info,
+                       bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2581,16 +2654,29 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
       ConfigTunnelTermTableEntry(context, tunnel_info, p4info, insert_entry);
   if (!status.ok()) return;
 }
+}  // namespace ovsp4rt
 
-#if defined(ES2K_TARGET)
 //----------------------------------------------------------------------
-// ovsp4rt_config_ip_mac_map_entry (ES2K)
+// ovsp4rt_config_tunnel_entry (common)
 //----------------------------------------------------------------------
-void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
-                                     bool insert_entry, const char* grpc_addr) {
+void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
+                                 bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
   Context context;
+
+  ConfigTunnelEntry(context, tunnel_info, insert_entry, grpc_addr);
+}
+
+#if defined(ES2K_TARGET)
+
+namespace ovsp4rt {
+//----------------------------------------------------------------------
+// ConfigIpMacMapEntry (ES2K)
+//----------------------------------------------------------------------
+void ConfigIpMacMapEntry(Context& context,
+                         const struct ip_mac_map_info& ip_info,
+                         bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2630,5 +2716,18 @@ try_dstip:
     if (!status.ok()) {
     }
   }
+}
+}  // namespace ovsp4rt
+
+//----------------------------------------------------------------------
+// ovsp4rt_config_ip_mac_map_entry (ES2K)
+//----------------------------------------------------------------------
+void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
+                                     bool insert_entry, const char* grpc_addr) {
+  using namespace ovsp4rt;
+
+  Context context;
+
+  ConfigIpMacMapEntry(context, ip_info, insert_entry, grpc_addr);
 }
 #endif  // ES2K_TARGET
