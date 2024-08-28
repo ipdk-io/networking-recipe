@@ -1790,18 +1790,6 @@ absl::Status ConfigVlanPushTableEntry(Context& context, const uint16_t vlan_id,
   return context.sendWriteRequest(write_request);
 }
 
-absl::StatusOr<::p4::v1::ReadResponse> GetVlanPushTableEntry(
-    Context& context, const uint16_t vlan_id,
-    const ::p4::config::v1::P4Info& p4info) {
-  ::p4::v1::ReadRequest read_request;
-  ::p4::v1::TableEntry* table_entry;
-
-  table_entry = context.initReadRequest(&read_request);
-
-  PrepareVlanPushTableEntry(table_entry, vlan_id, p4info, false);
-
-  return context.sendReadRequest(read_request);
-}
 
 absl::Status ConfigVlanPopTableEntry(Context& context, const uint16_t vlan_id,
                                      const ::p4::config::v1::P4Info& p4info,
