@@ -1834,19 +1834,6 @@ absl::Status ConfigVlanPushTableEntry(ovsp4rt::OvsP4rtSession* session,
   return ovsp4rt::SendWriteRequest(session, write_request);
 }
 
-absl::StatusOr<::p4::v1::ReadResponse> GetVlanPushTableEntry(
-    ovsp4rt::OvsP4rtSession* session, const uint16_t vlan_id,
-    const ::p4::config::v1::P4Info& p4info) {
-  ::p4::v1::ReadRequest read_request;
-  ::p4::v1::TableEntry* table_entry;
-
-  table_entry = ovsp4rt::SetupTableEntryToRead(session, &read_request);
-
-  PrepareVlanPushTableEntry(table_entry, vlan_id, p4info, false);
-
-  return ovsp4rt::SendReadRequest(session, read_request);
-}
-
 absl::Status ConfigVlanPopTableEntry(ovsp4rt::OvsP4rtSession* session,
                                      const uint16_t vlan_id,
                                      const ::p4::config::v1::P4Info& p4info,
