@@ -1790,7 +1790,6 @@ absl::Status ConfigVlanPushTableEntry(Context& context, const uint16_t vlan_id,
   return context.sendWriteRequest(write_request);
 }
 
-
 absl::Status ConfigVlanPopTableEntry(Context& context, const uint16_t vlan_id,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
