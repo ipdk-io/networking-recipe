@@ -2291,6 +2291,10 @@ void ConfigFdbEntry(Context& context, struct mac_learning_info learn_info,
       if (!status.ok()) {
       }
 
+      // TODO(derek): refactor common code
+      //
+      // GetVsiSrcPort(Context& context, const P4Info& p4info,
+      //               uint32_t src_port, uint32_t& vsi_port);
       status_or_read_response =
           GetTxAccVsiTableEntry(context, learn_info.src_port, p4info);
       if (!status_or_read_response.ok()) {
@@ -2325,6 +2329,7 @@ void ConfigFdbEntry(Context& context, struct mac_learning_info learn_info,
       }
 
       learn_info.src_port = host_sp;
+      // end of common code
     }
 
     status =
@@ -2453,6 +2458,10 @@ void ConfigSrcPortEntry(Context& context, struct src_port_info vsi_sp,
   status = context.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
+  // TODO(derek): refactor common code
+  //
+  // GetVsiSrcPort(Context& context, const P4Info& p4info,
+  //               uint32_t src_port, uint32_t& vsi_port);
   auto status_or_read_response =
       GetTxAccVsiTableEntry(context, vsi_sp.src_port, p4info);
   if (!status_or_read_response.ok()) return;
@@ -2485,6 +2494,7 @@ void ConfigSrcPortEntry(Context& context, struct src_port_info vsi_sp,
   }
 
   vsi_sp.src_port = host_sp;
+  // end of common code
 
   status = ConfigureVsiSrcPortTableEntry(context, vsi_sp, p4info, insert_entry);
   if (!status.ok()) return;
