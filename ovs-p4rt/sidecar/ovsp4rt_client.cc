@@ -1,10 +1,11 @@
 // Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+#include "ovsp4rt_client.h"
+
 #include "absl/flags/flag.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "ovsp4rt_client.h"
 #include "session/ovsp4rt_credentials.h"
 #include "session/ovsp4rt_session.h"
 
@@ -12,8 +13,7 @@
 
 ABSL_FLAG(uint64_t, device_id, 1, "P4Runtime device ID.");
 
-ABSL_FLAG(std::string, role_name, DEFAULT_ROLE_NAME,
-          "P4 config role name.");
+ABSL_FLAG(std::string, role_name, DEFAULT_ROLE_NAME, "P4 config role name.");
 
 namespace ovsp4rt {
 
