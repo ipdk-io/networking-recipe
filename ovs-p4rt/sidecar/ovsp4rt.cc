@@ -10,7 +10,7 @@
 #include "logging/ovsp4rt_logging.h"
 #include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
-#include "ovsp4rt_context.h"
+#include "ovsp4rt_client.h"
 #include "ovsp4rt_private.h"
 
 #if defined(DPDK_TARGET)
@@ -567,7 +567,7 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
   }
 }
 
-absl::Status ConfigFdbSmacTableEntry(Context& context,
+absl::Status ConfigFdbSmacTableEntry(Client& client,
                                      const struct mac_learning_info& learn_info,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
@@ -575,12 +575,12 @@ absl::Status ConfigFdbSmacTableEntry(Context& context,
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   PrepareFdbSmacTableEntry(table_entry, learn_info, p4info, insert_entry,
                            detail);
 
-  auto status = context.sendWriteRequest(write_request);
+  auto status = client.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
                           learn_info.mac_addr);
@@ -589,13 +589,13 @@ absl::Status ConfigFdbSmacTableEntry(Context& context,
 }
 
 absl::Status ConfigL2TunnelTableEntry(
-    Context& context, const struct mac_learning_info& learn_info,
+    Client& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   if (learn_info.tnl_info.local_ip.family == AF_INET6 &&
       learn_info.tnl_info.remote_ip.family == AF_INET6) {
@@ -604,7 +604,7 @@ absl::Status ConfigL2TunnelTableEntry(
     PrepareL2ToTunnelV4(table_entry, learn_info, p4info, insert_entry, detail);
   }
 
-  auto status = context.sendWriteRequest(write_request);
+  auto status = client.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
                           learn_info.mac_addr);
@@ -615,18 +615,18 @@ absl::Status ConfigL2TunnelTableEntry(
 #endif  // ES2K_TARGET
 
 absl::Status ConfigFdbTxVlanTableEntry(
-    Context& context, const struct mac_learning_info& learn_info,
+    Client& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, insert_entry,
                              detail);
 
-  auto status = context.sendWriteRequest(write_request);
+  auto status = client.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
                           learn_info.mac_addr);
@@ -635,18 +635,18 @@ absl::Status ConfigFdbTxVlanTableEntry(
 }
 
 absl::Status ConfigFdbRxVlanTableEntry(
-    Context& context, const struct mac_learning_info& learn_info,
+    Client& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   PrepareFdbRxVlanTableEntry(table_entry, learn_info, p4info, insert_entry,
                              detail);
 
-  auto status = context.sendWriteRequest(write_request);
+  auto status = client.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
                           learn_info.mac_addr);
@@ -655,13 +655,13 @@ absl::Status ConfigFdbRxVlanTableEntry(
 }
 
 absl::Status ConfigFdbTunnelTableEntry(
-    Context& context, const struct mac_learning_info& learn_info,
+    Client& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
 #if defined(DPDK_TARGET)
   PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info,
@@ -685,7 +685,7 @@ absl::Status ConfigFdbTunnelTableEntry(
 #error "ASSERT: Unknown TARGET type!"
 #endif
 
-  auto status = context.sendWriteRequest(write_request);
+  auto status = client.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailureWithMacAddr(insert_entry, detail.getLogTableName(),
                           learn_info.mac_addr);
@@ -1507,14 +1507,14 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
 }
 #endif  // ES2K_TARGET
 
-absl::Status ConfigEncapTableEntry(Context& context,
+absl::Status ConfigEncapTableEntry(Client& client,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
 #if defined(DPDK_TARGET)
   PrepareEncapTableEntry(table_entry, tunnel_info, p4info, insert_entry);
@@ -1541,7 +1541,7 @@ absl::Status ConfigEncapTableEntry(Context& context,
 #error "ASSERT: Unknown TARGET type!"
 #endif
 
-  return context.sendWriteRequest(write_request);
+  return client.sendWriteRequest(write_request);
 }
 
 #if defined(ES2K_TARGET)
@@ -1699,14 +1699,14 @@ void PrepareDecapModAndVlanPushTableEntry(
   }
 }
 
-absl::Status ConfigDecapTableEntry(Context& context,
+absl::Status ConfigDecapTableEntry(Client& client,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   if (tunnel_info.vlan_info.port_vlan_mode == P4_PORT_VLAN_NATIVE_TAGGED) {
     PrepareDecapModTableEntry(table_entry, tunnel_info, p4info, insert_entry);
@@ -1715,7 +1715,7 @@ absl::Status ConfigDecapTableEntry(Context& context,
                                          insert_entry);
   }
 
-  return context.sendWriteRequest(write_request);
+  return client.sendWriteRequest(write_request);
 }
 
 void PrepareVlanPushTableEntry(p4::v1::TableEntry* table_entry,
@@ -1777,30 +1777,30 @@ void PrepareVlanPopTableEntry(p4::v1::TableEntry* table_entry,
   }
 }
 
-absl::Status ConfigVlanPushTableEntry(Context& context, const uint16_t vlan_id,
+absl::Status ConfigVlanPushTableEntry(Client& client, const uint16_t vlan_id,
                                       const ::p4::config::v1::P4Info& p4info,
                                       bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   PrepareVlanPushTableEntry(table_entry, vlan_id, p4info, insert_entry);
 
-  return context.sendWriteRequest(write_request);
+  return client.sendWriteRequest(write_request);
 }
 
-absl::Status ConfigVlanPopTableEntry(Context& context, const uint16_t vlan_id,
+absl::Status ConfigVlanPopTableEntry(Client& client, const uint16_t vlan_id,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   PrepareVlanPopTableEntry(table_entry, vlan_id, p4info, insert_entry);
 
-  return context.sendWriteRequest(write_request);
+  return client.sendWriteRequest(write_request);
 }
 
 void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
@@ -1963,43 +1963,43 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
-    Context& context, const struct mac_learning_info& learn_info,
+    Client& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initReadRequest(&read_request);
+  table_entry = client.initReadRequest(&read_request);
 
   PrepareL2ToTunnelV4(table_entry, learn_info, p4info, false, detail);
 
   // This function does not log failed requests.
-  return context.sendReadRequest(read_request);
+  return client.sendReadRequest(read_request);
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV6TableEntry(
-    Context& context, const struct mac_learning_info& learn_info,
+    Client& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initReadRequest(&read_request);
+  table_entry = client.initReadRequest(&read_request);
 
   PrepareL2ToTunnelV6(table_entry, learn_info, p4info, false, detail);
 
   // This function does not log failed requests.
-  return context.sendReadRequest(read_request);
+  return client.sendReadRequest(read_request);
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
-    Context& context, const struct mac_learning_info& learn_info,
+    Client& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool adding = false) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initReadRequest(&read_request);
+  table_entry = client.initReadRequest(&read_request);
 
 #if defined(DPDK_TARGET)
   PrepareFdbTableEntryforV4VxlanTunnel(table_entry, learn_info, p4info, false,
@@ -2018,7 +2018,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
 #error "ASSERT: Unknown TARGET type!"
 #endif
 
-  auto status = context.sendReadRequest(read_request);
+  auto status = client.sendReadRequest(read_request);
   if (status.ok() && adding) {
     ovsp4rt_log_error("Error adding to %s: entry already exists",
                       detail.getLogTableName());
@@ -2027,17 +2027,17 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetFdbVlanTableEntry(
-    Context& context, const struct mac_learning_info& learn_info,
+    Client& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool adding = false) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initReadRequest(&read_request);
+  table_entry = client.initReadRequest(&read_request);
 
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, false, detail);
 
-  auto status = context.sendReadRequest(read_request);
+  auto status = client.sendReadRequest(read_request);
   if (status.ok() && adding) {
     ovsp4rt_log_error("Error adding to %: entry already exists",
                       detail.getLogTableName());
@@ -2046,66 +2046,66 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbVlanTableEntry(
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetVmSrcTableEntry(
-    Context& context, struct ip_mac_map_info ip_info,
+    Client& client, struct ip_mac_map_info ip_info,
     const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initReadRequest(&read_request);
+  table_entry = client.initReadRequest(&read_request);
 
   PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
   // This function does not log failed requests.
-  return context.sendReadRequest(read_request);
+  return client.sendReadRequest(read_request);
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetVmDstTableEntry(
-    Context& context, const struct ip_mac_map_info& ip_info,
+    Client& client, const struct ip_mac_map_info& ip_info,
     const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initReadRequest(&read_request);
+  table_entry = client.initReadRequest(&read_request);
 
   PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
-  return context.sendReadRequest(read_request);
+  return client.sendReadRequest(read_request);
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
-    Context& context, uint32_t sp, const ::p4::config::v1::P4Info& p4info) {
+    Client& client, uint32_t sp, const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = context.initReadRequest(&read_request);
+  table_entry = client.initReadRequest(&read_request);
 
   PrepareTxAccVsiTableEntry(table_entry, sp, p4info);
 
-  return context.sendReadRequest(read_request);
+  return client.sendReadRequest(read_request);
 }
 
 absl::Status ConfigureVsiSrcPortTableEntry(
-    Context& context, const struct src_port_info& sp,
+    Client& client, const struct src_port_info& sp,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   PrepareSrcPortTableEntry(table_entry, sp, p4info, insert_entry);
 
-  return context.sendWriteRequest(write_request);
+  return client.sendWriteRequest(write_request);
 }
 
 absl::Status ConfigRxTunnelSrcPortTableEntry(
-    Context& context, const struct tunnel_info& tunnel_info,
+    Client& client, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   if (tunnel_info.local_ip.family == AF_INET &&
       tunnel_info.remote_ip.family == AF_INET) {
@@ -2115,19 +2115,19 @@ absl::Status ConfigRxTunnelSrcPortTableEntry(
     PrepareV6RxTunnelTableEntry(table_entry, tunnel_info, p4info, insert_entry);
   }
 
-  return context.sendWriteRequest(write_request);
+  return client.sendWriteRequest(write_request);
 }
 
 #endif  // ES2K_TARGET
 
-absl::Status ConfigTunnelTermTableEntry(Context& context,
+absl::Status ConfigTunnelTermTableEntry(Client& client,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
                                         bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 #if defined(DPDK_TARGET)
   PrepareTunnelTermTableEntry(table_entry, tunnel_info, p4info, insert_entry);
 
@@ -2144,12 +2144,12 @@ absl::Status ConfigTunnelTermTableEntry(Context& context,
 #error "ASSERT: Unknown TARGET type!"
 #endif
 
-  return context.sendWriteRequest(write_request);
+  return client.sendWriteRequest(write_request);
 }
 
 #if defined(ES2K_TARGET)
 
-absl::Status ConfigDstIpMacMapTableEntry(Context& context,
+absl::Status ConfigDstIpMacMapTableEntry(Client& client,
                                          const struct ip_mac_map_info& ip_info,
                                          const ::p4::config::v1::P4Info& p4info,
                                          bool insert_entry) {
@@ -2157,19 +2157,19 @@ absl::Status ConfigDstIpMacMapTableEntry(Context& context,
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, insert_entry,
                                detail);
 
-  auto status = context.sendWriteRequest(write_request);
+  auto status = client.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailure(insert_entry, detail.getLogTableName());
   }
   return status;
 }
 
-absl::Status ConfigSrcIpMacMapTableEntry(Context& context,
+absl::Status ConfigSrcIpMacMapTableEntry(Client& client,
                                          const struct ip_mac_map_info& ip_info,
                                          const ::p4::config::v1::P4Info& p4info,
                                          bool insert_entry) {
@@ -2177,12 +2177,12 @@ absl::Status ConfigSrcIpMacMapTableEntry(Context& context,
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, insert_entry,
                                detail);
 
-  auto status = context.sendWriteRequest(write_request);
+  auto status = client.sendWriteRequest(write_request);
   if (!status.ok()) {
     LogFailure(insert_entry, detail.getLogTableName());
   }
@@ -2216,17 +2216,17 @@ namespace ovsp4rt {
 // learn_info is passed by value because this function makes local
 // modifications to it.
 //----------------------------------------------------------------------
-void ConfigFdbEntry(Context& context, struct mac_learning_info learn_info,
+void ConfigFdbEntry(Client& client, struct mac_learning_info learn_info,
                     bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
-  status = context.connect(grpc_addr);
+  status = client.connect(grpc_addr);
   if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  status = context.getPipelineConfig(&p4info);
+  status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   /* When we delete an FDB entry based on current logic, we do not know
@@ -2237,7 +2237,7 @@ void ConfigFdbEntry(Context& context, struct mac_learning_info learn_info,
 
   if (!insert_entry) {
     auto status_or_read_response =
-        GetL2ToTunnelV4TableEntry(context, learn_info, p4info);
+        GetL2ToTunnelV4TableEntry(client, learn_info, p4info);
     if (status_or_read_response.ok()) {
       learn_info.is_tunnel = true;
     }
@@ -2247,7 +2247,7 @@ void ConfigFdbEntry(Context& context, struct mac_learning_info learn_info,
      */
     if (!learn_info.is_tunnel) {
       status_or_read_response =
-          GetL2ToTunnelV6TableEntry(context, learn_info, p4info);
+          GetL2ToTunnelV6TableEntry(client, learn_info, p4info);
       if (status_or_read_response.ok()) {
         learn_info.is_tunnel = true;
         learn_info.tnl_info.local_ip.family = AF_INET6;
@@ -2259,44 +2259,43 @@ void ConfigFdbEntry(Context& context, struct mac_learning_info learn_info,
   if (learn_info.is_tunnel) {
     if (insert_entry) {
       auto status_or_read_response =
-          GetFdbTunnelTableEntry(context, learn_info, p4info, true);
+          GetFdbTunnelTableEntry(client, learn_info, p4info, true);
       if (status_or_read_response.ok()) {
         return;
       }
     }
 
     status =
-        ConfigFdbTunnelTableEntry(context, learn_info, p4info, insert_entry);
+        ConfigFdbTunnelTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
     }
 
-    status =
-        ConfigL2TunnelTableEntry(context, learn_info, p4info, insert_entry);
+    status = ConfigL2TunnelTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
     }
 
-    status = ConfigFdbSmacTableEntry(context, learn_info, p4info, insert_entry);
+    status = ConfigFdbSmacTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
     }
   } else {
     if (insert_entry) {
       auto status_or_read_response =
-          GetFdbVlanTableEntry(context, learn_info, p4info, true);
+          GetFdbVlanTableEntry(client, learn_info, p4info, true);
       if (status_or_read_response.ok()) {
         return;
       }
 
       status =
-          ConfigFdbRxVlanTableEntry(context, learn_info, p4info, insert_entry);
+          ConfigFdbRxVlanTableEntry(client, learn_info, p4info, insert_entry);
       if (!status.ok()) {
       }
 
       // TODO(derek): refactor common code
       //
-      // GetVsiSrcPort(Context& context, const P4Info& p4info,
+      // GetVsiSrcPort(Client& client, const P4Info& p4info,
       //               uint32_t src_port, uint32_t& vsi_port);
       status_or_read_response =
-          GetTxAccVsiTableEntry(context, learn_info.src_port, p4info);
+          GetTxAccVsiTableEntry(client, learn_info.src_port, p4info);
       if (!status_or_read_response.ok()) {
         return;
       }
@@ -2333,11 +2332,11 @@ void ConfigFdbEntry(Context& context, struct mac_learning_info learn_info,
     }
 
     status =
-        ConfigFdbTxVlanTableEntry(context, learn_info, p4info, insert_entry);
+        ConfigFdbTxVlanTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
     }
 
-    status = ConfigFdbSmacTableEntry(context, learn_info, p4info, insert_entry);
+    status = ConfigFdbSmacTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
     }
   }
@@ -2351,30 +2350,30 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  Context context;
+  Client client;
 
-  ConfigFdbEntry(context, learn_info, insert_entry, grpc_addr);
+  ConfigFdbEntry(client, learn_info, insert_entry, grpc_addr);
 }
 
 namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigRxTunnelSrcEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigRxTunnelSrcEntry(Context& context,
+void ConfigRxTunnelSrcEntry(Client& client,
                             const struct tunnel_info& tunnel_info,
                             bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
-  status = context.connect(grpc_addr);
+  status = client.connect(grpc_addr);
   if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  status = context.getPipelineConfig(&p4info);
+  status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
-  status = ConfigRxTunnelSrcPortTableEntry(context, tunnel_info, p4info,
+  status = ConfigRxTunnelSrcPortTableEntry(client, tunnel_info, p4info,
                                            insert_entry);
   if (!status.ok()) return;
 }
@@ -2388,37 +2387,37 @@ void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
                                         const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  Context context;
+  Client client;
 
-  ConfigRxTunnelSrcEntry(context, tunnel_info, insert_entry, grpc_addr);
+  ConfigRxTunnelSrcEntry(client, tunnel_info, insert_entry, grpc_addr);
 }
 
 namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigTunnelSrcPortEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigTunnelSrcPortEntry(Context& context,
+void ConfigTunnelSrcPortEntry(Client& client,
                               const struct src_port_info& tnl_sp,
                               bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
-  status = context.connect(grpc_addr);
+  status = client.connect(grpc_addr);
   if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  status = context.getPipelineConfig(&p4info);
+  status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
-  table_entry = context.initWriteRequest(&write_request, insert_entry);
+  table_entry = client.initWriteRequest(&write_request, insert_entry);
 
   PrepareSrcPortTableEntry(table_entry, tnl_sp, p4info, insert_entry);
 
-  status = context.sendWriteRequest(write_request);
+  status = client.sendWriteRequest(write_request);
 
   // TODO: handle error scenarios. For now return irrespective of the status.
   if (!status.ok()) return;
@@ -2433,9 +2432,9 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
                                           const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  Context context;
+  Client client;
 
-  ConfigTunnelSrcPortEntry(context, tnl_sp, insert_entry, grpc_addr);
+  ConfigTunnelSrcPortEntry(client, tnl_sp, insert_entry, grpc_addr);
 }
 
 namespace ovsp4rt {
@@ -2445,25 +2444,25 @@ namespace ovsp4rt {
 // vsi_sp is passed by value because this function makes local
 // modifications to it.
 //----------------------------------------------------------------------
-void ConfigSrcPortEntry(Context& context, struct src_port_info vsi_sp,
+void ConfigSrcPortEntry(Client& client, struct src_port_info vsi_sp,
                         bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
-  status = context.connect(grpc_addr);
+  status = client.connect(grpc_addr);
   if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  status = context.getPipelineConfig(&p4info);
+  status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   // TODO(derek): refactor common code
   //
-  // GetVsiSrcPort(Context& context, const P4Info& p4info,
+  // GetVsiSrcPort(Client& client, const P4Info& p4info,
   //               uint32_t src_port, uint32_t& vsi_port);
   auto status_or_read_response =
-      GetTxAccVsiTableEntry(context, vsi_sp.src_port, p4info);
+      GetTxAccVsiTableEntry(client, vsi_sp.src_port, p4info);
   if (!status_or_read_response.ok()) return;
 
   ::p4::v1::ReadResponse read_response =
@@ -2496,7 +2495,7 @@ void ConfigSrcPortEntry(Context& context, struct src_port_info vsi_sp,
   vsi_sp.src_port = host_sp;
   // end of common code
 
-  status = ConfigureVsiSrcPortTableEntry(context, vsi_sp, p4info, insert_entry);
+  status = ConfigureVsiSrcPortTableEntry(client, vsi_sp, p4info, insert_entry);
   if (!status.ok()) return;
 }
 }  // namespace ovsp4rt
@@ -2508,32 +2507,32 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
                                    bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  Context context;
+  Client client;
 
-  ConfigSrcPortEntry(context, vsi_sp, insert_entry, grpc_addr);
+  ConfigSrcPortEntry(client, vsi_sp, insert_entry, grpc_addr);
 }
 
 namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigVlanEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigVlanEntry(Context& context, uint16_t vlan_id, bool insert_entry,
+void ConfigVlanEntry(Client& client, uint16_t vlan_id, bool insert_entry,
                      const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
-  status = context.connect(grpc_addr);
+  status = client.connect(grpc_addr);
   if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  status = context.getPipelineConfig(&p4info);
+  status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
-  status = ConfigVlanPushTableEntry(context, vlan_id, p4info, insert_entry);
+  status = ConfigVlanPushTableEntry(client, vlan_id, p4info, insert_entry);
   if (!status.ok()) return;
 
-  status = ConfigVlanPopTableEntry(context, vlan_id, p4info, insert_entry);
+  status = ConfigVlanPopTableEntry(client, vlan_id, p4info, insert_entry);
   if (!status.ok()) return;
 }
 }  // namespace ovsp4rt
@@ -2545,9 +2544,9 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
                                const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  Context context;
+  Client client;
 
-  ConfigVlanEntry(context, vlan_id, insert_entry, grpc_addr);
+  ConfigVlanEntry(client, vlan_id, insert_entry, grpc_addr);
 }
 
 #elif defined(DPDK_TARGET)
@@ -2556,30 +2555,29 @@ namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigFdbEntry (DPDK)
 //----------------------------------------------------------------------
-void ConfigFdbEntry(Context& context,
-                    const struct mac_learning_info& learn_info,
+void ConfigFdbEntry(Client& client, const struct mac_learning_info& learn_info,
                     bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
-  status = context.connect(grpc_addr);
+  status = client.connect(grpc_addr);
   if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  status = context.getPipelineConfig(&p4info);
+  status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   if (learn_info.is_tunnel) {
     status =
-        ConfigFdbTunnelTableEntry(context, learn_info, p4info, insert_entry);
+        ConfigFdbTunnelTableEntry(client, learn_info, p4info, insert_entry);
   } else if (learn_info.is_vlan) {
     status =
-        ConfigFdbTxVlanTableEntry(context, learn_info, p4info, insert_entry);
+        ConfigFdbTxVlanTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) return;
 
     status =
-        ConfigFdbRxVlanTableEntry(context, learn_info, p4info, insert_entry);
+        ConfigFdbRxVlanTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) return;
   }
 }
@@ -2592,9 +2590,9 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  Context context;
+  Client client;
 
-  ConfigFdbEntry(context, learn_info, insert_entry, grpc_addr);
+  ConfigFdbEntry(client, learn_info, insert_entry, grpc_addr);
 }
 
 //----------------------------------------------------------------------
@@ -2626,29 +2624,29 @@ namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigTunnelEntry (common)
 //----------------------------------------------------------------------
-void ConfigTunnelEntry(Context& context, const struct tunnel_info& tunnel_info,
+void ConfigTunnelEntry(Client& client, const struct tunnel_info& tunnel_info,
                        bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
-  status = context.connect(grpc_addr);
+  status = client.connect(grpc_addr);
   if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  status = context.getPipelineConfig(&p4info);
+  status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
-  status = ConfigEncapTableEntry(context, tunnel_info, p4info, insert_entry);
+  status = ConfigEncapTableEntry(client, tunnel_info, p4info, insert_entry);
   if (!status.ok()) return;
 
 #if defined(ES2K_TARGET)
-  status = ConfigDecapTableEntry(context, tunnel_info, p4info, insert_entry);
+  status = ConfigDecapTableEntry(client, tunnel_info, p4info, insert_entry);
   if (!status.ok()) return;
 #endif
 
   status =
-      ConfigTunnelTermTableEntry(context, tunnel_info, p4info, insert_entry);
+      ConfigTunnelTermTableEntry(client, tunnel_info, p4info, insert_entry);
   if (!status.ok()) return;
 }
 }  // namespace ovsp4rt
@@ -2660,9 +2658,9 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
                                  bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  Context context;
+  Client client;
 
-  ConfigTunnelEntry(context, tunnel_info, insert_entry, grpc_addr);
+  ConfigTunnelEntry(client, tunnel_info, insert_entry, grpc_addr);
 }
 
 #if defined(ES2K_TARGET)
@@ -2671,45 +2669,42 @@ namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigIpMacMapEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigIpMacMapEntry(Context& context,
-                         const struct ip_mac_map_info& ip_info,
+void ConfigIpMacMapEntry(Client& client, const struct ip_mac_map_info& ip_info,
                          bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
-  status = context.connect(grpc_addr);
+  status = client.connect(grpc_addr);
   if (!status.ok()) return;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
-  status = context.getPipelineConfig(&p4info);
+  status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
   if (insert_entry) {
-    auto status_or_read_response = GetVmSrcTableEntry(context, ip_info, p4info);
+    auto status_or_read_response = GetVmSrcTableEntry(client, ip_info, p4info);
     if (status_or_read_response.ok()) {
       goto try_dstip;
     }
   }
 
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
-    status =
-        ConfigSrcIpMacMapTableEntry(context, ip_info, p4info, insert_entry);
+    status = ConfigSrcIpMacMapTableEntry(client, ip_info, p4info, insert_entry);
     if (!status.ok()) {
     }
   }
 
 try_dstip:
   if (insert_entry) {
-    auto status_or_read_response = GetVmDstTableEntry(context, ip_info, p4info);
+    auto status_or_read_response = GetVmDstTableEntry(client, ip_info, p4info);
     if (status_or_read_response.ok()) {
       return;
     }
   }
 
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
-    status =
-        ConfigDstIpMacMapTableEntry(context, ip_info, p4info, insert_entry);
+    status = ConfigDstIpMacMapTableEntry(client, ip_info, p4info, insert_entry);
     if (!status.ok()) {
     }
   }
@@ -2723,8 +2718,8 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
                                      bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  Context context;
+  Client client;
 
-  ConfigIpMacMapEntry(context, ip_info, insert_entry, grpc_addr);
+  ConfigIpMacMapEntry(client, ip_info, insert_entry, grpc_addr);
 }
 #endif  // ES2K_TARGET

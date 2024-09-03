@@ -1,8 +1,8 @@
 // Copyright 2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef OVSP4RT_CONTEXT_H_
-#define OVSP4RT_CONTEXT_H_
+#ifndef OVSP4RT_CLIENT_H_
+#define OVSP4RT_CLIENT_H_
 
 #include <stdint.h>
 
@@ -15,9 +15,9 @@
 
 namespace ovsp4rt {
 
-class Context {
+class Client {
  public:
-  Context() {}
+  Client() {}
 
   absl::Status connect(const char* grpc_addr);
 
@@ -54,4 +54,4 @@ class Context {
 
 }  // namespace ovsp4rt
 
-#endif  // OVSP4RT_CONTEXT_H_
+#endif  // OVSP4RT_CLIENT_H_
