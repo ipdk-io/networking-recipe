@@ -47,8 +47,8 @@ target_include_directories(encode_addr_test PUBLIC
 )
 
 target_link_libraries(encode_addr_test PUBLIC
-  GTest::gtest
   absl::flags_parse
+  GTest::gtest
 )
 
 add_test(NAME encode_addr_test COMMAND encode_addr_test)

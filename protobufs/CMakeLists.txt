@@ -8,7 +8,7 @@
 # Version 3.15 is the baseline for P4 Control Plane.
 cmake_minimum_required(VERSION 3.15)
 
-project(protobufs VERSION 2024.3.0 LANGUAGES CXX)
+project(protobufs VERSION 2024.8.0 LANGUAGES CXX)
 
 include(CMakePrintHelpers)
 include(GNUInstallDirs)

@@ -337,7 +337,7 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL,
                                      ACTION_SET_TUNNEL_PARAM_TUNNEL_ID));
-      // note: 8-bit vni (dpdk)
+      // TODO(derek): 8-bit value for 24-bit action parameter.
       param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
     }
 
@@ -408,6 +408,9 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
 #endif
 }
 
+#ifdef ES2K_TARGET
+
+// Never called when DPDK_TARGET is enabled.
 void PrepareFdbTableEntryforV4GeneveTunnel(
     p4::v1::TableEntry* table_entry, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry,
@@ -510,8 +513,6 @@ void PrepareFdbTableEntryforV4GeneveTunnel(
 #error "ASSERT: Unknown TARGET type!"
 #endif
 }
-
-#if defined(ES2K_TARGET)
 
 void PrepareL2ToTunnelV4(p4::v1::TableEntry* table_entry,
                          const struct mac_learning_info& learn_info,
@@ -1831,19 +1832,6 @@ absl::Status ConfigVlanPushTableEntry(ovsp4rt::OvsP4rtSession* session,
   PrepareVlanPushTableEntry(table_entry, vlan_id, p4info, insert_entry);
 
   return ovsp4rt::SendWriteRequest(session, write_request);
-}
-
-absl::StatusOr<::p4::v1::ReadResponse> GetVlanPushTableEntry(
-    ovsp4rt::OvsP4rtSession* session, const uint16_t vlan_id,
-    const ::p4::config::v1::P4Info& p4info) {
-  ::p4::v1::ReadRequest read_request;
-  ::p4::v1::TableEntry* table_entry;
-
-  table_entry = ovsp4rt::SetupTableEntryToRead(session, &read_request);
-
-  PrepareVlanPushTableEntry(table_entry, vlan_id, p4info, false);
-
-  return ovsp4rt::SendReadRequest(session, read_request);
 }
 
 absl::Status ConfigVlanPopTableEntry(ovsp4rt::OvsP4rtSession* session,

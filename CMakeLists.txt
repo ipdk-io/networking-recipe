@@ -7,7 +7,7 @@
 # Version 3.15 is the baseline for P4 Control Plane.
 cmake_minimum_required(VERSION 3.15)
 
-project(networking-recipe VERSION 24.06 LANGUAGES C CXX)
+project(networking-recipe VERSION 3.2.0 LANGUAGES C CXX)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 

@@ -37,11 +37,11 @@ env:
 
 jobs:
   #---------------------------------------------------------------------
-  # 1-build_dpdk_p4cp
+  # dpdk_build_and_test
   #---------------------------------------------------------------------
-  build_dpdk_p4cp:
+  dpdk_build_and_test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     steps:
       - name: Clone networking-recipe
@@ -81,54 +81,13 @@ jobs:
           export SDE_INSTALL=$SDE_INSTALL_DIR
           ./make-all.sh --target=dpdk --rpath
 
-  #---------------------------------------------------------------------
-  # 2-krnlmon_unit_tests
-  #---------------------------------------------------------------------
-  krnlmon_unit_tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: Clone networking-recipe
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          path: recipe
-
-      - name: Install prerequisites
+      - name: Run unit tests
+        working-directory: recipe/build
         run: |
-          sudo apt install $PREREQS
-
-      - name: Install DPDK SDE
-        uses: robinraju/release-downloader@v1.11
-        with:
-          repository: ${{ env.SDE_REPOSITORY }}
-          tag: ${{ env.SDE_TAG }}
-          fileName: ${{ env.SDE_FILENAME }}
-      - run: |
-          sudo tar -xzf $SDE_FILENAME -C /
-          rm $SDE_FILENAME
-
-      - name: Install stratum dependencies
-        uses: robinraju/release-downloader@v1.11
-        with:
-          repository: ${{ env.DEPS_REPOSITORY }}
-          tag: ${{ env.DEPS_TAG }}
-          fileName: ${{ env.DEPS_FILENAME }}
-      - run: |
-          sudo tar -xzf $DEPS_FILENAME -C /
-          rm $DEPS_FILENAME
-
-      - name: Run krnlmon unit tests
-        working-directory: recipe/krnlmon/krnlmon
-        run: |
-          export DEPEND_INSTALL=$DEPS_INSTALL_DIR
-          export SDE_INSTALL=$SDE_INSTALL_DIR
-          cmake -S . -B build -DTDI_TARGET=DPDK
-          cmake --build build --target krnlmon-test
+          ctest --output-on-failure
 
   #---------------------------------------------------------------------
-  # 3-build_p4runtime_protos
+  # build_p4runtime_protos
   #---------------------------------------------------------------------
   build_p4runtime_protos:
     runs-on: ubuntu-latest

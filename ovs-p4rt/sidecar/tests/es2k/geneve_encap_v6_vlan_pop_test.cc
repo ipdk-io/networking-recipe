@@ -72,12 +72,35 @@ class GeneveEncapV6VlanPopTest : public IpTunnelTest {
       }
     }
   }
+
+  void CheckAddrParam(const std::string& param_name, const std::string& value,
+                      const struct p4_ipaddr& ipaddr) const {
+    constexpr int IPV6_ADDR_SIZE = 16;
+    constexpr int IPV6_ADDR_WORDS = IPV6_ADDR_SIZE / 2;
+
+    ASSERT_EQ(value.size(), IPV6_ADDR_SIZE);
+
+    for (int word_num = 0; word_num < IPV6_ADDR_WORDS; ++word_num) {
+      int byte_num = word_num * 2;
+      uint16_t actual =
+          (value[byte_num] & 0xFF) | ((value[byte_num + 1] & 0xFF) << 8);
+      uint16_t expected = ipaddr.ip.v6addr.__in6_u.__u6_addr16[word_num];
+      EXPECT_EQ(actual, expected)
+          << param_name << "[" << word_num << "] does not match\n"
+          << "  actual:   0x" << std::setw(4) << std::setfill('0') << std::hex
+          << actual << '\n'
+          << "  expected: 0x" << std::setw(4) << std::setfill('0') << expected
+          << '\n'
+          << std::dec;
+    }
+  }
+
   void CheckSrcAddrParam(const std::string& value) const {
-    // TODO(derek): implement CheckSrcAddrParam().
+    CheckAddrParam("src_addr", value, tunnel_info.local_ip);
   }
 
   void CheckDstAddrParam(const std::string& value) const {
-    // TODO(derek): implement CheckDstAddrParam().
+    CheckAddrParam("dst_addr", value, tunnel_info.remote_ip);
   }
 
   void CheckSrcPortParam(const std::string& value) const {
