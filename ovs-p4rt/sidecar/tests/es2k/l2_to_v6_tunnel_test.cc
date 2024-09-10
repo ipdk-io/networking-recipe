@@ -22,17 +22,16 @@ class L2ToV6TunnelTest : public BaseTableTest {
 
   void InitFdbInfo() {
     constexpr uint8_t MAC_ADDR[] = {0xde, 0xad, 0xbe, 0xef, 0x00, 0xe};
-    constexpr uint32_t kIpAddrV6[] = {0, 66, 129, 512};
-    constexpr int kIpAddrV6Len = sizeof(kIpAddrV6) / sizeof(kIpAddrV6[0]);
+    constexpr char IPV6_ADDR[] = "face:deaf:feed:aced:cede:dead:beef:cafe";
 
     memcpy(fdb_info.mac_addr, MAC_ADDR, sizeof(fdb_info.mac_addr));
 
+    p4_ipaddr& remote_ip = fdb_info.tnl_info.remote_ip;
+    EXPECT_EQ(inet_pton(AF_INET6, IPV6_ADDR,
+                        &remote_ip.ip.v6addr.__in6_u.__u6_addr16),
+              1);
     fdb_info.tnl_info.remote_ip.family = AF_INET6;
-    // TODO(derek): replace this with pton()
-    for (int i = 0; i < kIpAddrV6Len; i++) {
-      fdb_info.tnl_info.remote_ip.ip.v6addr.__in6_u.__u6_addr32[i] =
-          kIpAddrV6[i];
-    }
+    fdb_info.tnl_info.remote_ip.prefix_len = 32;
 
     SelectAction("set_tunnel_v6");
   }
@@ -49,7 +48,7 @@ class L2ToV6TunnelTest : public BaseTableTest {
     const struct p4_ipaddr& remote_ip = fdb_info.tnl_info.remote_ip;
 
     // TODO(derek): look up param IDs by name.
-    // Allow for the possibility that params are not in order. (?)
+    // TODO(derek): Do not assume that params are in order.
     for (int i = 0; i < action.params_size(); i++) {
       const auto& param = action.params()[i];
       ASSERT_EQ(param.param_id(), i + 1);
