@@ -1962,9 +1962,9 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
 #endif
 }
 
-absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
-    Client& client, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info) {
+bool HaveL2ToTunnelV4TableEntry(Client& client,
+                                const struct mac_learning_info& learn_info,
+                                const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -1973,13 +1973,13 @@ absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
 
   PrepareL2ToTunnelV4(table_entry, learn_info, p4info, false, detail);
 
-  // This function does not log failed requests.
-  return client.sendReadRequest(read_request);
+  // TODO(derek): provisionally log failures?
+  return client.sendReadRequest(read_request).ok();
 }
 
-absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV6TableEntry(
-    Client& client, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info) {
+bool HaveL2ToTunnelV6TableEntry(Client& client,
+                                const struct mac_learning_info& learn_info,
+                                const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -1988,13 +1988,14 @@ absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV6TableEntry(
 
   PrepareL2ToTunnelV6(table_entry, learn_info, p4info, false, detail);
 
-  // This function does not log failed requests.
-  return client.sendReadRequest(read_request);
+  // TODO(derek): provisionally log failures?
+  return client.sendReadRequest(read_request).ok();
 }
 
-absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
-    Client& client, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
+bool HaveFdbTunnelTableEntry(Client& client,
+                             const struct mac_learning_info& learn_info,
+                             const ::p4::config::v1::P4Info& p4info,
+                             bool adding = false) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -2012,23 +2013,22 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
     PrepareFdbTableEntryforV4GeneveTunnel(table_entry, learn_info, p4info,
                                           false, detail);
   } else {
-    return absl::UnknownError("Unsupported tunnel type");
+    ovsp4rt_log_error("Unsupported tunnel type (%d)",
+                      learn_info.tnl_info.tunnel_type);
+    return false;
   }
 #else
 #error "ASSERT: Unknown TARGET type!"
 #endif
 
-  auto status = client.sendReadRequest(read_request);
-  if (status.ok() && adding) {
-    ovsp4rt_log_error("Error adding to %s: entry already exists",
-                      detail.getLogTableName());
-  }
-  return status;
+  // TODO(derek): provisionally log failures?
+  return client.sendReadRequest(read_request).ok();
 }
 
-absl::StatusOr<::p4::v1::ReadResponse> GetFdbVlanTableEntry(
-    Client& client, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
+bool HaveFdbVlanTableEntry(Client& client,
+                           const struct mac_learning_info& learn_info,
+                           const ::p4::config::v1::P4Info& p4info,
+                           bool adding = false) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -2037,17 +2037,12 @@ absl::StatusOr<::p4::v1::ReadResponse> GetFdbVlanTableEntry(
 
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, false, detail);
 
-  auto status = client.sendReadRequest(read_request);
-  if (status.ok() && adding) {
-    ovsp4rt_log_error("Error adding to %: entry already exists",
-                      detail.getLogTableName());
-  }
-  return status;
+  // TODO(derek): provisionally log failures?
+  return client.sendReadRequest(read_request).ok();
 }
 
-absl::StatusOr<::p4::v1::ReadResponse> GetVmSrcTableEntry(
-    Client& client, struct ip_mac_map_info ip_info,
-    const ::p4::config::v1::P4Info& p4info) {
+bool HaveVmSrcTableEntry(Client& client, struct ip_mac_map_info ip_info,
+                         const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -2056,13 +2051,12 @@ absl::StatusOr<::p4::v1::ReadResponse> GetVmSrcTableEntry(
 
   PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
-  // This function does not log failed requests.
-  return client.sendReadRequest(read_request);
+  // TODO(derek): provisionally log failures?
+  return client.sendReadRequest(read_request).ok();
 }
 
-absl::StatusOr<::p4::v1::ReadResponse> GetVmDstTableEntry(
-    Client& client, const struct ip_mac_map_info& ip_info,
-    const ::p4::config::v1::P4Info& p4info) {
+bool HaveVmDstTableEntry(Client& client, const struct ip_mac_map_info& ip_info,
+                         const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -2071,7 +2065,8 @@ absl::StatusOr<::p4::v1::ReadResponse> GetVmDstTableEntry(
 
   PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
-  return client.sendReadRequest(read_request);
+  // TODO(derek): provisionally log failures?
+  return client.sendReadRequest(read_request).ok();
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
@@ -2236,9 +2231,7 @@ void ConfigFdbEntry(Client& client, struct mac_learning_info learn_info,
    */
 
   if (!insert_entry) {
-    auto status_or_read_response =
-        GetL2ToTunnelV4TableEntry(client, learn_info, p4info);
-    if (status_or_read_response.ok()) {
+    if (HaveL2ToTunnelV4TableEntry(client, learn_info, p4info)) {
       learn_info.is_tunnel = true;
     }
 
@@ -2246,9 +2239,7 @@ void ConfigFdbEntry(Client& client, struct mac_learning_info learn_info,
      * entry as the entry can be either in V4 or V6 tunnel table.
      */
     if (!learn_info.is_tunnel) {
-      status_or_read_response =
-          GetL2ToTunnelV6TableEntry(client, learn_info, p4info);
-      if (status_or_read_response.ok()) {
+      if (HaveL2ToTunnelV6TableEntry(client, learn_info, p4info)) {
         learn_info.is_tunnel = true;
         learn_info.tnl_info.local_ip.family = AF_INET6;
         learn_info.tnl_info.remote_ip.family = AF_INET6;
@@ -2258,9 +2249,7 @@ void ConfigFdbEntry(Client& client, struct mac_learning_info learn_info,
 
   if (learn_info.is_tunnel) {
     if (insert_entry) {
-      auto status_or_read_response =
-          GetFdbTunnelTableEntry(client, learn_info, p4info, true);
-      if (status_or_read_response.ok()) {
+      if (HaveFdbTunnelTableEntry(client, learn_info, p4info, true)) {
         return;
       }
     }
@@ -2279,9 +2268,7 @@ void ConfigFdbEntry(Client& client, struct mac_learning_info learn_info,
     }
   } else {
     if (insert_entry) {
-      auto status_or_read_response =
-          GetFdbVlanTableEntry(client, learn_info, p4info, true);
-      if (status_or_read_response.ok()) {
+      if (HaveFdbVlanTableEntry(client, learn_info, p4info, true)) {
         return;
       }
 
@@ -2294,7 +2281,7 @@ void ConfigFdbEntry(Client& client, struct mac_learning_info learn_info,
       //
       // GetVsiSrcPort(Client& client, const P4Info& p4info,
       //               uint32_t src_port, uint32_t& vsi_port);
-      status_or_read_response =
+      auto status_or_read_response =
           GetTxAccVsiTableEntry(client, learn_info.src_port, p4info);
       if (!status_or_read_response.ok()) {
         return;
@@ -2683,8 +2670,7 @@ void ConfigIpMacMapEntry(Client& client, const struct ip_mac_map_info& ip_info,
   if (!status.ok()) return;
 
   if (insert_entry) {
-    auto status_or_read_response = GetVmSrcTableEntry(client, ip_info, p4info);
-    if (status_or_read_response.ok()) {
+    if (HaveVmSrcTableEntry(client, ip_info, p4info)) {
       goto try_dstip;
     }
   }
@@ -2697,8 +2683,7 @@ void ConfigIpMacMapEntry(Client& client, const struct ip_mac_map_info& ip_info,
 
 try_dstip:
   if (insert_entry) {
-    auto status_or_read_response = GetVmDstTableEntry(client, ip_info, p4info);
-    if (status_or_read_response.ok()) {
+    if (HaveVmDstTableEntry(client, ip_info, p4info)) {
       return;
     }
   }
