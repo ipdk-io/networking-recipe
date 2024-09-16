@@ -193,7 +193,8 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
             GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_REMOVE_VLAN_AND_FWD,
                        ACTION_REMOVE_VLAN_AND_FWD_PARAM_PORT_ID));
         auto port_id = learn_info.src_port;
-        // note: port_id is bit<32>
+        // TODO(derek): port_id truncated to 8 bits. [es2k]
+        // See https://github.com/ipdk-io/networking-recipe/issues/619
         param->set_value(EncodeByteValue(1, port_id));
       }
       {
@@ -201,7 +202,8 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
         param->set_param_id(
             GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_REMOVE_VLAN_AND_FWD,
                        ACTION_REMOVE_VLAN_AND_FWD_PARAM_VLAN_PTR));
-        // note: vlan_ptr is bit<24>
+        // TODO(derek): port_vlan truncated to 8 bits. [es2k]
+        // See https://github.com/ipdk-io/networking-recipe/issues/620
         param->set_value(EncodeByteValue(1, learn_info.vlan_info.port_vlan));
       }
     } else {
@@ -211,7 +213,8 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
         param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD,
                                        ACTION_L2_FWD_PARAM_PORT));
         auto port_id = learn_info.src_port;
-        // note: port_id is bit<32>
+        // TODO(derek): port_id truncated to 8 bits. [es2k]
+        // See https://github.com/ipdk-io/networking-recipe/issues/619
         param->set_value(EncodeByteValue(1, port_id));
       }
     }
@@ -225,8 +228,11 @@ void PrepareFdbTxVlanTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_L2_FWD,
                                      ACTION_L2_FWD_PARAM_PORT));
-      // Note: Unusual value semantics. Extract Function and document. (dpdk)
+      // TODO(derek) Questionable value semantics. [dpdk]
+      // See https://github.com/ipdk-io/networking-recipe/issues/689
       auto port_id = learn_info.vln_info.vlan_id - 1;
+      // TODO(derek): vlan_id truncated to 8 bits. [dpdk]
+      // See https://github.com/ipdk-io/networking-recipe/issues/689
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
@@ -266,7 +272,8 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
       param->set_param_id(GetParamId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD,
                                      ACTION_L2_FWD_PARAM_PORT));
       auto port_id = learn_info.rx_src_port;
-      // note: port_id is bit<32>
+      // TODO(derek): port_id truncated to 8 bits. [es2k]
+      // See https://github.com/ipdk-io/networking-recipe/issues/682
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
@@ -295,8 +302,11 @@ void PrepareFdbRxVlanTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_RX_TABLE_ACTION_L2_FWD,
                                      ACTION_L2_FWD_PARAM_PORT));
-      // Note: Unusual value semantics. Extract Function and document. (dpdk)
+      // TODO(derek): questionable value semantics. [dpdk]
+      // See https://github.com/ipdk-io/networking-recipe/issues/683
       auto port_id = learn_info.vln_info.vlan_id - 1;
+      // TODO(derek): vlan_id truncated to 8 bits. [dpdk]
+      // See https://github.com/ipdk-io/networking-recipe/issues/683
       param->set_value(EncodeByteValue(1, port_id));
     }
   }
@@ -337,7 +347,8 @@ void PrepareFdbTableEntryforV4VxlanTunnel(
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, L2_FWD_TX_TABLE_ACTION_SET_TUNNEL,
                                      ACTION_SET_TUNNEL_PARAM_TUNNEL_ID));
-      // TODO(derek): 8-bit value for 24-bit action parameter.
+      // TODO(derek): 8-bit value for 24-bit action parameter. [dpdk]
+      // See https://github.com/ipdk-io/networking-recipe/issues/677
       param->set_value(EncodeByteValue(1, learn_info.tnl_info.vni));
     }
 
@@ -1369,8 +1380,8 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
 #if defined(ES2K_TARGET)
   table_entry->set_table_id(GetTableId(p4info, IPV4_TUNNEL_TERM_TABLE));
 
-  // TODO(derek): ipv4_tunnel_term_table does not have a bridge_id
-  // match field. What gives?
+  // TODO(derek): table does not have a bridge_id match field. [es2k]
+  // See https://github.com/ipdk-io/networking-recipe/issues/617 for details.
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, IPV4_TUNNEL_TERM_TABLE,
                                       IPV4_TUNNEL_TERM_TABLE_KEY_BRIDGE_ID));
@@ -1409,7 +1420,8 @@ void PrepareTunnelTermTableEntry(p4::v1::TableEntry* table_entry,
       auto param = action->add_params();
       param->set_param_id(GetParamId(p4info, ACTION_DECAP_OUTER_IPV4,
                                      ACTION_DECAP_OUTER_IPV4_PARAM_TUNNEL_ID));
-      // note: 8-bit vni (dpdk)
+      // TODO(derek): tunnel_id truncated to 8 bits. [dpdk]
+      // See https://github.com/ipdk-io/networking-recipe/issues/685
       param->set_value(EncodeByteValue(1, tunnel_info.vni));
     }
   }
@@ -1472,6 +1484,9 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
   table_entry->set_table_id(GetTableId(p4info, IPV6_TUNNEL_TERM_TABLE));
+
+  // TODO(derek): table does not have a bridge_id match field. [es2k]
+  // See https://github.com/ipdk-io/networking-recipe/issues/617
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, IPV6_TUNNEL_TERM_TABLE,
                                       IPV6_TUNNEL_TERM_TABLE_KEY_BRIDGE_ID));
@@ -1671,7 +1686,8 @@ void PrepareVxlanDecapModAndVlanPushTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_VXLAN_DECAP_AND_PUSH_VLAN,
                      ACTION_VXLAN_DECAP_AND_PUSH_VLAN_PARAM_VLAN_ID));
-      // TODO(derek): port_vlan encoded as bit<8>.
+      // TODO(derek): port_vlan truncated to 8 bits. [es2k]
+      // See https://github.com/ipdk-io/networking-recipe/issues/678
       param->set_value(EncodeByteValue(1, tunnel_info.vlan_info.port_vlan));
     }
   }
@@ -1714,7 +1730,8 @@ void PrepareGeneveDecapModAndVlanPushTableEntry(
       param->set_param_id(
           GetParamId(p4info, ACTION_GENEVE_DECAP_AND_PUSH_VLAN,
                      ACTION_GENEVE_DECAP_AND_PUSH_VLAN_PARAM_VLAN_ID));
-      // TODO(derek): port_vlan encoded as bit<8>.
+      // TODO(derek): port_vlan truncated to 8 bits. [es2k]
+      // See https://github.com/ipdk-io/networking-recipe/issues/679
       param->set_value(EncodeByteValue(1, tunnel_info.vlan_info.port_vlan));
     }
   }
@@ -1806,7 +1823,8 @@ void PrepareVlanPopTableEntry(p4::v1::TableEntry* table_entry,
   auto match = table_entry->add_match();
   match->set_field_id(GetMatchFieldId(p4info, VLAN_POP_MOD_TABLE,
                                       VLAN_POP_MOD_KEY_MOD_BLOB_PTR));
-  // note: mod_blob_ptr is bit<24>, vlan_id is bit<12>, encoded value is bit<8>.
+  // TODO(derek): vlan_id truncated to 8 bits. [es2k]
+  // See https://github.com/ipdk-io/networking-recipe/issues/684
   match->mutable_exact()->set_value(EncodeByteValue(1, vlan_id));
 
   if (insert_entry) {
@@ -1997,7 +2015,8 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
   auto match = table_entry->add_match();
   match->set_field_id(
       GetMatchFieldId(p4info, TX_ACC_VSI_TABLE, TX_ACC_VSI_TABLE_KEY_VSI));
-  // TODO(derek): vsi field is bit<11>
+  // TODO(derek): sp value truncated to 8 bits. [es2k]
+  // See https://github.com/ipdk-io/networking-recipe/issues/680 for details.
   match->mutable_exact()->set_value(
       EncodeByteValue(1, (sp - ES2K_VPORT_ID_OFFSET)));
 
@@ -2481,8 +2500,6 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
   PrepareSrcPortTableEntry(table_entry, tnl_sp, p4info, insert_entry);
 
   status = ovsp4rt::SendWriteRequest(session.get(), write_request);
-
-  // TODO: handle error scenarios. For now return irrespective of the status.
   if (!status.ok()) return;
 }
 
