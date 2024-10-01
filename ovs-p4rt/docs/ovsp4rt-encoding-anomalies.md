@@ -59,9 +59,8 @@ Encodes the port action param as a single byte.
 
 Also has a [value semantics anomaly](#preparefdbrxvlantableentry---dpdk-2).
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/683>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/683>
+for details.
 
 #### PrepareFdbRxVlanTableEntry() - ES2K
 
@@ -70,9 +69,8 @@ Encodes the port field as a single byte.
 - The source field is uint32_t.
 - The param value is bit<32>.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/682>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/682>
+for details.
 
 #### PrepareFdbTableEntryforV4VxlanTunnel() - DPDK
 
@@ -81,9 +79,8 @@ DPDK variant encodes the `tunnel_id` action parameter as a single byte.
 - The source field is uint32_t.
 - The DPDK tunnel_id param is 24 bits wide.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/677>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/677>
+for details.
 
 #### PrepareFdbTxVlanTableEntry() - DPDK #1
 
@@ -91,9 +88,8 @@ Encodes the transformed vlan_id (nominally bit<12>) as a single byte (bit<8>).
 
 Also has a [value semantics anomaly](#preparefdbtxvlantableentry---dpdk-2).
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/689>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/689>
+for details.
 
 #### PrepareFdbTxVlanTableEntry() - ES2K #1
 
@@ -103,9 +99,8 @@ Encodes the port_vlan input as a single byte.
 - The parameter value is bit<24>.
 - VLAN identifiers are bit<12>.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/620>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/620>
+for details.
 
 #### PrepareFdbTxVlanTableEntry() - ES2K #2
 
@@ -114,9 +109,8 @@ Encodes the src_port input as a single byte.
 - The input value is uint32_t.
 - The parameter value is bit<32>.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/619>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/619>
+for details.
 
 #### PrepareGeneveDecapModAndVlanPushTableEntry()
 
@@ -125,9 +119,8 @@ Encodes the vlan_id field as a single byte.
 - The source field is int.
 - The param value is bit<12>.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/679>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/679>
+for details.
 
 #### PrepareTunnelTermTableEntry() - DPDK
 
@@ -135,9 +128,8 @@ Encodes the tunnel_id as a single byte.
 
 - The tunnel_id action param is bit<24>.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/685>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/685>
+for details.
 
 #### PrepareTxAccVsiTableEntry()
 
@@ -146,9 +138,8 @@ Encodes the VSI match key value as a single byte.
 - The input parameter is uint32_t.
 - The match-key value is bit<11>.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/680>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/680>
+for details.
 
 #### PrepareVlanPopTableEntry()
 
@@ -157,9 +148,8 @@ Encodes the vlan_id action param as a single byte.
 - The canonical width of a VLAN identifier is bit<12>.
 - The output field is bit<24>.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/684>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/684>
+for details.
 
 #### PrepareVlanPushTableEntry()
 
@@ -168,9 +158,8 @@ Encodes the vlan_id parameter as as single byte in both the
 
 - VLAN identifiers are bit<12>.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/632>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/632>
+for details.
 
 #### PrepareVxlanDecapModAndVlanPushTableEntry()
 
@@ -179,9 +168,8 @@ Encodes the vlan_id action parameter as a single byte.
 - The source field is int.
 - The vlan_id action parameter is bit<12>.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/678>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/678>
+for details.
 
 ### Undefined fields
 
@@ -191,9 +179,8 @@ Adds a match key for the Bridge ID (`user_meta.pmeta.bridge_id`).
 The Linux Networking P4 program does not define this match field
 for `ipv4_tunnel_term_table`.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/617>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/617>
+for details.
 
 #### PrepareV6TunnelTermTableEntry()
 
@@ -201,9 +188,8 @@ Adds a match key for the Bridge ID (`user_meta.pmeta.bridge_id`).
 The Linux Networking P4 program does not define this match field
 for `ipv6_tunnel_term_table`.
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/617>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/617>
+for details.
 
 ### Value Semantics
 
@@ -216,9 +202,8 @@ The DPDK variant has unusual value semantics.
 
 Also has a [field width anomaly](#preparefdbrxvlantableentry---dpdk-1).
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/683>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/683>
+for details.
 
 #### PrepareFdbTxVlanTableEntry() - DPDK #2
 
@@ -226,6 +211,5 @@ Subtracts one 1 from vlan_id and uses it as port_id.
 
 Also has a [field width anomaly](#preparefdbtxvlantableentry---dpdk-1).
 
-See GitHub issue for details.
-
-- <https://github.com/ipdk-io/networking-recipe/issues/683>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/683>
+for details.
