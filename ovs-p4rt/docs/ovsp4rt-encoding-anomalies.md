@@ -211,5 +211,5 @@ Subtracts one 1 from vlan_id and uses it as port_id.
 
 Also has a [field width anomaly](#preparefdbtxvlantableentry---dpdk-1).
 
-See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/683>
+See GitHub issue <https://github.com/ipdk-io/networking-recipe/issues/689>
 for details.
