@@ -63,9 +63,6 @@ See GitHub issue for details.
 
 - <https://github.com/ipdk-io/networking-recipe/issues/683>
 
-
-- <https://github.com/ipdk-io/networking-recipe/issues/683>
-
 #### PrepareFdbRxVlanTableEntry() - ES2K
 
 Encodes the port field as a single byte.
@@ -108,7 +105,7 @@ Encodes the port_vlan input as a single byte.
 
 See GitHub issue for details.
 
-- https://github.com/ipdk-io/networking-recipe/issues/620>
+- <https://github.com/ipdk-io/networking-recipe/issues/620>
 
 #### PrepareFdbTxVlanTableEntry() - ES2K #2
 
