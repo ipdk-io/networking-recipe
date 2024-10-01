@@ -34,8 +34,9 @@ void IpAddrToJson(nlohmann::json& json, const struct p4_ipaddr& info) {
   if (info.family == AF_INET) {
     json["ipv4_addr"] = {info.ip.v4addr.s_addr};
   } else if (info.family == AF_INET6) {
-    const uint32_t* v6addr = &info.ip.v6addr.__in6_u.__u6_addr32[0];
-    json["ipv6_addr"] = {v6addr[0], v6addr[1], v6addr[2], v6addr[3]};
+    const uint16_t* v6addr = &info.ip.v6addr.__in6_u.__u6_addr16[0];
+    json["ipv6_addr"] = {v6addr[0], v6addr[1], v6addr[2], v6addr[3],
+                         v6addr[4], v6addr[5], v6addr[6], v6addr[7]};
   }
 }
 
