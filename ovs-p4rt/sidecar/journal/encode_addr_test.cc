@@ -20,7 +20,7 @@ class EncodeAddrTest : public EncodeBaseTest {
 };
 
 TEST_F(EncodeAddrTest, can_encode_mac_address) {
-  const uint8_t mac_addr[6] = {0, 1, 2, 3, 4, 5};
+  const uint8_t mac_addr[6] = {255, 127, 63, 31, 15, 7};
 
   nlohmann::json json;
   MacAddrToJson(json, mac_addr);
@@ -53,7 +53,7 @@ TEST_F(EncodeAddrTest, can_encode_ipv4_address) {
 
   ASSERT_TRUE(json["prefix_len"].is_number());
   auto prefix_len = json["prefix_len"].template get<int>();
-  ASSERT_EQ(prefix_len, PREFIX_LEN);
+  EXPECT_EQ(prefix_len, PREFIX_LEN);
 
   ASSERT_TRUE(json["ipv4_addr"][0].is_number());
   auto ipv4_addr = json["ipv4_addr"][0].template get<uint32_t>();
@@ -83,12 +83,15 @@ TEST_F(EncodeAddrTest, can_encode_ipv6_address) {
 
   ASSERT_TRUE(json["prefix_len"].is_number());
   auto prefix_len = json["prefix_len"].template get<int>();
-  ASSERT_EQ(prefix_len, PREFIX_LEN);
+  EXPECT_EQ(prefix_len, PREFIX_LEN);
 
-  for (int i = 0; i < 4; i++) {
-    auto json_word = json["ipv6_addr"][i].template get<uint32_t>();
-    auto addr_word = addr.ip.v6addr.__in6_u.__u6_addr32[i];
-    ASSERT_EQ(json_word, addr_word) << "ipv6_addr[" << i << "] does not match.";
+  for (int i = 0; i < 8; i++) {
+    auto json_word = json["ipv6_addr"][i].template get<uint16_t>();
+    auto addr_word = addr.ip.v6addr.__in6_u.__u6_addr16[i];
+    EXPECT_EQ(addr_word, json_word)
+        << "ipv6_addr[" << i << "] does not match" << std::hex << '\n'
+        << "  addr_word (expected): 0x" << addr_word << '\n'
+        << "  json_word (actual)  : 0x" << json_word << std::dec << '\n';
   }
 }
 
