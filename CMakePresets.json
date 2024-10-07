@@ -32,7 +32,7 @@
         },
         {
             "name": "base-es2k-target",
-            "description": "Base presets forr ES2K target",
+            "description": "Base presets for ES2K target",
             "hidden": true,
             "inherits": ["common-target"],
             "cacheVariables": {
