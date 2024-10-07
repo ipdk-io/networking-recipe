@@ -1,6 +1,7 @@
-.vscode
-.vslick
+.vscode/
+.vslick/
 .p4cpconfig
 ~*
-build
-install
+build/
+install/
+CMakeUserePresets.json
