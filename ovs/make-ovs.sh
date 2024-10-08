@@ -9,7 +9,7 @@ print_help() {
     echo ""
     echo "Options:"
     echo "  --help          -h  Display help text and exit"
-    echo "  --p4ovs=MODE        Build OvS in specified P4OVS mode"
+    echo "  --p4ovs=MODE        Build OvS in specified P4OVS mode [${_P4OVS_MODE}]"
     echo "  --prefix=DIR    -P  Install directory prefix [${_OVS_PREFIX}]"
     echo ""
     echo "P4OVS modes:"
