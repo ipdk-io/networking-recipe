@@ -14,9 +14,10 @@
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true,
                 "CMAKE_INSTALL_PREFIX": {
                     "type": "PATH",
-                    "value": "install"
+                    "value": "${sourceDir}/install"
                 },
                 "SET_RPATH": true
             }
