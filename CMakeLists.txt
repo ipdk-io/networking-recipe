@@ -85,11 +85,11 @@ endif()
 # OVS build mode #
 ##################
 
-set_property(CACHE P4OVS_MODE PROPERTY STRINGS
-    "NONE;P4OVS;OVSP4RT;STUBS")
-
 set(P4OVS_MODE "p4ovs" CACHE STRING "P4OVS build mode")
 string(TOLOWER "${P4OVS_MODE}" P4OVS_MODE)
+
+set_property(CACHE P4OVS_MODE PROPERTY STRINGS
+    "NONE;P4OVS;OVSP4RT;STUBS")
 
 if(NOT WITH_OVSP4RT OR P4OVS_MODE STREQUAL "none")
     unset(WITH_OVSP4RT)
