@@ -4,4 +4,7 @@
 ~*
 build/
 install/
+
+# CMakeUserPresets.json is user-specific.
+# It should never be checked in.
 CMakeUserPresets.json
