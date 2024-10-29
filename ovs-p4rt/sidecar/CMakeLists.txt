@@ -24,6 +24,7 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt.cc
     ovsp4rt_client.cc
     ovsp4rt_client.h
+    ovsp4rt_client_interface.h
     ovsp4rt_private.h
 )
 
