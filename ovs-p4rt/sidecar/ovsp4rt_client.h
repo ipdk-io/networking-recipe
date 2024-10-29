@@ -18,26 +18,44 @@ namespace ovsp4rt {
 class Client {
  public:
   Client() {}
+  virtual ~Client() = default;
 
-  absl::Status connect(const char* grpc_addr);
+  // Connects to the P4Runtime server.
+  virtual absl::Status connect(const char* grpc_addr);
 
-  OvsP4rtSession* session() const { return session_.get(); }
+  // Returns a pointer to the ovsp4rt session object.
+  virtual OvsP4rtSession* session() const { return session_.get(); }
 
-  absl::Status getPipelineConfig(::p4::config::v1::P4Info* p4info);
+  // Gets the pipeline configuration from the P4Runtime server.
+  virtual absl::Status getPipelineConfig(::p4::config::v1::P4Info* p4info);
 
-  // Read requests
-  ::p4::v1::TableEntry* initReadRequest(::p4::v1::ReadRequest* request);
+  //--------------------------------------------------------------------
 
-  absl::StatusOr<p4::v1::ReadResponse> sendReadRequest(
+  // Initializes a Read Table Entry request message.
+  virtual ::p4::v1::TableEntry* initReadRequest(::p4::v1::ReadRequest* request);
+
+  // Sends a Read Table Entry request to the P4Runtime server.
+  virtual absl::StatusOr<p4::v1::ReadResponse> sendReadRequest(
       const p4::v1::ReadRequest& request);
 
-  // Write requests
-  ::p4::v1::TableEntry* initInsertRequest(::p4::v1::WriteRequest* request);
-  ::p4::v1::TableEntry* initModifyRequest(::p4::v1::WriteRequest* request);
-  ::p4::v1::TableEntry* initDeleteRequest(::p4::v1::WriteRequest* request);
+  //--------------------------------------------------------------------
 
-  ::p4::v1::TableEntry* initWriteRequest(::p4::v1::WriteRequest* request,
-                                         bool insert_entry) {
+  // Initializes an Insert Table Entry request message.
+  virtual ::p4::v1::TableEntry* initInsertRequest(
+      ::p4::v1::WriteRequest* request);
+
+  // Initializes a Modify Table Entry request message.
+  virtual ::p4::v1::TableEntry* initModifyRequest(
+      ::p4::v1::WriteRequest* request);
+
+  // Initializes a Delete Table Entry request message.
+  virtual ::p4::v1::TableEntry* initDeleteRequest(
+      ::p4::v1::WriteRequest* request);
+
+  // Initializes an Insert Table Entry or Delete Table Entry request
+  // message, depending on the value of the `insert_entry` parameter.
+  virtual ::p4::v1::TableEntry* initWriteRequest(
+      ::p4::v1::WriteRequest* request, bool insert_entry) {
     if (insert_entry) {
       return initInsertRequest(request);
     } else {
@@ -45,10 +63,11 @@ class Client {
     }
   }
 
-  absl::Status sendWriteRequest(const p4::v1::WriteRequest& request);
+  // Sends a Write Table Entry request to the P4Runtime server.
+  virtual absl::Status sendWriteRequest(const p4::v1::WriteRequest& request);
 
  private:
-  // P4Runtime session.
+  // Pointer to a P4Runtime session object.
   std::unique_ptr<ovsp4rt::OvsP4rtSession> session_;
 };
 
