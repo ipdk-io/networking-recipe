@@ -50,8 +50,23 @@
             }
         },
         {
+            "name": "install-path-presets",
+            "description": "Install paths from environment",
+            "hidden": true,
+            "cacheVariables": {
+                "DEPEND_INSTALL_DIR": {
+                    "type": "PATH",
+                    "value": "$env{DEPEND_INSTALL}"
+                },
+                "SDE_INSTALL_DIR": {
+                    "type": "PATH",
+                    "value": "$env{SDE_INSTALL}"
+                }
+            }
+        },
+        {
             "name": "ovs-legacy-mode",
-            "description": "Mixin presets for legacy P4OVS build",
+            "description": "Legacy OVS-first mode",
             "hidden": true,
             "cacheVariables": {
                 "OVS_INSTALL_DIR": {
@@ -63,7 +78,7 @@
         },
         {
             "name": "ovs-ovsp4rt-mode",
-            "description": "Mixin presets for external ovsp4rt library",
+            "description": "OVS with ovsp4rt library",
             "hidden": true,
             "cacheVariables": {
                 "OVS_INSTALL_DIR": null,
@@ -72,7 +87,7 @@
         },
         {
             "name": "ovs-stubs-mode",
-            "description": "Mixin presets for ovsp4rt stubs library",
+            "description": "OVS with ovsp4rt stubs",
             "hidden": true,
             "cacheVariables": {
                 "OVS_INSTALL_DIR": null,
