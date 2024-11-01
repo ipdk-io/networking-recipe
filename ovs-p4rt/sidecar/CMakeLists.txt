@@ -6,6 +6,8 @@
 
 option(BUILD_JOURNAL "Build ovs-p4rt with Journal class" OFF)
 option(BUILD_SPIES "Build ovs-p4rt with spies" OFF)
+mark_as_advanced(BUILD_JOURNAL)
+mark_as_advanced(BUILD_SPIES)
 
 set(SIDECAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
