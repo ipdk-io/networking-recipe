@@ -3,12 +3,12 @@
 This folder contains sample scripts that may be customized and added
 to your build environment.
 
-## Pre-load scripts
+## Preload scripts
 
 - `dpdk.cmake`
 - `es2k.cmake`
 
-### About pre-load scripts
+### About preload scripts
 
 These scripts allow you to specify one or more sets of parameters to be
 applied at cmake configuration time.
@@ -18,12 +18,12 @@ after the command line is processed and before the first CMakeLists.txt
 file is read.
 
 To use a sample script, copy it to the top-level folder and make any
-changes you wish. You can create as many pre-load scripts as you want.
+changes you wish. You can create as many preload scripts as you want.
 
-Pre-load scripts are customer-specific and are not stored in the
+Preload scripts are customer-specific and are not stored in the
 repository.
 
-### Configure with a pre-load script
+### Configure with a preload script
 
 ```bash
 cmake -B build -C dpdk.cmake [more options]
@@ -80,11 +80,11 @@ Preset CMake variables:
 
   CMAKE_BUILD_TYPE="RelWithDebInfo"
   CMAKE_EXPORT_COMPILE_COMMANDS:BOOL="TRUE"
-  CMAKE_INSTALL_PREFIX:PATH="/home/dfoster/work/latest/install"
+  CMAKE_INSTALL_PREFIX:PATH="home/bilbo/work/latest/install"
   DEPEND_INSTALL_DIR:PATH="/opt/deps"
-  OVS_INSTALL_DIR:PATH="/home/dfoster/work/latest/ovs/install"
+  OVS_INSTALL_DIR:PATH="home/bilbo/work/latest/ovs/install"
   P4OVS_MODE="P4OVS"
-  SDE_INSTALL_DIR:PATH="/home/dfoster/SDE/install"
+  SDE_INSTALL_DIR:PATH="home/bilbo/SDE/install"
   SET_RPATH:BOOL="TRUE"
   TDI_TARGET="dpdk"
 
