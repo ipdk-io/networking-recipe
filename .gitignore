@@ -5,6 +5,9 @@
 build/
 install/
 
-# CMakeUserPresets.json is user-specific.
-# It should never be checked in.
-CMakeUserPresets.json
+# CMake pre-load scripts
+/dpdk.cmake
+/es2k.cmake
+
+# CMake user presets
+/CMakeUserPresets.json
