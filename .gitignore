@@ -1,9 +1,13 @@
+~*
+
+.clang-tidy
+zlog-cfg-cur
+
 .vscode/
 .vslick/
 
-~*
-
 build/
+coverage/
 install/
 private/
 
