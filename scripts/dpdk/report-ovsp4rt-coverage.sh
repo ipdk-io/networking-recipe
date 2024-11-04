@@ -31,7 +31,7 @@ TEST_LABEL=ovsp4rt
 mkdir -p ${OUTPUT_DIR}
 
 # Empty it for good measure.
-rm -fr ${OUTPUT_DIR}/*
+rm -fr ${OUTPUT_DIR:?}/*
 
 # Capture the coverage data, excluding files in directories
 # that don't interest us.
