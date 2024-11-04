@@ -1,11 +1,17 @@
+~*
+
+.clang-tidy
+zlog-cfg-cur
+
 .vscode/
 .vslick/
-.p4cpconfig
-~*
-build/
-install/
 
-# CMake pre-load scripts
+build/
+coverage/
+install/
+private/
+
+# CMake preload scripts
 /dpdk.cmake
 /es2k.cmake
 
