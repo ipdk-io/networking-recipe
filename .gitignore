@@ -1,11 +1,13 @@
 .vscode/
 .vslick/
-.p4cpconfig
+
 ~*
+
 build/
 install/
+private/
 
-# CMake pre-load scripts
+# CMake preload scripts
 /dpdk.cmake
 /es2k.cmake
 
