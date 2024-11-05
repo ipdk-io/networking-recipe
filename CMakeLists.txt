@@ -208,6 +208,23 @@ include(SetInstallRpath)
 
 include(P4RuntimeProtobufs)
 
+####################
+# Uninstall target #
+####################
+
+# Create script to uninstall the build.
+configure_file(
+    "cmake/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    @ONLY
+)
+
+# Define target to run uninstall script.
+add_custom_target(uninstall
+    COMMAND
+        ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+)
+
 ##################
 # Subdirectories #
 ##################
