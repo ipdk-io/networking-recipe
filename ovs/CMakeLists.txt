@@ -16,6 +16,10 @@ include(GNUInstallDirs)
 option(P4OVS "Build OVS with P4 support (legacy mode)" OFF)
 option(WITH_RUNDIRS "Build with OVS runtime directories" OFF)
 
+set(P4OVS_MODE "" CACHE STRING "P4OVS build mode")
+set_property(CACHE P4OVS_MODE PROPERTY STRINGS
+    "NONE;P4OVS;OVSP4RT;STUBS")
+
 ##############
 # Build type #
 ##############
@@ -39,7 +43,6 @@ set(OVS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ovs" CACHE PATH
 # OVS configuration #
 #####################
 
-set(P4OVS_MODE "" CACHE STRING "P4OVS build mode")
 string(TOLOWER "${P4OVS_MODE}" P4OVS_MODE)
 
 if(P4OVS_MODE STREQUAL "stubs")

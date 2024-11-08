@@ -1,0 +1,69 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "ovs-base",
+            "description": "Common presets for all targets",
+            "hidden": true,
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": {
+                    "type": "PATH",
+                    "value": "${sourceDir}/install"
+                }
+            }
+        },
+        {
+            "name": "p4ovs",
+            "displayName": "OVS with P4 (legacy mode)",
+            "inherits": ["ovs-base"],
+            "cacheVariables": {
+                "P4OVS_MODE": "P4OVS"
+            }
+        },
+        {
+            "name": "ovsp4rt",
+            "displayName": "OVS with ovsp4rt library",
+            "inherits": ["ovs-base"],
+            "cacheVariables": {
+                "P4OVS_MODE": "OVSP4RT"
+            }
+        },
+        {
+            "name": "stubs",
+            "displayName": "OVS with ovsp4rt stubs",
+            "inherits": ["ovs-base"],
+            "cacheVariables": {
+                "P4OVS_MODE": "STUBS"
+            }
+        },
+        {
+            "name": "none",
+            "displayName": "OVS without P4",
+            "inherits": ["ovs-base"],
+            "cacheVariables": {
+                "P4OVS_MODE": "NONE"
+            }
+        },
+        {
+            "name": "default",
+            "displayName": "Default configuration",
+            "inherits": ["p4ovs"]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "quiet",
+            "displayName": "Build with V=0",
+            "configurePreset": "default",
+            "jobs": 6,
+            "nativeToolOptions": ["V=0"]
+        }
+    ]
+}
