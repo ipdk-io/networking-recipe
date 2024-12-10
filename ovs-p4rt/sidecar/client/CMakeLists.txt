@@ -1,0 +1,36 @@
+# CMake build file for ovs-p4rt/sidecar/client
+#
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+#
+
+#-----------------------------------------------------------------------
+# ovsp4rt_client_o
+#-----------------------------------------------------------------------
+add_library(ovsp4rt_client_o OBJECT
+  ovsp4rt_client.cc
+  ovsp4rt_client.h
+  ovsp4rt_client_interface.h
+)
+
+target_include_directories(ovsp4rt_client_o PUBLIC
+  ${SIDECAR_SOURCE_DIR}
+)
+
+#-----------------------------------------------------------------------
+# libovsp4rt_client.a
+#-----------------------------------------------------------------------
+add_library(ovsp4rt_client STATIC
+  $<TARGET_OBJECTS:ovsp4rt_client_o>
+)
+
+#-----------------------------------------------------------------------
+# ovsp4rt_client_so
+#-----------------------------------------------------------------------
+add_library(ovsp4rt_client_so SHARED EXCLUDE_FROM_ALL
+  $<TARGET_OBJECTS:ovsp4rt_client_o>
+)
+
+set_target_properties(ovsp4rt_client_so PROPERTIES
+  OUTPUT_NAME ovsp4rt_client
+)
