@@ -4,8 +4,11 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
+option(BUILD_CLIENT  "Build ovs-p4rt with Client class" OFF)
 option(BUILD_JOURNAL "Build ovs-p4rt with Journal class" OFF)
-option(BUILD_SPIES "Build ovs-p4rt with spies" OFF)
+option(BUILD_SPIES   "Build ovs-p4rt spies library" OFF)
+
+mark_as_advanced(BUILD_CLIENT)
 mark_as_advanced(BUILD_JOURNAL)
 mark_as_advanced(BUILD_SPIES)
 
@@ -114,15 +117,22 @@ else()
 endif()
 
 #-----------------------------------------------------------------------
+# libovsp4rt_spies.a
+#-----------------------------------------------------------------------
+if(BUILD_SPIES)
+    add_subdirectory(spies)
+endif()
+
+#-----------------------------------------------------------------------
 # libovsp4rt_stubs.a
 #-----------------------------------------------------------------------
 add_subdirectory(stubs)
 
 #-----------------------------------------------------------------------
-# libovsp4rt_spies.a
+# libovsp4rt_client_o
 #-----------------------------------------------------------------------
-if(BUILD_SPIES)
-    add_subdirectory(spies)
+if(BUILD_CLIENT)
+    add_subdirectory(client)
 endif()
 
 #-----------------------------------------------------------------------
@@ -168,5 +178,5 @@ if(BUILD_TESTING)
 endif()
 
 add_custom_target(ovsp4rt-unit-tests
-  DEPENDS ${UNIT_TEST_NAMES}
+    DEPENDS ${UNIT_TEST_NAMES}
 )
