@@ -5,11 +5,6 @@
 
 #include "ovsp4rt_encode.h"
 
-namespace {
-constexpr uint32_t LEARN_INFO_SCHEMA = 1;
-constexpr uint32_t PORT_INFO_SCHEMA = 1;
-}  // namespace
-
 namespace ovsp4rt {
 
 // mac_learning_info

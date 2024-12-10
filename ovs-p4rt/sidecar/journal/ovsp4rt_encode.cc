@@ -11,13 +11,11 @@
 #include "ovsp4rt/ovs-p4rt.h"
 
 namespace {
-
-constexpr uint32_t LEARN_INFO_SCHEMA = 1;
-constexpr uint32_t PORT_INFO_SCHEMA = 1;
-constexpr uint32_t TUNNEL_INFO_SCHEMA = 1;
-constexpr uint32_t VLAN_ID_SCHEMA = 1;
-constexpr uint32_t IP_MAC_MAP_INFO_SCHEMA = 1;
-
+constexpr uint32_t LEARN_INFO_VERSION = 1;
+constexpr uint32_t PORT_INFO_VERSION = 1;
+constexpr uint32_t TUNNEL_INFO_VERSION = 1;
+constexpr uint32_t VLAN_ID_VERSION = 1;
+constexpr uint32_t IP_MAC_MAP_INFO_VERSION = 1;
 }  // namespace
 
 namespace ovsp4rt {
@@ -123,7 +121,7 @@ nlohmann::json EncodeIpMacMapInfo(const char* func_name,
   nlohmann::json json;
 
   json["func_name"] = func_name;
-  json["schema"] = IP_MAC_MAP_INFO_SCHEMA;
+  json["version"] = IP_MAC_MAP_INFO_VERSION;
   json["struct_name"] = "ip_mac_map_info";
 
   auto& params = json["params"];
@@ -140,7 +138,7 @@ nlohmann::json EncodeMacLearningInfo(const char* func_name,
   nlohmann::json json;
 
   json["func_name"] = func_name;
-  json["schema"] = LEARN_INFO_SCHEMA;
+  json["version"] = LEARN_INFO_VERSION;
   json["struct_name"] = "mac_learning_info";
 
   auto& params = json["params"];
@@ -159,7 +157,7 @@ nlohmann::json EncodeSrcPortInfo(const char* func_name,
   nlohmann::json json;
 
   json["func_name"] = func_name;
-  json["schema"] = PORT_INFO_SCHEMA;
+  json["version"] = PORT_INFO_VERSION;
   json["struct_name"] = "src_port_info";
 
   auto& params = json["params"];
@@ -177,7 +175,7 @@ nlohmann::json EncodeTunnelInfo(const char* func_name,
   nlohmann::json json;
 
   json["func_name"] = func_name;
-  json["schema"] = TUNNEL_INFO_SCHEMA;
+  json["version"] = TUNNEL_INFO_VERSION;
   json["struct_name"] = "tunnel_info";
 
   auto& params = json["params"];
@@ -193,7 +191,7 @@ nlohmann::json EncodeVlanId(const char* func_name, uint16_t vlan_id,
   nlohmann::json json;
 
   json["func_name"] = func_name;
-  json["schema"] = VLAN_ID_SCHEMA;
+  json["version"] = VLAN_ID_VERSION;
 
   auto& params = json["params"];
   params["vlan_id"] = vlan_id;
