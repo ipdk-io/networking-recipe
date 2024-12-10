@@ -1,0 +1,17 @@
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+#
+# Uninstalls the files listed in install_manifest.txt.
+#
+
+file(READ "@CMAKE_BINARY_DIR@/install_manifest.txt" files)
+string(REPLACE "\n" ";" files "${files}")
+
+foreach(file ${files})
+  message(STATUS "Uninstalling ${file}")
+  if(EXISTS "${file}")
+    file(REMOVE "${file}")
+  else()
+    message(STATUS "File ${file} does not exist.")
+  endif()
+endforeach()

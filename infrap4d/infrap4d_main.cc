@@ -1,4 +1,4 @@
-// Copyright 2022-2023 Intel Corporation
+// Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include "absl/synchronization/notification.h"
@@ -14,7 +14,11 @@ extern "C" {
 DEFINE_bool(detach, true, "Run infrap4d in detached mode");
 DEFINE_bool(disable_krnlmon, false, "Run infrap4d without krnlmon support");
 
+static const char kUsage[] = "P4Runtime server for P4 Control Plane.";
+
 int main(int argc, char* argv[]) {
+  ::gflags::SetUsageMessage(kUsage);
+
   // Parse infrap4d command line
   stratum::hal::tdi::ParseCommandLine(argc, argv, true);
 

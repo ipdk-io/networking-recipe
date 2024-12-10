@@ -69,6 +69,7 @@ option(IPDK_ROLE_FIX "Enable IPDK role config changes" ON)
 option(SET_RPATH    "Set RPATH in libraries and executables" OFF)
 option(WITH_KRNLMON "Enable Kernel Monitor support" ON)
 option(WITH_OVSP4RT "Enable OVS support" ON)
+mark_as_advanced(IPDK_ROLE_FIX)
 
 ############################
 # Target selection options #
@@ -87,6 +88,9 @@ endif()
 
 set(P4OVS_MODE "p4ovs" CACHE STRING "P4OVS build mode")
 string(TOLOWER "${P4OVS_MODE}" P4OVS_MODE)
+
+set_property(CACHE P4OVS_MODE PROPERTY STRINGS
+    "NONE;P4OVS;OVSP4RT;STUBS")
 
 if(NOT WITH_OVSP4RT OR P4OVS_MODE STREQUAL "none")
     unset(WITH_OVSP4RT)
@@ -203,6 +207,23 @@ include(SetInstallRpath)
 #####################
 
 include(P4RuntimeProtobufs)
+
+####################
+# Uninstall target #
+####################
+
+# Create script to uninstall the build.
+configure_file(
+    "cmake/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    @ONLY
+)
+
+# Define target to run uninstall script.
+add_custom_target(uninstall
+    COMMAND
+        ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+)
 
 ##################
 # Subdirectories #

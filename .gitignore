@@ -1,6 +1,19 @@
-.vscode
-.vslick
-.p4cpconfig
 ~*
-build
-install
+
+.clang-tidy
+zlog-cfg-cur
+
+.vscode/
+.vslick/
+
+build/
+coverage/
+install/
+private/
+
+# CMake preload scripts
+/dpdk.cmake
+/es2k.cmake
+
+# CMake user presets
+/CMakeUserPresets.json

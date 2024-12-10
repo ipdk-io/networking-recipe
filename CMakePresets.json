@@ -1,0 +1,98 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "common-target",
+            "description": "Common presets for all targets",
+            "hidden": true,
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+                "CMAKE_INSTALL_PREFIX": {
+                    "type": "PATH",
+                    "value": "${sourceDir}/install"
+                },
+                "SET_RPATH": true
+            }
+        },
+        {
+            "name": "base-dpdk-target",
+            "description": "Base presets for DPDK target",
+            "hidden": true,
+            "inherits": ["common-target"],
+            "cacheVariables": {
+                "TDI_TARGET": "dpdk"
+            }
+        },
+        {
+            "name": "base-es2k-target",
+            "description": "Base presets for ES2K target",
+            "hidden": true,
+            "inherits": ["common-target"],
+            "cacheVariables": {
+                "TDI_TARGET": "es2k"
+            }
+        },
+        {
+            "name": "base-tofino-target",
+            "description": "Base presets for Tofino target",
+            "hidden": true,
+            "inherits": ["common-target"],
+            "cacheVariables": {
+                "TDI_TARGET": "tofino"
+            }
+        },
+        {
+            "name": "install-path-presets",
+            "description": "Install paths from environment",
+            "hidden": true,
+            "cacheVariables": {
+                "DEPEND_INSTALL_DIR": {
+                    "type": "PATH",
+                    "value": "$env{DEPEND_INSTALL}"
+                },
+                "SDE_INSTALL_DIR": {
+                    "type": "PATH",
+                    "value": "$env{SDE_INSTALL}"
+                }
+            }
+        },
+        {
+            "name": "ovs-legacy-mode",
+            "description": "Legacy OVS-first mode",
+            "hidden": true,
+            "cacheVariables": {
+                "OVS_INSTALL_DIR": {
+                    "type": "PATH",
+                    "value": "${sourceDir}/ovs/install"
+                },
+                "P4OVS_MODE": "P4OVS"
+            }
+        },
+        {
+            "name": "ovs-ovsp4rt-mode",
+            "description": "OVS with ovsp4rt library",
+            "hidden": true,
+            "cacheVariables": {
+                "OVS_INSTALL_DIR": null,
+                "P4OVS_MODE": "OVSP4RT"
+            }
+        },
+        {
+            "name": "ovs-stubs-mode",
+            "description": "OVS with ovsp4rt stubs",
+            "hidden": true,
+            "cacheVariables": {
+                "OVS_INSTALL_DIR": null,
+                "P4OVS_MODE": "STUBS"
+            }
+        }
+    ]
+}

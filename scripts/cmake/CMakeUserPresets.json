@@ -1,0 +1,50 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "dpdk",
+            "displayName": "DPDK target (P4OVS mode)",
+            "inherits": [
+                "base-dpdk-target",
+                "install-path-presets",
+                "ovs-legacy-mode"
+            ]
+        },
+        {
+            "name": "dpdk-ovsp4rt",
+            "displayName": "DPDK target (OVSP4RT mode)",
+            "inherits": [
+                "base-dpdk-target",
+                "install-path-presets",
+                "ovs-ovsp4rt-mode"
+            ]
+        },
+        {
+            "name": "es2k",
+            "displayName": "ES2K target (P4OVS mode)",
+            "inherits": [
+                "base-es2k-target",
+                "install-path-presets",
+                "ovs-legacy-mode"
+            ]
+        },
+        {
+            "name": "es2k-ovsp4rt",
+            "displayName": "ES2K target (OVSP4RT mode)",
+            "inherits": [
+                "base-es2k-target",
+                "install-path-presets",
+                "ovs-ovsp4rt-mode"
+            ]
+        },
+        {
+            "name": "tofino",
+            "displayName": "Tofino target (no OVS)",
+            "inherits": [
+                "base-tofino-target",
+                "install-path-presets"
+            ]
+
+        }
+    ]   
+}
