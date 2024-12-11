@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-option(BUILD_CLIENT  "Build ovs-p4rt with Client class" OFF)
+option(BUILD_CLIENT  "Build ovs-p4rt with Client class" ON)
 option(BUILD_JOURNAL "Build ovs-p4rt with Journal class" OFF)
 option(BUILD_SPIES   "Build ovs-p4rt spies library" OFF)
 
