@@ -6,11 +6,11 @@
 #include <string>
 
 #include "absl/flags/flag.h"
+#include "client/ovsp4rt_client.h"
 #include "logging/ovsp4rt_diag_detail.h"
 #include "logging/ovsp4rt_logging.h"
 #include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
-#include "ovsp4rt_client.h"
 #include "ovsp4rt_private.h"
 
 #if defined(DPDK_TARGET)
