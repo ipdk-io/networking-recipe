@@ -18,7 +18,7 @@ target_include_directories(ovsp4rt_client_o PUBLIC
   ${STRATUM_SOURCE_DIR}
 )
 
-target_link_libraries(ovs_sidecar_o PUBLIC
+target_link_libraries(ovsp4rt_client_o PUBLIC
   p4_role_config_proto
   p4runtime_proto
   stratum_utils
