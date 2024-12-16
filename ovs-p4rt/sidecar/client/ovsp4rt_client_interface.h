@@ -7,7 +7,6 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "p4/v1/p4runtime.pb.h"
-#include "session/ovsp4rt_session.h"
 
 namespace ovsp4rt {
 
@@ -17,9 +16,6 @@ class ClientInterface {
 
   // Connects to the P4Runtime server.
   virtual absl::Status connect(const char* grpc_addr) = 0;
-
-  // Returns a pointer to the ovsp4rt session object.
-  virtual OvsP4rtSession* session() const = 0;
 
   // Gets the pipeline configuration from the P4Runtime server.
   virtual absl::Status getPipelineConfig(::p4::config::v1::P4Info* p4info) = 0;

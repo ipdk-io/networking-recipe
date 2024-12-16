@@ -24,9 +24,6 @@ class Client : public ClientInterface {
   // Connects to the P4Runtime server.
   virtual absl::Status connect(const char* grpc_addr);
 
-  // Returns a pointer to the ovsp4rt session object.
-  virtual OvsP4rtSession* session() const { return session_.get(); }
-
   // Gets the pipeline configuration from the P4Runtime server.
   virtual absl::Status getPipelineConfig(::p4::config::v1::P4Info* p4info);
 
