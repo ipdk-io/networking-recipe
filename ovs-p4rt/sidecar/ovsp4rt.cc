@@ -578,7 +578,7 @@ void PrepareL2ToTunnelV6(p4::v1::TableEntry* table_entry,
   }
 }
 
-absl::Status ConfigFdbSmacTableEntry(Client& client,
+absl::Status ConfigFdbSmacTableEntry(ClientInterface& client,
                                      const struct mac_learning_info& learn_info,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
@@ -600,7 +600,7 @@ absl::Status ConfigFdbSmacTableEntry(Client& client,
 }
 
 absl::Status ConfigL2TunnelTableEntry(
-    Client& client, const struct mac_learning_info& learn_info,
+    ClientInterface& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
@@ -626,7 +626,7 @@ absl::Status ConfigL2TunnelTableEntry(
 #endif  // ES2K_TARGET
 
 absl::Status ConfigFdbTxVlanTableEntry(
-    Client& client, const struct mac_learning_info& learn_info,
+    ClientInterface& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
@@ -646,7 +646,7 @@ absl::Status ConfigFdbTxVlanTableEntry(
 }
 
 absl::Status ConfigFdbRxVlanTableEntry(
-    Client& client, const struct mac_learning_info& learn_info,
+    ClientInterface& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
@@ -666,7 +666,7 @@ absl::Status ConfigFdbRxVlanTableEntry(
 }
 
 absl::Status ConfigFdbTunnelTableEntry(
-    Client& client, const struct mac_learning_info& learn_info,
+    ClientInterface& client, const struct mac_learning_info& learn_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
@@ -1522,7 +1522,7 @@ void PrepareV6TunnelTermTableEntry(p4::v1::TableEntry* table_entry,
 }
 #endif  // ES2K_TARGET
 
-absl::Status ConfigEncapTableEntry(Client& client,
+absl::Status ConfigEncapTableEntry(ClientInterface& client,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
@@ -1716,7 +1716,7 @@ void PrepareDecapModAndVlanPushTableEntry(
   }
 }
 
-absl::Status ConfigDecapTableEntry(Client& client,
+absl::Status ConfigDecapTableEntry(ClientInterface& client,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
@@ -1795,7 +1795,8 @@ void PrepareVlanPopTableEntry(p4::v1::TableEntry* table_entry,
   }
 }
 
-absl::Status ConfigVlanPushTableEntry(Client& client, const uint16_t vlan_id,
+absl::Status ConfigVlanPushTableEntry(ClientInterface& client,
+                                      const uint16_t vlan_id,
                                       const ::p4::config::v1::P4Info& p4info,
                                       bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
@@ -1808,7 +1809,8 @@ absl::Status ConfigVlanPushTableEntry(Client& client, const uint16_t vlan_id,
   return client.sendWriteRequest(write_request);
 }
 
-absl::Status ConfigVlanPopTableEntry(Client& client, const uint16_t vlan_id,
+absl::Status ConfigVlanPopTableEntry(ClientInterface& client,
+                                     const uint16_t vlan_id,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
@@ -1981,7 +1983,7 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
 #endif
 }
 
-bool HaveL2ToTunnelV4TableEntry(Client& client,
+bool HaveL2ToTunnelV4TableEntry(ClientInterface& client,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
@@ -1996,7 +1998,7 @@ bool HaveL2ToTunnelV4TableEntry(Client& client,
   return client.sendReadRequest(read_request).ok();
 }
 
-bool HaveL2ToTunnelV6TableEntry(Client& client,
+bool HaveL2ToTunnelV6TableEntry(ClientInterface& client,
                                 const struct mac_learning_info& learn_info,
                                 const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
@@ -2011,7 +2013,7 @@ bool HaveL2ToTunnelV6TableEntry(Client& client,
   return client.sendReadRequest(read_request).ok();
 }
 
-bool HaveFdbTunnelTableEntry(Client& client,
+bool HaveFdbTunnelTableEntry(ClientInterface& client,
                              const struct mac_learning_info& learn_info,
                              const ::p4::config::v1::P4Info& p4info,
                              bool adding = false) {
@@ -2044,7 +2046,7 @@ bool HaveFdbTunnelTableEntry(Client& client,
   return client.sendReadRequest(read_request).ok();
 }
 
-bool HaveFdbVlanTableEntry(Client& client,
+bool HaveFdbVlanTableEntry(ClientInterface& client,
                            const struct mac_learning_info& learn_info,
                            const ::p4::config::v1::P4Info& p4info,
                            bool adding = false) {
@@ -2060,7 +2062,8 @@ bool HaveFdbVlanTableEntry(Client& client,
   return client.sendReadRequest(read_request).ok();
 }
 
-bool HaveVmSrcTableEntry(Client& client, struct ip_mac_map_info ip_info,
+bool HaveVmSrcTableEntry(ClientInterface& client,
+                         struct ip_mac_map_info ip_info,
                          const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
@@ -2074,7 +2077,8 @@ bool HaveVmSrcTableEntry(Client& client, struct ip_mac_map_info ip_info,
   return client.sendReadRequest(read_request).ok();
 }
 
-bool HaveVmDstTableEntry(Client& client, const struct ip_mac_map_info& ip_info,
+bool HaveVmDstTableEntry(ClientInterface& client,
+                         const struct ip_mac_map_info& ip_info,
                          const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
@@ -2089,7 +2093,8 @@ bool HaveVmDstTableEntry(Client& client, const struct ip_mac_map_info& ip_info,
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
-    Client& client, uint32_t sp, const ::p4::config::v1::P4Info& p4info) {
+    ClientInterface& client, uint32_t sp,
+    const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
 
@@ -2101,7 +2106,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
 }
 
 absl::Status ConfigureVsiSrcPortTableEntry(
-    Client& client, const struct src_port_info& sp,
+    ClientInterface& client, const struct src_port_info& sp,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
@@ -2114,7 +2119,7 @@ absl::Status ConfigureVsiSrcPortTableEntry(
 }
 
 absl::Status ConfigRxTunnelSrcPortTableEntry(
-    Client& client, const struct tunnel_info& tunnel_info,
+    ClientInterface& client, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
@@ -2134,7 +2139,7 @@ absl::Status ConfigRxTunnelSrcPortTableEntry(
 
 #endif  // ES2K_TARGET
 
-absl::Status ConfigTunnelTermTableEntry(Client& client,
+absl::Status ConfigTunnelTermTableEntry(ClientInterface& client,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
                                         bool insert_entry) {
@@ -2163,7 +2168,7 @@ absl::Status ConfigTunnelTermTableEntry(Client& client,
 
 #if defined(ES2K_TARGET)
 
-absl::Status ConfigDstIpMacMapTableEntry(Client& client,
+absl::Status ConfigDstIpMacMapTableEntry(ClientInterface& client,
                                          const struct ip_mac_map_info& ip_info,
                                          const ::p4::config::v1::P4Info& p4info,
                                          bool insert_entry) {
@@ -2183,7 +2188,7 @@ absl::Status ConfigDstIpMacMapTableEntry(Client& client,
   return status;
 }
 
-absl::Status ConfigSrcIpMacMapTableEntry(Client& client,
+absl::Status ConfigSrcIpMacMapTableEntry(ClientInterface& client,
                                          const struct ip_mac_map_info& ip_info,
                                          const ::p4::config::v1::P4Info& p4info,
                                          bool insert_entry) {
@@ -2230,8 +2235,9 @@ namespace ovsp4rt {
 // learn_info is passed by value because this function makes local
 // modifications to it.
 //----------------------------------------------------------------------
-void ConfigFdbEntry(Client& client, struct mac_learning_info learn_info,
-                    bool insert_entry, const char* grpc_addr) {
+void ConfigFdbEntry(ClientInterface& client,
+                    struct mac_learning_info learn_info, bool insert_entry,
+                    const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2298,7 +2304,7 @@ void ConfigFdbEntry(Client& client, struct mac_learning_info learn_info,
 
       // TODO(derek): refactor common code
       //
-      // GetVsiSrcPort(Client& client, const P4Info& p4info,
+      // GetVsiSrcPort(ClientInterface& client, const P4Info& p4info,
       //               uint32_t src_port, uint32_t& vsi_port);
       auto status_or_read_response =
           GetTxAccVsiTableEntry(client, learn_info.src_port, p4info);
@@ -2356,7 +2362,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
   using namespace ovsp4rt;
 
-  Client client;
+  ClientInterface client;
 
   ConfigFdbEntry(client, learn_info, insert_entry, grpc_addr);
 }
@@ -2365,7 +2371,7 @@ namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigRxTunnelSrcEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigRxTunnelSrcEntry(Client& client,
+void ConfigRxTunnelSrcEntry(ClientInterface& client,
                             const struct tunnel_info& tunnel_info,
                             bool insert_entry, const char* grpc_addr) {
   absl::Status status;
@@ -2402,7 +2408,7 @@ namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigTunnelSrcPortEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigTunnelSrcPortEntry(Client& client,
+void ConfigTunnelSrcPortEntry(ClientInterface& client,
                               const struct src_port_info& tnl_sp,
                               bool insert_entry, const char* grpc_addr) {
   absl::Status status;
@@ -2450,7 +2456,7 @@ namespace ovsp4rt {
 // vsi_sp is passed by value because this function makes local
 // modifications to it.
 //----------------------------------------------------------------------
-void ConfigSrcPortEntry(Client& client, struct src_port_info vsi_sp,
+void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
                         bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
@@ -2465,7 +2471,7 @@ void ConfigSrcPortEntry(Client& client, struct src_port_info vsi_sp,
 
   // TODO(derek): refactor common code
   //
-  // GetVsiSrcPort(Client& client, const P4Info& p4info,
+  // GetVsiSrcPort(ClientInterface& client, const P4Info& p4info,
   //               uint32_t src_port, uint32_t& vsi_port);
   auto status_or_read_response =
       GetTxAccVsiTableEntry(client, vsi_sp.src_port, p4info);
@@ -2522,8 +2528,8 @@ namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigVlanEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigVlanEntry(Client& client, uint16_t vlan_id, bool insert_entry,
-                     const char* grpc_addr) {
+void ConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
+                     bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2561,7 +2567,8 @@ namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigFdbEntry (DPDK)
 //----------------------------------------------------------------------
-void ConfigFdbEntry(Client& client, const struct mac_learning_info& learn_info,
+void ConfigFdbEntry(ClientInterface& client,
+                    const struct mac_learning_info& learn_info,
                     bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
@@ -2630,8 +2637,9 @@ namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigTunnelEntry (common)
 //----------------------------------------------------------------------
-void ConfigTunnelEntry(Client& client, const struct tunnel_info& tunnel_info,
-                       bool insert_entry, const char* grpc_addr) {
+void ConfigTunnelEntry(ClientInterface& client,
+                       const struct tunnel_info& tunnel_info, bool insert_entry,
+                       const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2675,7 +2683,8 @@ namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigIpMacMapEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigIpMacMapEntry(Client& client, const struct ip_mac_map_info& ip_info,
+void ConfigIpMacMapEntry(ClientInterface& client,
+                         const struct ip_mac_map_info& ip_info,
                          bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
