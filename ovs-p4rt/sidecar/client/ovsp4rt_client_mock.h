@@ -13,8 +13,6 @@ class ClientMock : public ClientInterface {
  public:
   MOCK_METHOD(absl::Status, connect, (const char*));
 
-  MOCK_METHOD(OvsP4rtSession*, session, (), (const));
-
   MOCK_METHOD(absl::Status, getPipelineConfig, (::p4::config::v1::P4Info*));
 
   MOCK_METHOD(::p4::v1::TableEntry*, initReadRequest, (::p4::v1::ReadRequest*));
