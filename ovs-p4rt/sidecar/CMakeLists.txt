@@ -30,9 +30,6 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt_private.h
 )
 
-add_subdirectory(logging)
-add_subdirectory(session)
-
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
 elseif(ES2K_TARGET)
@@ -52,10 +49,38 @@ target_link_libraries(ovs_sidecar_o PUBLIC
 )
 
 #-----------------------------------------------------------------------
+# libovsp4rt_client_o
+#-----------------------------------------------------------------------
+if(BUILD_CLIENT)
+    add_subdirectory(client)
+    set(OVSP4RT_CLIENT_OBJECTS $<TARGET_OBJECTS:ovsp4rt_client_o>)
+endif()
+
+#-----------------------------------------------------------------------
+# libovsp4rt_journal_o
+#-----------------------------------------------------------------------
+if(BUILD_JOURNAL)
+    add_subdirectory(journal)
+    set(OVSP4RT_JOURNAL_OBJECTS $<TARGET_OBJECTS:ovsp4rt_journal_o>)
+endif()
+
+#-----------------------------------------------------------------------
+# ovsp4rt_logging_o
+#-----------------------------------------------------------------------
+add_subdirectory(logging)
+
+#-----------------------------------------------------------------------
+# ovsp4rt_session_o
+#-----------------------------------------------------------------------
+add_subdirectory(session)
+
+#-----------------------------------------------------------------------
 # libovsp4rt.so
 #-----------------------------------------------------------------------
 add_library(ovsp4rt SHARED
     $<TARGET_OBJECTS:ovs_sidecar_o>
+    ${OVSP4RT_CLIENT_OBJECTS}
+    ${OVSP4RT_JOURNAL_OBJECTS}
     $<TARGET_OBJECTS:ovsp4rt_logging_o>
     $<TARGET_OBJECTS:ovsp4rt_session_o>
 )
@@ -127,20 +152,6 @@ endif()
 # libovsp4rt_stubs.a
 #-----------------------------------------------------------------------
 add_subdirectory(stubs)
-
-#-----------------------------------------------------------------------
-# libovsp4rt_client_o
-#-----------------------------------------------------------------------
-if(BUILD_CLIENT)
-    add_subdirectory(client)
-endif()
-
-#-----------------------------------------------------------------------
-# libovsp4rt_journal_o
-#-----------------------------------------------------------------------
-if(BUILD_JOURNAL)
-    add_subdirectory(journal)
-endif()
 
 #-----------------------------------------------------------------------
 # Install

@@ -15,6 +15,13 @@ add_library(ovsp4rt_client_o OBJECT
 
 target_include_directories(ovsp4rt_client_o PUBLIC
   ${SIDECAR_SOURCE_DIR}
+  ${STRATUM_SOURCE_DIR}
+)
+
+target_link_libraries(ovsp4rt_client_o PUBLIC
+  p4_role_config_proto
+  p4runtime_proto
+  stratum_utils
 )
 
 #-----------------------------------------------------------------------
