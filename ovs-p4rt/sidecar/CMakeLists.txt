@@ -27,6 +27,8 @@ endif()
 add_library(ovs_sidecar_o OBJECT
     ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
     ovsp4rt.cc
+    ovsp4rt_c_api.cc
+    ovsp4rt_cc_api.h
     ovsp4rt_private.h
 )
 

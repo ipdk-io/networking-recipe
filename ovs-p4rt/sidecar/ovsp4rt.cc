@@ -11,6 +11,7 @@
 #include "logging/ovsp4rt_logging.h"
 #include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
+#include "ovsp4rt_cc_api.h"
 #include "ovsp4rt_private.h"
 
 #if defined(DPDK_TARGET)
@@ -1994,7 +1995,6 @@ bool HaveL2ToTunnelV4TableEntry(ClientInterface& client,
 
   PrepareL2ToTunnelV4(table_entry, learn_info, p4info, false, detail);
 
-  // TODO(derek): provisionally log failures?
   return client.sendReadRequest(read_request).ok();
 }
 
@@ -2009,7 +2009,6 @@ bool HaveL2ToTunnelV6TableEntry(ClientInterface& client,
 
   PrepareL2ToTunnelV6(table_entry, learn_info, p4info, false, detail);
 
-  // TODO(derek): provisionally log failures?
   return client.sendReadRequest(read_request).ok();
 }
 
@@ -2042,7 +2041,6 @@ bool HaveFdbTunnelTableEntry(ClientInterface& client,
 #error "ASSERT: Unknown TARGET type!"
 #endif
 
-  // TODO(derek): provisionally log failures?
   return client.sendReadRequest(read_request).ok();
 }
 
@@ -2058,7 +2056,6 @@ bool HaveFdbVlanTableEntry(ClientInterface& client,
 
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, false, detail);
 
-  // TODO(derek): provisionally log failures?
   return client.sendReadRequest(read_request).ok();
 }
 
@@ -2073,7 +2070,6 @@ bool HaveVmSrcTableEntry(ClientInterface& client,
 
   PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
-  // TODO(derek): provisionally log failures?
   return client.sendReadRequest(read_request).ok();
 }
 
@@ -2088,7 +2084,6 @@ bool HaveVmDstTableEntry(ClientInterface& client,
 
   PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
-  // TODO(derek): provisionally log failures?
   return client.sendReadRequest(read_request).ok();
 }
 
@@ -2208,27 +2203,14 @@ absl::Status ConfigSrcIpMacMapTableEntry(ClientInterface& client,
   return status;
 }
 
-#endif  // ES2K_TARGET
-
 }  // namespace ovsp4rt
 
 //----------------------------------------------------------------------
-// ovsp4rt_str_to_tunnel_type (common)
+// C++ functions that implement the public API.
 //----------------------------------------------------------------------
-enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
-  if (tnl_type) {
-    if (strcmp(tnl_type, "vxlan") == 0) {
-      return OVS_TUNNEL_VXLAN;
-    } else if (strcmp(tnl_type, "geneve") == 0) {
-      return OVS_TUNNEL_GENEVE;
-    }
-  }
-  return OVS_TUNNEL_UNKNOWN;
-}
-
-#if defined(ES2K_TARGET)
 
 namespace ovsp4rt {
+
 //----------------------------------------------------------------------
 // ConfigFdbEntry (ES2K)
 //
@@ -2302,7 +2284,7 @@ void ConfigFdbEntry(ClientInterface& client,
       if (!status.ok()) {
       }
 
-      // TODO(derek): refactor common code
+      // TODO(derek): refactor (extract method)
       //
       // GetVsiSrcPort(ClientInterface& client, const P4Info& p4info,
       //               uint32_t src_port, uint32_t& vsi_port);
@@ -2340,7 +2322,7 @@ void ConfigFdbEntry(ClientInterface& client,
       }
 
       learn_info.src_port = host_sp;
-      // end of common code
+      // end of GetVsiSrcPort
     }
 
     status =
@@ -2353,21 +2335,7 @@ void ConfigFdbEntry(ClientInterface& client,
     }
   }
 }
-}  // namespace ovsp4rt
 
-//----------------------------------------------------------------------
-// ovsp4rt_config_fdb_entry (ES2K)
-//----------------------------------------------------------------------
-void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
-                              bool insert_entry, const char* grpc_addr) {
-  using namespace ovsp4rt;
-
-  ClientInterface client;
-
-  ConfigFdbEntry(client, learn_info, insert_entry, grpc_addr);
-}
-
-namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigRxTunnelSrcEntry (ES2K)
 //----------------------------------------------------------------------
@@ -2389,22 +2357,7 @@ void ConfigRxTunnelSrcEntry(ClientInterface& client,
                                            insert_entry);
   if (!status.ok()) return;
 }
-}  // namespace ovsp4rt
 
-//----------------------------------------------------------------------
-// ovsp4rt_config_rx_tunnel_src_entry (ES2K)
-//----------------------------------------------------------------------
-void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
-                                        bool insert_entry,
-                                        const char* grpc_addr) {
-  using namespace ovsp4rt;
-
-  Client client;
-
-  ConfigRxTunnelSrcEntry(client, tunnel_info, insert_entry, grpc_addr);
-}
-
-namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigTunnelSrcPortEntry (ES2K)
 //----------------------------------------------------------------------
@@ -2434,22 +2387,7 @@ void ConfigTunnelSrcPortEntry(ClientInterface& client,
   // TODO: handle error scenarios. For now return irrespective of the status.
   if (!status.ok()) return;
 }
-}  // namespace ovsp4rt
 
-//----------------------------------------------------------------------
-// ovsp4rt_config_tunnel_src_port_entry (ES2K)
-//----------------------------------------------------------------------
-void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
-                                          bool insert_entry,
-                                          const char* grpc_addr) {
-  using namespace ovsp4rt;
-
-  Client client;
-
-  ConfigTunnelSrcPortEntry(client, tnl_sp, insert_entry, grpc_addr);
-}
-
-namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigSrcPortEntry (ES2K)
 //
@@ -2469,7 +2407,7 @@ void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
   status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return;
 
-  // TODO(derek): refactor common code
+  // TODO(derek): refactor (extract method)
   //
   // GetVsiSrcPort(ClientInterface& client, const P4Info& p4info,
   //               uint32_t src_port, uint32_t& vsi_port);
@@ -2505,26 +2443,12 @@ void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
   }
 
   vsi_sp.src_port = host_sp;
-  // end of common code
+  // end of GetVsiSrcPort
 
   status = ConfigureVsiSrcPortTableEntry(client, vsi_sp, p4info, insert_entry);
   if (!status.ok()) return;
 }
-}  // namespace ovsp4rt
 
-//----------------------------------------------------------------------
-// ovsp4rt_config_src_port_entry (ES2K)
-//----------------------------------------------------------------------
-void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
-                                   bool insert_entry, const char* grpc_addr) {
-  using namespace ovsp4rt;
-
-  Client client;
-
-  ConfigSrcPortEntry(client, vsi_sp, insert_entry, grpc_addr);
-}
-
-namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigVlanEntry (ES2K)
 //----------------------------------------------------------------------
@@ -2547,23 +2471,9 @@ void ConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
   status = ConfigVlanPopTableEntry(client, vlan_id, p4info, insert_entry);
   if (!status.ok()) return;
 }
-}  // namespace ovsp4rt
-
-//----------------------------------------------------------------------
-// ovsp4rt_config_vlan_entry (ES2K)
-//----------------------------------------------------------------------
-void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
-                               const char* grpc_addr) {
-  using namespace ovsp4rt;
-
-  Client client;
-
-  ConfigVlanEntry(client, vlan_id, insert_entry, grpc_addr);
-}
 
 #elif defined(DPDK_TARGET)
 
-namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigFdbEntry (DPDK)
 //----------------------------------------------------------------------
@@ -2594,46 +2504,9 @@ void ConfigFdbEntry(ClientInterface& client,
     if (!status.ok()) return;
   }
 }
-}  // namespace ovsp4rt
 
-//----------------------------------------------------------------------
-// ovsp4rt_config_fdb_entry (DPDK)
-//----------------------------------------------------------------------
-void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
-                              bool insert_entry, const char* grpc_addr) {
-  using namespace ovsp4rt;
+#endif  // DPDK_TARGET
 
-  Client client;
-
-  ConfigFdbEntry(client, learn_info, insert_entry, grpc_addr);
-}
-
-//----------------------------------------------------------------------
-// Unimplemented functions (DPDK)
-//----------------------------------------------------------------------
-void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
-                                        bool insert_entry,
-                                        const char* grpc_addr) {}
-
-void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
-                               const char* grpc_addr) {}
-
-void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
-                                          bool insert_entry,
-                                          const char* grpc_addr) {}
-
-void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
-                                   bool insert_entry, const char* grpc_addr) {}
-
-void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
-                                     bool insert_entry, const char* grpc_addr) {
-}
-
-#else
-#error "ASSERT: Unknown TARGET type!"
-#endif
-
-namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigTunnelEntry (common)
 //----------------------------------------------------------------------
@@ -2663,23 +2536,9 @@ void ConfigTunnelEntry(ClientInterface& client,
       ConfigTunnelTermTableEntry(client, tunnel_info, p4info, insert_entry);
   if (!status.ok()) return;
 }
-}  // namespace ovsp4rt
-
-//----------------------------------------------------------------------
-// ovsp4rt_config_tunnel_entry (common)
-//----------------------------------------------------------------------
-void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
-                                 bool insert_entry, const char* grpc_addr) {
-  using namespace ovsp4rt;
-
-  Client client;
-
-  ConfigTunnelEntry(client, tunnel_info, insert_entry, grpc_addr);
-}
 
 #if defined(ES2K_TARGET)
 
-namespace ovsp4rt {
 //----------------------------------------------------------------------
 // ConfigIpMacMapEntry (ES2K)
 //----------------------------------------------------------------------
@@ -2722,17 +2581,7 @@ try_dstip:
     }
   }
 }
-}  // namespace ovsp4rt
 
-//----------------------------------------------------------------------
-// ovsp4rt_config_ip_mac_map_entry (ES2K)
-//----------------------------------------------------------------------
-void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
-                                     bool insert_entry, const char* grpc_addr) {
-  using namespace ovsp4rt;
-
-  Client client;
-
-  ConfigIpMacMapEntry(client, ip_info, insert_entry, grpc_addr);
-}
 #endif  // ES2K_TARGET
+
+}  // namespace ovsp4rt
