@@ -48,7 +48,7 @@ enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
   return OVS_TUNNEL_UNKNOWN;
 }
 
-#if defined(DPDK)
+#if defined(DPDK_TARGET)
 
 //----------------------------------------------------------------------
 // Unimplemented functions (DPDK)
@@ -71,7 +71,7 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
                                      bool insert_entry, const char* grpc_addr) {
 }
 
-#elif defined(ES2K)
+#elif defined(ES2K_TARGET)
 
 //----------------------------------------------------------------------
 // ovsp4rt_config_ip_mac_map_entry (ES2K)
@@ -135,4 +135,4 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
   ConfigVlanEntry(client, vlan_id, insert_entry, grpc_addr);
 }
 
-#endif
+#endif  // ES2K_TARGET
