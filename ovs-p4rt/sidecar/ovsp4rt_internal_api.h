@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Defines the interface to the C++ functions that implement
-// the public API.
+// the ovsp4rt C API.
 
 #ifndef OVSP4RT_CC_API_H_
 #define OVSP4RT_CC_API_H_

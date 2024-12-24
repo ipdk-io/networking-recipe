@@ -1,11 +1,11 @@
 // Copyright 2022-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-// Implementation of the C API using the Client class.
+// Standard implementation of the ovsp4rt C API.
 
 #include "client/ovsp4rt_client.h"
 #include "ovsp4rt/ovs-p4rt.h"
-#include "ovsp4rt_cc_api.h"
+#include "ovsp4rt_internal_api.h"
 
 //----------------------------------------------------------------------
 // ovsp4rt_config_fdb_entry (DPDK, ES2K)

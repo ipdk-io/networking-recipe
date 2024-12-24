@@ -11,7 +11,7 @@
 #include "logging/ovsp4rt_logging.h"
 #include "logging/ovsp4rt_logutils.h"
 #include "ovsp4rt/ovs-p4rt.h"
-#include "ovsp4rt_cc_api.h"
+#include "ovsp4rt_internal_api.h"
 #include "ovsp4rt_private.h"
 
 #if defined(DPDK_TARGET)
