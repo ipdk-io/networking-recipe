@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-option(BUILD_CLIENT  "Build ovs-p4rt with Client class" OFF)
+option(BUILD_CLIENT  "Build ovs-p4rt with Client class" ON)
 option(BUILD_JOURNAL "Build ovs-p4rt with Journal class" OFF)
 option(BUILD_SPIES   "Build ovs-p4rt spies library" OFF)
 
@@ -29,6 +29,20 @@ add_library(ovs_sidecar_o OBJECT
     ovsp4rt.cc
     ovsp4rt_private.h
 )
+
+if(BUILD_CLIENT)
+  if(BUILD_JOURNAL)
+    target_sources(ovs_sidecar_o PRIVATE
+      ovsp4rt_internal_api.h
+      ovsp4rt_journal_api.cc
+    )
+  else()
+    target_sources(ovs_sidecar_o PRIVATE
+      ovsp4rt_internal_api.h
+      ovsp4rt_standard_api.cc
+    )
+  endif()
+endif()
 
 if(DPDK_TARGET)
     add_subdirectory(dpdk)
