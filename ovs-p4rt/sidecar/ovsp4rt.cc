@@ -2256,7 +2256,8 @@ void ConfigFdbEntry(ClientInterface& client,
 
   if (learn_info.is_tunnel) {
     if (insert_entry) {
-      if (HaveFdbTunnelTableEntry(client, learn_info, p4info, true)) {
+      if (HaveFdbTunnelTableEntry(client, learn_info, p4info, insert_entry)) {
+        // Return if entry already exists.
         return;
       }
     }
@@ -2264,24 +2265,29 @@ void ConfigFdbEntry(ClientInterface& client,
     status =
         ConfigFdbTunnelTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
 
     status = ConfigL2TunnelTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
 
     status = ConfigFdbSmacTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
   } else {
     if (insert_entry) {
-      if (HaveFdbVlanTableEntry(client, learn_info, p4info, true)) {
+      if (HaveFdbVlanTableEntry(client, learn_info, p4info, insert_entry)) {
+        // Return if entry already exists.
         return;
       }
 
       status =
           ConfigFdbRxVlanTableEntry(client, learn_info, p4info, insert_entry);
       if (!status.ok()) {
+        // Ignore errors (why?)
       }
 
       // TODO(derek): refactor (extract method)
@@ -2328,10 +2334,12 @@ void ConfigFdbEntry(ClientInterface& client,
     status =
         ConfigFdbTxVlanTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
 
     status = ConfigFdbSmacTableEntry(client, learn_info, p4info, insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
   }
 }
@@ -2565,6 +2573,7 @@ void ConfigIpMacMapEntry(ClientInterface& client,
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
     status = ConfigSrcIpMacMapTableEntry(client, ip_info, p4info, insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
   }
 
@@ -2578,6 +2587,7 @@ try_dstip:
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
     status = ConfigDstIpMacMapTableEntry(client, ip_info, p4info, insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
   }
 }
