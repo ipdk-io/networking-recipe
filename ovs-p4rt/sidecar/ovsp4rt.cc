@@ -1984,9 +1984,9 @@ void PrepareTxAccVsiTableEntry(p4::v1::TableEntry* table_entry, uint32_t sp,
 #endif
 }
 
-bool HaveL2ToTunnelV4TableEntry(ClientInterface& client,
-                                const struct mac_learning_info& learn_info,
-                                const ::p4::config::v1::P4Info& p4info) {
+absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -1995,12 +1995,18 @@ bool HaveL2ToTunnelV4TableEntry(ClientInterface& client,
 
   PrepareL2ToTunnelV4(table_entry, learn_info, p4info, false, detail);
 
-  return client.sendReadRequest(read_request).ok();
+  return client.sendReadRequest(read_request);
 }
 
-bool HaveL2ToTunnelV6TableEntry(ClientInterface& client,
-                                const struct mac_learning_info& learn_info,
-                                const ::p4::config::v1::P4Info& p4info) {
+static inline bool HaveL2ToTunnelV4TableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info) {
+  return GetL2ToTunnelV4TableEntry(client, learn_info, p4info).ok();
+}
+
+absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV6TableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -2009,13 +2015,18 @@ bool HaveL2ToTunnelV6TableEntry(ClientInterface& client,
 
   PrepareL2ToTunnelV6(table_entry, learn_info, p4info, false, detail);
 
-  return client.sendReadRequest(read_request).ok();
+  return client.sendReadRequest(read_request);
 }
 
-bool HaveFdbTunnelTableEntry(ClientInterface& client,
-                             const struct mac_learning_info& learn_info,
-                             const ::p4::config::v1::P4Info& p4info,
-                             bool adding = false) {
+static inline bool HaveL2ToTunnelV6TableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info) {
+  return GetL2ToTunnelV6TableEntry(client, learn_info, p4info).ok();
+}
+
+absl::StatusOr<::p4::v1::ReadResponse> GetFdbTunnelTableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -2041,13 +2052,18 @@ bool HaveFdbTunnelTableEntry(ClientInterface& client,
 #error "ASSERT: Unknown TARGET type!"
 #endif
 
-  return client.sendReadRequest(read_request).ok();
+  return client.sendReadRequest(read_request);
 }
 
-bool HaveFdbVlanTableEntry(ClientInterface& client,
-                           const struct mac_learning_info& learn_info,
-                           const ::p4::config::v1::P4Info& p4info,
-                           bool adding = false) {
+static inline bool HaveFdbTunnelTableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
+  return GetFdbTunnelTableEntry(client, learn_info, p4info, adding).ok();
+}
+
+absl::StatusOr<::p4::v1::ReadResponse> GetFdbVlanTableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -2056,12 +2072,18 @@ bool HaveFdbVlanTableEntry(ClientInterface& client,
 
   PrepareFdbTxVlanTableEntry(table_entry, learn_info, p4info, false, detail);
 
-  return client.sendReadRequest(read_request).ok();
+  return client.sendReadRequest(read_request);
 }
 
-bool HaveVmSrcTableEntry(ClientInterface& client,
-                         struct ip_mac_map_info ip_info,
-                         const ::p4::config::v1::P4Info& p4info) {
+static inline bool HaveFdbVlanTableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
+  return GetFdbVlanTableEntry(client, learn_info, p4info, adding).ok();
+}
+
+absl::StatusOr<::p4::v1::ReadResponse> GetVmSrcTableEntry(
+    ClientInterface& client, struct ip_mac_map_info ip_info,
+    const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -2070,12 +2092,18 @@ bool HaveVmSrcTableEntry(ClientInterface& client,
 
   PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
-  return client.sendReadRequest(read_request).ok();
+  return client.sendReadRequest(read_request);
 }
 
-bool HaveVmDstTableEntry(ClientInterface& client,
-                         const struct ip_mac_map_info& ip_info,
-                         const ::p4::config::v1::P4Info& p4info) {
+static inline bool HaveVmSrcTableEntry(ClientInterface& client,
+                                       struct ip_mac_map_info ip_info,
+                                       const ::p4::config::v1::P4Info& p4info) {
+  return GetVmSrcTableEntry(client, ip_info, p4info).ok();
+}
+
+absl::StatusOr<::p4::v1::ReadResponse> GetVmDstTableEntry(
+    ClientInterface& client, const struct ip_mac_map_info& ip_info,
+    const ::p4::config::v1::P4Info& p4info) {
   ::p4::v1::ReadRequest read_request;
   ::p4::v1::TableEntry* table_entry;
   DiagDetail detail;
@@ -2084,7 +2112,13 @@ bool HaveVmDstTableEntry(ClientInterface& client,
 
   PrepareDstIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
-  return client.sendReadRequest(read_request).ok();
+  return client.sendReadRequest(read_request);
+}
+
+static inline bool HaveVmDstTableEntry(ClientInterface& client,
+                                       const struct ip_mac_map_info& ip_info,
+                                       const ::p4::config::v1::P4Info& p4info) {
+  return GetVmDstTableEntry(client, ip_info, p4info).ok();
 }
 
 absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
