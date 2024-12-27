@@ -5,26 +5,22 @@
 
 namespace ovsp4rt {
 
+// TODO(derek): func_name parameter?
 absl::StatusOr<::p4::v1::ReadResponse> JournalClient::sendReadRequest(
     const p4::v1::ReadRequest& request) {
-#if 0
-  _journal.recordReadRequest(request);
+  journal_.recordReadRequest(request);
   auto response = Client::sendReadRequest(request);
-  _journal.recordReadResponse(response);
-#else
-  return Client::sendReadRequest(request);
-#endif
+  journal_.recordReadResponse(response);
+  return response;
 }
 
+// TODO(derek): func_name parameter?
 absl::Status JournalClient::sendWriteRequest(
     const p4::v1::WriteRequest& request) {
-#if 0
-  _journal.recordWriteRequest(request);
-  auto response = Client::sendWriteRequest(request);
-  _journal.recordWriteResponse(response);
-#else
-  return Client::sendWriteRequest(request);
-#endif
+  journal_.recordWriteRequest(request);
+  auto status = Client::sendWriteRequest(request);
+  journal_.recordWriteStatus(status);
+  return status;
 }
 
 }  // namespace ovsp4rt
