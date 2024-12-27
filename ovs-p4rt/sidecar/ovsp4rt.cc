@@ -2453,8 +2453,7 @@ void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
       GetTxAccVsiTableEntry(client, vsi_sp.src_port, p4info);
   if (!response_or_status.ok()) return;
 
-  ::p4::v1::ReadResponse read_response =
-      std::move(response_or_status).value();
+  ::p4::v1::ReadResponse read_response = std::move(response_or_status).value();
   std::vector<::p4::v1::TableEntry> table_entries;
 
   table_entries.reserve(read_response.entities().size());
