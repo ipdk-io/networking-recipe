@@ -2237,13 +2237,9 @@ absl::Status ConfigSrcIpMacMapTableEntry(ClientInterface& client,
   return status;
 }
 
-}  // namespace ovsp4rt
-
 //----------------------------------------------------------------------
 // C++ functions that implement the public API.
 //----------------------------------------------------------------------
-
-namespace ovsp4rt {
 
 //----------------------------------------------------------------------
 // ConfigFdbEntry (ES2K)
@@ -2328,14 +2324,14 @@ void ConfigFdbEntry(ClientInterface& client,
       //
       // GetVsiSrcPort(ClientInterface& client, const P4Info& p4info,
       //               uint32_t src_port, uint32_t& vsi_port);
-      auto status_or_read_response =
+      auto response_or_status =
           GetTxAccVsiTableEntry(client, learn_info.src_port, p4info);
-      if (!status_or_read_response.ok()) {
+      if (!response_or_status.ok()) {
         return;
       }
 
       ::p4::v1::ReadResponse read_response =
-          std::move(status_or_read_response).value();
+          std::move(response_or_status).value();
       std::vector<::p4::v1::TableEntry> table_entries;
 
       table_entries.reserve(read_response.entities().size());
@@ -2453,12 +2449,12 @@ void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
   //
   // GetVsiSrcPort(ClientInterface& client, const P4Info& p4info,
   //               uint32_t src_port, uint32_t& vsi_port);
-  auto status_or_read_response =
+  auto response_or_status =
       GetTxAccVsiTableEntry(client, vsi_sp.src_port, p4info);
-  if (!status_or_read_response.ok()) return;
+  if (!response_or_status.ok()) return;
 
   ::p4::v1::ReadResponse read_response =
-      std::move(status_or_read_response).value();
+      std::move(response_or_status).value();
   std::vector<::p4::v1::TableEntry> table_entries;
 
   table_entries.reserve(read_response.entities().size());
