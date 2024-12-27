@@ -38,7 +38,21 @@ void Journal::recordInput(const char* func_name, uint16_t vlan_id,
   input_ = EncodeVlanId(func_name, vlan_id, insert_entry);
 }
 
-// ::p4::v1::WriteRequest
-void recordOutput(const char* func, ::p4::v1::WriteRequest& request) {}
+void Journal::recordReadRequest(const ::p4::v1::ReadRequest& request) {
+  // TODO(derek): to be implemented. Add func_name parameter?
+}
+
+void Journal::recordReadResponse(
+    const absl::StatusOr<::p4::v1::ReadResponse>& response) {
+  // TODO(derek): to be implemented. Add func_name parameter?
+}
+
+void Journal::recordWriteRequest(const ::p4::v1::WriteRequest& request) {
+  // TODO(derek): to be implemented. Add func_name parameter?
+}
+
+void Journal::recordWriteStatus(const absl::Status& status) {
+  // TODO(derek): to be implemented. Add func_name parameter?
+}
 
 }  // namespace ovsp4rt
