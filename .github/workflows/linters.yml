@@ -24,7 +24,7 @@ jobs:
   # 1-markdownlint
   #---------------------------------------------------------------------
   markdownlint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
 
     steps:
@@ -51,7 +51,7 @@ jobs:
   # 2-rstdoc8
   #---------------------------------------------------------------------
   rstdoc8:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
 
     steps:
@@ -80,7 +80,7 @@ jobs:
   # 3-rstcheck
   #---------------------------------------------------------------------
   rstcheck:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
 
     steps:
@@ -110,7 +110,7 @@ jobs:
   #---------------------------------------------------------------------
   py_bandit_check:
     timeout-minutes: 5
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Clone networking-recipe
         uses: actions/checkout@v4
@@ -127,7 +127,7 @@ jobs:
   # 5-clang_format_check
   #---------------------------------------------------------------------
   clang_format_check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
 
     steps:
@@ -154,7 +154,7 @@ jobs:
   # 6-shellcheck
   #---------------------------------------------------------------------
   shellcheck:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
 
     steps:
