@@ -4,8 +4,8 @@
 // Defines the interface to the C++ functions that implement
 // the ovsp4rt C API.
 
-#ifndef OVSP4RT_CC_API_H_
-#define OVSP4RT_CC_API_H_
+#ifndef OVSP4RT_INTERNAL_API_H_
+#define OVSP4RT_INTERNAL_API_H_
 
 #include "client/ovsp4rt_client_interface.h"
 #include "ovsp4rt/ovs-p4rt.h"
@@ -45,4 +45,4 @@ extern void ConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
 
 }  // namespace ovsp4rt
 
-#endif  // OVSP4RT_CC_API_H_
+#endif  // OVSP4RT_INTERNAL_API_H_

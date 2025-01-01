@@ -14,6 +14,7 @@ add_library(ovsp4rt_client_o OBJECT
 )
 
 if(BUILD_JOURNAL)
+  # The journaling client is a subclass of the standard client.
   target_sources(ovsp4rt_client_o PRIVATE
     ovsp4rt_journal_client.cc
     ovsp4rt_journal_client.h
