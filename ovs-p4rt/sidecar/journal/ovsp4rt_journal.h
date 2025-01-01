@@ -15,7 +15,7 @@
 
 namespace ovsp4rt {
 
-// Captures the inputs and outputs to an API function.
+// Records the inputs and outputs of an API function.
 class Journal {
  public:
   ~Journal() { saveEntry(); }
@@ -34,7 +34,14 @@ class Journal {
 
   void recordInput(const char* func_name, uint16_t vlan_id, bool insert_entry);
 
-  void recordOutput(const char* func, ::p4::v1::WriteRequest& request) {}
+  void recordReadRequest(const ::p4::v1::ReadRequest& request);
+
+  void recordReadResponse(
+      const absl::StatusOr<::p4::v1::ReadResponse>& response);
+
+  void recordWriteRequest(const ::p4::v1::WriteRequest& request);
+
+  void recordWriteStatus(const absl::Status& status);
 
   void saveEntry() {}
 
