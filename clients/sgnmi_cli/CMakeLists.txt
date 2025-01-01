@@ -24,9 +24,9 @@ target_link_libraries(sgnmi_cli
         gflags::gflags_shared
         gRPC::grpc
         gRPC::grpc++
-        gRPC::re2
         protobuf::libprotobuf
         pthread
+        re2::re2
 )
 
 if(HAVE_POSIX_AIO)
