@@ -43,6 +43,14 @@ mark_as_advanced(Protobuf_DIR)
 message(STATUS "Found Protobuf version ${Protobuf_VERSION}")
 
 #-----------------------------------------------------------------------
+# Google Regular Expression library (RE2).
+#-----------------------------------------------------------------------
+find_package(re2 CONFIG REQUIRED)
+mark_as_advanced(re2_DIR)
+
+message(STATUS "Found RE2 version ${re2_VERSION}")
+
+#-----------------------------------------------------------------------
 # Google RPC (gRPC).
 #-----------------------------------------------------------------------
 find_package(gRPC CONFIG REQUIRED)

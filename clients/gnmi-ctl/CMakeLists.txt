@@ -26,9 +26,9 @@ target_link_libraries(gnmi-ctl
         gflags::gflags_shared
         gRPC::grpc
         gRPC::grpc++
-        gRPC::re2
         protobuf::libprotobuf
         pthread
+        re2::re2
 )
 
 target_include_directories(gnmi-ctl
