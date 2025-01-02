@@ -1557,7 +1557,7 @@ absl::Status ConfigEncapTableEntry(ovsp4rt::OvsP4rtSession* session,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1755,7 +1755,7 @@ absl::Status ConfigDecapTableEntry(ovsp4rt::OvsP4rtSession* session,
                                    const struct tunnel_info& tunnel_info,
                                    const ::p4::config::v1::P4Info& p4info,
                                    bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1838,7 +1838,7 @@ absl::Status ConfigVlanPushTableEntry(ovsp4rt::OvsP4rtSession* session,
                                       const uint16_t vlan_id,
                                       const ::p4::config::v1::P4Info& p4info,
                                       bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1856,7 +1856,7 @@ absl::Status ConfigVlanPopTableEntry(ovsp4rt::OvsP4rtSession* session,
                                      const uint16_t vlan_id,
                                      const ::p4::config::v1::P4Info& p4info,
                                      bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -1911,7 +1911,7 @@ void PrepareSrcPortTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
-                                  struct ip_mac_map_info& ip_info,
+                                  const struct ip_mac_map_info& ip_info,
                                   const ::p4::config::v1::P4Info& p4info,
                                   bool insert_entry, DiagDetail& detail) {
   detail.table_id = LOG_SRC_IP_MAC_MAP_TABLE;
@@ -1960,7 +1960,7 @@ void PrepareSrcIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
 }
 
 void PrepareDstIpMacMapTableEntry(p4::v1::TableEntry* table_entry,
-                                  struct ip_mac_map_info& ip_info,
+                                  const struct ip_mac_map_info& ip_info,
                                   const ::p4::config::v1::P4Info& p4info,
                                   bool insert_entry, DiagDetail& detail) {
   detail.table_id = LOG_DST_IP_MAC_MAP_TABLE;
@@ -2162,7 +2162,7 @@ absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
 absl::Status ConfigureVsiSrcPortTableEntry(
     ovsp4rt::OvsP4rtSession* session, const struct src_port_info& sp,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -2179,7 +2179,7 @@ absl::Status ConfigureVsiSrcPortTableEntry(
 absl::Status ConfigRxTunnelSrcPortTableEntry(
     ovsp4rt::OvsP4rtSession* session, const struct tunnel_info& tunnel_info,
     const ::p4::config::v1::P4Info& p4info, bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
@@ -2205,7 +2205,7 @@ absl::Status ConfigTunnelTermTableEntry(ovsp4rt::OvsP4rtSession* session,
                                         const struct tunnel_info& tunnel_info,
                                         const ::p4::config::v1::P4Info& p4info,
                                         bool insert_entry) {
-  p4::v1::WriteRequest write_request;
+  ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
 
   if (insert_entry) {
