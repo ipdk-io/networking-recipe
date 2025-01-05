@@ -2421,8 +2421,6 @@ void ConfigTunnelSrcPortEntry(ClientInterface& client,
   PrepareSrcPortTableEntry(table_entry, tnl_sp, p4info, insert_entry);
 
   status = client.sendWriteRequest(write_request);
-
-  // TODO: handle error scenarios. For now return irrespective of the status.
   if (!status.ok()) return;
 }
 
