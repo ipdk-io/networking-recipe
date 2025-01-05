@@ -6,8 +6,6 @@
 
 #include <stdint.h>
 
-#include <string>
-
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "ovsp4rt_client_interface.h"
