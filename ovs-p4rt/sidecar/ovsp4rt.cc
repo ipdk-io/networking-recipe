@@ -2042,7 +2042,6 @@ absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV4TableEntry(
 
   PrepareL2ToTunnelV4(table_entry, learn_info, p4info, false, detail);
 
-  // This function does not log failed requests.
   return ovsp4rt::SendReadRequest(session, read_request);
 }
 
@@ -2058,7 +2057,6 @@ absl::StatusOr<::p4::v1::ReadResponse> GetL2ToTunnelV6TableEntry(
 
   PrepareL2ToTunnelV6(table_entry, learn_info, p4info, false, detail);
 
-  // This function does not log failed requests.
   return ovsp4rt::SendReadRequest(session, read_request);
 }
 
@@ -2128,7 +2126,6 @@ absl::StatusOr<::p4::v1::ReadResponse> GetVmSrcTableEntry(
 
   PrepareSrcIpMacMapTableEntry(table_entry, ip_info, p4info, false, detail);
 
-  // This function does not log failed requests.
   return ovsp4rt::SendReadRequest(session, read_request);
 }
 
@@ -2304,6 +2301,9 @@ enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
 
 //----------------------------------------------------------------------
 // ovsp4rt_config_fdb_entry (ES2K)
+//
+// learn_info is passed by value because this function makes local
+// modifications to it.
 //----------------------------------------------------------------------
 void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
                               bool insert_entry, const char* grpc_addr) {
@@ -2356,6 +2356,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       auto status_or_read_response =
           GetFdbTunnelTableEntry(session.get(), learn_info, p4info, true);
       if (status_or_read_response.ok()) {
+        // Return if entry already exists.
         return;
       }
     }
@@ -2363,30 +2364,36 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
     status = ConfigFdbTunnelTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
 
     status = ConfigL2TunnelTableEntry(session.get(), learn_info, p4info,
                                       insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
   } else {
     if (insert_entry) {
       auto status_or_read_response =
           GetFdbVlanTableEntry(session.get(), learn_info, p4info, true);
       if (status_or_read_response.ok()) {
+        // Return if entry already exists.
         return;
       }
 
       status = ConfigFdbRxVlanTableEntry(session.get(), learn_info, p4info,
                                          insert_entry);
       if (!status.ok()) {
+        // Ignore errors (why?)
       }
 
+      // TODO(derek): refactor (extract method)
       status_or_read_response =
           GetTxAccVsiTableEntry(session.get(), learn_info.src_port, p4info);
       if (!status_or_read_response.ok()) {
@@ -2421,16 +2428,19 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
       }
 
       learn_info.src_port = host_sp;
+      // end of refactoring
     }
 
     status = ConfigFdbTxVlanTableEntry(session.get(), learn_info, p4info,
                                        insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
 
     status = ConfigFdbSmacTableEntry(session.get(), learn_info, p4info,
                                      insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
   }
 }
@@ -2505,6 +2515,9 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
 
 //----------------------------------------------------------------------
 // ovsp4rt_config_src_port_entry (ES2K)
+//
+// vsi_sp is passed by value because this function makes local
+// modifications to it.
 //----------------------------------------------------------------------
 void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
                                    bool insert_entry, const char* grpc_addr) {
@@ -2525,6 +2538,7 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
   ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
 
+  // TODO(derek): refactor (extract method)
   auto status_or_read_response =
       GetTxAccVsiTableEntry(session.get(), vsi_sp.src_port, p4info);
   if (!status_or_read_response.ok()) return;
@@ -2557,6 +2571,7 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
   }
 
   vsi_sp.src_port = host_sp;
+  // end of refactoring
 
   status = ConfigureVsiSrcPortTableEntry(session.get(), vsi_sp, p4info,
                                          insert_entry);
@@ -2580,7 +2595,7 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
   std::unique_ptr<OvsP4rtSession> session =
       std::move(status_or_session).value();
 
-  // Fetch P4Info object from the server.
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
@@ -2613,7 +2628,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
   std::unique_ptr<ovsp4rt::OvsP4rtSession> session =
       std::move(status_or_session).value();
 
-  // Fetch P4Info object from the server.
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status =
       ovsp4rt::GetForwardingPipelineConfig(session.get(), &p4info);
@@ -2675,7 +2690,7 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
   std::unique_ptr<OvsP4rtSession> session =
       std::move(status_or_session).value();
 
-  // Fetch P4Info object from the server.
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status = GetForwardingPipelineConfig(session.get(), &p4info);
   if (!status.ok()) return;
@@ -2713,7 +2728,7 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
   std::unique_ptr<ovsp4rt::OvsP4rtSession> session =
       std::move(status_or_session).value();
 
-  // Fetch P4Info object from the server.
+  // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   ::absl::Status status =
       ovsp4rt::GetForwardingPipelineConfig(session.get(), &p4info);
@@ -2731,6 +2746,7 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
     status = ConfigSrcIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
   }
 
@@ -2747,6 +2763,7 @@ try_dstip:
     status = ConfigDstIpMacMapTableEntry(session.get(), ip_info, p4info,
                                          insert_entry);
     if (!status.ok()) {
+      // Ignore errors (why?)
     }
   }
 }
