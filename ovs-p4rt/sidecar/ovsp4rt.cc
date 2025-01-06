@@ -2358,7 +2358,7 @@ void ConfigFdbEntry(ClientInterface& client,
       }
 
       learn_info.src_port = host_sp;
-      // end of GetVsiSrcPort
+      // end of refactoring
     }
 
     status =
@@ -2478,7 +2478,7 @@ void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
   }
 
   vsi_sp.src_port = host_sp;
-  // end of GetVsiSrcPort
+  // end of refactoring
 
   status = ConfigureVsiSrcPortTableEntry(client, vsi_sp, p4info, insert_entry);
   if (!status.ok()) return;
