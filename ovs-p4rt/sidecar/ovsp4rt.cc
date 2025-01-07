@@ -2483,7 +2483,7 @@ void ConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
 // ConfigFdbEntry (DPDK)
 //----------------------------------------------------------------------
 void ConfigFdbEntry(ClientInterface& client,
-                    const struct mac_learning_info& learn_info,
+                    struct mac_learning_info learn_info,
                     bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 

@@ -13,7 +13,7 @@
 namespace ovsp4rt {
 
 extern void ConfigFdbEntry(ClientInterface& client,
-                           const struct mac_learning_info& learn_info,
+                           struct mac_learning_info learn_info,
                            bool insert_entry, const char* grpc_addr);
 
 extern void ConfigTunnelEntry(ClientInterface& client,
