@@ -83,7 +83,7 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
   using namespace ovsp4rt;
 
   JournalClient client;
-  client.journal().recordInput(_func__, ip_info, insert_entry);
+  client.journal().recordInput(__func__, ip_info, insert_entry);
 
   ConfigIpMacMapEntry(client, ip_info, insert_entry, grpc_addr);
 }
@@ -137,7 +137,7 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
   using namespace ovsp4rt;
 
   JournalClient client;
-  client.journal().recordInput(__func__, tnl_sp, insert_entry);
+  client.journal().recordInput(__func__, vlan_id, insert_entry);
 
   ConfigVlanEntry(client, vlan_id, insert_entry, grpc_addr);
 }
