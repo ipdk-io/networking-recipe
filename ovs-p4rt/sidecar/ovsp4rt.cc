@@ -2231,7 +2231,7 @@ void ConfigFdbEntry(ClientInterface& client,
    */
   if (!insert_entry) {
     auto status_or_read_response =
-        GetL2ToTunnelV4TableEntry(session.get(), learn_info, p4info);
+        GetL2ToTunnelV4TableEntry(client, learn_info, p4info);
     if (status_or_read_response.ok()) {
       learn_info.is_tunnel = true;
     }
@@ -2241,7 +2241,7 @@ void ConfigFdbEntry(ClientInterface& client,
      */
     if (!learn_info.is_tunnel) {
       status_or_read_response =
-          GetL2ToTunnelV6TableEntry(session.get(), learn_info, p4info);
+          GetL2ToTunnelV6TableEntry(client, learn_info, p4info);
       if (status_or_read_response.ok()) {
         learn_info.is_tunnel = true;
         learn_info.tnl_info.local_ip.family = AF_INET6;
@@ -2253,7 +2253,7 @@ void ConfigFdbEntry(ClientInterface& client,
   if (learn_info.is_tunnel) {
     if (insert_entry) {
       auto status_or_read_response =
-          GetFdbTunnelTableEntry(session.get(), learn_info, p4info, true);
+          GetFdbTunnelTableEntry(client, learn_info, p4info, true);
       if (status_or_read_response.ok()) {
         // Return if entry already exists.
         return;
@@ -2278,7 +2278,7 @@ void ConfigFdbEntry(ClientInterface& client,
   } else {
     if (insert_entry) {
       auto status_or_read_response =
-          GetFdbVlanTableEntry(session.get(), learn_info, p4info, true);
+          GetFdbVlanTableEntry(client, learn_info, p4info, true);
       if (status_or_read_response.ok()) {
         // Return if entry already exists.
         return;
@@ -2562,8 +2562,7 @@ void ConfigIpMacMapEntry(ClientInterface& client,
   if (!status.ok()) return;
 
   if (insert_entry) {
-    auto status_or_read_response =
-        GetVmSrcTableEntry(session.get(), ip_info, p4info);
+    auto status_or_read_response = GetVmSrcTableEntry(client, ip_info, p4info);
     if (status_or_read_response.ok()) {
       goto try_dstip;
     }
@@ -2578,8 +2577,7 @@ void ConfigIpMacMapEntry(ClientInterface& client,
 
 try_dstip:
   if (insert_entry) {
-    auto status_or_read_response =
-        GetVmDstTableEntry(session.get(), ip_info, p4info);
+    auto status_or_read_response = GetVmDstTableEntry(client, ip_info, p4info);
     if (status_or_read_response.ok()) {
       return;
     }
