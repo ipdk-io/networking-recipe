@@ -87,6 +87,64 @@ jobs:
           ctest --output-on-failure
 
   #---------------------------------------------------------------------
+  # ovsp4rt_build_and_test
+  #---------------------------------------------------------------------
+  ovsp4rt_build_and_test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Clone networking-recipe
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          path: recipe
+
+      - name: Install prerequisites
+        run: |
+          sudo apt install $PREREQS
+
+      - name: Install DPDK SDE
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: ${{ env.SDE_REPOSITORY }}
+          tag: ${{ env.SDE_TAG }}
+          fileName: ${{ env.SDE_FILENAME }}
+      - run: |
+          sudo tar -xzf $SDE_FILENAME -C /
+          rm $SDE_FILENAME
+
+      - name: Install stratum dependencies
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: ${{ env.DEPS_REPOSITORY }}
+          tag: ${{ env.DEPS_TAG }}
+          fileName: ${{ env.DEPS_FILENAME }}
+      - run: |
+          sudo tar -xzf $DEPS_FILENAME -C /
+          rm $DEPS_FILENAME
+
+      - name: Build ovsp4rt
+        working-directory: recipe
+        run: |
+          export DEPEND_INSTALL=$DEPS_INSTALL_DIR
+          export SDE_INSTALL=$SDE_INSTALL_DIR
+          # Configure cmake
+          cmake -B build \
+            -DTDI_TARGET=DPDK \
+            -DP4OVS_MODE=OVSP4RT \
+            -DBUILD_CLIENT=YES \
+            -DBUILD_JOURNAL=YES
+          # Build ovsp4rt
+          cmake --build build -j6 \
+            --target ovsp4rt ovsp4rt-unit-tests
+
+      - name: Run unit tests
+        working-directory: recipe/build
+        run: |
+          ctest -L ovsp4rt --output-on-failure
+
+  #---------------------------------------------------------------------
   # build_p4runtime_protos
   #---------------------------------------------------------------------
   build_p4runtime_protos:
