@@ -2205,14 +2205,14 @@ absl::Status ConfigSrcIpMacMapTableEntry(ClientInterface& client,
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// ConfigFdbEntry (ES2K)
+// DoConfigFdbEntry (ES2K)
 //
 // learn_info is passed by value because this function may make local
 // modifications to it.
 //----------------------------------------------------------------------
-void ConfigFdbEntry(ClientInterface& client,
-                    struct mac_learning_info learn_info, bool insert_entry,
-                    const char* grpc_addr) {
+void DoConfigFdbEntry(ClientInterface& client,
+                      struct mac_learning_info learn_info, bool insert_entry,
+                      const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2345,11 +2345,11 @@ void ConfigFdbEntry(ClientInterface& client,
 }
 
 //----------------------------------------------------------------------
-// ConfigRxTunnelSrcEntry (ES2K)
+// DoConfigRxTunnelSrcEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigRxTunnelSrcEntry(ClientInterface& client,
-                            const struct tunnel_info& tunnel_info,
-                            bool insert_entry, const char* grpc_addr) {
+void DoConfigRxTunnelSrcEntry(ClientInterface& client,
+                              const struct tunnel_info& tunnel_info,
+                              bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2367,11 +2367,11 @@ void ConfigRxTunnelSrcEntry(ClientInterface& client,
 }
 
 //----------------------------------------------------------------------
-// ConfigTunnelSrcPortEntry (ES2K)
+// DoConfigTunnelSrcPortEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigTunnelSrcPortEntry(ClientInterface& client,
-                              const struct src_port_info& tnl_sp,
-                              bool insert_entry, const char* grpc_addr) {
+void DoConfigTunnelSrcPortEntry(ClientInterface& client,
+                                const struct src_port_info& tnl_sp,
+                                bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2395,13 +2395,13 @@ void ConfigTunnelSrcPortEntry(ClientInterface& client,
 }
 
 //----------------------------------------------------------------------
-// ConfigSrcPortEntry (ES2K)
+// DoConfigSrcPortEntry (ES2K)
 //
 // vsi_sp is passed by value because this function makes local
 // modifications to it.
 //----------------------------------------------------------------------
-void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
-                        bool insert_entry, const char* grpc_addr) {
+void DoConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
+                          bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2455,10 +2455,10 @@ void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
 }
 
 //----------------------------------------------------------------------
-// ConfigVlanEntry (ES2K)
+// DoConfigVlanEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
-                     bool insert_entry, const char* grpc_addr) {
+void DoConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
+                       bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2480,11 +2480,11 @@ void ConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
 #elif defined(DPDK_TARGET)
 
 //----------------------------------------------------------------------
-// ConfigFdbEntry (DPDK)
+// DoConfigFdbEntry (DPDK)
 //----------------------------------------------------------------------
-void ConfigFdbEntry(ClientInterface& client,
-                    struct mac_learning_info learn_info, bool insert_entry,
-                    const char* grpc_addr) {
+void DoConfigFdbEntry(ClientInterface& client,
+                      struct mac_learning_info learn_info, bool insert_entry,
+                      const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2513,11 +2513,11 @@ void ConfigFdbEntry(ClientInterface& client,
 #endif  // DPDK_TARGET
 
 //----------------------------------------------------------------------
-// ConfigTunnelEntry (common)
+// DoConfigTunnelEntry (common)
 //----------------------------------------------------------------------
-void ConfigTunnelEntry(ClientInterface& client,
-                       const struct tunnel_info& tunnel_info, bool insert_entry,
-                       const char* grpc_addr) {
+void DoConfigTunnelEntry(ClientInterface& client,
+                         const struct tunnel_info& tunnel_info,
+                         bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
@@ -2545,11 +2545,11 @@ void ConfigTunnelEntry(ClientInterface& client,
 #if defined(ES2K_TARGET)
 
 //----------------------------------------------------------------------
-// ConfigIpMacMapEntry (ES2K)
+// DoConfigIpMacMapEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigIpMacMapEntry(ClientInterface& client,
-                         const struct ip_mac_map_info& ip_info,
-                         bool insert_entry, const char* grpc_addr) {
+void DoConfigIpMacMapEntry(ClientInterface& client,
+                           const struct ip_mac_map_info& ip_info,
+                           bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.

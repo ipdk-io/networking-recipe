@@ -12,34 +12,35 @@
 
 namespace ovsp4rt {
 
-extern void ConfigFdbEntry(ClientInterface& client,
-                           struct mac_learning_info learn_info,
-                           bool insert_entry, const char* grpc_addr);
+extern void DoConfigFdbEntry(ClientInterface& client,
+                             struct mac_learning_info learn_info,
+                             bool insert_entry, const char* grpc_addr);
 
-extern void ConfigTunnelEntry(ClientInterface& client,
-                              const struct tunnel_info& tunnel_info,
-                              bool insert_entry, const char* grpc_addr);
+extern void DoConfigTunnelEntry(ClientInterface& client,
+                                const struct tunnel_info& tunnel_info,
+                                bool insert_entry, const char* grpc_addr);
 
 #if defined(ES2K_TARGET)
 
-extern void ConfigIpMacMapEntry(ClientInterface& client,
-                                const struct ip_mac_map_info& ip_info,
-                                bool insert_entry, const char* grpc_addr);
+extern void DoConfigIpMacMapEntry(ClientInterface& client,
+                                  const struct ip_mac_map_info& ip_info,
+                                  bool insert_entry, const char* grpc_addr);
 
-extern void ConfigRxTunnelSrcEntry(ClientInterface& client,
-                                   const struct tunnel_info& tunnel_info,
-                                   bool insert_entry, const char* grpc_addr);
-
-extern void ConfigSrcPortEntry(ClientInterface& client,
-                               struct src_port_info vsi_sp, bool insert_entry,
-                               const char* grpc_addr);
-
-extern void ConfigTunnelSrcPortEntry(ClientInterface& client,
-                                     const struct src_port_info& tnl_sp,
+extern void DoConfigRxTunnelSrcEntry(ClientInterface& client,
+                                     const struct tunnel_info& tunnel_info,
                                      bool insert_entry, const char* grpc_addr);
 
-extern void ConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
-                            bool insert_entry, const char* grpc_addr);
+extern void DoConfigSrcPortEntry(ClientInterface& client,
+                                 struct src_port_info vsi_sp, bool insert_entry,
+                                 const char* grpc_addr);
+
+extern void DoConfigTunnelSrcPortEntry(ClientInterface& client,
+                                       const struct src_port_info& tnl_sp,
+                                       bool insert_entry,
+                                       const char* grpc_addr);
+
+extern void DoConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
+                              bool insert_entry, const char* grpc_addr);
 
 #endif  // ES2K_TARGET
 
