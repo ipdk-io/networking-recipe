@@ -1,10 +1,10 @@
-// Copyright 2024 Intel Corporation
+// Copyright 2024-2025 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ES2K_P4INFO_TEXT_H_
-#define ES2K_P4INFO_TEXT_H_
+#ifndef DPDK_P4INFO_TEXT_H_
+#define DPDK_P4INFO_TEXT_H_
 
-// P4Info for ES2K Linux Networking.
+// P4Info for DPDK Linux Networking.
 constexpr char P4INFO_TEXT[] = R"p4(
 # proto-file: p4/config/v1/p4info.proto
 # proto-message: p4.config.v1.P4Info
@@ -555,4 +555,4 @@ type_info {
 }
 )p4";
 
-#endif  // ES2K_P4INFO_TEXT_H_
+#endif  // DPDK_P4INFO_TEXT_H_

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 2024 Intel Corporation.
+# Copyright 2024-2025 Intel Corporation.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Converts a P4Info.txt file to a C++ header file.
@@ -14,20 +14,20 @@ DEFAULT_INFILE = "p4Info.txt"
 DEFAULT_OUTFILE = "p4info_text.h"
 
 PREAMBLE = \
-"""// Copyright 2024 Intel Corporation
+"""// Copyright 2024-2025 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef ES2K_P4INFO_TEXT_H_
-#define ES2K_P4INFO_TEXT_H_
+#ifndef DPDK_P4INFO_TEXT_H_
+#define DPDK_P4INFO_TEXT_H_
 
-// P4Info for ES2K Linux Networking.
+// P4Info for DPDK Linux Networking.
 constexpr char P4INFO_TEXT[] = R"p4(
 """
 
 POSTAMBLE = \
 """)p4";
 
-#endif  // ES2K_P4INFO_TEXT_H_
+#endif  // DPDK_P4INFO_TEXT_H_
 """
 
 def create_header(infile, outfile):
