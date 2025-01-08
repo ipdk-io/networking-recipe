@@ -26,7 +26,7 @@ endif()
 #-----------------------------------------------------------------------
 add_library(ovs_sidecar_o OBJECT
     ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
-    $<IF:$<BOOL:BUILD_CLIENT>,newovsp4rt.cc,ovsp4rt.cc>
+    $<IF:$<BOOL:${BUILD_CLIENT}>,newovsp4rt.cc,ovsp4rt.cc>
     ovsp4rt_private.h
 )
 
