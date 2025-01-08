@@ -1,4 +1,4 @@
-// Copyright 2022-2024 Intel Corporation
+// Copyright 2022-2025 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 // Defines the interface to the C++ functions that implement
@@ -13,7 +13,7 @@
 namespace ovsp4rt {
 
 extern void ConfigFdbEntry(ClientInterface& client,
-                           const struct mac_learning_info& learn_info,
+                           struct mac_learning_info learn_info,
                            bool insert_entry, const char* grpc_addr);
 
 extern void ConfigTunnelEntry(ClientInterface& client,
