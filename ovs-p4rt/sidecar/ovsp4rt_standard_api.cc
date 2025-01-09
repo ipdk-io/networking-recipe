@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Standard implementation of the ovsp4rt C API.
+// *** UNDER CONSTRUCTION ***
 
 #include "client/ovsp4rt_client.h"
 #include "ovsp4rt/ovs-p4rt.h"
@@ -16,7 +17,7 @@ void ovsp4rt_config_fdb_entry(struct mac_learning_info learn_info,
 
   Client client;
 
-  ConfigFdbEntry(client, learn_info, insert_entry, grpc_addr);
+  DoConfigFdbEntry(client, learn_info, insert_entry, grpc_addr);
 }
 
 //----------------------------------------------------------------------
@@ -28,7 +29,7 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
 
   Client client;
 
-  ConfigTunnelEntry(client, tunnel_info, insert_entry, grpc_addr);
+  DoConfigTunnelEntry(client, tunnel_info, insert_entry, grpc_addr);
 }
 
 #if defined(DPDK_TARGET)
@@ -65,7 +66,7 @@ void ovsp4rt_config_ip_mac_map_entry(struct ip_mac_map_info ip_info,
 
   Client client;
 
-  ConfigIpMacMapEntry(client, ip_info, insert_entry, grpc_addr);
+  DoConfigIpMacMapEntry(client, ip_info, insert_entry, grpc_addr);
 }
 
 //----------------------------------------------------------------------
@@ -78,7 +79,7 @@ void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
 
   Client client;
 
-  ConfigRxTunnelSrcEntry(client, tunnel_info, insert_entry, grpc_addr);
+  DoConfigRxTunnelSrcEntry(client, tunnel_info, insert_entry, grpc_addr);
 }
 
 //----------------------------------------------------------------------
@@ -90,7 +91,7 @@ void ovsp4rt_config_src_port_entry(struct src_port_info vsi_sp,
 
   Client client;
 
-  ConfigSrcPortEntry(client, vsi_sp, insert_entry, grpc_addr);
+  DoConfigSrcPortEntry(client, vsi_sp, insert_entry, grpc_addr);
 }
 
 //----------------------------------------------------------------------
@@ -103,7 +104,7 @@ void ovsp4rt_config_tunnel_src_port_entry(struct src_port_info tnl_sp,
 
   Client client;
 
-  ConfigTunnelSrcPortEntry(client, tnl_sp, insert_entry, grpc_addr);
+  DoConfigTunnelSrcPortEntry(client, tnl_sp, insert_entry, grpc_addr);
 }
 
 //----------------------------------------------------------------------
@@ -115,7 +116,7 @@ void ovsp4rt_config_vlan_entry(uint16_t vlan_id, bool insert_entry,
 
   Client client;
 
-  ConfigVlanEntry(client, vlan_id, insert_entry, grpc_addr);
+  DoConfigVlanEntry(client, vlan_id, insert_entry, grpc_addr);
 }
 
 #endif  // ES2K_TARGET
