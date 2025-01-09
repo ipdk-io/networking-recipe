@@ -32,23 +32,6 @@ void ovsp4rt_config_tunnel_entry(struct tunnel_info tunnel_info,
   DoConfigTunnelEntry(client, tunnel_info, insert_entry, grpc_addr);
 }
 
-//----------------------------------------------------------------------
-// ovsp4rt_str_to_tunnel_type (DPDK, ES2K)
-//
-// It is unclear whether this function belongs here or in a separate
-// file.
-//----------------------------------------------------------------------
-enum ovs_tunnel_type ovsp4rt_str_to_tunnel_type(const char* tnl_type) {
-  if (tnl_type) {
-    if (strcmp(tnl_type, "vxlan") == 0) {
-      return OVS_TUNNEL_VXLAN;
-    } else if (strcmp(tnl_type, "geneve") == 0) {
-      return OVS_TUNNEL_GENEVE;
-    }
-  }
-  return OVS_TUNNEL_UNKNOWN;
-}
-
 #if defined(DPDK_TARGET)
 
 //----------------------------------------------------------------------
