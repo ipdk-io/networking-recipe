@@ -79,7 +79,7 @@ void ovsp4rt_config_rx_tunnel_src_entry(struct tunnel_info tunnel_info,
 
   Client client;
 
-  DoConfigRxTunnelSrcEntry(client, tunnel_info, insert_entry, grpc_addr);
+  (void)DoConfigRxTunnelSrcEntry(client, tunnel_info, insert_entry, grpc_addr);
 }
 
 //----------------------------------------------------------------------
