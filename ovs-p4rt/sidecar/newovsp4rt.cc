@@ -1,6 +1,19 @@
 // Copyright 2022-2025 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// Revision of ovsp4rt.cc to improve testability.
+// *** UNDER CONSTRUCTION ***
+//
+// - Replaced the OvsP4rtSession object with a Client object,
+//   which provides an abstract interface to the P4Runtime
+//   server.
+//
+// - Split each ovsp4rt API into an internal C++ function
+//   that implements the core logic of the API, and a
+//   C wrapper function.
+//
+// - Moved the C wrapper functions to a separate file.
+
 #include <arpa/inet.h>
 
 #include <string>
