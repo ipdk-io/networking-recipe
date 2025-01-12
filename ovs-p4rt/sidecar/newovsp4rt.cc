@@ -1,6 +1,19 @@
 // Copyright 2022-2025 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
+// Revision of ovsp4rt.cc to improve testability.
+// *** UNDER CONSTRUCTION ***
+//
+// - Replaced the OvsP4rtSession object with a Client object,
+//   which provides an abstract interface to the P4Runtime
+//   server.
+//
+// - Split each ovsp4rt API into an internal C++ function
+//   that implements the core logic of the API, and a
+//   C wrapper function.
+//
+// - Moved the C wrapper functions to a separate file.
+
 #include <arpa/inet.h>
 
 #include <string>
@@ -2201,68 +2214,28 @@ absl::Status ConfigSrcIpMacMapTableEntry(ClientInterface& client,
 }
 
 //----------------------------------------------------------------------
-// Predicate functions (ES2K)
-//----------------------------------------------------------------------
-
-static inline bool HaveL2ToTunnelV4TableEntry(
-    ClientInterface& client, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info) {
-  return GetL2ToTunnelV4TableEntry(client, learn_info, p4info).ok();
-}
-
-static inline bool HaveL2ToTunnelV6TableEntry(
-    ClientInterface& client, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info) {
-  return GetL2ToTunnelV6TableEntry(client, learn_info, p4info).ok();
-}
-
-static inline bool HaveFdbTunnelTableEntry(
-    ClientInterface& client, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
-  return GetFdbTunnelTableEntry(client, learn_info, p4info, adding).ok();
-}
-
-static inline bool HaveFdbVlanTableEntry(
-    ClientInterface& client, const struct mac_learning_info& learn_info,
-    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
-  return GetFdbVlanTableEntry(client, learn_info, p4info, adding).ok();
-}
-
-static inline bool HaveVmSrcTableEntry(ClientInterface& client,
-                                       struct ip_mac_map_info ip_info,
-                                       const ::p4::config::v1::P4Info& p4info) {
-  return GetVmSrcTableEntry(client, ip_info, p4info).ok();
-}
-
-static inline bool HaveVmDstTableEntry(ClientInterface& client,
-                                       const struct ip_mac_map_info& ip_info,
-                                       const ::p4::config::v1::P4Info& p4info) {
-  return GetVmDstTableEntry(client, ip_info, p4info).ok();
-}
-
-//----------------------------------------------------------------------
 // C++ functions that implement the public API.
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// ConfigFdbEntry (ES2K)
+// DoConfigFdbEntry (ES2K)
 //
 // learn_info is passed by value because this function may make local
 // modifications to it.
 //----------------------------------------------------------------------
-void ConfigFdbEntry(ClientInterface& client,
-                    struct mac_learning_info learn_info, bool insert_entry,
-                    const char* grpc_addr) {
+absl::Status DoConfigFdbEntry(ClientInterface& client,
+                              struct mac_learning_info learn_info,
+                              bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
   status = client.connect(grpc_addr);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = client.getPipelineConfig(&p4info);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   /* In the delete case, we do not know whether this is a Tunnel learn
    * entry or a regular VSI learn entry. Check for a match in one of
@@ -2270,7 +2243,9 @@ void ConfigFdbEntry(ClientInterface& client,
    * learn_info structure.
    */
   if (!insert_entry) {
-    if (HaveL2ToTunnelV4TableEntry(client, learn_info, p4info)) {
+    auto status_or_read_response =
+        GetL2ToTunnelV4TableEntry(client, learn_info, p4info);
+    if (status_or_read_response.ok()) {
       learn_info.is_tunnel = true;
     }
 
@@ -2278,7 +2253,9 @@ void ConfigFdbEntry(ClientInterface& client,
      * entry as the entry can be either in V4 or V6 tunnel table.
      */
     if (!learn_info.is_tunnel) {
-      if (HaveL2ToTunnelV6TableEntry(client, learn_info, p4info)) {
+      status_or_read_response =
+          GetL2ToTunnelV6TableEntry(client, learn_info, p4info);
+      if (status_or_read_response.ok()) {
         learn_info.is_tunnel = true;
         learn_info.tnl_info.local_ip.family = AF_INET6;
         learn_info.tnl_info.remote_ip.family = AF_INET6;
@@ -2288,39 +2265,33 @@ void ConfigFdbEntry(ClientInterface& client,
 
   if (learn_info.is_tunnel) {
     if (insert_entry) {
-      if (HaveFdbTunnelTableEntry(client, learn_info, p4info, insert_entry)) {
+      auto status_or_read_response =
+          GetFdbTunnelTableEntry(client, learn_info, p4info, true);
+      if (status_or_read_response.ok()) {
         // Return if entry already exists.
-        return;
+        return status_or_read_response.status();
       }
     }
 
-    status =
-        ConfigFdbTunnelTableEntry(client, learn_info, p4info, insert_entry);
-    if (!status.ok()) {
-      // Ignore errors (why?)
-    }
+    // Ignore errors (why?)
+    (void)ConfigFdbTunnelTableEntry(client, learn_info, p4info, insert_entry);
 
-    status = ConfigL2TunnelTableEntry(client, learn_info, p4info, insert_entry);
-    if (!status.ok()) {
-      // Ignore errors (why?)
-    }
+    // Ignore errors (why?)
+    (void)ConfigL2TunnelTableEntry(client, learn_info, p4info, insert_entry);
 
-    status = ConfigFdbSmacTableEntry(client, learn_info, p4info, insert_entry);
-    if (!status.ok()) {
-      // Ignore errors (why?)
-    }
+    // Ignore errors (why?)
+    (void)ConfigFdbSmacTableEntry(client, learn_info, p4info, insert_entry);
   } else {
     if (insert_entry) {
-      if (HaveFdbVlanTableEntry(client, learn_info, p4info, insert_entry)) {
+      auto status_or_read_response =
+          GetFdbVlanTableEntry(client, learn_info, p4info, true);
+      if (status_or_read_response.ok()) {
         // Return if entry already exists.
-        return;
+        return absl::OkStatus();
       }
 
-      status =
-          ConfigFdbRxVlanTableEntry(client, learn_info, p4info, insert_entry);
-      if (!status.ok()) {
-        // Ignore errors (why?)
-      }
+      // Ignore errors (why?)
+      (void)ConfigFdbRxVlanTableEntry(client, learn_info, p4info, insert_entry);
 
       // TODO(derek): refactor (extract method)
       //
@@ -2329,7 +2300,7 @@ void ConfigFdbEntry(ClientInterface& client,
       auto response_or_status =
           GetTxAccVsiTableEntry(client, learn_info.src_port, p4info);
       if (!response_or_status.ok()) {
-        return;
+        return response_or_status.status();
       }
 
       ::p4::v1::ReadResponse read_response =
@@ -2363,57 +2334,55 @@ void ConfigFdbEntry(ClientInterface& client,
       // end of refactoring
     }
 
-    status =
-        ConfigFdbTxVlanTableEntry(client, learn_info, p4info, insert_entry);
-    if (!status.ok()) {
-      // Ignore errors (why?)
-    }
+    // Ignore errors (why?)
+    (void)ConfigFdbTxVlanTableEntry(client, learn_info, p4info, insert_entry);
 
-    status = ConfigFdbSmacTableEntry(client, learn_info, p4info, insert_entry);
-    if (!status.ok()) {
-      // Ignore errors (why?)
-    }
+    // Ignore errors (why?)
+    (void)ConfigFdbSmacTableEntry(client, learn_info, p4info, insert_entry);
   }
+
+  return absl::OkStatus();
 }
 
 //----------------------------------------------------------------------
-// ConfigRxTunnelSrcEntry (ES2K)
+// DoConfigRxTunnelSrcEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigRxTunnelSrcEntry(ClientInterface& client,
-                            const struct tunnel_info& tunnel_info,
-                            bool insert_entry, const char* grpc_addr) {
+absl::Status DoConfigRxTunnelSrcEntry(ClientInterface& client,
+                                      const struct tunnel_info& tunnel_info,
+                                      bool insert_entry,
+                                      const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
   status = client.connect(grpc_addr);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = client.getPipelineConfig(&p4info);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
-  status = ConfigRxTunnelSrcPortTableEntry(client, tunnel_info, p4info,
-                                           insert_entry);
-  if (!status.ok()) return;
+  return ConfigRxTunnelSrcPortTableEntry(client, tunnel_info, p4info,
+                                         insert_entry);
 }
 
 //----------------------------------------------------------------------
-// ConfigTunnelSrcPortEntry (ES2K)
+// DoConfigTunnelSrcPortEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigTunnelSrcPortEntry(ClientInterface& client,
-                              const struct src_port_info& tnl_sp,
-                              bool insert_entry, const char* grpc_addr) {
+absl::Status DoConfigTunnelSrcPortEntry(ClientInterface& client,
+                                        const struct src_port_info& tnl_sp,
+                                        bool insert_entry,
+                                        const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
   status = client.connect(grpc_addr);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = client.getPipelineConfig(&p4info);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   ::p4::v1::WriteRequest write_request;
   ::p4::v1::TableEntry* table_entry;
@@ -2422,28 +2391,28 @@ void ConfigTunnelSrcPortEntry(ClientInterface& client,
 
   PrepareSrcPortTableEntry(table_entry, tnl_sp, p4info, insert_entry);
 
-  status = client.sendWriteRequest(write_request);
-  if (!status.ok()) return;
+  return client.sendWriteRequest(write_request);
 }
 
 //----------------------------------------------------------------------
-// ConfigSrcPortEntry (ES2K)
+// DoConfigSrcPortEntry (ES2K)
 //
 // vsi_sp is passed by value because this function makes local
 // modifications to it.
 //----------------------------------------------------------------------
-void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
-                        bool insert_entry, const char* grpc_addr) {
+absl::Status DoConfigSrcPortEntry(ClientInterface& client,
+                                  struct src_port_info vsi_sp,
+                                  bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
   status = client.connect(grpc_addr);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = client.getPipelineConfig(&p4info);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   // TODO(derek): refactor (extract method)
   //
@@ -2451,7 +2420,7 @@ void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
   //               uint32_t src_port, uint32_t& vsi_port);
   auto response_or_status =
       GetTxAccVsiTableEntry(client, vsi_sp.src_port, p4info);
-  if (!response_or_status.ok()) return;
+  if (!response_or_status.ok()) return response_or_status.status();
 
   ::p4::v1::ReadResponse read_response = std::move(response_or_status).value();
   std::vector<::p4::v1::TableEntry> table_entries;
@@ -2482,51 +2451,49 @@ void ConfigSrcPortEntry(ClientInterface& client, struct src_port_info vsi_sp,
   vsi_sp.src_port = host_sp;
   // end of refactoring
 
-  status = ConfigureVsiSrcPortTableEntry(client, vsi_sp, p4info, insert_entry);
-  if (!status.ok()) return;
+  return ConfigureVsiSrcPortTableEntry(client, vsi_sp, p4info, insert_entry);
 }
 
 //----------------------------------------------------------------------
-// ConfigVlanEntry (ES2K)
+// DoConfigVlanEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
-                     bool insert_entry, const char* grpc_addr) {
+absl::Status DoConfigVlanEntry(ClientInterface& client, uint16_t vlan_id,
+                               bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
   status = client.connect(grpc_addr);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = client.getPipelineConfig(&p4info);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   status = ConfigVlanPushTableEntry(client, vlan_id, p4info, insert_entry);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
-  status = ConfigVlanPopTableEntry(client, vlan_id, p4info, insert_entry);
-  if (!status.ok()) return;
+  return ConfigVlanPopTableEntry(client, vlan_id, p4info, insert_entry);
 }
 
 #elif defined(DPDK_TARGET)
 
 //----------------------------------------------------------------------
-// ConfigFdbEntry (DPDK)
+// DoConfigFdbEntry (DPDK)
 //----------------------------------------------------------------------
-void ConfigFdbEntry(ClientInterface& client,
-                    const struct mac_learning_info& learn_info,
-                    bool insert_entry, const char* grpc_addr) {
+absl::Status DoConfigFdbEntry(ClientInterface& client,
+                              struct mac_learning_info learn_info,
+                              bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
   status = client.connect(grpc_addr);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = client.getPipelineConfig(&p4info);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   if (learn_info.is_tunnel) {
     status =
@@ -2534,91 +2501,88 @@ void ConfigFdbEntry(ClientInterface& client,
   } else if (learn_info.is_vlan) {
     status =
         ConfigFdbTxVlanTableEntry(client, learn_info, p4info, insert_entry);
-    if (!status.ok()) return;
+    if (!status.ok()) return status;
 
     status =
         ConfigFdbRxVlanTableEntry(client, learn_info, p4info, insert_entry);
-    if (!status.ok()) return;
   }
+  return status;
 }
 
 #endif  // DPDK_TARGET
 
 //----------------------------------------------------------------------
-// ConfigTunnelEntry (common)
+// DoConfigTunnelEntry (common)
 //----------------------------------------------------------------------
-void ConfigTunnelEntry(ClientInterface& client,
-                       const struct tunnel_info& tunnel_info, bool insert_entry,
-                       const char* grpc_addr) {
+absl::Status DoConfigTunnelEntry(ClientInterface& client,
+                                 const struct tunnel_info& tunnel_info,
+                                 bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
   status = client.connect(grpc_addr);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = client.getPipelineConfig(&p4info);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   status = ConfigEncapTableEntry(client, tunnel_info, p4info, insert_entry);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
 #if defined(ES2K_TARGET)
   status = ConfigDecapTableEntry(client, tunnel_info, p4info, insert_entry);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 #endif
 
-  status =
-      ConfigTunnelTermTableEntry(client, tunnel_info, p4info, insert_entry);
-  if (!status.ok()) return;
+  return ConfigTunnelTermTableEntry(client, tunnel_info, p4info, insert_entry);
 }
 
 #if defined(ES2K_TARGET)
 
 //----------------------------------------------------------------------
-// ConfigIpMacMapEntry (ES2K)
+// DoConfigIpMacMapEntry (ES2K)
 //----------------------------------------------------------------------
-void ConfigIpMacMapEntry(ClientInterface& client,
-                         const struct ip_mac_map_info& ip_info,
-                         bool insert_entry, const char* grpc_addr) {
+absl::Status DoConfigIpMacMapEntry(ClientInterface& client,
+                                   const struct ip_mac_map_info& ip_info,
+                                   bool insert_entry, const char* grpc_addr) {
   absl::Status status;
 
   // Start a new client session.
   status = client.connect(grpc_addr);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   // Fetch P4Info object from server.
   ::p4::config::v1::P4Info p4info;
   status = client.getPipelineConfig(&p4info);
-  if (!status.ok()) return;
+  if (!status.ok()) return status;
 
   if (insert_entry) {
-    if (HaveVmSrcTableEntry(client, ip_info, p4info)) {
+    auto status_or_read_response = GetVmSrcTableEntry(client, ip_info, p4info);
+    if (status_or_read_response.ok()) {
       goto try_dstip;
     }
   }
 
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
-    status = ConfigSrcIpMacMapTableEntry(client, ip_info, p4info, insert_entry);
-    if (!status.ok()) {
-      // Ignore errors (why?)
-    }
+    // Ignore errors (why?)
+    (void)ConfigSrcIpMacMapTableEntry(client, ip_info, p4info, insert_entry);
   }
 
 try_dstip:
   if (insert_entry) {
-    if (HaveVmDstTableEntry(client, ip_info, p4info)) {
-      return;
+    auto status_or_read_response = GetVmDstTableEntry(client, ip_info, p4info);
+    if (status_or_read_response.ok()) {
+      return status_or_read_response.status();
     }
   }
 
   if (ValidIpAddr(ip_info.src_ip_addr.ip.v4addr.s_addr)) {
-    status = ConfigDstIpMacMapTableEntry(client, ip_info, p4info, insert_entry);
-    if (!status.ok()) {
-      // Ignore errors (why?)
-    }
+    // Ignore errors (why?)
+    (void)ConfigDstIpMacMapTableEntry(client, ip_info, p4info, insert_entry);
   }
+  return absl::OkStatus();
 }
 
 #endif  // ES2K_TARGET

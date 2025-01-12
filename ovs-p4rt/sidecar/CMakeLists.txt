@@ -1,6 +1,6 @@
 # CMake build file for ovs-p4rt/sidecar
 #
-# Copyright 2022-2024 Intel Corporation
+# Copyright 2022-2025 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
@@ -26,7 +26,7 @@ endif()
 #-----------------------------------------------------------------------
 add_library(ovs_sidecar_o OBJECT
     ${OVSP4RT_INCLUDE_DIR}/ovsp4rt/ovs-p4rt.h
-    ovsp4rt.cc
+    $<IF:$<BOOL:${BUILD_CLIENT}>,newovsp4rt.cc,ovsp4rt.cc>
     ovsp4rt_private.h
 )
 
@@ -35,10 +35,12 @@ if(BUILD_CLIENT)
     target_sources(ovs_sidecar_o PRIVATE
       ovsp4rt_internal_api.h
       ovsp4rt_journal_api.cc
+      ovsp4rt_simple_api.cc
     )
   else()
     target_sources(ovs_sidecar_o PRIVATE
       ovsp4rt_internal_api.h
+      ovsp4rt_simple_api.cc
       ovsp4rt_standard_api.cc
     )
   endif()
