@@ -2214,6 +2214,46 @@ absl::Status ConfigSrcIpMacMapTableEntry(ClientInterface& client,
 }
 
 //----------------------------------------------------------------------
+// Predicate functions (ES2K)
+//----------------------------------------------------------------------
+
+static inline bool HaveL2ToTunnelV4TableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info) {
+  return GetL2ToTunnelV4TableEntry(client, learn_info, p4info).ok();
+}
+
+static inline bool HaveL2ToTunnelV6TableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info) {
+  return GetL2ToTunnelV6TableEntry(client, learn_info, p4info).ok();
+}
+
+static inline bool HaveFdbTunnelTableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
+  return GetFdbTunnelTableEntry(client, learn_info, p4info, adding).ok();
+}
+
+static inline bool HaveFdbVlanTableEntry(
+    ClientInterface& client, const struct mac_learning_info& learn_info,
+    const ::p4::config::v1::P4Info& p4info, bool adding = false) {
+  return GetFdbVlanTableEntry(client, learn_info, p4info, adding).ok();
+}
+
+static inline bool HaveVmSrcTableEntry(ClientInterface& client,
+                                       struct ip_mac_map_info ip_info,
+                                       const ::p4::config::v1::P4Info& p4info) {
+  return GetVmSrcTableEntry(client, ip_info, p4info).ok();
+}
+
+static inline bool HaveVmDstTableEntry(ClientInterface& client,
+                                       const struct ip_mac_map_info& ip_info,
+                                       const ::p4::config::v1::P4Info& p4info) {
+  return GetVmDstTableEntry(client, ip_info, p4info).ok();
+}
+
+//----------------------------------------------------------------------
 // C++ functions that implement the public API.
 //----------------------------------------------------------------------
 
@@ -2243,9 +2283,7 @@ absl::Status DoConfigFdbEntry(ClientInterface& client,
    * learn_info structure.
    */
   if (!insert_entry) {
-    auto status_or_read_response =
-        GetL2ToTunnelV4TableEntry(client, learn_info, p4info);
-    if (status_or_read_response.ok()) {
+    if (HaveL2ToTunnelV4TableEntry(client, learn_info, p4info)) {
       learn_info.is_tunnel = true;
     }
 
@@ -2253,9 +2291,7 @@ absl::Status DoConfigFdbEntry(ClientInterface& client,
      * entry as the entry can be either in V4 or V6 tunnel table.
      */
     if (!learn_info.is_tunnel) {
-      status_or_read_response =
-          GetL2ToTunnelV6TableEntry(client, learn_info, p4info);
-      if (status_or_read_response.ok()) {
+      if (HaveL2ToTunnelV6TableEntry(client, learn_info, p4info)) {
         learn_info.is_tunnel = true;
         learn_info.tnl_info.local_ip.family = AF_INET6;
         learn_info.tnl_info.remote_ip.family = AF_INET6;
@@ -2265,11 +2301,9 @@ absl::Status DoConfigFdbEntry(ClientInterface& client,
 
   if (learn_info.is_tunnel) {
     if (insert_entry) {
-      auto status_or_read_response =
-          GetFdbTunnelTableEntry(client, learn_info, p4info, true);
-      if (status_or_read_response.ok()) {
+      if (HaveFdbTunnelTableEntry(client, learn_info, p4info, insert_entry)) {
         // Return if entry already exists.
-        return status_or_read_response.status();
+        return util::OkStatus();
       }
     }
 
@@ -2283,9 +2317,7 @@ absl::Status DoConfigFdbEntry(ClientInterface& client,
     (void)ConfigFdbSmacTableEntry(client, learn_info, p4info, insert_entry);
   } else {
     if (insert_entry) {
-      auto status_or_read_response =
-          GetFdbVlanTableEntry(client, learn_info, p4info, true);
-      if (status_or_read_response.ok()) {
+      if (HaveFdbVlanTableEntry(client, learn_info, p4info, insert_entry)) {
         // Return if entry already exists.
         return absl::OkStatus();
       }
@@ -2559,8 +2591,7 @@ absl::Status DoConfigIpMacMapEntry(ClientInterface& client,
   if (!status.ok()) return status;
 
   if (insert_entry) {
-    auto status_or_read_response = GetVmSrcTableEntry(client, ip_info, p4info);
-    if (status_or_read_response.ok()) {
+    if (HaveVmSrcTableEntry(client, ip_info, p4info)) {
       goto try_dstip;
     }
   }
@@ -2572,9 +2603,8 @@ absl::Status DoConfigIpMacMapEntry(ClientInterface& client,
 
 try_dstip:
   if (insert_entry) {
-    auto status_or_read_response = GetVmDstTableEntry(client, ip_info, p4info);
-    if (status_or_read_response.ok()) {
-      return status_or_read_response.status();
+    if (HaveVmDstTableEntry(client, ip_info, p4info)) {
+      return util::OkStatus();
     }
   }
 
