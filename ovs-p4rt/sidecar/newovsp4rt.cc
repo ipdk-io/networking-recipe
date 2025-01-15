@@ -2110,9 +2110,9 @@ absl::StatusOr<::p4::v1::ReadResponse> GetTxAccVsiTableEntry(
   return client.sendReadRequest(read_request);
 }
 
-absl::StatusOr<uint32> GetTxAccVsiHostSrcPort(
-    ClientInterface& client, const ::p4::config::v1::P4Info& p4info,
-    uint32 src_port) {
+absl::StatusOr<uint32> GetTxAccVsiPort(ClientInterface& client,
+                                       const ::p4::config::v1::P4Info& p4info,
+                                       uint32 src_port) {
   auto response_or_status = GetTxAccVsiTableEntry(client, src_port, p4info);
   auto status = response_or_status.status();
   if (!status.ok()) return status;
@@ -2134,6 +2134,7 @@ absl::StatusOr<uint32> GetTxAccVsiHostSrcPort(
     auto* table_action = table_entry.mutable_action();
     // TODO(derek): why mutable?
     auto* action = table_action->mutable_action();
+    // TODO(derek): validate table_action->preamble.id?
     for (const auto& param : action->params()) {
       if (param_id == param.param_id()) {
         const std::string& s1 = param.value();
@@ -2142,11 +2143,13 @@ absl::StatusOr<uint32> GetTxAccVsiHostSrcPort(
         for (int param_bytes = 0; param_bytes < 4; param_bytes++) {
           host_sp = host_sp << 8 | int(s2[param_bytes]);
         }
+        // TODO(derek): This break exits to the outermost for loop,
+        // advancing to the next table entry. Is this correct?
+        // Would `return host_sp` be better?
         break;
       }
     }
   }
-
   return host_sp;
 }
 
@@ -2333,8 +2336,7 @@ absl::Status DoConfigFdbEntry(ClientInterface& client,
       // Ignore errors (why?)
       (void)ConfigFdbRxVlanTableEntry(client, learn_info, p4info, insert_entry);
 
-      auto host_sp =
-          GetTxAccVsiHostSrcPort(client, p4info, learn_info.src_port);
+      auto host_sp = GetTxAccVsiPort(client, p4info, learn_info.src_port);
       if (!host_sp.ok()) {
         return host_sp.status();
       }
@@ -2421,7 +2423,7 @@ absl::Status DoConfigSrcPortEntry(ClientInterface& client,
   status = client.getPipelineConfig(&p4info);
   if (!status.ok()) return status;
 
-  auto host_sp = GetTxAccVsiHostSrcPort(client, p4info, vsi_sp.src_port);
+  auto host_sp = GetTxAccVsiPort(client, p4info, vsi_sp.src_port);
   if (!host_sp.ok()) {
     return host_sp.status();
   }
