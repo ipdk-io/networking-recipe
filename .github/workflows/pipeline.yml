@@ -29,8 +29,8 @@ env:
   SDE_INSTALL_DIR: /opt/p4dev/dpdk-sde
 
   DEPS_REPOSITORY: ipdk-io/stratum-deps
-  DEPS_TAG: v1.2.1
-  DEPS_FILENAME: deps-ubuntu-latest-x86_64.tar.gz
+  DEPS_TAG: v1.3.5
+  DEPS_FILENAME: deps-ubuntu-22.04-1.3.5-x86_64.tar.gz
   DEPS_INSTALL_DIR: /opt/p4dev/x86deps
 
   PREREQS: libbsd-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev
