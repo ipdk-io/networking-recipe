@@ -1,13 +1,13 @@
 # CMake build file for superproject.
 #
-# Copyright 2022-2024 Intel Corporation
+# Copyright 2022-2025 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
 # Version 3.15 is the baseline for P4 Control Plane.
 cmake_minimum_required(VERSION 3.15)
 
-project(networking-recipe VERSION 3.3.0 LANGUAGES C CXX)
+project(networking-recipe VERSION 3.4.0 LANGUAGES C CXX)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
