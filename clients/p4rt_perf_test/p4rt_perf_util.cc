@@ -1,8 +1,9 @@
 // Copyright 2023-2024 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
-#include <stdarg.h>
 #include "p4rt_perf_util.h"
+
+#include <stdarg.h>
 
 std::string EncodeByteValue(int arg_count...) {
   std::string byte_value;
