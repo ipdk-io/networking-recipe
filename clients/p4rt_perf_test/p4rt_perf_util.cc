@@ -3,6 +3,8 @@
 
 #include "p4rt_perf_util.h"
 
+#include <stdarg.h>
+
 std::string EncodeByteValue(int arg_count...) {
   std::string byte_value;
   va_list args;
