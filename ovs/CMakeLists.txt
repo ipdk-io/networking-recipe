@@ -1,11 +1,11 @@
 # CMake build file for Open vSwitch
 #
-# Copyright 2022-2024 Intel Corporation
+# Copyright 2022-2025 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 
-# Version 3.15 is the baseline for P4 Control Plane.
-cmake_minimum_required(VERSION 3.15)
+# CMake version 3.16 is the baseline for P4 Control Plane
+cmake_minimum_required(VERSION 3.16)
 
 project(ovs LANGUAGES C)
 

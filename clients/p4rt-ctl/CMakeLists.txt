@@ -1,9 +1,9 @@
 # Build file for p4rt-ctl.
 #
-# Copyright 2022-2023 Intel Corporation
+# Copyright 2022-2025 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 # Define PYTHON3 variable.
 find_program(PYTHON3 python3)

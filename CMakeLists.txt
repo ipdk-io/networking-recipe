@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache 2.0
 #
 
-# CMake version 3.16 is the baseline for P4 Control Plane.
+# CMake version 3.16 is the baseline for P4 Control Plane
 cmake_minimum_required(VERSION 3.16)
 
 project(networking-recipe VERSION 3.5.0 LANGUAGES C CXX)
