@@ -1,12 +1,12 @@
 #
-# Copyright 2023-2024 Intel Corporation
+# Copyright 2023-2025 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
 #
 # Compile p4runtime protobufs for supported languages.
 #
 
-# Version 3.15 is the baseline for P4 Control Plane.
-cmake_minimum_required(VERSION 3.15)
+# CMake version 3.16 is the baseline for P4 Control Plane
+cmake_minimum_required(VERSION 3.16)
 
 project(protobufs VERSION 2024.8.0 LANGUAGES CXX)
 
