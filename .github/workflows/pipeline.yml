@@ -41,14 +41,14 @@ jobs:
 # es2k_build_and_test
 #---------------------------------------------------------------------
   es2k_build_and_test:
-    runs-on: [self-hosted, es2k-runner] # self-hosted with label 'es2k-runner'
+    runs-on: [self-hosted, es2k-runner]
     steps:
       - name: List available runners
         run: |
           echo "Available runners:"
-          curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          curl -s -H "Authorization: Bearer ${{ secrets.ORG_PAT }}" \
             https://api.github.com/repos/${{ github.repository }}/actions/runners \
-            | jq '.runners[] | {name, status, labels}'
+            | jq '.runners?[]? | {name, status, labels}' || echo "No runners found."
 
       - name: Log selected runner
         run: |
