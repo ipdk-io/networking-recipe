@@ -67,7 +67,7 @@ jobs:
         run: |
           echo "Building project for ES2K target..."
           export SDE_INSTALL=/home/github-runner/p4-sde/install 
-          export DEPS_INSTALL=/home/github-runner/stratum-deps/install
+          export DEPEND_INSTALL=/home/github-runner/stratum-deps/install
           ./make-all.sh --target=es2k -D $DEPEND_INSTALL --rpath
 
   #---------------------------------------------------------------------
