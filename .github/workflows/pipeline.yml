@@ -32,6 +32,7 @@ env:
   DEPS_REPOSITORY: ipdk-io/stratum-deps
   DEPS_TAG: v1.3.5
   DEPS_FILENAME: deps-ubuntu-22.04-1.3.5-x86_64.tar.gz
+  DEPS_FILENAME_FEDORA: deps-fc37-1.3.5-x86_64.tar.gz
   DEPS_INSTALL_DIR: /opt/p4dev/x86deps
 
   PREREQS: libbsd-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev
@@ -56,6 +57,16 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Install stratum dependencies
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: ${{ env.DEPS_REPOSITORY }}
+          tag: ${{ env.DEPS_TAG }}
+          fileName: ${{ env.DEPS_FILENAME_FEDORA }}
+      - run: |
+          sudo tar -xzf $DEPS_FILENAME_FEDORA -C /
+          rm $DEPS_FILENAME_FEDORA
 
       - name: Clone networking-recipe
         run: |
