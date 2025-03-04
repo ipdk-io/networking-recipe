@@ -77,7 +77,7 @@ jobs:
         run: |
           echo "Building project for ES2K target..."
           export DEPEND_INSTALL=$DEPS_INSTALL_DIR
-          export SDE_INSTALL=/root/p4-sde/install
+          export SDE_INSTALL=/opt/p4dev/es2k-sde
           ./make-all.sh --target=es2k -D $DEPEND_INSTALL --rpath
 
   #---------------------------------------------------------------------
