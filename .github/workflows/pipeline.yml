@@ -6,7 +6,6 @@ on:
       - main
       - ipdk_v*
       - mev-ts*
-      - es2k_workflow_check
 
   pull_request:
     branches:
