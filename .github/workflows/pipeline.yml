@@ -32,7 +32,6 @@ env:
   DEPS_REPOSITORY: ipdk-io/stratum-deps
   DEPS_TAG: v1.3.5
   DEPS_FILENAME: deps-ubuntu-22.04-1.3.5-x86_64.tar.gz
-  DEPS_FILENAME_FEDORA: deps-fc37-1.3.5-x86_64.tar.gz
   DEPS_INSTALL_DIR: /opt/p4dev/x86deps
 
   PREREQS: libbsd-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev
@@ -63,10 +62,10 @@ jobs:
         with:
           repository: ${{ env.DEPS_REPOSITORY }}
           tag: ${{ env.DEPS_TAG }}
-          fileName: ${{ env.DEPS_FILENAME_FEDORA }}
+          fileName: ${{ env.DEPS_FILENAME }}
       - run: |
-          sudo tar -xzf $DEPS_FILENAME_FEDORA -C /
-          rm $DEPS_FILENAME_FEDORA
+          sudo tar -xzf $DEPS_FILENAME -C /
+          rm $DEPS_FILENAME
 
       - name: Clone networking-recipe
         run: |
@@ -77,8 +76,8 @@ jobs:
         working-directory: networking-recipe
         run: |
           echo "Building project for ES2K target..."
-          export SDE_INSTALL=/home/github-runner/p4-sde/install 
-          export DEPEND_INSTALL=/home/github-runner/stratum-deps/install
+          export DEPEND_INSTALL=$DEPS_INSTALL_DIR
+          export SDE_INSTALL=/root/p4-sde/install
           ./make-all.sh --target=es2k -D $DEPEND_INSTALL --rpath
 
   #---------------------------------------------------------------------
