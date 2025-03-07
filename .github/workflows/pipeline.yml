@@ -50,19 +50,6 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/actions/runners \
             | jq '.runners?[]? | {name, status, labels}' || echo "No runners found."
 
-      - name: List available runners 2
-        run: |
-          echo "Available runners:"
-          curl -s -v -H "Authorization: Bearer ${{ secrets.ORG_PAT }}" \
-            https://api.github.com/repos/${{ github.repository }}/actions/runners \
-            > runners.json
-          
-          if [ -s runners.json ]; then
-            jq '.runners?[]? | {name, status, labels}' runners.json
-          else
-            echo "Failed to retrieve runners."
-          fi
-          
       - name: Log selected runner
         run: |
           echo "This job is running on runner: $RUNNER_NAME"
