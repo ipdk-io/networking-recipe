@@ -45,14 +45,11 @@ jobs:
     steps:
       - name: List available runners
         run: |
-          echo "Fetching available runners..."
-          response=$(curl -s -H "Authorization: Bearer ${{ secrets.ORG_PAT }}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/actions/runners)
-          
-          echo "Filtering runners with 'es2k-runner' label..."
-          echo "$response" | jq '.runners[] | select(.labels[].name == "es2k-runner") | {name, status, labels}'
-    
+          echo "Available runners:"
+          curl -s -H "Authorization: Bearer ${{ secrets.ORG_PAT }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/runners \
+            | jq '.runners?[]? | {name, status, labels}' || echo "No runners found."
+
       - name: Log selected runner
         run: |
           echo "This job is running on runner: $RUNNER_NAME"
