@@ -6,6 +6,7 @@ on:
       - main
       - ipdk_v*
       - mev-ts*
+
   pull_request:
     branches:
       - main
@@ -36,6 +37,49 @@ env:
   PREREQS: libbsd-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev
 
 jobs:
+#---------------------------------------------------------------------
+# es2k_build_and_test
+#---------------------------------------------------------------------
+  es2k_build_and_test:
+    runs-on: [self-hosted, es2k-runner]
+    steps:
+      - name: List available runners
+        run: |
+          echo "Available runners:"
+          curl -s -H "Authorization: Bearer ${{ secrets.ORG_PAT }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/runners \
+            | jq '.runners?[]? | {name, status, labels}' || echo "No runners found."
+
+      - name: Log selected runner
+        run: |
+          echo "This job is running on runner: $RUNNER_NAME"
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install stratum dependencies
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: ${{ env.DEPS_REPOSITORY }}
+          tag: ${{ env.DEPS_TAG }}
+          fileName: ${{ env.DEPS_FILENAME }}
+      - run: |
+          sudo tar -xzf $DEPS_FILENAME -C /
+          rm $DEPS_FILENAME
+
+      - name: Clone networking-recipe
+        run: |
+          echo "Cloning networking-recipe on runner..."
+          git clone https://x-access-token:${{ secrets.ORG_PAT }}@github.com/ipdk-io/networking-recipe.git --recursive
+
+      - name: Build project for ES2K target
+        working-directory: networking-recipe
+        run: |
+          echo "Building project for ES2K target..."
+          export DEPEND_INSTALL=$DEPS_INSTALL_DIR
+          export SDE_INSTALL=/opt/p4dev/es2k-sde
+          ./make-all.sh --target=es2k -D $DEPEND_INSTALL --rpath
+
   #---------------------------------------------------------------------
   # dpdk_build_and_test
   #---------------------------------------------------------------------
