@@ -38,9 +38,9 @@ env:
 
 jobs:
 #---------------------------------------------------------------------
-# es2k_build_and_test
+# es2k_build_check
 #---------------------------------------------------------------------
-  es2k_build_and_test:
+  es2k_build_check:
     runs-on: [self-hosted, es2k-runner]
     steps:
       - name: List available runners
