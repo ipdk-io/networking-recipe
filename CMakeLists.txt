@@ -9,15 +9,11 @@ cmake_minimum_required(VERSION 3.16)
 
 # Read the project version to set from version.json
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/version.json" VERSION_JSON)
-string(JSON VERSION_MAJOR GET ${VERSION_JSON} major)
-string(JSON VERSION_MINOR GET ${VERSION_JSON} minor)
-string(JSON VERSION_PATCH GET ${VERSION_JSON} patch)
-
-set(PROJECT_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+string(REGEX MATCH "\"version\"[^\"]*\"([^\"]*)\"" _ ${VERSION_JSON})
+set(PROJECT_VERSION ${CMAKE_MATCH_1})
 
 project(networking-recipe VERSION ${PROJECT_VERSION} LANGUAGES C CXX)
 
-message(STATUS "Version from JSON file (version.json): ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 message(STATUS "Project version set to: ${PROJECT_VERSION}")
 
 
