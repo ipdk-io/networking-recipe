@@ -7,7 +7,15 @@
 # CMake version 3.16 is the baseline for P4 Control Plane
 cmake_minimum_required(VERSION 3.16)
 
-project(networking-recipe VERSION 3.5.0 LANGUAGES C CXX)
+# Read the project version to set from version.json
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/version.json" VERSION_JSON)
+string(REGEX MATCH "\"version\"[^\"]*\"([^\"]*)\"" _ ${VERSION_JSON})
+set(PROJECT_VERSION ${CMAKE_MATCH_1})
+
+project(networking-recipe VERSION ${PROJECT_VERSION} LANGUAGES C CXX)
+
+message(STATUS "Project version set to: ${PROJECT_VERSION}")
+
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
