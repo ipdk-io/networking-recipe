@@ -42,7 +42,7 @@ jobs:
 
       - name: Lint markdown files
         if: steps.changed.outputs.any_changed == 'true'
-        uses: nosborn/github-action-markdown-cli@v3.4.0
+        uses: nosborn/github-action-markdown-cli@v3.5.0
         with:
           files: ${{ steps.changed.outputs.all_changed_files }}
           config_file: .markdownlint.json
