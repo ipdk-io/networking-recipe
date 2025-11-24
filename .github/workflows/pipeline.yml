@@ -55,7 +55,7 @@ jobs:
           echo "This job is running on runner: $RUNNER_NAME"
 
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install stratum dependencies
         uses: robinraju/release-downloader@v1.12
@@ -89,7 +89,7 @@ jobs:
 
     steps:
       - name: Clone networking-recipe
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           path: recipe
@@ -139,7 +139,7 @@ jobs:
 
     steps:
       - name: Clone networking-recipe
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           path: recipe
