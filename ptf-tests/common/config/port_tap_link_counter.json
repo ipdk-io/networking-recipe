@@ -1,0 +1,80 @@
+{
+    "switch": "br0",
+    "p4file": "simple_l2l3_wcm",
+    "port": [
+        {
+            "id": "1",
+            "device": "physical-device",
+            "name": "PORT0",
+            "port-type": "LINK",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-,cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [
+        {
+            "description": "table_for_wcm_action_counter",
+            "switch": "br0",
+            "name": "ingress.ipv4_wcm",
+            "type": "entry",
+            "match_action": [
+                "hdr.ipv4.dst_addr=224.0.0.1/255.0.0.0,priority=100,action=ingress.send(1)",
+                "hdr.ipv4.dst_addr=192.168.16.0/255.255.255.0,priority=150,action=ingress.send(2)",
+                "hdr.ipv4.dst_addr=255.255.255.255/255.0.0.0,priority=200,action=ingress.send(3)",
+                "hdr.ipv4.dst_addr=192.168.15.0/255.255.0.0,priority=110,action=ingress.send(0)",
+                "hdr.ipv4.dst_addr=239.0.0.1/255.0.0.0,priority=120,action=ingress.send(0)"
+            ]
+        }
+    ],
+    "traffic": {
+        "send_port": [0,1,2,3],
+        "receive_port": [0,1,2,3],
+        "in_pkt_header": {
+            "ip_dst": [
+                "192.168.16.100",
+                "192.168.15.1",
+                "224.0.0.1",
+                "255.255.255.255",
+                "239.0.0.1"
+            ],
+            "ip_src": ["192.168.1.10"],
+            "number_pkts": [200,300,400,500],
+            "payload_size": [64,1000],
+            "pkts_counter": ["in-unicast-pkts","out-unicast-pkts"],
+            "octets_counter": ["in-octets", "out-octets"],
+            "mul_pkts_counter": ["in-multicast-pkts","out-multicast-pkts"],
+            "brd_pkts_counter":["in-broadcast-pkts","out-broadcast-pkts"],
+            "count_buffer":[10]
+        }
+    }
+}

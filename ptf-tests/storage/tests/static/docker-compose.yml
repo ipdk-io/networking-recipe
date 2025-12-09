@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2022-2023 Dell Inc, or its subsidiaries.
+---
+version: "3.7"
+
+services:
+
+  opi-intel-bridge:
+    image: ghcr.io/opiproject/opi-intel-bridge:main
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+    ports:
+      - "8082:8082"
+      - "50051:50051"
+    networks:
+      - opi
+    volumes:
+      - "/var/tmp:/var/tmp"
+    depends_on:
+      redis:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    command: /opi-intel-bridge -grpc_port=50051 -http_port=8082 -spdk_addr /var/tmp/spdk.ssa.sock -redis_addr=redis:6379
+    healthcheck:
+      test: grpcurl -plaintext localhost:50051 list || exit 1
+
+  redis:
+    image: redis:7.2.3-alpine3.18
+    networks:
+      - opi
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.51.0
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - opi
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "nc -zv localhost 4317 && nc -zv localhost 4318 || exit 1"
+        ]
+      interval: 6s
+      retries: 5
+      start_period: 20s
+      timeout: 10s
+
+networks:
+  opi:

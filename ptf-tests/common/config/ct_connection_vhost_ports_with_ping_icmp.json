@@ -1,0 +1,82 @@
+{
+  "switch": "br0",
+  "p4file": "pna_tcp_connection_tracking",
+  "port": [
+  {
+  "id": "1",
+  "device": "virtual-device",
+  "name": "net_vhost0",
+  "host-name" : "host1",
+  "socket-path":"/tmp/vhost-user-0",
+  "queues":"1",
+  "device-type":"VIRTIO_NET",
+  "packet-dir":"host",
+  "port-type": "LINK",
+  "single_cmd": "TRUE",
+  "interface": "ens3",
+  "ip_address": "10.10.10.10/24",
+  "mac_local": "00:e8:ca:11:aa:01",
+  "ip_route": "20.20.20.0/24",
+  "ip_add_route": "10.10.10.10"
+  
+  },
+  {
+
+  "id": "2",
+  "device": "virtual-device",
+  "name": "net_vhost1",
+  "host-name" : "host1",
+  "socket-path":"/tmp/vhost-user-1",
+  "queues":"1",
+  "device-type":"VIRTIO_NET",
+  "packet-dir":"network",
+  "port-type": "LINK",
+  "single_cmd": "TRUE",
+  "interface": "ens3",
+  "ip_address": "20.20.20.10/24",
+  "mac_local": "00:e8:ca:11:bb:01",
+  "ip_route": "10.10.10.0/24",
+  "ip_add_route": "20.20.20.10"
+
+  }
+  ],
+
+  "vm": [
+  {
+  "id": "1",
+  "remote_ip": "20.20.20.10",
+  "mac_remote": "00:e8:ca:11:bb:01"
+  },
+  {
+  "id": "2",
+  "remote_ip": "10.10.10.10",
+  "mac_remote": "00:e8:ca:11:aa:01"
+  }
+  ],
+
+
+  "table": [ 
+  {
+  "description": "icmp_ct_state_table",
+  "switch": "br0",
+  "name": "MainControlImpl.icmp_ct_state_table",
+  "type": "entry",
+  "match_action": [
+  "meta.dir=0x00,meta.currentState=0x00,action=MainControlImpl.icmp_ct_unreplied",
+  "meta.dir=0x01,meta.currentState=0x11,action=MainControlImpl.icmp_ct_replied",
+  "meta.dir=0x01,meta.currentState=0x12,action=MainControlImpl.icmp_ct_ignore",
+  "meta.dir=0x00,meta.currentState=0x12,action=MainControlImpl.icmp_ct_ignore"
+  ]
+  },
+  {
+  "description": "ip_packet_fwd",
+  "switch": "br0",
+  "name": "MainControlImpl.ip_packet_fwd",
+  "type": "entry",
+  "match_action": [
+  "hdr.ipv4.dstAddr=20.20.20.0/24,action=MainControlImpl.send(1)",
+  "hdr.ipv4.dstAddr=10.10.10.0/24,action=MainControlImpl.send(0)"	  
+  ]
+  }
+  ]
+}

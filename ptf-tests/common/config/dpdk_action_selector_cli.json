@@ -1,0 +1,108 @@
+{
+    "switch": "br0",
+    "p4file": "l3_action_selector",
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "2000",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP3",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "5",
+            "device": "virtual-device",
+            "name": "TAP4",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "6",
+            "device": "virtual-device",
+            "name": "TAP5",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "7",
+            "device": "virtual-device",
+            "name": "TAP6",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "8",
+            "device": "virtual-device",
+            "name": "TAP7",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+   ],
+    "table": [ 
+        {
+            "description": "dpdk_action_selector_cli_test",
+            "switch": "br0",
+            "name": "ingress.as_sl3",
+     "member_details": [
+      "action=ingress.send(0),member_id=1",
+      "action=ingress.send(1),member_id=2",
+      "action=ingress.send(2),member_id=3",
+      "action=ingress.send(3),member_id=4",
+      "action=ingress.send(4),member_id=5",
+      "action=ingress.send(5),member_id=6",
+      "action=ingress.send(6),member_id=7",
+      "action=ingress.send(7),member_id=8"
+     ],
+     "group_details": [
+      "group_id=1,reference_members=(1,2,3,4),max_size=128",
+      "group_id=2,reference_members=(5,6,7,8),max_size=128"
+     ]
+ }
+     ]
+
+ }     

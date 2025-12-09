@@ -1,0 +1,18 @@
+{
+    "p4file": "show_tap_port_mtu",
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "mtu": "500"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP"
+        }
+    ] 
+} 

@@ -1,0 +1,95 @@
+{
+    "switch": "br0",
+    "p4file": "l3_exact_match",
+      "port": [
+        {
+            "id": "8",
+            "device": "virtual-device",
+            "name": "TAP7",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "2000",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP3",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "7",
+            "device": "virtual-device",
+            "name": "TAP6",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "5",
+            "device": "virtual-device",
+            "name": "TAP4",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "6",
+            "device": "virtual-device",
+            "name": "TAP5",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [ 
+        {
+            "description": "",
+            "switch": "",
+            "name": "",
+            "type": "",
+            "match_action": []
+       } 
+     ]
+}     

@@ -1,0 +1,46 @@
+# Copyright (C) 2022 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+
+DEBUG=false
+
+LP_USERNAME=""
+LP_PASSWORD=""
+LP_IP_ADDRESS=""
+
+HOST_USERNAME=""
+HOST_PASSWORD=""
+HOST_IP_ADDRESS=""
+
+# TARGETS should be in format ["kvm", "nvme"] or [kvm, nvme]
+TARGETS=["opi_nvme"]
+
+###################################################################################
+###################################################################################
+###################################################################################
+
+# If you use only one platform set only main settings
+MAIN_PLATFORM_USERNAME=""
+MAIN_PLATFORM_PASSWORD=""
+MAIN_PLATFORM_IP_ADDRESS=""
+
+HTTP_PROXY="http://proxy-chain.intel.com:911"
+HTTPS_PROXY="http://proxy-chain.intel.com:912"
+FTP_PROXY="http://proxy-chain.intel.com:911"
+
+# additionals settings
+#MAIN_PLATFORM_PORT=22
+#MAIN_PLATFORM_WORKDIR=""
+#LP_PORT=22
+#LP_WORKDIR=""
+#HOST_PORT=22
+#HOST_WORKDIR=""
+#QEMU_BINARY=""
+
+#SPDK_PORT=""
+#NVME_PORT=""
+#SMA_PORT=""
+#QMP_PORT=""
+#HOST_TARGET_SERVICE_PORT_IN_VM=""
+#NQN=""
+CMD_SENDER_PLATFORM=""

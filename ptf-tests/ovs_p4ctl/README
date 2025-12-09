@@ -1,0 +1,127 @@
+===============================================================================
+Setting Up The Repos and Test Environment Setup:
+===============================================================================
+
+1) clone and build P4SDE repo on host/server machine 
+(using steps in this script: 
+https://github.com/ipdk-io/ipdk/blob/main/build/IPDK_Container/scripts/build_p4sde.sh)
+
+2) clone and build P4OVS repo on host/server machine 
+(use this link for steps: 
+https://github.com/ipdk-io/ovs/blob/ovs-with-p4/Documentation/intro/install/ovs-with-p4-general.rst) 
+
+3) clone and build ptf repo from  https://github.com/p4lang/ptf.git 
+
+           steps to follow:
+
+                - git clone https://github.com/p4lang/ptf.git ptf
+
+                - cd ptf
+
+                - pip install -r requirements-dev.txt
+
+                - pip3 install pypcap
+
+                - sudo apt-get install tcpdump
+
+                - pip install ptf
+
+                - sudo python setup.py install
+
+4) other dependencies:
+
+                - install python 3.6
+
+                - copy p4testutils under 
+$SDE_INSTALL/lib/python3.8/site-packages/  <this step is optional>
+
+                - pip install crc16
+
+5) clone and build p4runtime_shell
+
+               - git clone https://github.com/p4lang/p4runtime-shell.git 
+
+               -  pip3 install p4runtime==1.3.0
+
+               - pip3 install ipaddr==2.2.0
+
+               - pip3 install grpcio==1.35.0
+
+               - pip3 install protobuf==3.14.0
+
+===============================================================================
+Running simple l3 scenario (using vhost ports):
+===============================================================================
+start p4rt service on a host machine. create 2 vhost ports using gnmi cli. 
+create a TAP port and attach it to virbr0. 
+
+start VM with this set up (2 vhost ports and 1 tap port). 
+on the vm side these ports are enumerated as normal netdevs. 
+
+assign ip address to vhost ports enumerated as netdevs on vm. 
+now run the ptf test that sets the pipeline with this 
+configuration (simple_l3.pb.bin), configure these ports with 
+rules and sends the traffic.
+
+Steps to be followed :
+=======================
+1) run OVS and p4rt service on host machine
+
+  - source p4ovs_env_setup.sh <SDE_INSTALL_PATH>
+
+  - ./run_ovs.sh
+
+2) create gnmi ports on the host itself
+
+  - alias sudo='sudo PATH="$PATH" HOME="$HOME" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"'
+
+  - sudo gnmi-cli set "device:virtual-device,name:net_vhost0,host:host1,device-type:VIRTIO_NET,queues:1,socket-path:/tmp/vhost-user-0,port-type:LINK"
+
+  - sudo gnmi-cli set "device:virtual-device,name:net_vhost1,host:host1,device-type:VIRTIO_NET,queues:1,socket-path:/tmp/vhost-user-1,port-type:LINK"
+
+3) bring up the VM with following commands. 
+it brings up the VM with 2 vhost ports and 1 tap management port 
+attached to virbr0
+
+QCOW2_IMAG_PATH_VM1=/root/PTF/PTF_VM/ubuntu-20.04-server-cloudimg-amd64.img
+
+qemu-kvm -smp 4 -m 1024M \
+-boot c -cpu host -enable-kvm -nographic \
+-L /root/pc-bios -name VM1_TAP_DEV \
+-hda /root/PTF/PTF_VM/ubuntu-20.04-server-cloudimg-amd64.img\
+-object memory-backend-file,id=mem,size=1024M,mem-path=/dev/hugepages,share=on \
+-mem-prealloc \
+-numa node,memdev=mem \
+-netdev type=tap,id=vm1-net6551,script=no,downscript=no,vhost=on,ifname=vm1-net6551 \
+-device virtio-net-pci,netdev=vm1-net6551 \
+-chardev socket,id=char1,path=/tmp/vhost-user-0 \
+-netdev type=vhost-user,id=netdev0,chardev=char1,vhostforce \
+-device virtio-net-pci,mac=00:e8:ca:11:aa:01,netdev=netdev0 \
+-chardev socket,id=char2,path=/tmp/vhost-user-1 \
+-netdev type=vhost-user,id=netdev1,chardev=char2,vhostforce \
+-device virtio-net-pci,mac=00:e8:ca:11:aa:02,netdev=netdev1 \
+-serial telnet::6551,server,nowait &
+
+sleep 15
+sudo brctl addif virbr0 vm1-net6551
+sudo ip link set dev vm1-net6551 up
+
+04) login to the VM using telnet localhost 6551 and run dhclient to get the 
+IP address for the management port
+
+5) exit the telnet session and log in to VM using ssh -l root <ip address>
+
+6) assign ip address to other 2 vhost ports that are numerated as netdevs on VM
+
+              - ip addr add dev <interface_name> <ip_address>/24
+
+7) run the test using following command
+
+             ./run_p4_tests.sh -p <p4 program name> -t <path/to/the/test/directory/> --no-veth -s <test case name> --p4info <path/to/p4info/txt/file> --p4bin <path/to/bin/file> --ip <host/server machine IP>
+
+            (example) →  ./run_p4_tests.sh -p simple_l3 -t /root/TEST/simple_l3_test/ --no-veth -s simplel3 --p4info /root/cfgs/simple_l3/p4Info.txt --p4bin /root/cfgs/simple_l3/simple_l3.pb.bin --ip 10.190.193.179
+
+             simplel3.py test sets the forwarding pipeline with 
+simple_l3.pb.bin and configures vhost ports with rules and then 
+sends the traffic. 
+

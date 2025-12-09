@@ -1,0 +1,89 @@
+{
+    "switch": "br0",
+    "p4file": "l3_action_profile",
+    "port": [
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "2000",
+            "single-cmd": "TRUE",
+            "mac": "00:00:01:00:00:01"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE",
+            "mac": "00:00:01:00:00:02"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP3",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [ 
+  {
+            "description": "table_for_configure_member",
+            "switch": "br0",
+            "name": "ingress.as_sl3",
+            "type": "entry",
+            "member_details": [
+     "action=ingress.send(1),member_id=2",
+     "action=ingress.send(2),member_id=3",
+     "action=ingress.send(3),member_id=4"
+    ]
+  },
+        {
+            "description": "table_for_ipv4",
+            "switch": "br0",
+     "name": "ingress.ipv4_host",
+            "type": "entry",
+            "match_action": [
+                    "headers.ipv4.dst_addr=1.1.1.2,member_id=2",
+                    "headers.ipv4.dst_addr=224.0.0.1,member_id=3",
+      "headers.ipv4.dst_addr=255.255.255.255,member_id=4"
+            ]
+  } 
+     ],
+
+    "traffic": 
+  {
+          "in_pkt_header": {
+    "ip_dst_1": "1.1.1.2",
+    "ip_dst_2": "224.0.0.1",
+    "ip_dst_3": "255.255.255.255"
+   },
+         "out_pkt_header": [],
+         "number_pkts": [500],
+         "payload_size": [1000],
+         "pkts_counter": ["in-unicast-pkts","out-unicast-pkts"],
+         "octets_counter": ["in-octets", "out-octets"],
+         "mul_pkts_counter": ["in-multicast-pkts","out-multicast-pkts"],
+         "brd_pkts_counter":["in-broadcast-pkts","out-broadcast-pkts"],
+         "count_buffer": [10]
+         }
+ }     

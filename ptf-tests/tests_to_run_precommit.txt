@@ -1,0 +1,61 @@
+# Copyright (c) 2022 Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+########################################
+# This file is passed as CLI argument to the script p4ovs_test_runner.py
+# Please refer to the help document of ipdk_test_runner.py
+# or README under ptf_tests folder for more details
+# This file contains all the test cases available 
+# with their corresponding command line parameters
+########################################
+# These testcases are run for pre-commits
+
+DPDK_Flow_Dump_Help:config_json='DPDK_Flow_Dump_Help.json'
+DPDK_Flow_Dump_with_CT:config_json='DPDK_Flow_Dump_with_CT.json';pci_bdf='BDF1'
+DPDK_Flow_Dump_with_LNT:config_json='DPDK_Flow_Dump_with_LNT.json';lnt_pci_bdf='LNT_BDF1,LNT_BDF2'
+DPDK_Flow_Dump_with_PNA_indirect_counter:config_json='DPDK_Flow_Dump_with_PNA_indirect_counter.json'
+DPDK_Flow_Dump_with_PSA_indirect_counter:config_json='DPDK_Flow_Dump_with_PSA_indirect_counter.json'
+DPDK_Flow_Dump_with_action_selector:config_json='DPDK_Flow_Dump_with_action_selector.json'
+DPDK_Hot_Plug:config_json='DPDK_Hot_Plug.json';vm_location_list='VM1'
+DPDK_Hot_Plug_Remove:config_json='DPDK_Hot_Plug_Remove.json';vm_location_list='VM1'
+LNT_ECMP_2VM_2Host_ping:config_json='LNT_ECMP_2VM_2Host_ping.json';vm_location_list='VM1,VM2';lnt_pci_bdf='LNT_BDF1,LNT_BDF2';client_cred='CLIENT';remote_port='PORT1,PORT2'
+config_control_port_with_link:config_json='config_control_port_with_link.json';pci_bdf='BDF1'
+ct_connection_tap_link_ports_with_scapy_icmp:config_json='ct_connection_tap_link_ports_with_scapy_icmp.json';pci_bdf='BDF1'
+ct_connection_tap_link_ports_with_scapy_udp:config_json='ct_connection_tap_link_ports_with_scapy_udp.json';pci_bdf='BDF1'
+ct_multiple_connection_tap_link_ports:config_json='ct_multiple_connection_tap_link_ports.json';pci_bdf='BDF1'
+ct_rule_del_add_test:config_json='ct_rule_del_add_test.json';pci_bdf='BDF1'
+ct_single_connection_tap_link_ports:config_json='ct_single_connection_tap_link_ports.json';pci_bdf='BDF1'
+ctrl_port_counter_with_vhost:config_json='ctrl_port_counter_with_vhost.json';vm_location_list='VM1'
+dpdk_action_profile_cli:config_json='dpdk_action_profile_cli.json'
+dpdk_action_selector_cli:config_json='dpdk_action_selector_cli.json'
+dpdk_l3em_indirect_counter:config_json='dpdk_l3em_indirect_counter_pna.json';vm_location_list='VM1,VM2'
+dpdk_l3em_indirect_counter_help:config_json='dpdk_l3em_indirect_counter_help.json'
+dpdk_l3em_indirect_counter_reset:config_json='dpdk_l3em_indirect_counter_pna.json';vm_location_list='VM1,VM2'
+l2_dpdk_port_flapping_with_tap_ports:config_json='l2_dpdk_port_flapping_with_tap.json'
+l2_exact_match_with_link_port:config_json='l2_exact_match_with_link.json';pci_bdf='BDF1'
+l3_action_profile_with_link_ports:config_json='l3_action_profile_with_link_test1.json';pci_bdf='BDF1'
+l3_action_selector_with_link_ports:config_json='l3_action_selector_with_link_test1.json';pci_bdf='BDF1'
+l3_dpdk_port_flapping_with_vhost_ports:config_json='l3_dpdk_port_flapping_with_vhost.json';vm_location_list='VM1,VM2'
+l3_exact_match_with_vhost:config_json='l3_exact_match_with_vhost.json';vm_location_list='VM1,VM2'
+l3_wcm_del_add:config_json='l3_wcm_del_add_test.json'
+lnt_1hotplugvm_vxlan_1nsvm:config_json='lnt_1hotplugvm_vxlan_1nsvm.json';vm_location_list='VM1';lnt_pci_bdf='LNT_BDF1';remote_port='PORT1';client_cred='CLIENT'
+mtu_config_test_with_tap:config_json='mtu_config_test_with_tap.json'
+nt_out_range_port:config_json='nt_out_range_port.json'
+nt_send_traffic_non_existing_group:config_json='nt_send_traffic_non_existing_group.json'
+port_dump_link_port_only:config_json='port_dump_link_port_only.json';pci_bdf='BDF1'
+port_dump_mixed_no_default_val:config_json='port_dump_mixed_no_default_val.json';pci_bdf='BDF1'
+port_dump_tap_only_out_order:config_json='port_dump_tap_only_out_order.json'
+port_dump_vhost_only_in_order:config_json='port_dump_vhost_only_in_order.json'
+port_tap_link_counter:config_json='port_tap_link_counter.json';pci_bdf='BDF1'
+show_tap_port_mtu:config_json='show_tap_port_mtu.json'

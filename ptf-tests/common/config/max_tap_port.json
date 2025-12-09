@@ -1,0 +1,229 @@
+{
+    "max_port_count": "32",
+    "port": [
+        {
+            "id": "0",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "1",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP3",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP4",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "5",
+            "device": "virtual-device",
+            "name": "TAP5",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "6",
+            "device": "virtual-device",
+            "name": "TAP6",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "7",
+            "device": "virtual-device",
+            "name": "TAP7",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "8",
+            "device": "virtual-device",
+            "name": "TAP8",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "9",
+            "device": "virtual-device",
+            "name": "TAP9",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "10",
+            "device": "virtual-device",
+            "name": "TAP10",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "11",
+            "device": "virtual-device",
+            "name": "TAP11",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "12",
+            "device": "virtual-device",
+            "name": "TAP12",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "13",
+            "device": "virtual-device",
+            "name": "TAP13",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "14",
+            "device": "virtual-device",
+            "name": "TAP14",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "15",
+            "device": "virtual-device",
+            "name": "TAP15",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "16",
+            "device": "virtual-device",
+            "name": "TAP16",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "17",
+            "device": "virtual-device",
+            "name": "TAP17",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "18",
+            "device": "virtual-device",
+            "name": "TAP18",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "19",
+            "device": "virtual-device",
+            "name": "TAP19",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "20",
+            "device": "virtual-device",
+            "name": "TAP20",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "21",
+            "device": "virtual-device",
+            "name": "TAP21",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "22",
+            "device": "virtual-device",
+            "name": "TAP22",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "23",
+            "device": "virtual-device",
+            "name": "TAP23",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "24",
+            "device": "virtual-device",
+            "name": "TAP24",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "25",
+            "device": "virtual-device",
+            "name": "TAP25",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "26",
+            "device": "virtual-device",
+            "name": "TAP26",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "27",
+            "device": "virtual-device",
+            "name": "TAP27",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "28",
+            "device": "virtual-device",
+            "name": "TAP28",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "29",
+            "device": "virtual-device",
+            "name": "TAP29",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "30",
+            "device": "virtual-device",
+            "name": "TAP30",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        },
+        {
+            "id": "31",
+            "device": "virtual-device",
+            "name": "TAP31",
+            "port-type" : "TAP",
+            "mtu" : "1500"
+        }
+   ]
+}

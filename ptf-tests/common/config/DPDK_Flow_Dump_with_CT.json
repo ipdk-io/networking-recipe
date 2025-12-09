@@ -1,0 +1,99 @@
+{
+  "switch": "br0",
+  "p4file": "pna_tcp_connection_tracking",
+  "port": [
+  {
+  "id": "1",
+  "device": "physical-device",
+  "name": "PORT0",
+  "port-type": "LINK",
+  "pipeline-name": "pipe",
+  "packet-dir": "network",
+  "single_cmd": "TRUE"
+  },
+  {
+  "id": "2",
+  "device": "virtual-device",
+  "name": "TAP0",
+  "port-type": "TAP",
+  "pipeline-name": "pipe",
+  "mempool-name": "MEMPOOL0",
+  "mtu": "1500",
+  "single_cmd": "TRUE"
+  }
+  ],
+  "table": [ 
+  {
+  "description": "tcp_ct_state_table",
+  "switch": "br0",
+  "name": "MainControlImpl.tcp_ct_state_table",
+  "type": "entry",
+  "match_action": [
+  "meta.dir=0x00,meta.tcpFlagsSet=0x01,meta.currentState=0x00,action=MainControlImpl.tcp_ct_syn_sent",
+  "meta.dir=0x01,meta.tcpFlagsSet=0x02,meta.currentState=0x01,action=MainControlImpl.tcp_ct_syn_recv",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x04,meta.currentState=0x02,action=MainControlImpl.tcp_ct_established",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x03,meta.currentState=0x03,action=MainControlImpl.tcp_ct_fin_wait",
+  "meta.dir=0x01,meta.tcpFlagsSet=0x04,meta.currentState=0x04,action=MainControlImpl.tcp_ct_close_wait",
+  "meta.dir=0x01,meta.tcpFlagsSet=0x03,meta.currentState=0x05,action=MainControlImpl.tcp_ct_last_ack",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x04,meta.currentState=0x06,action=MainControlImpl.tcp_ct_time_wait",
+  "meta.dir=0x01,meta.tcpFlagsSet=0x03,meta.currentState=0x04,action=MainControlImpl.tcp_ct_last_ack",
+  "meta.dir=0x01,meta.tcpFlagsSet=0x04,meta.currentState=0x03,action=MainControlImpl.tcp_ct_ignore",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x04,meta.currentState=0x03,action=MainControlImpl.tcp_ct_ignore",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x01,action=MainControlImpl.tcp_ct_close",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x02,action=MainControlImpl.tcp_ct_close",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x03,action=MainControlImpl.tcp_ct_close",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x04,action=MainControlImpl.tcp_ct_close",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x05,action=MainControlImpl.tcp_ct_close",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x06,action=MainControlImpl.tcp_ct_close",
+  "meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x07,action=MainControlImpl.tcp_ct_close"  
+  ]
+  },
+  {
+  "description": "ip_packet_fwd",
+  "switch": "br0",
+  "name": "MainControlImpl.ip_packet_fwd",
+  "type": "entry",
+  "match_action": [
+  "hdr.ipv4.dstAddr=20.20.20.0/24,action=MainControlImpl.send(1)",
+  "hdr.ipv4.dstAddr=10.10.10.0/24,action=MainControlImpl.send(0)"
+  ]
+  } 
+  ],
+
+  "traffic": 
+  {
+  "type": "tcp",
+  "send_port": [0, 1],
+  "receive_port": [1, 0],
+  "in_pkt_header": {
+  "eth_mac": ["00:00:01:00:00:01","00:00:02:00:00:01"],
+  "ip_address" : ["10.10.10.10","20.20.20.10"],
+  "tcp_port" : [10001, 20001],
+  "flags" : ["SA", "A", "F", "A", "R"]
+  
+  },
+  "out_pkt_header": []
+  },
+  "flow_dump_table": [
+
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x01,meta.currentState=0x00 actions=MainControlImpl.tcp_ct_syn_sent()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x01,meta.tcpFlagsSet=0x02,meta.currentState=0x01 actions=MainControlImpl.tcp_ct_syn_recv()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x04,meta.currentState=0x02 actions=MainControlImpl.tcp_ct_established()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x03,meta.currentState=0x03 actions=MainControlImpl.tcp_ct_fin_wait()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x01,meta.tcpFlagsSet=0x04,meta.currentState=0x04 actions=MainControlImpl.tcp_ct_close_wait()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x01,meta.tcpFlagsSet=0x03,meta.currentState=0x05 actions=MainControlImpl.tcp_ct_last_ack()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x04,meta.currentState=0x06 actions=MainControlImpl.tcp_ct_time_wait()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x01,meta.tcpFlagsSet=0x03,meta.currentState=0x04 actions=MainControlImpl.tcp_ct_last_ack()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x01,meta.tcpFlagsSet=0x04,meta.currentState=0x03 actions=MainControlImpl.tcp_ct_ignore()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x04,meta.currentState=0x03 actions=MainControlImpl.tcp_ct_ignore()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x01 actions=MainControlImpl.tcp_ct_close()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x02 actions=MainControlImpl.tcp_ct_close()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x03 actions=MainControlImpl.tcp_ct_close()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x04 actions=MainControlImpl.tcp_ct_close()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x05 actions=MainControlImpl.tcp_ct_close()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x06 actions=MainControlImpl.tcp_ct_close()",
+  "table=MainControlImpl.tcp_ct_state_table meta.dir=0x00,meta.tcpFlagsSet=0x05,meta.currentState=0x07 actions=MainControlImpl.tcp_ct_close()",
+  "table=MainControlImpl.ip_packet_fwd hdr.ipv4.dstAddr=0x14141400/24 actions=MainControlImpl.send(port=0x00000001)",
+  "table=MainControlImpl.ip_packet_fwd hdr.ipv4.dstAddr=0x0a0a0a00/24 actions=MainControlImpl.send(port=0x00000000)"
+  ]
+}     

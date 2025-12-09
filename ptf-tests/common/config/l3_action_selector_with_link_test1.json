@@ -1,0 +1,82 @@
+{
+    "switch": "br0",
+    "p4file": "l3_action_selector",
+    "port": [
+        {
+            "id": "1",
+            "device": "physical-device",
+            "name": "PORT0",
+            "port-type": "LINK",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "2",
+            "device": "virtual-device",
+            "name": "TAP0",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        },
+        {
+            "id": "3",
+            "device": "virtual-device",
+            "name": "TAP1",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-,cmd": "TRUE"
+        },
+        {
+            "id": "4",
+            "device": "virtual-device",
+            "name": "TAP2",
+            "port-type": "TAP",
+            "pipeline-name": "pipe",
+            "mempool-name": "MEMPOOL0",
+            "mtu": "1500",
+            "single-cmd": "TRUE"
+        }
+    ],
+    "table": [ 
+        {
+            "description": "table_action_selector_test_1",
+            "switch": "br0",
+            "name": "ingress.as_sl3",
+     "member_details": [
+      "action=ingress.send(0),member_id=1",
+      "action=ingress.send(1),member_id=2"
+     ],
+     "group_details": [
+      "group_id=1,reference_members=(1),max_size=128",
+      "group_id=2,reference_members=(2),max_size=128"
+     ]
+ },
+        {
+            "description": "ipv4_table",
+            "switch": "br0",
+            "name": "ingress.ipv4_host",
+            "match_action": [
+                    "headers.ipv4.dst_addr=1.1.1.1,group_id=1",
+                    "headers.ipv4.dst_addr=2.2.2.2,group_id=2",
+                    "headers.ipv4.dst_addr=224.0.0.1,group_id=2",
+                    "headers.ipv4.dst_addr=255.255.255.255,group_id=2"
+     ]
+ } 
+     ],
+
+    "traffic": 
+  {
+          "type": "tcp",
+          "send_port": [0, 1],
+          "receive_port": [1, 0],
+          "in_pkt_header": {
+    "ip_src": ["1.1.1.1"],
+    "ip_dst": ["2.2.2.2", "224.0.0.1", "255.255.255.255"]
+   },
+         "out_pkt_header": []
+   }
+ }     
