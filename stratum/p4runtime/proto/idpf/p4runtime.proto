@@ -1,0 +1,57 @@
+// Copyright (c) 2024, Intel Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// For licensing information, see the file ‘LICENSE’ in the root folder
+
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "p4/v1/p4runtime.proto";
+
+// This is an extension of p4/v1/p4runtime.proto
+// It provides support for the meter externs in the Intel IPU E2100.
+
+package idpf;
+
+option go_package = "github.com/p4lang/p4runtime/go/idpf";
+
+// MatchValueLookupTable
+message MVLUTEntry {
+  uint32 mvlut_id = 1;
+  message ConfigParam {
+    message Param {
+      uint32 param_id = 1;
+      uint64 param_value = 2;
+    }
+    repeated Param params = 1;
+  }
+  repeated p4.v1.FieldMatch match = 2;
+  ConfigParam param = 3;
+}
+
+// DANGER -- this is an extension of p4.v1.Action with some additional fields.
+// as such it needs to be identical to that with just extra stuff added.
+// It is unfortunate that protobuf does not support versioning and extension.
+message Action {
+  uint32 action_id = 1;
+  message Param {
+    uint32 param_id = 2;
+    bytes value = 3;
+    // extra stuff added for idpf
+    string param_name = 5;
+    string proto_id = 6;
+    string key_name = 7;
+  }
+  repeated Param params = 4;
+}
