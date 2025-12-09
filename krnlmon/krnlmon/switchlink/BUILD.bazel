@@ -1,0 +1,217 @@
+# //switchlink/BUILD.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//bazel:rules.bzl", "krnlmon_cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+OVS_DEFINES = select({
+    "//flags:ovs_enabled": ["OVSP4RT_SUPPORT"],
+    "//conditions:default": [],
+})
+
+krnlmon_cc_library(
+    name = "switchlink_address",
+    srcs = ["switchlink_address.c"],
+    deps = [
+        ":switchlink_globals",
+        ":switchlink_handlers",
+        ":switchlink_int",
+        "//switchutils:switch_log",
+        "@target_sys",
+    ],
+)
+
+cc_test(
+    name = "switchlink_address_test",
+    size = "small",
+    srcs = ["switchlink_address_test.cc"],
+    deps = [
+        ":switchlink_address",
+        ":switchlink_globals",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_db",
+    srcs = [
+        "switchlink_db.c",
+        "switchlink_db.h",
+        "switchlink_db_int.h",
+    ],
+    deps = [
+        ":switchlink_int",
+        ":switchlink_link_types",
+        ":switchlink_types",
+        "@target_utils",
+        "@target_utils//:tommyds",
+        "@target_utils//:xxhash",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_globals",
+    srcs = ["switchlink_globals.c"],
+    hdrs = ["switchlink_globals.h"],
+    deps = [":switchlink_types"],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_types",
+    srcs = ["switchlink.h"],  # rename
+    deps = [
+        "//switchutils:switch_utils",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_handlers",
+    srcs = ["switchlink_handlers.h"],
+    linkopts = ["-lnl-3"],
+    deps = [
+        ":switchlink_db",
+        ":switchlink_types",
+        "//:krnlmon_options",
+        "@nl-3",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_int",
+    srcs = ["switchlink_int.h"],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_link",
+    srcs = ["switchlink_link.c"],
+    defines = OVS_DEFINES,
+    deps = [
+        ":switchlink_globals",
+        ":switchlink_handlers",
+        ":switchlink_int",
+        ":switchlink_link_types",
+        ":switchlink_types",
+        "//:krnlmon_options",
+        "//switchutils:switch_log",
+    ],
+)
+
+cc_test(
+    name = "switchlink_link_test",
+    size = "small",
+    srcs = ["switchlink_link_test.cc"],
+    deps = [
+        ":switchlink_globals",
+        ":switchlink_handlers",
+        ":switchlink_link",
+        "//:krnlmon_options",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_link_types",
+    srcs = ["switchlink_link_types.h"],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_main",
+    srcs = [
+        "switchlink_main.c",
+        "switchlink_main.h",
+    ],
+    linkopts = [
+        "-lnl-3",
+        "-lpthread",
+    ],
+    deps = [
+        ":switchlink_int",
+        ":switchlink_types",
+        "//switchutils:switch_log",
+        "@nl-3",
+        "@target_sys",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_neigh",
+    srcs = ["switchlink_neigh.c"],
+    deps = [
+        ":switchlink_globals",
+        ":switchlink_handlers",
+        ":switchlink_int",
+        ":switchlink_types",
+        "//switchutils:switch_log",
+    ],
+)
+
+cc_test(
+    name = "switchlink_neigh_test",
+    size = "small",
+    srcs = ["switchlink_neigh_test.cc"],
+    deps = [
+        ":switchlink_globals",
+        ":switchlink_neigh",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_route",
+    srcs = ["switchlink_route.c"],
+    deps = [
+        ":switchlink_globals",
+        ":switchlink_handlers",
+        ":switchlink_int",
+        "//switchutils:switch_log",
+    ],
+)
+
+cc_test(
+    name = "switchlink_route_test",
+    size = "small",
+    srcs = ["switchlink_route_test.cc"],
+    deps = [
+        ":switchlink_globals",
+        ":switchlink_route",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_utils",
+    srcs = ["switchlink_utils.c"],
+    hdrs = ["switchlink_utils.h"],
+    deps = [
+        "//switchutils:switch_utils",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_validate_driver",
+    srcs = ["switchlink_validate_driver.c"],
+    deps = [
+        ":switchlink_int",
+    ],
+)
+
+cc_library(
+    name = "switchlink",
+    srcs = [
+        ":switchlink_address",
+        ":switchlink_db",
+        ":switchlink_globals",
+        ":switchlink_link",
+        ":switchlink_main",
+        ":switchlink_neigh",
+        ":switchlink_route",
+        ":switchlink_utils",
+    ] + select({
+        "//flags:es2k_target": [":switchlink_validate_driver"],
+        "//conditions:default": [],
+    }),
+)

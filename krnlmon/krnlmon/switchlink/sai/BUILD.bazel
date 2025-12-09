@@ -1,0 +1,112 @@
+# //switchlink/sai/BUILD.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//bazel:rules.bzl", "krnlmon_cc_library")
+load("//bazel:sde.bzl", "TARGET_SDE")
+
+package(default_visibility = ["//visibility:public"])
+
+SWITCHLINK_SAI_TARGET_LIBS = select(
+    {
+        "//flags:es2k_target": [":switchlink_handle_lag"],
+        "//conditions:default": [],
+    },
+)
+
+krnlmon_cc_library(
+    name = "switchlink_handle_ecmp",
+    srcs = ["switchlink_handle_ecmp.c"],
+    deps = [
+        ":switchlink_init_sai",
+        "//switchlink:switchlink_db",
+        "//switchlink:switchlink_handlers",
+        "//switchlink:switchlink_types",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_handle_lag",
+    srcs = ["switchlink_handle_lag.c"],
+    deps = [
+        ":switchlink_init_sai",
+        "//switchsde:sde_port_intf",
+        "//switchsde:sde_status",
+        "//switchsde:sde_types",
+    ] + TARGET_SDE,
+)
+
+krnlmon_cc_library(
+    name = "switchlink_handle_link",
+    srcs = ["switchlink_handle_link.c"],
+    deps = [
+        ":switchlink_init_sai",
+        "//switchlink:switchlink_handlers",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_handle_neigh",
+    srcs = ["switchlink_handle_neigh.c"],
+    deps = [
+        ":switchlink_init_sai",
+        "//switchlink:switchlink_globals",
+        "//switchlink:switchlink_handlers",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_handle_nexthop",
+    srcs = ["switchlink_handle_nexthop.c"],
+    deps = [
+        ":switchlink_init_sai",
+        "//switchlink:switchlink_handlers",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_handle_route",
+    srcs = ["switchlink_handle_route.c"],
+    deps = [
+        ":switchlink_init_sai",
+        "//switchlink:switchlink_globals",
+        "//switchlink:switchlink_handlers",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_handle_tunnel",
+    srcs = ["switchlink_handle_tunnel.c"],
+    deps = [
+        ":switchlink_init_sai",
+        "//switchlink:switchlink_handlers",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchlink_init_sai",
+    srcs = ["switchlink_init_sai.c"],
+    hdrs = ["switchlink_init_sai.h"],
+    deps = [
+        "//:krnlmon_options",
+        "//switchlink:switchlink_db",
+        "//switchlink:switchlink_types",
+        "//switchlink:switchlink_utils",
+        "//switchsai:saiinternal",
+    ],
+)
+
+cc_library(
+    name = "sai",
+    srcs = [
+        ":switchlink_handle_ecmp",
+        ":switchlink_handle_link",
+        ":switchlink_handle_neigh",
+        ":switchlink_handle_nexthop",
+        ":switchlink_handle_route",
+        ":switchlink_handle_tunnel",
+        ":switchlink_init_sai",
+    ] + SWITCHLINK_SAI_TARGET_LIBS,
+)

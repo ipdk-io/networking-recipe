@@ -1,0 +1,306 @@
+# //switchapi/BUILD.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+load("//bazel:defs.bzl", "NO_MATCH_ERROR")
+load("//bazel:rules.bzl", "krnlmon_cc_library")
+load("//bazel:sde.bzl", "TARGET_SDE")
+
+package(default_visibility = ["//visibility:public"])
+
+SWITCH_PD_ROUTING_HDR = select(
+    {
+        "//flags:dpdk_target": ["//switchapi/dpdk:switch_pd_routing_hdr"],
+        "//flags:es2k_target": ["//switchapi/es2k:switch_pd_routing_hdr"],
+    },
+    no_match_error = NO_MATCH_ERROR,
+)
+
+krnlmon_cc_library(
+    name = "switch_base_types",
+    hdrs = ["switch_base_types.h"],
+    deps = [
+        "@target_sys",
+        "@target_utils//:judy",
+        "@target_utils//:tommyds",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_config",
+    hdrs = ["switch_config.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_config_int",
+        ":switch_handle",
+        ":switch_table",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_config_int",
+    hdrs = ["switch_config_int.h"],
+    deps = [
+        ":switch_device",
+        ":switch_id",
+        ":switch_table",
+        ":switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_device",
+    hdrs = ["switch_device.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_lag",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_device_int",
+    hdrs = ["switch_device_int.h"],
+    deps = [
+        ":switch_base_types",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_fdb",
+    hdrs = ["switch_fdb.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_handle",
+        ":switch_interface",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_handle",
+    hdrs = ["switch_handle.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_id",
+        ":switch_status",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_handle_int",
+    hdrs = ["switch_handle_int.h"],
+    deps = [
+        "@target_utils",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_id",
+    hdrs = ["switch_id.h"],
+    deps = [
+        ":switch_base_types",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_interface",
+    hdrs = ["switch_interface.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_handle",
+        ":switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_internal",
+    hdrs = ["switch_internal.h"],
+    deps = [
+        ":switch_device_int",
+        ":switch_handle_int",
+        ":switch_status",
+        "//switchutils:switch_log",
+        "//switchutils:switch_utils",
+        "@local_dpdk_bin//:tdi",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_l3",
+    hdrs = ["switch_l3.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_handle",
+        ":switch_l3_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_l3_int",
+    hdrs = ["switch_l3_int.h"],
+    deps = [
+        ":switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_lag",
+    hdrs = ["switch_lag.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_neighbor",
+    hdrs = ["switch_neighbor.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_handle",
+        ":switch_neighbor_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_neighbor_int",
+    hdrs = ["switch_neighbor_int.h"],
+    deps = [
+        ":switch_pd_routing",
+        ":switch_rif",
+        ":switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_nhop",
+    hdrs = ["switch_nhop.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_handle",
+        ":switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_nhop_int",
+    hdrs = ["switch_nhop_int.h"],
+    deps = [
+        ":switch_nhop",
+        ":switch_pd_routing",
+        ":switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_routing",
+    hdrs = ["switch_pd_routing.h"],
+    deps = SWITCH_PD_ROUTING_HDR,
+)
+
+krnlmon_cc_library(
+    name = "switch_port_int",
+    hdrs = ["switch_port_int.h"],
+)
+
+krnlmon_cc_library(
+    name = "switch_rif",
+    hdrs = ["switch_rif.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_handle",
+        ":switch_tunnel",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_rif_int",
+    hdrs = ["switch_rif_int.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_handle",
+        ":switch_tunnel",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_rmac",
+    hdrs = ["switch_rmac.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_status",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_rmac_int",
+    hdrs = ["switch_rmac_int.h"],
+    deps = [
+        ":switch_id",
+        ":switch_rmac",
+        ":switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_status",
+    hdrs = ["switch_status.h"],
+    deps = [
+        ":switch_base_types",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_table",
+    hdrs = ["switch_table.h"],
+    deps = [
+        ":switch_base_types",
+        "//switchutils:switch_log",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_tdi",
+    hdrs = ["switch_tdi.h"],
+)
+
+krnlmon_cc_library(
+    name = "switch_tunnel",
+    hdrs = ["switch_tunnel.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_handle",
+        ":switch_interface",
+        ":switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_types_int",
+    hdrs = ["switch_types_int.h"],
+    deps = [
+        "//switchapi:switch_base_types",
+        "//switchapi:switch_handle",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_vrf",
+    hdrs = ["switch_vrf.h"],
+    deps = [
+        ":switch_base_types",
+        ":switch_handle",
+        ":switch_interface",
+    ],
+)
+
+alias(
+    name = "switchapi",
+    actual = select(
+        {
+            "//flags:dpdk_target": "//switchapi/dpdk:switchapi",
+            "//flags:es2k_target": "//switchapi/es2k:switchapi",
+        },
+        no_match_error = NO_MATCH_ERROR,
+    ),
+)

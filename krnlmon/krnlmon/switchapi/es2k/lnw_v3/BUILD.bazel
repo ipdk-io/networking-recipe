@@ -1,0 +1,63 @@
+# //switchapi/es2k/lnw_v3/BUILD.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+load("//bazel:rules.bzl", "krnlmon_cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+krnlmon_cc_library(
+    name = "lnw_ecmp_hash_table",
+    hdrs = ["lnw_ecmp_hash_table.h"],
+)
+
+krnlmon_cc_library(
+    name = "lnw_ecmp_nexthop_table",
+    hdrs = ["lnw_ecmp_nexthop_table.h"],
+)
+
+krnlmon_cc_library(
+    name = "lnw_nexthop_table",
+    hdrs = ["lnw_nexthop_table.h"],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_lag_hdr",
+    hdrs = ["switch_pd_lag.h"],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_lag",
+    srcs = ["switch_pd_lag.c"],
+    deps = [
+        ":switch_pd_lag_hdr",
+        "//switchapi:switch_device",
+        "//switchapi:switch_handle",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_lag",
+        "//switchapi/es2k:switch_pd_p4_name_mapping",
+        "//switchapi/es2k:switch_pd_p4_name_routing",
+        "//switchapi/es2k:switch_pd_utils",
+        "@local_es2k_bin//:sde_hdrs",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_routing",
+    srcs = ["switch_pd_routing.c"],
+    deps = [
+        ":lnw_ecmp_hash_table",
+        ":lnw_ecmp_nexthop_table",
+        ":lnw_nexthop_table",
+        "//switchapi:switch_base_types",
+        "//switchapi:switch_handle",
+        "//switchapi:switch_l3",
+        "//switchapi:switch_nhop",
+        "//switchapi:switch_nhop_int",
+        "//switchapi:switch_rmac_int",
+        "//switchapi/es2k:switch_pd_p4_name_mapping",
+        "//switchapi/es2k:switch_pd_routing_hdr",
+        "//switchapi/es2k:switch_pd_utils",
+    ],
+)

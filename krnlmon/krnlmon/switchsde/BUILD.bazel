@@ -1,0 +1,61 @@
+# //switchsde/BUILD.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//bazel:rules.bzl", "krnlmon_cc_library")
+load("//bazel:sde.bzl", "TARGET_SDE_HDRS")
+
+package(default_visibility = ["//visibility:public"])
+
+TARGET_UNIT_TEST = select(
+    {
+        "//flags:dpdk_target": ["switchsde_dpdk_test.cc"],
+        "//flags:es2k_target": ["switchsde_es2k_test.cc"],
+    },
+    no_match_error = "must specify --define target={dpdk|es2k}",
+)
+
+krnlmon_cc_library(
+    name = "sde_port_intf",
+    srcs = select({
+        "//flags:dpdk_target": ["sde_dpdk_port_intf.c"],
+        "//flags:es2k_target": ["sde_es2k_port_intf.c"],
+    }),
+    hdrs = ["sde_port_intf.h"],
+    deps = [
+        ":sde_types",
+        "@target_sys",
+    ] + TARGET_SDE_HDRS,
+)
+
+krnlmon_cc_library(
+    name = "sde_status",
+    srcs = ["sde_status.c"],
+    hdrs = ["sde_status.h"],
+)
+
+krnlmon_cc_library(
+    name = "sde_types",
+    hdrs = ["sde_types.h"],
+)
+
+cc_test(
+    name = "switchsde_test",
+    size = "small",
+    srcs = TARGET_UNIT_TEST,
+    deps = [
+        ":sde_status",
+        ":sde_types",
+        "@com_google_googletest//:gtest_main",
+    ] + TARGET_SDE_HDRS,
+)
+
+cc_library(
+    name = "switchsde",
+    srcs = [
+        ":sde_port_intf",
+        ":sde_status",
+    ],
+)

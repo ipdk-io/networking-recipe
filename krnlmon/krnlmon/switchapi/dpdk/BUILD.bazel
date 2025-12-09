@@ -1,0 +1,287 @@
+# //switchapi/dpdk/BUILD.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//bazel:rules.bzl", "krnlmon_cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+krnlmon_cc_library(
+    name = "switch_config",
+    srcs = ["switch_config.c"],
+    deps = [
+        "//switchapi:switch_config",
+        "//switchapi:switch_config_int",
+        "//switchapi:switch_device_int",
+        "//switchapi:switch_internal",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_device",
+    srcs = ["switch_device.c"],
+    deps = [
+        "//switchapi:switch_config",
+        "//switchapi:switch_config_int",
+        "//switchapi:switch_fdb",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_l3",
+        "//switchapi:switch_neighbor_int",
+        "//switchapi:switch_nhop_int",
+        "//switchapi:switch_rmac_int",
+        "//switchapi:switch_table",
+        "//switchapi:switch_vrf",
+        "//switchutils:switch_log",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_fdb",
+    srcs = ["switch_fdb.c"],
+    deps = [
+        ":switch_pd_fdb",
+        ":switch_pd_utils",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_handle",
+    srcs = ["switch_handle.c"],
+    deps = [
+        "//switchapi:switch_device",
+        "//switchapi:switch_handle",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_l3",
+        "//switchapi:switch_nhop_int",
+        "//switchapi:switch_pd_routing",
+        "//switchapi:switch_rmac_int",
+        "//switchapi:switch_table",
+        "//switchapi:switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_id",
+    srcs = ["switch_id.c"],
+    deps = [
+        "//switchapi:switch_device",
+        "//switchapi:switch_id",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_table",
+        "//switchapi:switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_l3",
+    srcs = ["switch_l3.c"],
+    deps = [
+        "//switchapi:switch_device",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_l3",
+        "//switchapi:switch_nhop_int",
+        "//switchapi:switch_pd_routing",
+        "//switchapi:switch_rmac_int",
+        "//switchapi:switch_table",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_neighbor",
+    srcs = ["switch_neighbor.c"],
+    deps = [
+        ":switch_pd_fdb",
+        "//switchapi:switch_l3",
+        "//switchapi:switch_neighbor",
+        "//switchapi:switch_nhop_int",
+        "//switchapi:switch_rmac_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_nhop",
+    srcs = ["switch_nhop.c"],
+    deps = [
+        ":switch_pd_routing",
+        "//switchapi:switch_device",
+        "//switchapi:switch_handle_int",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_neighbor_int",
+        "//switchapi:switch_nhop",
+        "//switchapi:switch_nhop_int",
+        "//switchapi:switch_rif_int",
+        "//switchapi:switch_table",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_fdb",
+    srcs = ["switch_pd_fdb.c"],
+    hdrs = ["switch_pd_fdb.h"],
+    deps = [
+        ":switch_pd_p4_name_mapping",
+        ":switch_pd_utils",
+        "//switchapi:switch_base_types",
+        "//switchapi:switch_device",
+        "//switchapi:switch_fdb",
+        "//switchapi:switch_rif_int",
+        "//switchapi:switch_table",
+        "//switchapi:switch_tunnel",
+        "@local_dpdk_bin//:sde_hdrs",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_p4_name_mapping",
+    hdrs = ["switch_pd_p4_name_mapping.h"],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_routing_hdr",
+    hdrs = ["switch_pd_routing.h"],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_routing",
+    srcs = ["switch_pd_routing.c"],
+    deps = [
+        ":switch_pd_p4_name_mapping",
+        ":switch_pd_routing_hdr",
+        ":switch_pd_utils",
+        "//switchapi:switch_base_types",
+        "//switchapi:switch_handle",
+        "//switchapi:switch_l3",
+        "//switchapi:switch_nhop",
+        "//switchapi:switch_nhop_int",
+        "//switchapi:switch_rmac_int",
+        "//switchapi:switch_tdi",
+        "@local_dpdk_bin//:sde_hdrs",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_tunnel",
+    srcs = ["switch_pd_tunnel.c"],
+    hdrs = ["switch_pd_tunnel.h"],
+    deps = [
+        ":switch_pd_p4_name_mapping",
+        ":switch_pd_utils",
+        "//switchapi:switch_base_types",
+        "//switchapi:switch_handle",
+        "//switchapi:switch_tdi",
+        "//switchapi:switch_tunnel",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_pd_utils",
+    srcs = ["switch_pd_utils.c"],
+    hdrs = ["switch_pd_utils.h"],
+    deps = [
+        "//switchapi:switch_base_types",
+        "//switchapi:switch_device",
+        "//switchapi:switch_handle",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_rif",
+        "//switchapi:switch_table",
+        "//switchapi:switch_tdi",
+        "@local_dpdk_bin//:sde_hdrs",
+        "@local_dpdk_bin//:tdi",
+        "@target_sys",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_rif",
+    srcs = ["switch_rif.c"],
+    deps = [
+        ":switch_pd_utils",
+        "//switchapi:switch_rif_int",
+        "@local_dpdk_bin//:sde_hdrs",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_rmac",
+    srcs = ["switch_rmac.c"],
+    deps = [
+        ":switch_pd_routing",
+        "//switchapi:switch_device",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_rmac",
+        "//switchapi:switch_table",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_table",
+    srcs = ["switch_table.c"],
+    deps = [
+        "//switchapi:switch_device",
+        "//switchapi:switch_id",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_table",
+        "//switchapi:switch_types_int",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_tunnel",
+    srcs = ["switch_tunnel.c"],
+    deps = [
+        ":switch_pd_tunnel",
+        "//switchapi:switch_device",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_table",
+        "//switchapi:switch_tunnel",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switch_vrf",
+    srcs = ["switch_vrf.c"],
+    deps = [
+        "//switchapi:switch_device",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_table",
+        "//switchapi:switch_vrf",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "switchapi_utils",
+    srcs = ["switchapi_utils.c"],
+    deps = [
+        "//switchapi:switch_device",
+        "//switchapi:switch_id",
+        "//switchapi:switch_internal",
+        "//switchapi:switch_table",
+        "//switchapi:switch_types_int",
+    ],
+)
+
+cc_library(
+    name = "switchapi",
+    srcs = [
+        ":switch_config",
+        ":switch_device",
+        ":switch_fdb",
+        ":switch_handle",
+        ":switch_id",
+        ":switch_l3",
+        ":switch_neighbor",
+        ":switch_nhop",
+        ":switch_pd_fdb",
+        ":switch_pd_routing",
+        ":switch_pd_tunnel",
+        ":switch_pd_utils",
+        ":switch_rif",
+        ":switch_rmac",
+        ":switch_table",
+        ":switch_tunnel",
+        ":switch_vrf",
+        ":switchapi_utils",
+    ],
+)

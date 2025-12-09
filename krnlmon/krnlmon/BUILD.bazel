@@ -1,0 +1,59 @@
+# //BUILD.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+load("//bazel:rules.bzl", "krnlmon_cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+load("//bazel:rules.bzl", "krnlmon_cc_library")
+load("//bazel:sde.bzl", "TARGET_SDE_LIBS", "TARGET_TDI")
+
+cc_shared_library(
+    name = "krnlmon",
+    user_link_flags = [
+        "-lpthread",
+        "-lnl-3",
+    ],
+    deps = [
+        "//switchapi",
+        "//switchlink",
+        "//switchlink/sai",
+        "//switchsai",
+        "//switchsde",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "krnlmon_main",
+    srcs = ["krnlmon_main.cc"],
+    hdrs = ["krnlmon_main.h"],
+    deps = [
+        "//switchlink:switchlink_main",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+krnlmon_cc_library(
+    name = "krnlmon_options",
+    srcs = ["krnlmon_options.h"],
+)
+
+cc_binary(
+    name = "dummy_krnlmon",
+    srcs = [
+        "dummy_main.cc",
+        ":krnlmon",
+    ],
+    linkopts = [
+        "-lbsd",
+    ],
+    deps = [
+        ":krnlmon_main",
+        "@com_google_absl//absl/synchronization",
+        "@target_utils//:judy",
+        "@target_utils//:tommyds",
+        "@target_utils//:xxhash",
+    ] + TARGET_SDE_LIBS + TARGET_TDI,
+)

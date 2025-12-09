@@ -1,0 +1,22 @@
+# //switchutils/BUILD.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//bazel:rules.bzl", "krnlmon_cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+krnlmon_cc_library(
+    name = "switch_log",
+    hdrs = ["switch_log.h"],
+    deps = [
+        "@target_sys",
+    ],
+)
+
+cc_library(
+    name = "switch_utils",
+    hdrs = ["switch_utils.h"],
+)

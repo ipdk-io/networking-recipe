@@ -1,0 +1,38 @@
+# //flags/BUILD.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+package(default_visibility = ["//visibility:public"])
+
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+
+# Define "--//flags:ovs" command-line flag
+bool_flag(
+    name = "ovs",
+    build_setting_default = False,
+)
+
+# Enabled by "--//flags:ovs=true"
+config_setting(
+    name = "ovs_enabled",
+    flag_values = {
+        "//flags:ovs": "true",
+    },
+)
+
+# Enabled by "--define target=dpdk"
+config_setting(
+    name = "dpdk_target",
+    define_values = {
+        "target": "dpdk",
+    },
+)
+
+# Enabled by "--define target=es2k"
+config_setting(
+    name = "es2k_target",
+    define_values = {
+        "target": "es2k",
+    },
+)

@@ -1,0 +1,98 @@
+# WORKSPACE.bazel
+
+# Copyright 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+workspace(name = "io_ipdk_krnlmon")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# ---------------------------------------------------------------------------
+#       Skylib
+# ---------------------------------------------------------------------------
+http_archive(
+    name = "bazel_skylib",
+    sha256 = "66ffd9315665bfaafc96b52278f57c7e2dd09f5ede279ea6d39b2be471e7e3aa",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.4.2/bazel-skylib-1.4.2.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.4.2/bazel-skylib-1.4.2.tar.gz",
+    ],
+)
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+# ---------------------------------------------------------------------------
+#       Abseil
+# ---------------------------------------------------------------------------
+http_archive(
+    name = "com_google_absl",
+    sha256 = "4208129b49006089ba1d6710845a45e31c59b0ab6bff9e5788a87f55c5abd602",
+    strip_prefix = "abseil-cpp-20220623.0",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.0.tar.gz"],
+)
+
+# ---------------------------------------------------------------------------
+#       GoogleTest
+# ---------------------------------------------------------------------------
+http_archive(
+    name = "com_google_googletest",
+    sha256 = "d3d307a240e129bb57da8aae64f3b0099bf1b8efff7249df993b619b8641ec77",
+    strip_prefix = "googletest-a3460d1aeeaa43fdf137a6adefef10ba0b59fe4b",
+    urls = ["https://github.com/google/googletest/archive/a3460d1aeeaa43fdf137a6adefef10ba0b59fe4b.zip"],
+)
+
+# ---------------------------------------------------------------------------
+#       Switch Abstraction Interface (SAI)
+# ---------------------------------------------------------------------------
+http_archive(
+    name = "sai",
+    build_file = "//bazel:external/sai.BUILD",
+    integrity = "sha256-N9uRjAwCVoxARecxGebI4qcDisKWx+HvnNSmu7ckQyg=",
+    strip_prefix = "SAI-1.9.0",
+    urls = ["https://github.com/opencomputeproject/SAI/archive/refs/tags/v1.9.0.zip"],
+)
+
+# ---------------------------------------------------------------------------
+#       Netlink libraries
+# ---------------------------------------------------------------------------
+new_local_repository(
+    name = "nl-3",
+    build_file = "//bazel:external/nl-3.BUILD",
+    path = "/usr",
+)
+
+new_local_repository(
+    name = "nl-route-3",
+    build_file = "//bazel:external/nl-route-3.BUILD",
+    path = "/usr",
+)
+
+# ---------------------------------------------------------------------------
+#       DPDK SDE
+# ---------------------------------------------------------------------------
+load("//bazel:dpdk.bzl", "dpdk_configure")
+
+dpdk_configure(name = "local_dpdk_bin")
+
+# ---------------------------------------------------------------------------
+#       ES2K SDE
+# ---------------------------------------------------------------------------
+load("//bazel:es2k.bzl", "es2k_configure")
+
+es2k_configure(name = "local_es2k_bin")
+
+# ---------------------------------------------------------------------------
+#       TARGET_SYS
+# ---------------------------------------------------------------------------
+load("//bazel:external/target_sys.bzl", "configure_target_sys")
+
+configure_target_sys(name = "target_sys")
+
+# ---------------------------------------------------------------------------
+#       TARGET_UTILS
+# ---------------------------------------------------------------------------
+load("//bazel:external/target_utils.bzl", "configure_target_utils")
+
+configure_target_utils(name = "target_utils")

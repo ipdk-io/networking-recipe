@@ -1,0 +1,15 @@
+# Bazel
+/bazel-*
+.bazelrc
+MODULE.bazel
+MODULE.bazel.lock
+
+# CMake
+/build/
+/install/
+
+# VS Code
+/.vscode/
+
+# SlickEdit
+/.vslick/
