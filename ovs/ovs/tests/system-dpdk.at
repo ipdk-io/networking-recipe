@@ -1,0 +1,1172 @@
+m4_define([CONFIGURE_VETH_OFFLOADS],
+   [AT_CHECK([ethtool -K $1 tx off], [0], [ignore], [ignore])])
+
+AT_BANNER([OVS-DPDK unit tests])
+
+m4_define([SYSTEM_DPDK_ALLOWED_LOGS],[
+\@does not exist. The Open vSwitch kernel module is probably not loaded.@d
+\@does not support MTU configuration,@d
+\@EAL: No \(available\|free\) .*hugepages reported@d
+\@Failed to enable flow control@d
+\@Rx checksum offload is not supported on@d
+\@TELEMETRY: No legacy callbacks, legacy socket not created@d
+])
+
+dnl CHECK_MEMPOOL_PARAM([mtu], [numa], [+line])
+dnl
+dnl Waits for logs to indicate that the user has configured a mempool
+dnl for 'mtu' on 'numa'. Checking starts from line number 'line' in
+dnl ovs-vswitchd.log.
+m4_define([CHECK_MEMPOOL_PARAM], [
+    line_st=$3
+    if [[ -z "$line_st" ]]
+    then
+        line_st="+0"
+    fi
+    OVS_WAIT_UNTIL([tail -n $line_st ovs-vswitchd.log dnl
+                   | grep "User configured shared mempool set for: MTU $1, NUMA $2."])
+])
+
+dnl --------------------------------------------------------------------------
+dnl Check if EAL init is successful
+AT_SETUP([OVS-DPDK - EAL init])
+AT_KEYWORDS([dpdk])
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+AT_CHECK([grep "DPDK Enabled - initializing..." ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "EAL" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "DPDK Enabled - initialized" ovs-vswitchd.log], [], [stdout])
+OVS_VSWITCHD_STOP("[SYSTEM_DPDK_ALLOWED_LOGS]")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl Add standard DPDK PHY port
+AT_SETUP([OVS-DPDK - add standard DPDK port])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_PHY_SKIP()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 phy0 -- set Interface phy0 type=dpdk options:dpdk-devargs=$(cat PCI_ADDR)], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 phy0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("[SYSTEM_DPDK_ALLOWED_LOGS]")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl Add vhost-user-client port
+AT_SETUP([OVS-DPDK - add vhost-user-client port])
+AT_KEYWORDS([dpdk])
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl Ping vhost-user port
+AT_SETUP([OVS-DPDK - ping vhost-user ports])
+AT_KEYWORDS([dpdk])
+OVS_DPDK_PRE_CHECK()
+AT_SKIP_IF([! which dpdk-testpmd >/dev/null 2>/dev/null])
+OVS_DPDK_START()
+
+dnl Find number of sockets
+AT_CHECK([lscpu], [], [stdout])
+AT_CHECK([cat stdout | grep "NUMA node(s)" | awk '{c=1; while (c++<$(3)) {printf "512,"}; print "512"}' > NUMA_NODE])
+
+dnl Add userspace bridge and attach it to OVS
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuser0 -- set Interface dpdkvhostuser0 \
+          type=dpdkvhostuser], [],
+         [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user server: socket created" \
+          ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "Socket $OVS_RUNDIR/dpdkvhostuser0 created for vhost-user port dpdkvhostuser0" \
+          ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: bind to $OVS_RUNDIR/dpdkvhostuser0" ovs-vswitchd.log], [],
+         [stdout])
+
+dnl Set up namespaces
+ADD_NAMESPACES(ns1, ns2)
+
+dnl Add veth device
+ADD_VETH(tap1, ns2, br10, "172.31.110.12/24")
+
+dnl Execute testpmd in background
+on_exit "pkill -f -x -9 'tail -f /dev/null'"
+tail -f /dev/null | dpdk-testpmd --socket-mem="$(cat NUMA_NODE)" --no-pci\
+           --vdev="net_virtio_user,path=$OVS_RUNDIR/dpdkvhostuser0" \
+           --vdev="net_tap0,iface=tap0" --file-prefix page0 \
+           --single-file-segments -- -a >$OVS_RUNDIR/testpmd-dpdkvhostuser0.log 2>&1 &
+
+OVS_WAIT_UNTIL([grep "virtio is now ready for processing" ovs-vswitchd.log])
+OVS_WAIT_UNTIL([ip link show dev tap0 | grep -qw LOWER_UP])
+
+dnl Move the tap devices to the namespaces
+AT_CHECK([ps aux | grep testpmd], [], [stdout], [stderr])
+AT_CHECK([ip link show], [], [stdout], [stderr])
+AT_CHECK([ip link set tap0 netns ns1], [], [stdout], [stderr])
+
+AT_CHECK([ip netns exec ns1 ip link show], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns1 ip link show | grep tap0], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns1 ip link set tap0 up], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns1 ip addr add 172.31.110.11/24 dev tap0], [],
+         [stdout], [stderr])
+
+AT_CHECK([ip netns exec ns1 ip link show], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns2 ip link show], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns1 ping -c 4 -I tap0 172.31.110.12], [], [stdout],
+         [stderr])
+
+dnl Clean up the testpmd now
+pkill -f -x -9 'tail -f /dev/null'
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuser0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: recvmsg failed@d
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostuser0: No such file or directory@d
+\@dpdkvhostuser ports are considered deprecated;  please migrate to dpdkvhostuserclient ports.@d
+\@failed to enumerate system datapaths: No such file or directory@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+dnl --------------------------------------------------------------------------
+dnl Ping vhost-user-client port
+AT_SETUP([OVS-DPDK - ping vhost-user-client ports])
+AT_KEYWORDS([dpdk])
+OVS_DPDK_PRE_CHECK()
+AT_SKIP_IF([! which dpdk-testpmd >/dev/null 2>/dev/null])
+OVS_DPDK_START()
+
+dnl Find number of sockets
+AT_CHECK([lscpu], [], [stdout])
+AT_CHECK([cat stdout | grep "NUMA node(s)" | awk '{c=1; while (c++<$(3)) {printf "512,"}; print "512"}' > NUMA_NODE])
+
+dnl Add userspace bridge and attach it to OVS
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface \
+          dpdkvhostuserclient0 \
+          type=dpdkvhostuserclient \
+          options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [],
+         [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Set up namespaces
+ADD_NAMESPACES(ns1, ns2)
+
+dnl Add veth device
+ADD_VETH(tap1, ns2, br10, "172.31.110.12/24")
+
+dnl Execute testpmd in background
+on_exit "pkill -f -x -9 'tail -f /dev/null'"
+tail -f /dev/null | dpdk-testpmd --socket-mem="$(cat NUMA_NODE)" --no-pci\
+           --vdev="net_virtio_user,path=$OVS_RUNDIR/dpdkvhostclient0,server=1" \
+           --vdev="net_tap0,iface=tap0" --file-prefix page0 \
+           --single-file-segments -- -a >$OVS_RUNDIR/testpmd-dpdkvhostuserclient0.log 2>&1 &
+
+OVS_WAIT_UNTIL([grep "virtio is now ready for processing" ovs-vswitchd.log])
+OVS_WAIT_UNTIL([ip link show dev tap0 | grep -qw LOWER_UP])
+
+dnl Move the tap devices to the namespaces
+AT_CHECK([ps aux | grep testpmd], [], [stdout], [stderr])
+AT_CHECK([ip link show], [], [stdout], [stderr])
+AT_CHECK([ip link set tap0 netns ns1], [], [stdout], [stderr])
+
+AT_CHECK([ip netns exec ns1 ip link show], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns1 ip link show | grep tap0], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns1 ip link set tap0 up], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns1 ip addr add 172.31.110.11/24 dev tap0], [],
+         [stdout], [stderr])
+
+AT_CHECK([ip netns exec ns1 ip link show], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns2 ip link show], [], [stdout], [stderr])
+AT_CHECK([ip netns exec ns1 ping -c 4 -I tap0 172.31.110.12], [], [stdout],
+         [stderr])
+
+dnl Clean up the testpmd now
+pkill -f -x -9 'tail -f /dev/null'
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: recvmsg failed@d
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+\@dpdkvhostuser ports are considered deprecated;  please migrate to dpdkvhostuserclient ports.@d
+\@failed to enumerate system datapaths: No such file or directory@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl Ingress policing create delete phy port
+AT_SETUP([OVS-DPDK - Ingress policing create delete phy port])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_PHY_SKIP()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and add policer
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 phy0 -- set Interface phy0 type=dpdk options:dpdk-devargs=$(cat PCI_ADDR)], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set interface phy0 ingress_policing_rate=10000 ingress_policing_burst=1000])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Fail if policer could not be created
+AT_FAIL_IF([grep "Could not create rte meter for ingress policer" ovs-vswitchd.log], [], [stdout])
+
+dnl Remove policer
+AT_CHECK([ovs-vsctl set interface phy0 ingress_policing_rate=0 ingress_policing_burst=0])
+
+dnl Check policer was removed correctly
+AT_CHECK([ovs-vsctl list interface phy0], [], [stdout])
+AT_CHECK([grep -E 'ingress_policing_burst: 0' stdout], [], [stdout])
+
+AT_CHECK([ovs-vsctl list interface phy0], [], [stdout])
+AT_CHECK([grep -E 'ingress_policing_rate: 0' stdout], [], [stdout])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 phy0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("[SYSTEM_DPDK_ALLOWED_LOGS]")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl Ingress policing create delete vport port
+AT_SETUP([OVS-DPDK - Ingress policing create delete vport port])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and add ingress policer
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set interface dpdkvhostuserclient0 ingress_policing_rate=10000 ingress_policing_burst=1000])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Fail if ingress policer could not be created
+AT_FAIL_IF([grep "Could not create rte meter for ingress policer" ovs-vswitchd.log], [], [stdout])
+
+dnl Remove ingress policer
+AT_CHECK([ovs-vsctl set interface dpdkvhostuserclient0 ingress_policing_rate=0 ingress_policing_burst=0])
+
+dnl Check ingress policer was removed correctly
+AT_CHECK([ovs-vsctl list interface dpdkvhostuserclient0], [], [stdout])
+AT_CHECK([grep -E 'ingress_policing_burst: 0' stdout], [], [stdout])
+
+AT_CHECK([ovs-vsctl list interface dpdkvhostuserclient0], [], [stdout])
+AT_CHECK([grep -E 'ingress_policing_rate: 0' stdout], [], [stdout])
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl Ingress policing no policing rate
+AT_SETUP([OVS-DPDK - Ingress policing no policing rate])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and add ingress policer
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set interface dpdkvhostuserclient0 ingress_policing_burst=1000])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Fail if ingress policer could not be created
+AT_FAIL_IF([grep "Could not create rte meter for ingress policer" ovs-vswitchd.log], [], [stdout])
+
+dnl Check ingress policer was created correctly
+AT_CHECK([ovs-vsctl list interface dpdkvhostuserclient0], [], [stdout])
+AT_CHECK([grep -E 'ingress_policing_burst: 1000' stdout], [], [stdout])
+
+AT_CHECK([ovs-vsctl list interface dpdkvhostuserclient0], [], [stdout])
+AT_CHECK([grep -E 'ingress_policing_rate: 0' stdout], [], [stdout])
+
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl Ingress policing no policing burst
+AT_SETUP([OVS-DPDK - Ingress policing no policing burst])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and add ingress policer
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set interface dpdkvhostuserclient0 ingress_policing_rate=10000])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Fail if ingress policer could not be created
+AT_FAIL_IF([grep "Could not create rte meter for ingress policer" ovs-vswitchd.log], [], [stdout])
+
+dnl Check ingress policer was created correctly
+AT_CHECK([ovs-vsctl list interface dpdkvhostuserclient0], [], [stdout])
+AT_CHECK([grep -E 'ingress_policing_burst: 0' stdout], [], [stdout])
+
+AT_CHECK([ovs-vsctl list interface dpdkvhostuserclient0], [], [stdout])
+AT_CHECK([grep -E 'ingress_policing_rate: 10000' stdout], [], [stdout])
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+dnl --------------------------------------------------------------------------
+dnl QoS create delete phy port
+AT_SETUP([OVS-DPDK - QoS create delete phy port])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_PHY_SKIP()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and add egress policer
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 phy0 -- set Interface phy0 type=dpdk options:dpdk-devargs=$(cat PCI_ADDR)], [], [stdout], [stderr])
+OVS_WAIT_UNTIL([ovs-vsctl set port phy0 qos=@newqos -- --id=@newqos create qos type=egress-policer other-config:cir=1250000 other-config:cbs=2048])
+AT_CHECK([ovs-appctl -t ovs-vswitchd qos/show phy0], [], [stdout])
+sleep 2
+
+dnl Fail if egress policer could not be created
+AT_FAIL_IF([grep "Could not create rte meter for egress policer" ovs-vswitchd.log], [], [stdout])
+
+dnl Remove egress policer
+AT_CHECK([ovs-vsctl destroy QoS phy0 -- clear Port phy0 qos])
+
+dnl Check egress policer was removed correctly
+AT_CHECK([ovs-appctl -t ovs-vswitchd qos/show phy0], [], [stdout])
+AT_CHECK([grep -E 'QoS not configured on phy0' stdout], [], [stdout])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 phy0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("[SYSTEM_DPDK_ALLOWED_LOGS]")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl QoS create delete vport port
+AT_SETUP([OVS-DPDK - QoS create delete vport port])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and add egress policer
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+OVS_WAIT_UNTIL([ovs-vsctl set port dpdkvhostuserclient0 qos=@newqos -- --id=@newqos create qos type=egress-policer other-config:cir=1250000 \
+                  other-config:cbs=2048])
+AT_CHECK([ovs-appctl -t ovs-vswitchd qos/show dpdkvhostuserclient0], [], [stdout])
+sleep 2
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Fail if egress policer could not be created
+AT_FAIL_IF([grep "Could not create rte meter for egress policer" ovs-vswitchd.log], [], [stdout])
+
+dnl Remove egress policer
+AT_CHECK([ovs-vsctl destroy QoS dpdkvhostuserclient0 -- clear Port dpdkvhostuserclient0 qos])
+
+dnl Check egress policer was removed correctly
+AT_CHECK([ovs-appctl -t ovs-vswitchd qos/show dpdkvhostuserclient0], [], [stdout])
+AT_CHECK([grep -E 'QoS not configured on dpdkvhostuserclient0' stdout], [], [stdout])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl QoS no cir
+AT_SETUP([OVS-DPDK - QoS no cir])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and add egress policer
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+OVS_WAIT_UNTIL([ovs-vsctl set port dpdkvhostuserclient0 qos=@newqos -- --id=@newqos create qos type=egress-policer other-config:cbs=2048])
+sleep 2
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Check egress policer was not created
+AT_CHECK([ovs-appctl -t ovs-vswitchd qos/show dpdkvhostuserclient0], [], [stdout])
+AT_CHECK([grep -E 'QoS not configured on dpdkvhostuserclient0' stdout], [], [stdout])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+\@Could not create rte meter for egress policer@d
+\@Failed to set QoS type egress-policer on port dpdkvhostuserclient0: Invalid argument@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl QoS no cbs
+AT_SETUP([OVS-DPDK - QoS no cbs])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and add egress policer
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+OVS_WAIT_UNTIL([ovs-vsctl set port dpdkvhostuserclient0 qos=@newqos -- --id=@newqos create qos type=egress-policer other-config:cir=1250000])
+sleep 2
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Check egress policer was not created
+AT_CHECK([ovs-appctl -t ovs-vswitchd qos/show dpdkvhostuserclient0], [], [stdout])
+AT_CHECK([grep -E 'QoS not configured on dpdkvhostuserclient0' stdout], [], [stdout])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+\@Could not create rte meter for egress policer@d
+\@Failed to set QoS type egress-policer on port dpdkvhostuserclient0: Invalid argument@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+
+dnl --------------------------------------------------------------------------
+dnl MTU increase phy port
+AT_SETUP([OVS-DPDK - MTU increase phy port])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_PHY_SKIP()
+OVS_DPDK_START()
+
+dnl First set MTU to its default value and confirm that value, then increase the MTU value and confirm the new value
+
+dnl Add userspace bridge and attach it to OVS with default MTU value
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 phy0 -- set Interface phy0 type=dpdk options:dpdk-devargs=$(cat PCI_ADDR)], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Check default MTU value in the datapath
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=1500' stdout], [], [stdout])
+
+dnl Increase MTU value and check in the datapath
+AT_CHECK([ovs-vsctl set Interface phy0 mtu_request=9000])
+
+dnl Fail if MTU is not supported
+AT_FAIL_IF([grep "Interface phy0 does not support MTU configuration" ovs-vswitchd.log], [], [stdout])
+
+dnl Fail if error is encountered during MTU setup
+AT_FAIL_IF([grep "Interface phy0 MTU (9000) setup error" ovs-vswitchd.log], [], [stdout])
+
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=9000' stdout], [], [stdout])
+
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 phy0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("[SYSTEM_DPDK_ALLOWED_LOGS]")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl MTU decrease phy port
+AT_SETUP([OVS-DPDK - MTU decrease phy port])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_PHY_SKIP()
+OVS_DPDK_START()
+
+dnl First set an increased MTU value and confirm that value, then decrease the MTU value and confirm the new value
+
+dnl Add userspace bridge and attach it to OVS and modify MTU value
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 phy0 -- set Interface phy0 type=dpdk options:dpdk-devargs=$(cat PCI_ADDR)], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set Interface phy0 mtu_request=9000])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Fail if MTU is not supported
+AT_FAIL_IF([grep "Interface phy0 does not support MTU configuration" ovs-vswitchd.log], [], [stdout])
+
+dnl Fail if error is encountered during MTU setup
+AT_FAIL_IF([grep "Interface phy0 MTU (9000) setup error" ovs-vswitchd.log], [], [stdout])
+
+dnl Check MTU value in the datapath
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=9000' stdout], [], [stdout])
+
+dnl Decrease MTU value and check in the datapath
+AT_CHECK([ovs-vsctl set Interface phy0 mtu_request=2000])
+
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=2000' stdout], [], [stdout])
+
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 phy0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("[SYSTEM_DPDK_ALLOWED_LOGS]")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl MTU increase vport port
+AT_SETUP([OVS-DPDK - MTU increase vport port])
+AT_KEYWORDS([dpdk])
+
+AT_SKIP_IF([! which dpdk-testpmd >/dev/null 2>/dev/null])
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Find number of sockets
+AT_CHECK([lscpu], [], [stdout])
+AT_CHECK([cat stdout | grep "NUMA node(s)" | awk '{c=1; while (c++<$(3)) {printf "512,"}; print "512"}' > NUMA_NODE])
+
+dnl Add userspace bridge and attach it to OVS with default MTU value
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Execute testpmd in background
+on_exit "pkill -f -x -9 'tail -f /dev/null'"
+tail -f /dev/null | dpdk-testpmd --socket-mem="$(cat NUMA_NODE)" --no-pci\
+           --vdev="net_virtio_user,path=$OVS_RUNDIR/dpdkvhostclient0,server=1" \
+           --vdev="net_tap0,iface=tap0" --file-prefix page0 \
+           --single-file-segments -- -a >$OVS_RUNDIR/testpmd-dpdkvhostuserclient0.log 2>&1 &
+
+OVS_WAIT_UNTIL([grep "virtio is now ready for processing" ovs-vswitchd.log])
+
+dnl Check default MTU value in the datapath
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=1500' stdout], [], [stdout])
+
+dnl Increase MTU value and check in the datapath
+AT_CHECK([ovs-vsctl set Interface dpdkvhostuserclient0 mtu_request=9000])
+
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=9000' stdout], [], [stdout])
+
+dnl Clean up the testpmd now
+pkill -f -x -9 'tail -f /dev/null'
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl MTU decrease vport port
+AT_SETUP([OVS-DPDK - MTU decrease vport port])
+AT_KEYWORDS([dpdk])
+
+AT_SKIP_IF([! which dpdk-testpmd >/dev/null 2>/dev/null])
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Find number of sockets
+AT_CHECK([lscpu], [], [stdout])
+AT_CHECK([cat stdout | grep "NUMA node(s)" | awk '{c=1; while (c++<$(3)) {printf "512,"}; print "512"}' > NUMA_NODE])
+
+dnl Add userspace bridge and attach it to OVS and modify MTU value
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set Interface dpdkvhostuserclient0 mtu_request=9000])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Execute testpmd in background
+on_exit "pkill -f -x -9 'tail -f /dev/null'"
+tail -f /dev/null | dpdk-testpmd --socket-mem="$(cat NUMA_NODE)" --no-pci\
+           --vdev="net_virtio_user,path=$OVS_RUNDIR/dpdkvhostclient0,server=1" \
+           --vdev="net_tap0,iface=tap0" --file-prefix page0 \
+           --single-file-segments -- -a >$OVS_RUNDIR/testpmd-dpdkvhostuserclient0.log 2>&1 &
+
+OVS_WAIT_UNTIL([grep "virtio is now ready for processing" ovs-vswitchd.log])
+
+dnl Check MTU value in the datapath
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=9000' stdout], [], [stdout])
+
+dnl Decrease MTU value and check in the datapath
+AT_CHECK([ovs-vsctl set Interface dpdkvhostuserclient0 mtu_request=2000])
+
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=2000' stdout], [], [stdout])
+
+dnl Clean up the testpmd now
+pkill -f -x -9 'tail -f /dev/null'
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl MTU upper bound phy port
+AT_SETUP([OVS-DPDK - MTU upper bound phy port])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_PHY_SKIP()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and set MTU value to max upper bound
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 phy0 -- set Interface phy0 type=dpdk options:dpdk-devargs=$(cat PCI_ADDR)], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set Interface phy0 mtu_request=9702])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Fail if MTU is not supported
+AT_FAIL_IF([grep "Interface phy0 does not support MTU configuration" ovs-vswitchd.log], [], [stdout])
+
+dnl Fail if error is encountered during MTU setup
+AT_FAIL_IF([grep "Interface phy0 MTU (9702) setup error" ovs-vswitchd.log], [], [stdout])
+
+dnl Check MTU value in the datapath
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=9702' stdout], [], [stdout])
+
+dnl Set MTU value above upper bound and check for error
+AT_CHECK([ovs-vsctl set Interface phy0 mtu_request=9711])
+AT_CHECK([grep "phy0: unsupported MTU 9711" ovs-vswitchd.log], [], [stdout])
+
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 phy0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@phy0: unsupported MTU 9711@d
+\@failed to set MTU for network device phy0: Invalid argument@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl MTU lower bound phy port
+AT_SETUP([OVS-DPDK - MTU lower bound phy port])
+AT_KEYWORDS([dpdk])
+
+OVS_DPDK_PRE_PHY_SKIP()
+OVS_DPDK_START()
+
+dnl Add userspace bridge and attach it to OVS and set MTU value to min lower bound
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 phy0 -- set Interface phy0 type=dpdk options:dpdk-devargs=$(cat PCI_ADDR)], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set Interface phy0 mtu_request=68])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Fail if MTU is not supported
+AT_FAIL_IF([grep "Interface phy0 does not support MTU configuration" ovs-vswitchd.log], [], [stdout])
+
+dnl Fail if error is encountered during MTU setup
+AT_FAIL_IF([grep "Interface phy0 MTU (68) setup error" ovs-vswitchd.log], [], [stdout])
+
+dnl Check MTU value in the datapath
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=68' stdout], [], [stdout])
+
+dnl Set MTU value below lower bound and check for error
+AT_CHECK([ovs-vsctl set Interface phy0 mtu_request=67])
+AT_CHECK([grep "phy0: unsupported MTU 67" ovs-vswitchd.log], [], [stdout])
+
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 phy0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@phy0: unsupported MTU 67@d
+\@failed to set MTU for network device phy0: Invalid argument@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl MTU upper bound vport port
+AT_SETUP([OVS-DPDK - MTU upper bound vport port])
+AT_KEYWORDS([dpdk])
+
+AT_SKIP_IF([! which dpdk-testpmd >/dev/null 2>/dev/null])
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Find number of sockets
+AT_CHECK([lscpu], [], [stdout])
+AT_CHECK([cat stdout | grep "NUMA node(s)" | awk '{c=1; while (c++<$(3)) {printf "512,"}; print "512"}' > NUMA_NODE])
+
+dnl Add userspace bridge and attach it to OVS and set MTU value to max upper bound
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set Interface dpdkvhostuserclient0 mtu_request=9702])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Execute testpmd in background
+on_exit "pkill -f -x -9 'tail -f /dev/null'"
+tail -f /dev/null | dpdk-testpmd --socket-mem="$(cat NUMA_NODE)" --no-pci\
+           --vdev="net_virtio_user,path=$OVS_RUNDIR/dpdkvhostclient0,server=1" \
+           --vdev="net_tap0,iface=tap0" --file-prefix page0 \
+           --single-file-segments -- -a >$OVS_RUNDIR/testpmd-dpdkvhostuserclient0.log 2>&1 &
+
+OVS_WAIT_UNTIL([grep "virtio is now ready for processing" ovs-vswitchd.log])
+
+dnl Check MTU value in the datapath
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=9702' stdout], [], [stdout])
+
+dnl Set MTU value above upper bound and check for error
+AT_CHECK([ovs-vsctl set Interface dpdkvhostuserclient0 mtu_request=9711])
+AT_CHECK([grep "dpdkvhostuserclient0: unsupported MTU 9711" ovs-vswitchd.log], [], [stdout])
+
+dnl Clean up the testpmd now
+pkill -f -x -9 'tail -f /dev/null'
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+\@dpdkvhostuserclient0: unsupported MTU 9711@d
+\@failed to set MTU for network device dpdkvhostuserclient0: Invalid argument@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl MTU lower bound vport port
+AT_SETUP([OVS-DPDK - MTU lower bound vport port])
+AT_KEYWORDS([dpdk])
+
+AT_SKIP_IF([! which dpdk-testpmd >/dev/null 2>/dev/null])
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+
+dnl Find number of sockets
+AT_CHECK([lscpu], [], [stdout])
+AT_CHECK([cat stdout | grep "NUMA node(s)" | awk '{c=1; while (c++<$(3)) {printf "512,"}; print "512"}' > NUMA_NODE])
+
+dnl Add userspace bridge and attach it to OVS and set MTU value to min lower bound
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 dpdkvhostuserclient0 -- set Interface dpdkvhostuserclient0 type=dpdkvhostuserclient options:vhost-server-path=$OVS_RUNDIR/dpdkvhostclient0], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl set Interface dpdkvhostuserclient0 mtu_request=68])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Parse log file
+AT_CHECK([grep "VHOST_CONFIG: vhost-user client: socket created" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "vHost User device 'dpdkvhostuserclient0' created in 'client' mode, using client socket" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "VHOST_CONFIG: $OVS_RUNDIR/dpdkvhostclient0: reconnecting..." ovs-vswitchd.log], [], [stdout])
+
+dnl Execute testpmd in background
+on_exit "pkill -f -x -9 'tail -f /dev/null'"
+tail -f /dev/null | dpdk-testpmd --socket-mem="$(cat NUMA_NODE)" --no-pci\
+           --vdev="net_virtio_user,path=$OVS_RUNDIR/dpdkvhostclient0,server=1" \
+           --vdev="net_tap0,iface=tap0" --file-prefix page0 \
+           --single-file-segments -- -a >$OVS_RUNDIR/testpmd-dpdkvhostuserclient0.log 2>&1 &
+
+OVS_WAIT_UNTIL([grep "virtio is now ready for processing" ovs-vswitchd.log])
+
+dnl Check MTU value in the datapath
+AT_CHECK([ovs-appctl dpctl/show], [], [stdout])
+AT_CHECK([grep -E 'mtu=68' stdout], [], [stdout])
+
+dnl Set MTU value below lower bound and check for error
+AT_CHECK([ovs-vsctl set Interface dpdkvhostuserclient0 mtu_request=67])
+AT_CHECK([grep "dpdkvhostuserclient0: unsupported MTU 67" ovs-vswitchd.log], [], [stdout])
+
+dnl Clean up the testpmd now
+pkill -f -x -9 'tail -f /dev/null'
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 dpdkvhostuserclient0], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@VHOST_CONFIG: failed to connect to $OVS_RUNDIR/dpdkvhostclient0: No such file or directory@d
+\@dpdkvhostuserclient0: unsupported MTU 67@d
+\@failed to set MTU for network device dpdkvhostuserclient0: Invalid argument@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+
+
+dnl --------------------------------------------------------------------------
+dnl MFEX Autovalidator
+AT_SETUP([OVS-DPDK - MFEX Autovalidator])
+AT_KEYWORDS([dpdk])
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+AT_CHECK([ovs-vsctl add-br br0 -- set bridge br0 datapath_type=netdev])
+AT_SKIP_IF([! ovs-appctl dpif-netdev/miniflow-parser-get | sed 1,4d | grep "True"], [], [dnl
+])
+
+AT_SKIP_IF([! $PYTHON3 -c "import scapy"], [], [])
+AT_CHECK([$PYTHON3 $srcdir/mfex_fuzzy.py test_traffic.pcap 2000], [], [stdout])
+
+dnl Add userspace bridge and attach it to OVS
+AT_CHECK([ovs-vsctl add-port br0 p1 -- set Interface p1 type=dpdk options:dpdk-devargs=net_pcap1,rx_pcap=test_traffic.pcap,infinite_rx=1], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+
+AT_CHECK([ovs-appctl dpif-netdev/dpif-impl-set dpif_avx512], [0], [dnl
+DPIF implementation set to dpif_avx512.
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set autovalidator], [0], [dnl
+Miniflow extract implementation set to autovalidator.
+])
+
+OVS_WAIT_UNTIL([test `ovs-vsctl get interface p1 statistics | grep -oP 'rx_packets=\s*\K\d+'` -ge 16000])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br0 p1], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("[SYSTEM_DPDK_ALLOWED_LOGS]")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+dnl --------------------------------------------------------------------------
+dnl MFEX Autovalidator Fuzzy
+AT_SETUP([OVS-DPDK - MFEX Autovalidator Fuzzy])
+AT_KEYWORDS([dpdk])
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START()
+AT_CHECK([ovs-vsctl add-br br0 -- set bridge br0 datapath_type=netdev])
+AT_SKIP_IF([! ovs-appctl dpif-netdev/miniflow-parser-get | sed 1,4d | grep "True"], [], [dnl
+])
+
+AT_SKIP_IF([! $PYTHON3 -c "import scapy"], [], [])
+AT_CHECK([$PYTHON3 $srcdir/mfex_fuzzy.py fuzzy.pcap 2000 fuzzy], [], [stdout])
+
+dnl Add userspace bridge and attach it to OVS
+AT_CHECK([ovs-vsctl add-port br0 p1 -- set Interface p1 type=dpdk options:dpdk-devargs=net_pcap1,rx_pcap=fuzzy.pcap,infinite_rx=1], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+
+AT_CHECK([ovs-appctl dpif-netdev/dpif-impl-set dpif_avx512], [0], [dnl
+DPIF implementation set to dpif_avx512.
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set autovalidator], [0], [dnl
+Miniflow extract implementation set to autovalidator.
+])
+
+OVS_WAIT_UNTIL([test `ovs-vsctl get interface p1 statistics | grep -oP 'rx_packets=\s*\K\d+'` -ge 16000])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br0 p1], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@upcall: datapath reached the dynamic limit of .* flows.@d
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------
+
+dnl --------------------------------------------------------------------------
+AT_SETUP([OVS-DPDK - MFEX Configuration])
+AT_KEYWORDS([dpdk])
+OVS_DPDK_PRE_CHECK()
+AT_SKIP_IF([! $PYTHON3 -c "import scapy"], [], [])
+AT_CHECK([$PYTHON3 $srcdir/mfex_fuzzy.py test_traffic.pcap 1], [], [stdout])
+OVS_DPDK_START()
+AT_CHECK([ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask=0x1])
+dnl Add userspace bridge and attach it to OVS
+AT_CHECK([ovs-vsctl add-br br0 -- set bridge br0 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br0 p1 -- set Interface p1 type=dpdk options:dpdk-devargs=net_pcap1,rx_pcap=test_traffic.pcap,infinite_rx=1], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set scalar 1], [2],
+[], [dnl
+Error: unknown argument 1.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd 6 study 300 xyz], [2],
+[], [dnl
+Error: invalid study_pkt_cnt value: xyz.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set scalar abcd], [2],
+[], [dnl
+Error: unknown argument abcd.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd 0 scalar abcd], [2],
+[], [dnl
+Error: unknown argument abcd.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd], [2],
+[], [dnl
+Error: -pmd option requires a thread id argument.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set tudy abcd], [2],
+[], [dnl
+Error: unknown argument abcd.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd 7 study abcd], [2],
+[], [dnl
+Error: invalid study_pkt_cnt value: abcd.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd 0 study], [0], [dnl
+Miniflow extract implementation set to study, on pmd thread 0, studying 128 packets.
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd 0 study 512], [0], [dnl
+Miniflow extract implementation set to study, on pmd thread 0, studying 512 packets.
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set study 512], [0], [dnl
+Miniflow extract implementation set to study, studying 512 packets.
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set study], [0], [dnl
+Miniflow extract implementation set to study, studying 128 packets.
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd 0 autovalidator], [0], [dnl
+Miniflow extract implementation set to autovalidator, on pmd thread 0.
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd zero study], [2],
+[], [dnl
+Error: miniflow extract parser not changed, PMD thread passed is not valid: 'zero'. Pass a valid pmd thread ID.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd 1], [2],
+[], [dnl
+Error: no miniflow extract name provided. Output of miniflow-parser-get shows implementation list.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd 1 superstudy], [2],
+[], [dnl
+Error: unknown miniflow extract implementation superstudy.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set superstudy], [2],
+[], [dnl
+Error: unknown miniflow extract implementation superstudy.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+AT_CHECK([ovs-appctl dpif-netdev/miniflow-parser-set -pmd 1 study -pmd], [2],
+[], [dnl
+Error: invalid study_pkt_cnt value: -pmd.
+ovs-appctl: ovs-vswitchd: server returned an error
+])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br0 p1], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+\@Error: unknown argument 1.@d
+\@Error: invalid study_pkt_cnt value: xyz.@d
+\@Error: unknown argument abcd.@d
+\@Error: -pmd option requires a thread id argument.@d
+\@Error: invalid study_pkt_cnt value: abcd.@d
+\@Error: miniflow extract parser not changed, PMD thread passed is not valid: 'zero'. Pass a valid pmd thread ID.@d
+\@Error: no miniflow extract name provided. Output of miniflow-parser-get shows implementation list.@d
+\@Error: unknown miniflow extract implementation superstudy.@d
+\@Error: invalid study_pkt_cnt value: -pmd.@d
+])")
+AT_CLEANUP dnl
+dnl --------------------------------------------------------------------------
+
+dnl --------------------------------------------------------------------------
+dnl Setup user configured mempools
+AT_SETUP([OVS-DPDK - user configured mempool])
+AT_KEYWORDS([dpdk])
+OVS_DPDK_PRE_CHECK()
+OVS_DPDK_START_OVSDB()
+OVS_DPDK_START_VSWITCHD()
+
+AT_CHECK([ovs-vsctl --no-wait set Open_vSwitch . other_config:shared-mempool-config=8000,6000,1500])
+AT_CHECK([ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-init=true])
+
+CHECK_MEMPOOL_PARAM([8000], [ALL], [])
+CHECK_MEMPOOL_PARAM([6000], [ALL], [])
+CHECK_MEMPOOL_PARAM([1500], [ALL], [])
+
+AT_CHECK(ovs-appctl vlog/set netdev_dpdk:dbg)
+
+dnl Add userspace bridge and a dpdk port
+AT_CHECK([ovs-vsctl add-br br10 -- set bridge br10 datapath_type=netdev])
+AT_CHECK([ovs-vsctl add-port br10 p1 -- set Interface p1 type=dpdk options:dpdk-devargs=net_null0,no-rx=1], [], [stdout], [stderr])
+AT_CHECK([ovs-vsctl show], [], [stdout])
+sleep 2
+
+dnl Check if the right user configured mempool is found for default MTU (1500)
+AT_CHECK([grep "Found user configured shared mempool .* suitable for port with MTU 1500" ovs-vswitchd.log], [], [stdout])
+AT_CHECK([grep "Port p1: Requesting a mempool" ovs-vswitchd.log], [], [stdout])
+
+dnl Change the MTU value to 7000 to trigger mempool change
+TMP=$(($(cat ovs-vswitchd.log | wc -l | tr -d [[:blank:]])+1))
+AT_CHECK(ovs-vsctl set Interface p1 mtu_request=7000)
+OVS_WAIT_UNTIL([tail -n +$TMP ovs-vswitchd.log | grep "Found user configured shared mempool .* suitable for port with MTU 7000"])
+OVS_WAIT_UNTIL([tail -n +$TMP ovs-vswitchd.log | grep "Port p1: Requesting a mempool"])
+
+dnl Change back the MTU value to 1500 to trigger mempool change (re-use)
+TMP=$(($(cat ovs-vswitchd.log | wc -l | tr -d [[:blank:]])+1))
+AT_CHECK(ovs-vsctl set Interface p1 mtu_request=1500)
+OVS_WAIT_UNTIL([tail -n +$TMP ovs-vswitchd.log | grep "Found user configured shared mempool .* suitable for port with MTU 1500"])
+OVS_WAIT_UNTIL([tail -n +$TMP ovs-vswitchd.log | grep "Reusing mempool"])
+
+dnl Change the MTU value beyond the max value in shared-mempool-config list
+TMP=$(($(cat ovs-vswitchd.log | wc -l | tr -d [[:blank:]])+1))
+AT_CHECK(ovs-vsctl set Interface p1 mtu_request=9000)
+OVS_WAIT_UNTIL([tail -n +$TMP ovs-vswitchd.log | grep "No user configured shared mempool mbuf sizes found suitable for port with MTU 9000"])
+OVS_WAIT_UNTIL([tail -n +$TMP ovs-vswitchd.log | grep "Port p1: Requesting a mempool"])
+
+dnl Clean up
+AT_CHECK([ovs-vsctl del-port br10 p1], [], [stdout], [stderr])
+OVS_VSWITCHD_STOP("m4_join([], [SYSTEM_DPDK_ALLOWED_LOGS], [
+])")
+AT_CLEANUP
+dnl --------------------------------------------------------------------------

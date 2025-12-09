@@ -1,0 +1,260 @@
+# -*- shell-script -*-
+HAVE_OPENSSL='@HAVE_OPENSSL@'
+OPENSSL_SUPPORTS_SNI='@OPENSSL_SUPPORTS_SNI@'
+HAVE_UNBOUND='@HAVE_UNBOUND@'
+EGREP='@EGREP@'
+PYTHON3='@PYTHON3@'
+CFLAGS='@CFLAGS@'
+
+# PYTHONCOERCECLOCALE=0 disables the Unicode compatibility warning on
+# stderr that breaks almost any Python3 test (PEP 0538)
+PYTHONCOERCECLOCALE=0
+export PYTHONCOERCECLOCALE
+
+PYTHONPATH=$abs_top_srcdir/python:$abs_top_builddir/tests:$PYTHONPATH
+export PYTHONPATH
+
+PYTHONIOENCODING=utf_8
+export PYTHONIOENCODING
+
+# PYTHONDONTWRITEBYTECODE=yes keeps Python from creating .pyc and .pyo
+# files.  Creating .py[co] works OK for any given version of Open
+# vSwitch, but it causes trouble if you switch from a version with
+# foo/__init__.py into an (older) version with plain foo.py, since
+# foo/__init__.pyc will cause Python to ignore foo.py.
+PYTHONDONTWRITEBYTECODE=yes
+export PYTHONDONTWRITEBYTECODE
+
+# Test whether the current working directory name is all ASCII
+# characters.  Some Python code doesn't tolerate non-ASCII characters
+# in filenames very well, so if the current working directory is
+# non-ASCII then we skip the tests that run those programs.
+#
+# This would be just papering over a real problem, except that the
+# tests that we skip are launched from initscripts and thus normally
+# run in system directories with ASCII names.  (This problem only came
+# up at all because the Debian autobuilders do build in a top-level
+# directory named /«BUILDDIR».)
+case `pwd | tr -d ' -~'` in
+    '') non_ascii_cwd=false ;;
+    *) non_ascii_cwd=true
+esac
+
+# Enable malloc debugging features.
+case `uname` in
+Linux)
+    MALLOC_PERTURB_=165; export MALLOC_PERTURB_
+    MALLOC_CHECK_=2; export MALLOC_CHECK_
+    ;;
+FreeBSD)
+    case `uname -r` in
+    [789].*)
+        MALLOC_CONF=AJ
+        ;;
+    1[01].*)
+        MALLOC_CONF=abort:true,junk:true,redzone:true
+        ;;
+    *)
+        MALLOC_CONF=abort:true,junk:true
+        ;;
+    esac
+    export MALLOC_CONF
+esac
+
+# The name of loopback interface 
+case `uname` in
+Linux)
+    LOOPBACK_INTERFACE=lo
+    ;;
+FreeBSD|NetBSD)
+    LOOPBACK_INTERFACE=lo0
+    ;;
+esac
+
+# Check for platform.
+case `uname` in
+MINGW*|MSYS*)
+    IS_WIN32="yes"
+    IS_BSD="no"
+    ;;
+FreeBSD|NetBSD)
+    IS_WIN32="no"
+    IS_BSD="yes"
+    ;;
+*)
+    IS_WIN32="no"
+    IS_BSD="no"
+    ;;
+esac
+
+if test "$IS_WIN32" = yes; then
+    # enables legacy windows unicode printing needed for Python3 compatibility
+    # with the Python2 tests
+    PYTHONLEGACYWINDOWSFSENCODING=true
+    export PYTHONLEGACYWINDOWSFSENCODING
+    PYTHONLEGACYWINDOWSSTDIO=true
+    export PYTHONLEGACYWINDOWSSTDIO
+fi
+
+# Check for CPU architecture
+case `uname -m` in
+aarch64)
+    IS_ARM64="yes"
+    ;;
+*)
+    IS_ARM64="no"
+    ;;
+esac
+
+# Check whether to run IPv6 tests.
+$PYTHON3 -c '
+import errno
+import socket
+import sys
+try:
+    socket.socket(family=socket.AF_INET6).bind(("::1", 0, 0, 0))
+except socket.error as e:
+    if e.errno == errno.EAFNOSUPPORT or errno.EADDRNOTAVAIL:
+        sys.exit(2)
+    raise
+'
+case $? in
+    0) HAVE_IPV6=yes ;;
+    2) HAVE_IPV6=no ;;
+    *) echo "$0: unexpected error probing $PYTHON3 for IPv6 support" >&2 ;;
+esac
+
+# Look for a python L7 library 'LIB' in the system. If it is found, defines
+# HAVE_LIB="yes", otherwise HAVE_LIB="no"
+find_l7_lib()
+{
+    set +x
+    var=HAVE_`echo "$1" | tr '[a-z]' '[A-Z]'`
+    result=$($PYTHON3 $abs_top_srcdir/tests/test-l7.py --help | grep "$1")
+    if test "x${result}" != x; then
+        eval ${var}="yes"
+    else
+        eval ${var}="no"
+    fi
+}
+
+# HAVE_FTP
+find_l7_lib ftp
+# HAVE_TFTP
+find_l7_lib tftp
+
+# Look for a commnand in the system. If it is found, defines
+# HAVE_COMMAND="yes", otherwise HAVE_COMMAND="no".
+find_command()
+{
+    which $1 > /dev/null 2>&1
+    status=$?
+    var=HAVE_`echo "$1" | tr '[a-z]' '[A-Z]'`
+    if test "$status" = "0"; then
+        eval ${var}="yes"
+    else
+        eval ${var}="no"
+    fi
+}
+
+# Set HAVE_NC
+find_command nc
+
+# Determine correct netcat option to quit on stdin EOF
+if nc --version 2>&1 | grep -q nmap.org; then
+    # Nmap netcat
+    NC_EOF_OPT="--send-only -w 5"
+else
+    # BSD netcat
+    NC_EOF_OPT="-q 1 -w 5"
+fi
+
+# Set HAVE_TC
+find_command tc
+
+# When HAVE_TC=yes, check if the current tc supports adding pps filter
+SUPPORT_TC_INGRESS_PPS="no"
+if test $HAVE_TC="yes"; then
+    ip link add veth0 type veth peer name veth1
+    tc qdisc add dev veth0 handle ffff: ingress
+    if tc filter add dev veth0 parent ffff: u32 match u32 0 0 police pkts_rate 100 pkts_burst 10; then
+        SUPPORT_TC_INGRESS_PPS="yes"
+    fi
+    ip link del veth0
+fi
+
+# Set HAVE_TCPDUMP
+find_command tcpdump
+
+# Set HAVE_LFTP
+find_command lftp
+
+CURL_OPT="-g -v --max-time 1 --retry 2 --retry-delay 1 --connect-timeout 1"
+
+# Determine whether "diff" supports "normal" diffs.  (busybox diff does not.)
+if echo xyzzy | diff /dev/null - | grep '^>' >/dev/null; then
+    DIFF_SUPPORTS_NORMAL_FORMAT=yes
+else
+    DIFF_SUPPORTS_NORMAL_FORMAT=no
+fi
+
+# Check whether UB Sanitizer is being used.
+case "$CFLAGS" in
+*fsanitize=undefined*)
+    TESTS_WITH_UBSAN=yes
+    ;;
+*)
+    TESTS_WITH_UBSAN=no
+    ;;
+esac
+
+# Turn off proxies.
+unset http_proxy
+unset https_proxy
+unset ftp_proxy
+unset no_proxy
+unset HTTP_PROXY
+unset HTTPS_PROXY
+unset FTP_PROXY
+unset NO_PROXY
+
+# Prevent logging to syslog during tests.
+OVS_SYSLOG_METHOD=null
+export OVS_SYSLOG_METHOD
+
+# Set default timeout for control utils
+OVS_CTL_TIMEOUT=30
+export OVS_CTL_TIMEOUT
+
+# Add some default flags to make the tests run better under Address
+# Sanitizer, if it was used for the build.
+#
+# We disable leak detection because otherwise minor leaks that don't
+# matter break everything.
+ASAN_OPTIONS=detect_leaks=0:abort_on_error=true:log_path=asan:$ASAN_OPTIONS
+export ASAN_OPTIONS
+
+# Add some default flags for UndefinedBehaviorSanitizer, if it was used
+# for the build.
+UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=true:log_path=ubsan:$UBSAN_OPTIONS
+export UBSAN_OPTIONS
+
+# Check whether Python test requirements are available.
+REQUIREMENT_PATH=$abs_top_srcdir/python/test_requirements.txt $PYTHON3 -c '
+import os
+import pathlib
+import pkg_resources
+import sys
+
+with pathlib.Path(os.path.join(os.getenv("REQUIREMENT_PATH"))).open() as reqs:
+    for req in pkg_resources.parse_requirements(reqs):
+        try:
+            pkg_resources.require(str(req))
+        except pkg_resources.DistributionNotFound:
+            sys.exit(2)
+'
+case $? in
+    0) HAVE_PYTEST=yes ;;
+    2) HAVE_PYTEST=no ;;
+    *) echo "$0: unexpected error probing Python unit test requirements" >&2 ;;
+esac

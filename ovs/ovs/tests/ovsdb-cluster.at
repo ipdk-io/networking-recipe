@@ -1,0 +1,939 @@
+OVS_START_SHELL_HELPERS
+# ovsdb_check_cluster N_SERVERS SCHEMA_FUNC OUTPUT USE_LOCAL_CONFIG TRANSACTION...
+ovsdb_check_cluster () {
+    set -x
+    local n=$1 schema_func=$2 output=$3 local_config=$4
+    shift; shift; shift; shift
+
+    $schema_func > schema
+    schema=`ovsdb-tool schema-name schema`
+    AT_CHECK([ovsdb-tool '-vPATTERN:console:%c|%p|%m' create-cluster s1.db schema unix:s1.raft], [0], [], [stderr])
+    if test X$local_config == X"yes"; then
+        for i in `seq $n`; do
+            AT_CHECK([ovsdb-tool create c$i.db $top_srcdir/ovsdb/local-config.ovsschema], [0], [], [stderr])
+            local ctxn="[[\"Local_Config\",
+                         {\"op\": \"insert\", \"table\": \"Config\",
+                          \"row\": {\"connections\": [\"named-uuid\",\"conn$n\"]}},
+                         {\"op\": \"insert\", \"table\": \"Connection\", \"uuid-name\": \"conn$n\",
+                          \"row\": {\"target\": \"punix:s$i.ovsdb\"}}]]"
+
+            AT_CHECK([ovsdb-tool transact c$i.db "$ctxn"], [0], [ignore], [stderr])
+        done
+    fi
+    AT_CHECK([grep -v 'from ephemeral to persistent' stderr], [1])
+    cid=`ovsdb-tool db-cid s1.db`
+    for i in `seq 2 $n`; do
+        AT_CHECK([ovsdb-tool join-cluster s$i.db $schema unix:s$i.raft unix:s1.raft])
+    done
+
+    on_exit 'kill `cat *.pid`'
+    for i in `seq $n`; do
+        local remote=punix:s$i.ovsdb
+        local config_db=
+        if test X$local_config == X"yes"; then
+            remote=db:Local_Config,Config,connections
+            config_db=c$i.db
+        fi
+        AT_CHECK([ovsdb-server -vraft -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=$remote s$i.db $config_db])
+    done
+    for i in `seq $n`; do
+        AT_CHECK([ovsdb_client_wait unix:s$i.ovsdb $schema connected])
+    done
+
+    for txn
+    do
+      AT_CHECK([ovsdb-client -vjsonrpc -vconsole:off -vsyslog:off -vvlog:off --log-file transact unix:s1.ovsdb,unix:s2.ovsdb,unix:s3.ovsdb "$txn"], [0], [stdout])
+      cat stdout >> output
+    done
+    AT_CHECK_UNQUOTED([uuidfilt output], [0], [$output])
+    for i in `seq $n`; do
+        OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+    done
+
+    AT_CHECK([ovsdb-tool check-cluster s*.db])
+}
+OVS_END_SHELL_HELPERS
+
+# Test a 1-server cluster.
+AT_BANNER([OVSDB - clustered transactions (1 server)])
+m4_define([OVSDB_CHECK_EXECUTION],
+  [AT_SETUP([$1 - cluster of 1])
+   AT_KEYWORDS([ovsdb server positive unix cluster cluster1 $5])
+   ovsdb_check_cluster 1 "$2" '$4' no m4_foreach([txn], [$3], ['txn' ])
+   AT_CLEANUP])
+EXECUTION_EXAMPLES
+
+# Test a 3-server cluster.
+AT_BANNER([OVSDB - clustered transactions (3 servers)])
+m4_define([OVSDB_CHECK_EXECUTION],
+  [AT_SETUP([$1 - cluster of 3])
+   AT_KEYWORDS([ovsdb server positive unix cluster cluster3 $5])
+   ovsdb_check_cluster 3 "$2" '$4' no m4_foreach([txn], [$3], ['txn' ])
+   AT_CLEANUP])
+EXECUTION_EXAMPLES
+
+# Test a 5-server cluster.
+AT_BANNER([OVSDB - clustered transactions (5 servers)])
+m4_define([OVSDB_CHECK_EXECUTION],
+  [AT_SETUP([$1 - cluster of 5])
+   AT_KEYWORDS([ovsdb server positive unix cluster cluster5 $5])
+   ovsdb_check_cluster 5 "$2" '$4' no m4_foreach([txn], [$3], ['txn' ])
+   AT_CLEANUP])
+EXECUTION_EXAMPLES
+
+# Test a 3-server cluster using a Local_Config db.
+AT_BANNER([OVSDB - clustered transactions Local_Config (3 servers)])
+m4_define([OVSDB_CHECK_EXECUTION],
+  [AT_SETUP([$1 - cluster of 3])
+   AT_KEYWORDS([ovsdb server positive unix cluster cluster3 Local_Config $5])
+   ovsdb_check_cluster 3 "$2" '$4' yes m4_foreach([txn], [$3], ['txn' ])
+   AT_CLEANUP])
+EXECUTION_EXAMPLES
+
+
+AT_BANNER([OVSDB - disconnect from cluster])
+
+OVS_START_SHELL_HELPERS
+# ovsdb_test_cluster_disconnect N_SERVERS LEADER_OR_FOLLOWER [CHECK_FLAPPING]
+# Test server disconnected from the cluster.
+# N_SERVERS: Number of servers in the cluster.
+# LEADER_OR_FOLLOWER: The role of the server that is disconnected from the
+#                     cluster: "leader" or "follower".
+# CHECK_FLAPPING: Whether to check if is_disconnected flapped. "yes", "no".
+ovsdb_test_cluster_disconnect () {
+    n=$1
+    leader_or_follower=$2
+    check_flapping=$3
+    schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+    ordinal_schema > schema
+    AT_CHECK([ovsdb-tool '-vPATTERN:console:%c|%p|%m' create-cluster s1.db $abs_srcdir/idltest.ovsschema unix:s1.raft], [0], [], [stderr])
+    cid=`ovsdb-tool db-cid s1.db`
+    schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+    for i in `seq 2 $n`; do
+        AT_CHECK([ovsdb-tool join-cluster s$i.db $schema_name unix:s$i.raft unix:s1.raft])
+    done
+
+    on_exit 'kill `cat *.pid`'
+    for i in `seq $n`; do
+        AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+    done
+    for i in `seq $n`; do
+        AT_CHECK([ovsdb_client_wait unix:s$i.ovsdb $schema_name connected])
+    done
+
+    AT_CHECK([ovsdb-client transact unix:s1.ovsdb '[["idltest",
+          {"op": "insert",
+           "table": "simple",
+           "row": {"i": 1}}]]'], [0], [ignore], [ignore])
+
+    # When a node is disconnected from the cluster, the IDL should disconnect
+    # and retry even if it uses a single remote, because the remote IP can be
+    # a VIP on a load-balance. So we use single remote to test here.
+    if test $leader_or_follower == "leader"; then
+        target=1
+        shutdown=`seq $(($n/2 + 1)) $n`
+        cleanup=`seq $(($n/2))`
+    else
+        target=$n
+
+        # shutdown followers before the leader (s1) so that there is no chance for
+        # s$n to become leader during the process.
+        shutdown="`seq 2 $(($n/2 + 1))` 1"
+        cleanup=`seq $(($n/2 + 2)) $n`
+    fi
+    echo shutdown=$shutdown
+    echo cleanup=$cleanup
+
+    # Connect to $target.  Use "wait" to trigger a non-op transaction so
+    # that test-ovsdb will not quit.
+
+    txn='[["idltest",
+          {"op": "wait",
+           "table": "simple",
+           "where": [["i", "==", 1]],
+           "columns": ["i"],
+           "until": "==",
+           "rows": [{"i": 1}]}]]'
+
+    test-ovsdb '-vPATTERN:console:test-ovsdb|%c|%m' -v -t10 idl \
+               unix:s$target.ovsdb "$txn" > test-ovsdb.log 2>&1 &
+    echo $! > test-ovsdb.pid
+
+    OVS_WAIT_UNTIL([grep "000: table simple: i=1" test-ovsdb.log])
+
+    $PYTHON3 $srcdir/test-ovsdb.py -t10 idl $abs_srcdir/idltest.ovsschema \
+               unix:s$target.ovsdb "$txn" > test-ovsdb-py.log 2>&1 &
+    echo $! > test-ovsdb-py.pid
+
+    OVS_WAIT_UNTIL([grep "000: table simple: i=1" test-ovsdb-py.log])
+
+    # Start collecting raft_is_connected logs for $target before shutting down
+    # any servers.
+    tail -f s$target.log > raft_is_connected.log &
+    echo $! > tail.pid
+
+    # Shutdown the other servers so that $target is disconnected from the cluster.
+    for i in $shutdown; do
+        OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+    done
+
+    # The test-ovsdb should detect the disconnect and retry.
+    OVS_WAIT_UNTIL([grep disconnect test-ovsdb.log])
+    OVS_WAIT_UNTIL([grep disconnect test-ovsdb-py.log])
+
+    # The $target debug log should show raft_is_connected: false.
+    OVS_WAIT_UNTIL([grep "raft_is_connected: false" raft_is_connected.log])
+
+    # Save the current count of "raft_is_connected: true"
+    count_old=`grep "raft_is_connected: true" raft_is_connected.log | wc -l`
+    echo count_old $count_old
+
+    if test X$check_flapping == X"yes"; then
+        sleep 10
+    fi
+    # Make sure raft_is_connected didn't flap from false to true.
+    count_new=`grep "raft_is_connected: true" raft_is_connected.log | wc -l`
+    echo count_new $count_new
+    AT_CHECK([test $count_new == $count_old])
+
+    for i in $cleanup; do
+        OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+    done
+}
+OVS_END_SHELL_HELPERS
+
+AT_SETUP([OVSDB cluster - follower disconnect from cluster, single remote])
+AT_KEYWORDS([ovsdb server negative unix cluster disconnect])
+ovsdb_test_cluster_disconnect 3 follower
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - leader disconnect from cluster, single remote])
+AT_KEYWORDS([ovsdb server negative unix cluster disconnect])
+ovsdb_test_cluster_disconnect 3 leader
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - leader disconnect from cluster, check flapping])
+AT_KEYWORDS([ovsdb server negative unix cluster disconnect])
+ovsdb_test_cluster_disconnect 5 leader yes
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - initial status should be disconnected])
+AT_KEYWORDS([ovsdb server negative unix cluster disconnect])
+
+n=3
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+ordinal_schema > schema
+AT_CHECK([ovsdb-tool '-vPATTERN:console:%c|%p|%m' create-cluster s1.db $abs_srcdir/idltest.ovsschema unix:s1.raft], [0], [], [stderr])
+cid=`ovsdb-tool db-cid s1.db`
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+for i in `seq 2 $n`; do
+    AT_CHECK([ovsdb-tool join-cluster s$i.db $schema_name unix:s$i.raft unix:s1.raft])
+done
+
+on_exit 'kill `cat *.pid`'
+for i in `seq $n`; do
+    AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+done
+for i in `seq $n`; do
+    AT_CHECK([ovsdb_client_wait unix:s$i.ovsdb $schema_name connected])
+done
+
+# Stop all servers, and start the s1 only, to test initial connection status
+# when there is no leader yet.
+for i in `seq 1 $n`; do
+    OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+done
+i=1
+AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+
+# The initial status should be disconnected. So wait should fail.
+AT_CHECK([ovsdb_client_wait --timeout=1 unix:s$i.ovsdb $schema_name connected], [142], [ignore], [ignore])
+OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+
+AT_CLEANUP
+
+
+
+AT_BANNER([OVSDB cluster election timer change])
+
+AT_SETUP([OVSDB cluster - election timer change])
+AT_KEYWORDS([ovsdb server positive unix cluster timer])
+
+n=3
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+ordinal_schema > schema
+AT_CHECK([ovsdb-tool '-vPATTERN:console:%c|%p|%m' create-cluster s1.db $abs_srcdir/idltest.ovsschema unix:s1.raft], [0], [], [stderr])
+cid=`ovsdb-tool db-cid s1.db`
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+for i in `seq 2 $n`; do
+    AT_CHECK([ovsdb-tool join-cluster s$i.db $schema_name unix:s$i.raft unix:s1.raft])
+done
+
+on_exit 'kill `cat *.pid`'
+for i in `seq $n`; do
+    AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+done
+for i in `seq $n`; do
+    AT_CHECK([ovsdb_client_wait unix:s$i.ovsdb $schema_name connected])
+done
+
+# Change not allowed through follower.
+AT_CHECK([ovs-appctl -t "`pwd`"/s2 cluster/change-election-timer $schema_name 2000], [2], [], [ignore])
+
+# Timer cannot be changed to bigger than 2x the original value.
+AT_CHECK([ovs-appctl -t "`pwd`"/s1 cluster/change-election-timer $schema_name 4000], [2], [], [ignore])
+
+AT_CHECK([ovs-appctl -t "`pwd`"/s1 cluster/change-election-timer $schema_name 2000], [0], [dnl
+change of election timer initiated.
+], [])
+OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s1 cluster/status $schema_name | grep "Election timer: 2000"])
+OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s2 cluster/status $schema_name | grep "Election timer: 2000"])
+
+AT_CHECK([ovs-appctl -t "`pwd`"/s1 cluster/change-election-timer $schema_name 4000], [0], [dnl
+change of election timer initiated.
+], [])
+OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s1 cluster/status $schema_name | grep "Election timer: 4000"])
+OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s2 cluster/status $schema_name | grep "Election timer: 4000"])
+
+# Latest timer should be used after restart
+for i in `seq $n`; do
+    printf "\ns$i: stopping\n"
+    OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+done
+for i in `seq $n`; do
+    AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+done
+OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s1 cluster/status $schema_name | grep "Election timer: 4000"])
+OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s2 cluster/status $schema_name | grep "Election timer: 4000"])
+
+# Wait until cluster is ready
+for i in `seq $n`; do
+    OVS_WAIT_WHILE([ovs-appctl -t "`pwd`"/s$i cluster/status $schema_name | grep "Leader: unknown"])
+done
+
+# Latest timer should be restored after DB compact and restart.
+# This is to test the install_snapshot RPC.
+
+# Compact online
+for i in `seq $n`; do
+    AT_CHECK([ovs-appctl -t "`pwd`"/s$i ovsdb-server/compact])
+done
+
+for i in `seq $n`; do
+    printf "\ns$i: stopping\n"
+    OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+done
+for i in `seq $n`; do
+    AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+done
+for i in `seq $n`; do
+    OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s$i cluster/status $schema_name | grep "Election timer: 4000"])
+done
+
+# Wait until cluster is ready
+for i in `seq $n`; do
+    OVS_WAIT_WHILE([ovs-appctl -t "`pwd`"/s$i cluster/status $schema_name | grep "Leader: unknown"])
+done
+
+# Newly joined member should use latest timer value
+AT_CHECK([ovsdb-tool join-cluster s4.db $schema_name unix:s4.raft unix:s1.raft])
+AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s4.log --pidfile=s4.pid --unixctl=s4 --remote=punix:s4.ovsdb s4.db])
+OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s4 cluster/status $schema_name | grep "Election timer: 4000"])
+# for i in `seq 10`; do
+#     ovs-appctl -t "`pwd`"/s4 cluster/status $schema_name
+#     sleep 1
+# done
+
+AT_CLEANUP
+
+
+AT_BANNER([OVSDB cluster install snapshot RPC])
+
+AT_SETUP([OVSDB cluster - install snapshot RPC])
+AT_KEYWORDS([ovsdb server positive unix cluster snapshot])
+
+n=3
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+ordinal_schema > schema
+AT_CHECK([ovsdb-tool '-vPATTERN:console:%c|%p|%m' create-cluster s1.db $abs_srcdir/idltest.ovsschema unix:s1.raft], [0], [], [stderr])
+cid=`ovsdb-tool db-cid s1.db`
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+for i in `seq 2 $n`; do
+    AT_CHECK([ovsdb-tool join-cluster s$i.db $schema_name unix:s$i.raft unix:s1.raft])
+done
+
+on_exit 'kill `cat *.pid`'
+for i in `seq $n`; do
+    AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+done
+for i in `seq $n`; do
+    AT_CHECK([ovsdb_client_wait unix:s$i.ovsdb $schema_name connected])
+done
+
+AT_CHECK([ovsdb-client transact unix:s1.ovsdb '[["idltest",
+      {"op": "insert",
+       "table": "indexed",
+       "row": {"i": 0}}]]'], [0], [ignore], [ignore])
+
+# Kill one follower (s2) and write some data to cluster, so that the follower is falling behind
+printf "\ns2: stopping\n"
+OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s2], [s2.pid])
+
+# Delete "i":0 and readd it to get a different UUID for it.
+AT_CHECK([ovsdb-client transact unix:s1.ovsdb '[["idltest",
+      {"op": "delete",
+       "table": "indexed",
+       "where": [["i", "==", 0]]}]]'], [0], [ignore], [ignore])
+
+AT_CHECK([ovsdb-client transact unix:s1.ovsdb '[["idltest",
+      {"op": "insert",
+       "table": "indexed",
+       "row": {"i": 0}}]]'], [0], [ignore], [ignore])
+
+AT_CHECK([ovsdb-client transact unix:s1.ovsdb '[["idltest",
+      {"op": "insert",
+       "table": "indexed",
+       "row": {"i": 1}}]]'], [0], [ignore], [ignore])
+
+# Compact leader online to generate snapshot
+AT_CHECK([ovs-appctl -t "`pwd`"/s1 ovsdb-server/compact])
+
+# Start the follower s2 again.
+AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s2.log --pidfile=s2.pid --unixctl=s2 --remote=punix:s2.ovsdb s2.db])
+AT_CHECK([ovsdb_client_wait unix:s2.ovsdb $schema_name connected])
+
+# A client transaction through s2. During this transaction, there will be a
+# install_snapshot RPC because s2 detects it is behind and s1 doesn't have the
+# pre_log_index requested by s2 because it is already compacted.
+# After the install_snapshot RPC process, the transaction through s2 should
+# succeed.
+AT_CHECK([ovsdb-client transact unix:s2.ovsdb '[["idltest",
+      {"op": "insert",
+       "table": "indexed",
+       "row": {"i": 2}}]]'], [0], [ignore], [ignore])
+
+# The snapshot should overwrite the in-memory contents of the DB on S2
+# without generating any constraint violations. All tree records (0, 1, 2)
+# should be in the DB at this point.
+AT_CHECK([ovsdb-client --no-headings dump unix:s2.ovsdb idltest indexed | uuidfilt | sort -k 2], [0], [dnl
+<0> 0
+<1> 1
+<2> 2
+indexed table
+])
+
+for i in `seq $n`; do
+    OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+done
+
+AT_CLEANUP
+
+AT_BANNER([OVSDB - cluster failure while joining])
+AT_SETUP([OVSDB cluster - follower crash while joining])
+AT_KEYWORDS([ovsdb server negative unix cluster join])
+
+n=3
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+ordinal_schema > schema
+AT_CHECK([ovsdb-tool '-vPATTERN:console:%c|%p|%m' create-cluster s1.db dnl
+              $abs_srcdir/idltest.ovsschema unix:s1.raft], [0], [], [stderr])
+cid=`ovsdb-tool db-cid s1.db`
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+for i in `seq 2 $n`; do
+    AT_CHECK([ovsdb-tool join-cluster s$i.db $schema_name unix:s$i.raft unix:s1.raft])
+done
+
+on_exit 'kill `cat *.pid`'
+
+dnl Starting followers first, so we can configure them to crash on join.
+for j in `seq $n`; do
+    i=$(($n + 1 - $j))
+    AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off dnl
+                           --detach --no-chdir --log-file=s$i.log dnl
+                           --pidfile=s$i.pid --unixctl=s$i dnl
+                           --remote=punix:s$i.ovsdb s$i.db])
+    if test $i != 1; then
+        OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s$i dnl
+                            cluster/failure-test crash-before-sending-install-snapshot-reply dnl
+                            | grep -q "engaged"])
+    fi
+done
+
+dnl Make sure that followers really crashed.
+for i in `seq 2 $n`; do
+    OVS_WAIT_WHILE([test -s s$i.pid])
+done
+
+dnl Bring them back.
+for i in `seq 2 $n`; do
+    AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off dnl
+                           --detach --no-chdir --log-file=s$i.log dnl
+                           --pidfile=s$i.pid --unixctl=s$i dnl
+                           --remote=punix:s$i.ovsdb s$i.db])
+done
+
+dnl Make sure that all servers joined the cluster.
+for i in `seq $n`; do
+    AT_CHECK([ovsdb_client_wait unix:s$i.ovsdb $schema_name connected])
+done
+
+for i in `seq $n`; do
+    OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+done
+
+AT_CLEANUP
+
+
+
+OVS_START_SHELL_HELPERS
+# ovsdb_cluster_failure_test SCHEMA_FUNC OUTPUT TRANSACTION...
+ovsdb_cluster_failure_test () {
+    # Initial state: s1 is leader, s2 and s3 are followers
+    remote_1=$1
+    remote_2=$2
+    crash_node=$3
+    crash_command=$4
+    if test "$crash_node" == "1"; then
+        new_leader=$5
+    fi
+    log_grep=$6
+
+    cp $top_srcdir/vswitchd/vswitch.ovsschema schema
+    schema=`ovsdb-tool schema-name schema`
+    AT_CHECK([ovsdb-tool '-vPATTERN:console:%c|%p|%m' create-cluster s1.db schema unix:s1.raft], [0], [], [stderr])
+    AT_CHECK([sed < stderr "/ovsdb|WARN|schema: changed .* columns in 'Open_vSwitch' database from ephemeral to persistent/d"])
+
+    n=3
+    join_cluster() {
+        local i=$1
+        others=
+        for j in `seq 1 $n`; do
+            if test $i != $j; then
+                others="$others unix:s$j.raft"
+            fi
+        done
+        AT_CHECK([ovsdb-tool join-cluster s$i.db $schema unix:s$i.raft $others])
+    }
+    start_server() {
+        local i=$1
+        printf "\ns$i: starting\n"
+        AT_CHECK([ovsdb-server -vjsonrpc -vraft -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+    }
+    connect_server() {
+        local i=$1
+        printf "\ns$i: waiting to connect to storage\n"
+        AT_CHECK([ovsdb_client_wait --log-file=connect$i.log unix:s$i.ovsdb $schema connected])
+    }
+    cid=`ovsdb-tool db-cid s1.db`
+    for i in `seq 2 $n`; do join_cluster $i; done
+
+    on_exit 'kill `cat *.pid`'
+    for i in `seq $n`; do start_server $i; done
+    for i in `seq $n`; do connect_server $i; done
+
+    db=unix:s$remote_1.ovsdb,unix:s$remote_2.ovsdb
+
+    # To ensure $new_leader node the new leader, we delay election timer for
+    # the other follower.
+    if test -n "$new_leader"; then
+        if test "$new_leader" == "2"; then
+            delay_election_node=3
+        else
+            delay_election_node=2
+        fi
+        AT_CHECK([ovs-appctl -t "`pwd`"/s$delay_election_node cluster/failure-test delay-election], [0], [ignore])
+    fi
+
+    # Initializing the database separately to avoid extra 'wait' operation
+    # in later transactions.
+    AT_CHECK([ovs-vsctl -v --db="$db" --no-leader-only --no-shuffle-remotes --no-wait init], [0], [ignore], [ignore])
+
+    AT_CHECK([ovs-appctl -t "`pwd`"/s$crash_node cluster/failure-test $crash_command], [0], [ignore])
+    AT_CHECK([ovs-vsctl -v --db="$db" --no-leader-only --no-shuffle-remotes --no-wait create QoS type=x], [0], [ignore], [ignore])
+
+    # Make sure that the node really crashed or has specific log message.
+    if test -z "$log_grep"; then
+        AT_CHECK([ls s$crash_node.ovsdb], [2], [ignore], [ignore])
+        # XXX: Client will fail if remotes contains unix socket that doesn't exist (killed).
+        if test "$remote_1" = "$crash_node"; then
+            db=unix:s$remote_2.ovsdb
+        fi
+    else
+        OVS_WAIT_UNTIL([grep -q "$log_grep" s${crash_node}.log])
+    fi
+    AT_CHECK([ovs-vsctl --db="$db" --no-leader-only --no-wait --columns=type --bare list QoS], [0], [x
+])
+}
+OVS_END_SHELL_HELPERS
+AT_BANNER([OVSDB - cluster failure with pending transaction])
+
+AT_SETUP([OVSDB cluster - txn on follower-2, leader crash before sending appendReq, follower-2 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 2 3 1 crash-before-sending-append-request 2
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, leader crash before sending appendReq, follower-3 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 2 3 1 crash-before-sending-append-request 3
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, leader crash before sending execRep, follower-2 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 2 3 1 crash-before-sending-execute-command-reply 2
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, leader crash before sending execRep, follower-3 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 2 3 1 crash-before-sending-execute-command-reply 3
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, leader crash after sending execRep, follower-2 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 2 3 1 crash-after-sending-execute-command-reply 2
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, leader crash after sending execRep, follower-3 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 2 3 1 crash-after-sending-execute-command-reply 3
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on leader, leader crash before sending appendReq, follower-2 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 1 2 1 crash-before-sending-append-request 2
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on leader, leader crash before sending appendReq, follower-3 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 1 2 1 crash-before-sending-append-request 3
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on leader, leader crash after sending appendReq, follower-2 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+# XXX: Detect and skip repeated transaction before enabling this test
+AT_CHECK([exit 77])
+ovsdb_cluster_failure_test 1 2 1 crash-after-sending-append-request 2
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on leader, leader crash after sending appendReq, follower-3 becomes leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+# XXX: Detect and skip repeated transaction before enabling this test
+AT_CHECK([exit 77])
+ovsdb_cluster_failure_test 1 2 1 crash-after-sending-append-request 3
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, follower-2 crash before sending execReq, reconnect to follower-3])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 2 3 2 crash-before-sending-execute-command-request
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, follower-2 crash before sending execReq, reconnect to leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 2 1 2 crash-before-sending-execute-command-request
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, follower-2 crash after sending execReq, reconnect to follower-3])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+# XXX: Detect and skip repeated transaction before enabling this test
+AT_CHECK([exit 77])
+ovsdb_cluster_failure_test 2 3 2 crash-after-sending-execute-command-request
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, follower-2 crash after sending execReq, reconnect to leader])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+# XXX: Detect and skip repeated transaction before enabling this test
+AT_CHECK([exit 77])
+ovsdb_cluster_failure_test 2 1 2 crash-after-sending-execute-command-request
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on leader, follower-2 crash after receiving appendReq for the update])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 1 1 2 crash-after-receiving-append-request-update
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on follower-2, follower-3 crash after receiving appendReq for the update])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn])
+ovsdb_cluster_failure_test 2 2 3 crash-after-receiving-append-request-update
+AT_CLEANUP
+
+AT_SETUP([OVSDB cluster - txn on leader, leader transfers leadership after sending appendReq])
+AT_KEYWORDS([ovsdb server negative unix cluster pending-txn transfer])
+ovsdb_cluster_failure_test 1 2 1 transfer-leadership-after-sending-append-request -1 "Transferring leadership"
+AT_CLEANUP
+
+
+AT_SETUP([OVSDB cluster - competing candidates])
+AT_KEYWORDS([ovsdb server negative unix cluster competing-candidates])
+
+n=3
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+ordinal_schema > schema
+AT_CHECK([ovsdb-tool '-vPATTERN:console:%c|%p|%m' create-cluster s1.db $abs_srcdir/idltest.ovsschema unix:s1.raft], [0], [], [stderr])
+cid=`ovsdb-tool db-cid s1.db`
+schema_name=`ovsdb-tool schema-name $abs_srcdir/idltest.ovsschema`
+for i in `seq 2 $n`; do
+    AT_CHECK([ovsdb-tool join-cluster s$i.db $schema_name unix:s$i.raft unix:s1.raft])
+done
+
+on_exit 'kill `cat *.pid`'
+for i in `seq $n`; do
+    AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+done
+for i in `seq $n`; do
+    AT_CHECK([ovsdb_client_wait unix:s$i.ovsdb $schema_name connected])
+done
+
+# We need to simulate the situation when 2 candidates starts election with same
+# term.
+#
+# Before triggering leader election, tell follower s2 don't send vote request (simulating
+# vote-request lost or not handled in time), and tell follower s3 to delay
+# election timer to make sure s3 doesn't send vote-request before s2 enters
+# term 2.
+AT_CHECK([ovs-appctl -t "`pwd`"/s2 cluster/failure-test dont-send-vote-request], [0], [ignore])
+AT_CHECK([ovs-appctl -t "`pwd`"/s3 cluster/failure-test delay-election], [0], [ignore])
+
+# Restart leader, which will become follower, and both old followers will start
+# election as candidate. The new follower (old leader) will vote one of them,
+# and the other candidate should step back as follower as again.
+kill -9 `cat s1.pid`
+AT_CHECK([ovsdb-server -v -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s1.log --pidfile=s1.pid --unixctl=s1 --remote=punix:s1.ovsdb s1.db])
+
+# Tell s1 to delay election timer so that it won't start election before s3
+# becomes candidate.
+AT_CHECK([ovs-appctl -t "`pwd`"/s1 cluster/failure-test delay-election], [0], [ignore])
+
+OVS_WAIT_UNTIL([ovs-appctl -t "`pwd`"/s1 cluster/status $schema_name | grep "Term: 2"])
+
+for i in `seq $n`; do
+    OVS_WAIT_WHILE([ovs-appctl -t "`pwd`"/s$i cluster/status $schema_name | grep "candidate"])
+    AT_CHECK([ovsdb_client_wait unix:s$i.ovsdb $schema_name connected])
+done
+
+for i in `seq $n`; do
+    OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+done
+
+AT_CLEANUP
+
+
+AT_BANNER([OVSDB - cluster tests])
+
+# Torture test.
+OVS_START_SHELL_HELPERS
+ovsdb_torture_test () {
+    local n=$1                  # Number of cluster members
+    local victim=$2             # Cluster member to kill or remove
+    local variant=$3            # 'kill' and restart or 'remove' and add
+    cp $top_srcdir/vswitchd/vswitch.ovsschema schema
+    schema=`ovsdb-tool schema-name schema`
+    AT_CHECK([ovsdb-tool '-vPATTERN:console:%c|%p|%m' create-cluster s1.db schema unix:s1.raft], [0], [], [stderr])
+    AT_CHECK([sed < stderr "/ovsdb|WARN|schema: changed .* columns in 'Open_vSwitch' database from ephemeral to persistent/d"])
+
+    join_cluster() {
+        local i=$1
+        others=
+        for j in `seq 1 $n`; do
+            if test $i != $j; then
+                others="$others unix:s$j.raft"
+            fi
+        done
+        AT_CHECK([ovsdb-tool join-cluster s$i.db $schema unix:s$i.raft $others])
+    }
+
+    start_server() {
+        local i=$1
+        printf "\ns$i: starting\n"
+        AT_CHECK([ovsdb-server -vjsonrpc -vconsole:off -vsyslog:off --detach --no-chdir --log-file=s$i.log --pidfile=s$i.pid --unixctl=s$i --remote=punix:s$i.ovsdb s$i.db])
+    }
+    stop_server() {
+        local i=$1
+        printf "\ns$i: stopping\n"
+        OVS_APP_EXIT_AND_WAIT_BY_TARGET([`pwd`/s$i], [s$i.pid])
+    }
+    connect_server() {
+        local i=$1
+        printf "\ns$i: waiting to connect to storage\n"
+        AT_CHECK([ovsdb_client_wait --log-file=connect$i.log unix:s$i.ovsdb $schema connected])
+    }
+    remove_server() {
+        local i=$1
+        printf "\ns$i: removing from cluster\n"
+        AT_CHECK([ovs-appctl -t "`pwd`"/s$i cluster/leave Open_vSwitch])
+        printf "\ns$i: waiting for removal to complete\n"
+        AT_CHECK([ovsdb_client_wait --log-file=remove$i.log unix:s$i.ovsdb $schema removed])
+        stop_server $i
+    }
+    add_server() {
+        local i=$1
+        rm s$i.db
+        join_cluster $i
+        start_server $i
+        connect_server $i
+    }
+
+    cid=`ovsdb-tool db-cid s1.db`
+    for i in `seq 2 $n`; do join_cluster $i; done
+
+    on_exit 'kill `cat *.pid`'
+    for i in `seq $n`; do start_server $i; done
+    for i in `seq $n`; do connect_server $i; done
+
+    db=unix:s1.ovsdb
+    for i in `seq 2 $n`; do
+        db=$db,unix:s$i.ovsdb
+    done
+
+    n1=10 n2=5 n3=50
+    echo "starting $n1*$n2 ovs-vsctl processes..."
+    for i in $(seq 0 $(expr $n1 - 1) ); do
+        (for j in $(seq $n2); do
+             : > $i-$j.running
+             txn="add Open_vSwitch . external_ids $i-$j=$i-$j"
+             for k in $(seq $n3); do
+                 txn="$txn -- add Open_vSwitch . external_ids $i-$j-$k=$i-$j-$k"
+             done
+             run_as "ovs-vsctl($i-$j)" ovs-vsctl "-vPATTERN:console:ovs-vsctl($i-$j)|%D{%H:%M:%S}|%05N|%c|%p|%m" --log-file=$i-$j.log -vfile -vsyslog:off -vtimeval:off --timeout=120 --db="$db" --no-leader-only --no-wait $txn
+             status=$?
+             if test $status != 0; then
+                 echo "$i-$j exited with status $status" > $i-$j:$status
+             fi
+             rm $i-$j.running
+         done
+         : > $i.done)&
+    done
+    echo "...done"
+
+    echo "waiting for ovs-vsctl processes to exit..."
+    # Use file instead of var because code inside "while" runs in a subshell.
+    echo 0 > phase
+    i=0
+    (while :; do echo || exit 0; sleep 0.1; done) | while read REPLY; do
+        printf "t=%2d s:" $i
+        done=0
+        for j in $(seq 0 $(expr $n1 - 1)); do
+            if test -f $j.done; then
+                printf " $j"
+                done=$(expr $done + 1)
+            fi
+        done
+        printf '\n'
+        if test $done = $n1; then
+            break
+        fi
+
+        case $(cat phase) in # (
+        0)
+            if test $done -ge $(expr $n1 / 10); then
+                if test $variant = kill; then
+                    stop_server $victim
+                else
+                    remove_server $victim
+                fi
+                echo 1 > phase
+                next=$(expr $i + 2)
+            fi
+            ;; # (
+        1)
+            if test $i -ge $next; then
+                if test $variant = kill; then
+                    start_server $victim
+                    connect_server $victim
+                else
+                    add_server $victim
+                fi
+                echo 2 > phase
+            fi
+            ;;
+        esac
+
+        i=$(expr $i + 1)
+    done
+    echo "...done"
+    AT_CHECK([if test $(cat phase) != 2; then exit 77; fi])
+
+    for i in $(seq 0 $(expr $n1 - 1) ); do
+        for j in `seq $n2`; do
+            echo "$i-$j=$i-$j"
+            for k in `seq $n3`; do
+                echo "$i-$j-$k=$i-$j-$k"
+            done
+        done
+    done | sort > expout
+    AT_CHECK([ovs-vsctl --db="$db" --no-wait --log-file=finalize.log -vtimeval:off -vfile -vsyslog:off --bare get Open_vSwitch . external-ids | tr ',' '\n' | sed 's/[[{}"" ]]//g' | sort], [0], [expout])
+
+    for i in `seq $n`; do
+        if test $i != $victim || test $(cat phase) != 1; then
+            stop_server $i
+        fi
+    done
+
+    # We ignore stdout because non-fatal warnings get printed there.
+    AT_CHECK([ovsdb-tool check-cluster s*.db], [0], [ignore])
+}
+OVS_END_SHELL_HELPERS
+
+AT_SETUP([OVSDB 3-server torture test - kill/restart leader])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster3])
+ovsdb_torture_test 3 1 kill
+AT_CLEANUP
+AT_SETUP([OVSDB 3-server torture test - kill/restart follower 1])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster3])
+ovsdb_torture_test 3 2 kill
+AT_CLEANUP
+AT_SETUP([OVSDB 3-server torture test - kill/restart follower 2])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster3])
+ovsdb_torture_test 3 3 kill
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - kill/restart leader])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 1 kill
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - kill/restart follower 1])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 2 kill
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - kill/restart follower 2])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 3 kill
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - kill/restart follower 3])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 4 kill
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - kill/restart follower 4])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 5 kill
+AT_CLEANUP
+
+AT_SETUP([OVSDB 3-server torture test - remove/re-add leader])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster3])
+ovsdb_torture_test 3 1 remove
+AT_CLEANUP
+AT_SETUP([OVSDB 3-server torture test - remove/re-add follower 1])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster3])
+ovsdb_torture_test 3 2 remove
+AT_CLEANUP
+AT_SETUP([OVSDB 3-server torture test - remove/re-add follower 2])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster3])
+ovsdb_torture_test 3 3 remove
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - remove/re-add leader])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 1 remove
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - remove/re-add follower 1])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 2 remove
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - remove/re-add follower 2])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 3 remove
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - remove/re-add follower 3])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 4 remove
+AT_CLEANUP
+AT_SETUP([OVSDB 5-server torture test - remove/re-add follower 4])
+AT_KEYWORDS([ovsdb server positive unix cluster cluster5])
+ovsdb_torture_test 5 5 remove
+AT_CLEANUP
