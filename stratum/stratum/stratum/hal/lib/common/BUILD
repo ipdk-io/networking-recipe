@@ -1,0 +1,873 @@
+# stratum/hal/lib/common/BUILD
+
+# Copyright 2018 Google LLC
+# Copyright 2018-present Open Networking Foundation
+# Copyright 2022-2023 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+load(
+    "//bazel:rules.bzl",
+    "STRATUM_INTERNAL",
+    "stratum_cc_library",
+    "stratum_cc_test",
+)
+load("//bazel:deps.bzl", "P4RUNTIME_VER")
+
+licenses(["notice"])  # Apache v2
+
+package(
+    #default_hdrs_check = "strict",
+    default_visibility = STRATUM_INTERNAL,
+)
+
+stratum_cc_library(
+    name = "admin_service",
+    srcs = [
+        "admin_service.cc",
+    ],
+    hdrs = [
+        "admin_service.h",
+    ],
+    deps = [
+        ":admin_utils",
+        ":admin_utils_interface",
+        ":common_cc_proto",
+        ":error_buffer",
+        ":switch_interface",
+        "//stratum/glue:logging",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/glue/status",
+        "//stratum/lib:constants",
+        "//stratum/lib:macros",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_github_openconfig_gnoi//:system_cc_grpc",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+stratum_cc_test(
+    name = "admin_service_test",
+    srcs = [
+        "admin_service_test.cc",
+    ],
+    deps = [
+        ":admin_service",
+        ":admin_utils_mock",
+        ":error_buffer",
+        ":switch_mock",
+        ":test_main",
+        "@com_github_google_glog//:glog",
+        "//stratum/glue/net_util:ports",
+        "//stratum/glue/status:status_test_util",
+        "@com_google_googletest//:gtest",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@com_github_grpc_grpc//:grpc++",
+        #FIXME(boc) "@com_github_openconfig_gnoi//:system_cc_grpc",
+        "//stratum/lib:constants",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker_mock",
+        "//stratum/lib/test_utils:matchers",
+        "//stratum/public/lib:error",
+    ],
+)
+
+stratum_cc_library(
+    name = "admin_utils_interface",
+    hdrs = ["admin_utils_interface.h"],
+)
+
+cc_library(
+    name = "admin_utils_mock",
+    testonly = 1,
+    hdrs = ["admin_utils_mock.h"],
+    deps = [
+        ":admin_utils_interface",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+stratum_cc_library(
+    name = "admin_utils",
+    srcs = ["admin_utils.cc"],
+    deps = [
+        ":admin_utils_interface",
+        "//stratum/glue:logging",
+        "//stratum/lib:macros",
+        "//stratum/lib:utils",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_github_openconfig_gnoi//:common_cc_proto",
+        "@com_github_openconfig_gnoi//:system_cc_grpc",
+        "@com_github_openconfig_gnoi//:types_cc_proto",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+stratum_cc_library(
+    name = "certificate_management_service",
+    srcs = [
+        "certificate_management_service.cc",
+    ],
+    hdrs = [
+        "certificate_management_service.h",
+    ],
+    deps = [
+        ":common_cc_proto",
+        ":error_buffer",
+        ":switch_interface",
+        "//stratum/glue:logging",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/glue/status",
+        "//stratum/lib:constants",
+        "//stratum/lib:macros",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_github_openconfig_gnoi//:cert_cc_grpc",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+stratum_cc_test(
+    name = "certificate_management_service_test",
+    srcs = [
+        "certificate_management_service_test.cc",
+    ],
+    tags = ["flaky"],
+    deps = [
+        ":certificate_management_service",
+        ":error_buffer",
+        ":switch_mock",
+        ":test_main",
+        "@com_github_google_glog//:glog",
+        "//stratum/glue/net_util:ports",
+        "//stratum/glue/status:status_test_util",
+        "@com_google_googletest//:gtest",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@com_github_grpc_grpc//:grpc++",
+        #FIXME(boc) "@com_github_openconfig_gnoi//:system_cc_grpc",
+        "//stratum/lib:constants",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker_mock",
+        "//stratum/lib/test_utils:matchers",
+        "//stratum/public/lib:error",
+    ],
+)
+
+stratum_cc_library(
+    name = "client_sync_reader_writer",
+    hdrs = ["client_sync_reader_writer.h"],
+    deps = [
+        "//stratum/glue:logging",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+proto_library(
+    name = "common_proto",
+    srcs = ["common.proto"],
+)
+
+cc_proto_library(
+    name = "common_cc_proto",
+    deps = [":common_proto"],
+)
+
+stratum_cc_library(
+    name = "config_monitoring_service",
+    srcs = [
+        "config_monitoring_service.cc",
+        "gnmi_publisher.cc",
+    ],
+    hdrs = [
+        "config_monitoring_service.h",
+        "gnmi_publisher.h",
+    ],
+    data = [
+        # TODO(Yi): generate this when we generating the OpenConfig proto files
+        "gnmi_caps.pb.txt",
+    ],
+    deps = [
+        ":channel_writer_wrapper",
+        ":common_cc_proto",
+        ":constants",
+        ":error_buffer",
+        ":openconfig_converter",
+        ":switch_interface",
+        ":target_options",
+        ":utils",
+        ":writer_interface",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/glue/gtl:stl_util",
+        "//stratum/glue/status",
+        "//stratum/glue/status:status_macros",
+        "//stratum/glue:logging",
+        "//stratum/hal/lib/yang:yang_parse_tree",
+        "//stratum/hal/lib/yang:yang_parse_tree_paths",
+        "//stratum/lib/security:auth_policy_checker",
+        "//stratum/lib:constants",
+        "//stratum/lib:macros",
+        "//stratum/lib:timer_daemon",
+        "//stratum/lib:utils",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_grpc",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_proto",
+        "@com_github_openconfig_hercules//:openconfig_cc_proto",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/time",
+        "@com_google_protobuf//:protobuf",
+        #FIXME(boc)
+        #"//util/time:clock",
+    ],
+)
+
+stratum_cc_test(
+    name = "config_monitoring_service_test",
+    srcs = [
+        "config_monitoring_service_test.cc",
+        "gnmi_publisher_test.cc",
+    ],
+    data = [
+        # TODO(Yi): generate this when we generating the OpenConfig proto files
+        "gnmi_caps.pb.txt",
+    ],
+    deps = [
+        ":config_monitoring_service",
+        ":error_buffer",
+        ":gnmi_publisher_mock",
+        ":subscribe_reader_writer_mock",
+        ":switch_mock",
+        ":test_main",
+        ":testdata",
+        ":writer_mock",
+        "//stratum/glue/status:status_test_util",
+        "//stratum/hal/lib/yang:yang_parse_tree_mock",
+        "//stratum/hal/lib/yang:yang_parse_tree_test",  # why?
+        "//stratum/lib:constants",
+        "//stratum/lib:timer_daemon",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker_mock",
+        "//stratum/lib/test_utils:matchers",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_proto",
+        "@com_github_openconfig_hercules//:openconfig_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_googletest//:gtest",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+exports_files(["gnmi_caps.pb.txt"])
+
+cc_library(
+    name = "subscribe_reader_writer_mock",
+    testonly = 1,
+    hdrs = ["subscribe_reader_writer_mock.h"],
+    deps = [
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_proto",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "gnmi_publisher_mock",
+    testonly = 1,
+    hdrs = [
+        "gnmi_events.h",
+        "gnmi_publisher.h",
+        "gnmi_publisher_mock.h",
+    ],
+    deps = [
+        ":common_cc_proto",
+        ":switch_interface",
+        ":switch_mock",
+        ":writer_interface",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/glue/status",
+        "//stratum/glue/status:status_macros",
+        "//stratum/hal/lib/yang:parse_tree",
+        "//stratum/lib:macros",
+        "//stratum/lib:timer_daemon",
+        "//stratum/public/lib:error",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_grpc",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_proto",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_googletest//:gtest",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+stratum_cc_library(
+    name = "constants",
+    hdrs = ["constants.h"],
+    deps = [
+        "//stratum/glue:integral_types",
+        "@com_google_absl//absl/base:core_headers",
+    ],
+)
+
+stratum_cc_library(
+    name = "gnmi_events",
+    hdrs = ["gnmi_events.h"],
+)
+
+stratum_cc_library(
+    name = "gnmi_publisher_hdr",
+    hdrs = ["gnmi_publisher.h"],
+)
+
+stratum_cc_library(
+    name = "diag_service",
+    srcs = [
+        "diag_service.cc",
+    ],
+    hdrs = [
+        "diag_service.h",
+    ],
+    deps = [
+        ":common_cc_proto",
+        ":error_buffer",
+        ":switch_interface",
+        "//stratum/glue:logging",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/lib:constants",
+        "//stratum/lib:macros",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_github_openconfig_gnoi//:diag_cc_grpc",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+stratum_cc_test(
+    name = "diag_service_test",
+    srcs = [
+        "diag_service_test.cc",
+    ],
+    deps = [
+        ":diag_service",
+        ":error_buffer",
+        ":switch_mock",
+        ":test_main",
+        "@com_github_google_glog//:glog",
+        "//stratum/glue/net_util:ports",
+        "//stratum/glue/status:status_test_util",
+        "@com_google_googletest//:gtest",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@com_github_grpc_grpc//:grpc++",
+        #FIXME(boc) "@com_github_openconfig_gnoi//:system_cc_grpc",
+        "//stratum/lib:constants",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker_mock",
+        "//stratum/lib/test_utils:matchers",
+        "//stratum/public/lib:error",
+    ],
+)
+
+stratum_cc_library(
+    name = "error_buffer",
+    srcs = ["error_buffer.cc"],
+    hdrs = ["error_buffer.h"],
+    deps = [
+        "@com_github_google_glog//:glog",
+        #"//file/base:path",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "//stratum/glue:logging",
+        "//stratum/glue/status",
+        "//stratum/lib:macros",
+        "//stratum/lib:utils",
+        "//stratum/glue/gtl:source_location",
+    ],
+)
+
+stratum_cc_test(
+    name = "error_buffer_test",
+    srcs = [
+        "error_buffer_test.cc",
+    ],
+    deps = [
+        ":error_buffer",
+        ":test_main",
+        "//stratum/glue/status:status_test_util",
+        "//stratum/lib/test_utils:matchers",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+stratum_cc_library(
+    name = "file_service",
+    srcs = [
+        "file_service.cc",
+    ],
+    hdrs = [
+        "file_service.h",
+    ],
+    deps = [
+        ":common_cc_proto",
+        ":error_buffer",
+        ":switch_interface",
+        "//stratum/glue:logging",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/glue/status",
+        "//stratum/lib:constants",
+        "//stratum/lib:macros",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_github_openconfig_gnoi//:file_cc_grpc",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+stratum_cc_test(
+    name = "file_service_test",
+    srcs = [
+        "file_service_test.cc",
+    ],
+    tags = ["flaky"],
+    deps = [
+        ":error_buffer",
+        ":file_service",
+        ":switch_mock",
+        ":test_main",
+        "@com_github_google_glog//:glog",
+        "//stratum/glue/net_util:ports",
+        "//stratum/glue/status:status_test_util",
+        "@com_google_googletest//:gtest",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@com_github_grpc_grpc//:grpc++",
+        #FIXME(boc) "@com_github_openconfig_gnoi//:system_cc_grpc",
+        "//stratum/lib:constants",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker_mock",
+        "//stratum/lib/test_utils:matchers",
+        "//stratum/public/lib:error",
+    ],
+)
+
+stratum_cc_library(
+    name = "hal",
+    srcs = ["hal.cc"],
+    hdrs = ["hal.h"],
+    deps = [
+        ":admin_service",
+        ":certificate_management_service",
+        ":common_cc_proto",
+        ":config_monitoring_service",
+        ":diag_service",
+        ":error_buffer",
+        ":file_service",
+        ":p4_service",
+        ":switch_interface",
+        "//stratum/glue:logging",
+        "//stratum/glue:platform",
+        "//stratum/lib:constants",
+        "//stratum/lib:macros",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker",
+        "//stratum/lib/security:credentials_manager",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+stratum_cc_test(
+    name = "hal_test",
+    srcs = [
+        "hal_test.cc",
+    ],
+    deps = [
+        ":hal",
+        ":switch_mock",
+        ":test_main",
+        "//stratum/glue/net_util:ports",
+        "//stratum/glue/status:status_test_util",
+        "//stratum/lib:utils",
+        "//stratum/lib/security:auth_policy_checker_mock",
+        "//stratum/lib/security:credentials_manager_mock",
+        "//stratum/lib/test_utils:matchers",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+stratum_cc_library(
+    name = "p4_service",
+    srcs = ["p4_service.cc"],
+    hdrs = ["p4_service.h"],
+    defines = [
+        "P4RUNTIME_VER=" + P4RUNTIME_VER,
+    ],
+    deps = [
+        ":channel_writer_wrapper",
+        ":common_cc_proto",
+        ":error_buffer",
+        ":server_writer_wrapper",
+        ":switch_interface",
+        ":target_options",
+        "//stratum/glue:logging",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/glue/status",
+        "//stratum/glue/status:status_macros",
+        "//stratum/glue/status:statusor",
+        "//stratum/hal/lib/p4:forwarding_pipeline_configs_cc_proto",
+        "//stratum/lib:macros",
+        "//stratum/lib:utils",
+        "//stratum/lib/channel",
+        "//stratum/lib/p4runtime:sdn_controller_manager",
+        "//stratum/lib/security:auth_policy_checker",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_github_p4lang_p4runtime//:p4info_cc_proto",
+        "@com_github_p4lang_p4runtime//:p4runtime_cc_grpc",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/cleanup",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/numeric:int128",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/time",
+        "@com_google_googleapis//google/rpc:code_cc_proto",
+        "@com_google_googleapis//google/rpc:status_cc_proto",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+stratum_cc_test(
+    name = "p4_service_test",
+    srcs = [
+        "p4_service_test.cc",
+    ],
+    defines = [
+        "P4RUNTIME_VER=" + P4RUNTIME_VER,
+    ],
+    deps = [
+        ":error_buffer",
+        ":p4_service",
+        ":switch_mock",
+        ":test_main",
+        "//stratum/glue/net_util:ports",
+        "//stratum/glue/status:status_test_util",
+        "//stratum/lib:utils",
+        "//stratum/lib/p4runtime:stream_message_reader_writer_mock",
+        "//stratum/lib/security:auth_policy_checker_mock",
+        "//stratum/lib/test_utils:matchers",
+        "//stratum/public/lib:error",
+        "@com_github_google_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/numeric:int128",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_googleapis//google/rpc:code_cc_proto",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+stratum_cc_library(
+    name = "phal_interface",
+    hdrs = ["phal_interface.h"],
+    deps = [
+        ":common_cc_proto",
+        "//stratum/glue/status",
+        "//stratum/glue/status:statusor",
+        "//stratum/hal/lib/phal:sfp_configurator",
+        "//stratum/lib/channel",
+    ],
+)
+
+cc_library(
+    name = "phal_mock",
+    testonly = 1,
+    hdrs = ["phal_mock.h"],
+    deps = [
+        ":phal_interface",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+stratum_cc_library(
+    name = "writer_interface",
+    hdrs = ["writer_interface.h"],
+)
+
+cc_library(
+    name = "writer_mock",
+    testonly = 1,
+    hdrs = ["writer_mock.h"],
+    deps = [
+        ":writer_interface",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+stratum_cc_library(
+    name = "proto_oneof_writer_wrapper",
+    hdrs = ["proto_oneof_writer_wrapper.h"],
+)
+
+stratum_cc_library(
+    name = "server_writer_wrapper",
+    hdrs = ["server_writer_wrapper.h"],
+    deps = [
+        ":writer_interface",
+        "@com_github_grpc_grpc//:grpc++",
+    ],
+)
+
+stratum_cc_library(
+    name = "channel_writer_wrapper",
+    hdrs = ["channel_writer_wrapper.h"],
+    deps = [
+        ":writer_interface",
+        "//stratum/lib/channel",
+    ],
+)
+
+stratum_cc_library(
+    name = "switch_interface",
+    hdrs = [
+        "gnmi_events.h",
+        "switch_interface.h",
+    ],
+    deps = [
+        ":common_cc_proto",
+        ":writer_interface",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/glue/status",
+        "//stratum/glue/status:statusor",
+        "//stratum/lib:timer_daemon",
+        "//stratum/lib:utils",
+        "//stratum/lib/channel",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_grpc",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_proto",
+        "@com_github_p4lang_p4runtime//:p4runtime_cc_grpc",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+cc_library(
+    name = "switch_mock",
+    testonly = 1,
+    hdrs = ["switch_mock.h"],
+    deps = [
+        ":switch_interface",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "test_main",
+    testonly = 1,
+    srcs = ["test_main.cc"],
+    deps = [
+        "//stratum/glue:init_google",
+        "//stratum/glue:logging",
+        "@com_github_google_glog//:glog",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+stratum_cc_library(
+    name = "utils",
+    srcs = ["utils.cc"],
+    hdrs = ["utils.h"],
+    deps = [
+        ":common_cc_proto",
+        ":constants",
+        "//stratum/glue/status:statusor",
+        "//stratum/lib:constants",
+        "//stratum/lib:macros",
+        "//stratum/public/lib:error",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_proto",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_googlesource_code_re2//:re2",
+    ],
+)
+
+stratum_cc_test(
+    name = "utils_test",
+    srcs = ["utils_test.cc"],
+    deps = [
+        ":test_main",
+        ":utils",
+        "//stratum/glue/status:status_test_util",
+        "//stratum/lib:constants",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+stratum_cc_library(
+    name = "openconfig_converter",
+    srcs = [
+        "openconfig_converter.cc",
+    ],
+    hdrs = [
+        "openconfig_converter.h",
+    ],
+    deps = [
+        ":common_cc_proto",
+        "@com_google_absl//absl/strings",
+        "@com_github_openconfig_hercules//:openconfig_cc_proto",
+        "//stratum/public/proto:openconfig_goog_bcm_cc_proto",
+        "//stratum/glue:logging",
+        #FIXME(boc) "//stratum/glue/openconfig/proto:old_openconfig_proto",
+        "//stratum/glue/status",
+        "//stratum/glue/status:status_macros",
+        "//stratum/glue/status:statusor",
+        "//stratum/lib:constants",
+        "//stratum/lib:macros",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/hal/lib/common:utils",
+    ],
+)
+
+stratum_cc_test(
+    name = "openconfig_converter_test",
+    srcs = ["openconfig_converter_test.cc"],
+    deps = [
+        ":openconfig_converter",
+        ":test_main",
+        ":testdata",
+        ":utils",
+        "//stratum/glue/status:status_test_util",
+        "//stratum/lib:utils",
+        "//stratum/lib/test_utils:matchers",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "testdata",
+    data = glob(["testdata/**"]),
+)
+
+cc_library(
+    name = "gnmi_publisher",
+    srcs = [
+        "gnmi_publisher.cc",
+    ],
+    hdrs = [
+        "gnmi_events.h",
+        "gnmi_publisher.h",
+    ],
+    deps = [
+        ":channel_writer_wrapper",
+        ":common_cc_proto",
+        ":switch_interface",
+        ":writer_interface",
+        "//stratum/glue:integral_types",
+        "//stratum/glue/gtl:map_util",
+        "//stratum/glue/status",
+        "//stratum/hal/lib/common:utils",
+        "//stratum/hal/lib/yang:parse_tree",
+        "//stratum/hal/lib/yang:parse_tree_paths",
+        "//stratum/lib:timer_daemon",
+        "//stratum/lib:utils",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_grpc",
+        "@com_github_openconfig_gnmi_proto//:gnmi_cc_proto",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/synchronization",
+    ],
+)
+
+# Built as part of config_monitoring_service_test.
+#stratum_cc_test(
+#    name = "gnmi_publisher_test",
+#    srcs = [
+#        "gnmi_publisher_test.cc",
+#    ],
+#    deps = [
+#        ":gnmi_publisher",
+#        ":subscribe_reader_writer_mock",
+#        ":switch_mock",
+#        ":test_main",
+#        "//stratum/glue:logging",
+#        "//stratum/glue/status",
+#        "//stratum/glue/status:status_macros",
+#        "//stratum/glue/status:status_test_util",
+#        "//stratum/hal/lib/yang:yang_parse_tree",
+#        "//stratum/hal/lib/yang:yang_parse_tree_paths",
+#        "@com_github_openconfig_hercules//:openconfig_cc_proto",
+#        "@com_google_absl//absl/container:flat_hash_map",
+#        "@com_google_googletest//:gtest",
+#    ],
+#)
+
+stratum_cc_library(
+    name = "target_options",
+    srcs = ["target_options.cc"],
+    hdrs = ["target_options.h"],
+)

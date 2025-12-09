@@ -1,0 +1,113 @@
+name: "Stratum CI Pipeline"
+
+on:
+  push:
+    branches:
+      - split-arch
+  pull_request:
+    branches:
+      - mev-ts*
+      - split-arch
+      - stratum-updates
+
+  workflow_dispatch:
+
+concurrency:
+  # If workflow for PR or push is already running, stop it and start a new one.
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  #---------------------------------------------------------------------
+  # Environment variables
+  #---------------------------------------------------------------------
+  SDE_REPOSITORY: ipdk-io/p4dev.dpdk-sde
+  SDE_TAG: 2023.10.1
+  SDE_FILENAME: dpdk-sde-dev-ubuntu-20.04.tar.gz
+  SDE_INSTALL_DIR: /opt/p4dev/dpdk-sde
+
+  DPDK_TESTLOGS: dpdk-bazel-testlogs.tar.gz
+
+jobs:
+  #---------------------------------------------------------------------
+  # dpdk_build_and_test
+  #---------------------------------------------------------------------
+  dpdk_build_and_test:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Clone stratum repository
+        uses: actions/checkout@v4
+
+      - name: Mount bazel cache
+        uses: actions/cache@v4
+        with:
+          path: "~/.cache/bazel"
+          key: bazel-${{ runner.os }}-dpdk_build-${{ hashFiles('WORKSPACE', '**/*.bzl', '**/BUILD') }}
+          restore-keys: |
+            bazel-${{ runner.os }}-dpdk_build-
+
+      - name: Fetch DPDK SDE
+        uses: robinraju/release-downloader@v1.12
+        with:
+          repository: ${{ env.SDE_REPOSITORY }}
+          tag: ${{ env.SDE_TAG }}
+          fileName: ${{ env.SDE_FILENAME }}
+
+      - name: Install DPDK SDE
+        run: |
+          sudo tar -xzf $SDE_FILENAME -C /
+          rm $SDE_FILENAME
+
+      - name: Build Stratum DPDK
+        run: |
+          export SDE_INSTALL=$SDE_INSTALL_DIR
+          bazel build //stratum/hal/bin/tdi/dpdk:stratum_dpdk --define target=dpdk
+
+      - name: Run DPDK unit tests
+        run: |
+          export SDE_INSTALL=$SDE_INSTALL_DIR
+          xargs -a .github/dpdk-tests.txt bazel test --define target=dpdk --test_tag_filters=-broken,-flaky
+
+  #---------------------------------------------------------------------
+  # bcm_unit_tests
+  #---------------------------------------------------------------------
+  bcm_unit_tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Clone stratum repository
+        uses: actions/checkout@v4
+
+      - name: Mount bazel cache
+        uses: actions/cache@v4
+        with:
+          path: "~/.cache/bazel"
+          key: bazel-${{ runner.os }}-bcm-tests-${{ hashFiles('WORKSPACE', '**/*.bzl', '**/BUILD') }}
+          restore-keys: |
+            bazel-${{ runner.os }}-bcm-tests-
+
+      - name: Install prerequisites
+        run: |
+          sudo apt install libelf-dev
+
+      - name: Run unit tests
+        run: |
+          bazel test //stratum/hal/lib/bcm/...
+
+  #---------------------------------------------------------------------
+  # cdlang_tests (gNMI)
+  #---------------------------------------------------------------------
+  cdlang_tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Clone stratum repository
+        uses: actions/checkout@v4
+        with:
+          path: stratum
+
+      - name: Run cdlang tests
+        working-directory: stratum
+        run: |
+          bazel test //stratum/testing/cdlang/...

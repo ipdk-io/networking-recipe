@@ -1,0 +1,12 @@
+# Copyright 2019-present Open Networking Foundation
+# SPDX-License-Identifier: Apache-2.0
+# invalid speed
+singleton_ports {
+  id: 1
+  name: "1/1/1"
+  slot: 1
+  port: 1
+  channel: 1
+  speed_bps: 1234567
+  node: 1
+}

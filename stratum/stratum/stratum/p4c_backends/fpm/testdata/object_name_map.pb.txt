@@ -1,0 +1,130 @@
+# Copyright 2019 Google LLC
+# SPDX-License-Identifier: Apache-2.0
+
+# Test file for annotations mapping based on object names.
+field_addenda_map {
+  key: "match-field-name-with-type"
+  value {
+    type: P4_FIELD_TYPE_ETH_SRC
+  }
+}
+field_addenda_map {
+  key: "match-field-name-with-addenda"
+  value {
+    addenda_names: "match-field-addenda-1"
+  }
+}
+field_addenda_map {
+  key: "match-field-name-with-type-and-addenda"
+  value {
+    type: P4_FIELD_TYPE_ETH_DST
+    addenda_names: "match-field-addenda-N1"
+  }
+}
+field_addenda_map {
+  key: "match-field-name-with-multiple-addenda"
+  value {
+    addenda_names: "match-field-addenda-N1"
+    addenda_names: "match-field-addenda-N2"
+  }
+}
+table_addenda_map {
+  key: "table-name-with-type"
+  value {
+    type: P4_TABLE_L3_IP
+  }
+}
+table_addenda_map {
+  key: "table-name-with-addenda"
+  value {
+    addenda_names: "table-addenda-N1"
+  }
+}
+table_addenda_map {
+  key: "table-name-with-type-and-multiple-addenda"
+  value {
+    type: P4_TABLE_L3_IP
+    addenda_names: "table-addenda-N1"
+    addenda_names: "table-addenda-N2"
+  }
+}
+action_addenda_map {
+  key: "action-name-with-type"
+  value {
+    type: P4_ACTION_TYPE_FUNCTION
+  }
+}
+action_addenda_map {
+  key: "action-name-with-addenda"
+  value {
+    addenda_names: "action-addenda-N2"
+  }
+}
+action_addenda_map {
+  key: "action-name-with-replace-addenda"
+  value {
+    addenda_names: "action-addenda-N1"
+  }
+}
+action_addenda_map {
+  key: "action-name-with-type-and-multiple-addenda"
+  value {
+    type: P4_ACTION_TYPE_FUNCTION
+    addenda_names: "action-addenda-N1"
+    addenda_names: "action-addenda-N2"
+  }
+}
+field_addenda {
+  name: "match-field-addenda-N1"
+  device_data {
+    name: "dummy-device-data-in-match-field-addenda-N1"
+  }
+}
+field_addenda {
+  name: "match-field-addenda-N2"
+  device_data {
+    name: "dummy-device-data-in-match-field-addenda-N2"
+  }
+}
+table_addenda {
+  name: "table-addenda-N1"
+  device_data {
+    name: "device-data-name-N1"
+    data: "dummy-device-data-in-table-addenda-N1"
+  }
+}
+table_addenda {
+  name: "table-addenda-N2"
+  device_data {
+    name: "device-data-name-N2"
+    data: "dummy-device-data-in-table-addenda-N2"
+  }
+}
+action_addenda {
+  name: "action-addenda-N1"
+  assignment_primitive_replace: true
+  assignments_addenda {
+    assigned_value {
+      constant_param: 1
+    }
+    destination_field_name: "dummy-destination-field-name-N1"
+  }
+  device_data {
+    name: "device-data-name-N1"
+    data: "dummy-device-data-in-action-addenda-N1"
+  }
+  primitive_ops_addenda: P4_ACTION_OP_DROP
+}
+action_addenda {
+  name: "action-addenda-N2"
+  assignments_addenda {
+    assigned_value {
+      parameter_name: "dummy-parameter-action-name-N2"
+    }
+    destination_field_name: "dummy-destination-field-name-N2"
+  }
+  device_data {
+    name: "device-data-name-N2"
+    data: "dummy-device-data-in-action-addenda-N2"
+  }
+}

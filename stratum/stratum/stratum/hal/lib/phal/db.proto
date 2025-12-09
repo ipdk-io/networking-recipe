@@ -1,0 +1,284 @@
+// Copyright 2018 Google LLC
+// Copyright 2018-present Open Networking Foundation
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+option cc_generic_services = false;
+
+package stratum.hal.phal;
+
+import "stratum/hal/lib/common/common.proto";
+
+// This proto encodes all of the data that can possibly be provided
+// by the VANE-PHAL.
+message PhalDB {
+  repeated Card cards = 1;
+  repeated FanTray fan_trays = 2;
+  repeated PsuTray psu_trays = 3;
+  repeated LedGroup led_groups = 4;
+  repeated ThermalGroup thermal_groups = 5;
+  repeated OpticalModule optical_modules = 6;
+}
+
+message Card {
+  repeated Port ports = 1;
+}
+
+// TODO(unknown): Add fan tray LED support and fan tray type.
+message FanTray {
+  message Fan {
+    int32 id = 1;
+    string description = 2;
+    HwState hardware_state = 3;
+    string err_msg = 4;
+    HardwareInfo info = 5;
+
+    string model = 6;
+    string serial_number = 7;
+    double rpm = 8;
+    int32 speed_control = 9;  // Stores a percent value in [0,100]. Writable.
+    FanDir direction = 10;
+    FanCaps capabilities = 11;
+  }
+  repeated Fan fans = 1;
+  HardwareInfo info = 2;
+}
+
+message PsuTray {
+  message Psu {
+    int32 id = 1;
+    string description = 2;
+    HwState hardware_state = 3;
+    string err_msg = 4;
+    HardwareInfo info = 5;
+
+    double input_voltage = 6;
+    double output_voltage = 7;
+    double input_current = 8;
+    double output_current = 9;
+    double input_power = 10;
+    double output_power = 11;
+    PsuType type = 12;
+    PsuCaps capabilities = 13;
+  }
+  repeated Psu psus = 1;
+  HardwareInfo info = 2;
+}
+
+message LedGroup {
+  message Led {
+    int32 id = 1;
+    string description = 2;
+    HwState hardware_state = 3;
+    string err_msg = 4;
+    HardwareInfo info = 5;
+
+    LedCaps capabilities = 6;
+    LedMode mode = 7;
+    LedState state = 8;
+    LedColor color = 9;
+    // we'll use int32 as no char equivalent in protobufs
+    int32 character = 10;
+  }
+  repeated Led leds = 1;
+}
+
+message ThermalGroup {
+  message Thermal {
+    int32 id = 1;
+    string description = 2;
+    HwState hardware_state = 3;
+    string err_msg = 4;
+    HardwareInfo info = 5;
+
+    double cur_temp = 6;
+    double warn_temp = 7;
+    double error_temp = 8;
+    double shut_down_temp = 9;
+    ThermalCaps capabilities = 10;
+  }
+  repeated Thermal thermals = 1;
+}
+
+message OpticalModule {
+  message NetworkInterface {
+    int32 id = 1;
+    uint64 frequency = 2;            // Measured in Hz.
+    double input_power = 3;          // Measured in dBm.
+    double output_power = 4;         // Measured in dBm.
+    double target_output_power = 5;  // Measured in dBm.
+    uint64 operational_mode = 6;
+  }
+  int32 id = 1;
+  repeated NetworkInterface network_interfaces = 2;
+}
+
+message Port {
+  int32 id = 1;
+  PhysicalPortType physical_port_type = 2;
+  Transceiver transceiver = 3;
+}
+
+message AlarmStatus {
+  bool low_warn = 1;
+  bool high_warn = 2;
+  bool low_alarm = 3;
+  bool high_alarm = 4;
+}
+
+message SFPChannel {
+  bool rx_los = 1;
+  bool tx_los = 2;
+  bool tx_fault = 3;
+  bool tx_eq_fault = 4;
+  bool rx_lol = 5;
+  bool tx_lol = 6;
+  double tx_bias = 7;   // Measured in milliAmps.
+  double tx_power = 8;  // Measured in dBm.
+  double rx_power = 9;  // Measured in dBm.
+  AlarmStatus tx_bias_alarm = 10;
+  AlarmStatus tx_power_alarm = 11;
+  AlarmStatus rx_power_alarm = 12;
+  bool tx_disable = 13;
+  uint32 rate_select = 14;
+}
+
+message Transceiver {
+  int32 id = 1;
+  string description = 2;
+  HwState hardware_state = 3;
+  string err_msg = 4;
+  HardwareInfo info = 5;
+
+  bool data_ready = 6;
+  MediaType media_type = 7;
+  SfpType connector_type = 8;
+  SfpModuleType module_type = 9;
+  SfpModuleCaps module_capabilities = 10;
+  int32 cable_length = 11;
+  string cable_length_desc = 12;
+  double temperature = 13;  // Measured in degrees Celsius.
+  double vcc = 14;          // Measured in volts.
+  AlarmStatus temperature_alarm = 15;
+  AlarmStatus vcc_alarm = 16;
+  int32 channel_count = 17;
+  repeated SFPChannel channels = 18;
+}
+
+// Data optionally available for every piece of hardware in the PHAL db.
+message HardwareInfo {
+  // Fields that appear in OpenConfig:
+  string id = 1;
+  string description = 2;
+  string mfg_name = 3;
+  string version = 4;
+  string serial_no = 5;
+  string part_no = 6;
+  // Google additions:
+  uint32 mfg_date = 7;
+  uint32 firmware_version_no = 8;
+  repeated TemperatureData temperatures = 9;
+}
+
+message TemperatureData {
+  enum Location {
+    OTHER = 0;
+    HEATSINK = 1;
+    INLET = 2;
+    EXHAUST = 3;
+    MODULE = 4;
+  }
+  Location location = 1;
+  double celsius = 2;
+  string details = 3;
+}
+
+// Attribute DB (i.e. Phal DB) services
+service PhalDb {
+  // Get one or more attributes
+  rpc Get(GetRequest) returns (GetResponse) {}
+
+  // Set one or more attributes
+  rpc Set(SetRequest) returns (SetResponse) {}
+
+  // Subscribe to one or more attributes
+  rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse) {}
+}
+
+message PathQuery {
+  message PathEntry {
+    // The name of the next attribute group in the path. If this is the last
+    // entry in the path, this is the name of an attribute instead. In the
+    // simplest case, this is the only field of PathEntry which needs to be set.
+    string name = 1;
+    // Ignored if indexed == false.
+    int32 index = 2;
+    // If indexed == true, this PathEntry refers to a repeated attribute group.
+    // If all == true as well, we should query every index in this group.
+    // Otherwise, query only the specified index.
+    bool indexed = 3;
+    // Ignored if indexed == false.
+    bool all = 4;
+    // If terminal_group == true, this PathEntry is the last entry in our path,
+    // but still refers to an attribute group. Instead of querying a single
+    // attribute, we will query every attribute contained in this group and its
+    // children.
+    bool terminal_group = 5;
+  }
+  repeated PathEntry entries = 1;
+}
+
+message GetRequest {
+  PathQuery path = 1;
+}
+
+message GetResponse {
+  PhalDB phal_db = 1;
+}
+
+message SubscribeRequest {
+  PathQuery path = 1;
+  uint64 polling_interval = 2;  // nanoseconds
+}
+
+message SubscribeResponse {
+  PhalDB phal_db = 1;
+}
+
+message UpdateValue {
+  oneof value {
+    double double_val = 1;
+    float float_val = 2;
+    int32 int32_val = 3;
+    int64 int64_val = 4;
+    uint32 uint32_val = 5;
+    uint64 uint64_val = 6;
+    bool bool_val = 7;
+    string string_val = 8;
+    bytes bytes_val = 9;
+  }
+}
+
+// Update one or more values in a leaf node
+message Update {
+  PathQuery path = 1;
+  UpdateValue value = 2;
+}
+
+message SetRequest {
+  repeated Update updates = 1;
+}
+
+message SetResponse {}
+
+// Error message used to report a single update error for a Set RPC.
+message Error {
+  // gRPC canonical error code (see
+  // github.com/grpc/grpc-go/blob/master/codes/codes.go)
+  int32 canonical_code = 1;
+  // Detailed error message.
+  string message = 2;
+  // Detailed numeric error code
+  int32 code = 3;
+}

@@ -1,0 +1,16 @@
+# Copyright 2019-present Open Networking Foundation
+# SPDX-License-Identifier: Apache-2.0
+# invalid open config config, no chassis defined
+component {
+  name: ":lc-1"
+  component {
+    linecard {
+      slot_id {
+        value: "1"
+      }
+    }
+    id {
+      value: "1"
+    }
+  }
+}

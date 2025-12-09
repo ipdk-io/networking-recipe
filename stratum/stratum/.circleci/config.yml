@@ -1,0 +1,24 @@
+# Copyright 2022-present Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+version: 2.1
+setup: true
+orbs:
+  continuation: circleci/continuation@0.1.2
+jobs:
+  generate_and_run_config:
+    executor: continuation/default
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Generate config
+          command: |
+            bash .circleci/generate-config.sh > /tmp/generated_config.yml
+      - continuation/continue:
+          configuration_path: /tmp/generated_config.yml
+
+workflows:
+  setup:
+    jobs:
+      - generate_and_run_config

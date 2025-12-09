@@ -1,0 +1,70 @@
+# Copyright 2019-present Open Networking Foundation
+# SPDX-License-Identifier: Apache-2.0
+# Bazel
+/bazel-*
+
+# C++
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Python Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Executables
+*.exe
+*.out
+*.app
+
+# macOS
+*.DS_Store
+
+# Thumbnails
+._*
+
+# VS Code
+/.vscode/
+
+# Visual SlickEdit
+/.vslick/
+
+# CLion
+/.idea/
+/.project/
+/.clwb/
+
+# emacs
+*~
+
+# vi
+*.swp
+
+# Tarballs
+*.tgz
+*.tar.xz
+
+# SSL certificates
+tools/tls/certs/
+.srl

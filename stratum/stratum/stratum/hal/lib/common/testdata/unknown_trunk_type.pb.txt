@@ -1,0 +1,10 @@
+# Copyright 2019-present Open Networking Foundation
+# SPDX-License-Identifier: Apache-2.0
+# unknown trunk type
+trunk_ports {
+  id: 9
+  name: "trk-1"
+  type: UNKNOWN_TRUNK
+  members: 1
+  members: 2
+}

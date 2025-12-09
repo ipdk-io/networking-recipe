@@ -1,0 +1,1778 @@
+// Copyright 2018 Google LLC
+// Copyright 2018-present Open Networking Foundation
+// Copyright 2023 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+
+// This file include all the common internal messages used by Stratum stack.
+
+syntax = "proto3";
+
+option cc_generic_services = false;
+
+package stratum.hal;
+
+//------------------------------------------------------------------------------
+// Misc enum types used throughout the stack.
+//------------------------------------------------------------------------------
+
+// Mode of operation of the stack.
+enum OperationMode {
+  OPERATION_MODE_UNKNOWN = 0;
+  OPERATION_MODE_STANDALONE = 1;  // Standalone Stratum.
+  OPERATION_MODE_COUPLED = 2;     // Stratum running as part of Sandcastle.
+  OPERATION_MODE_SIM = 3;         // Stratum running in sim mode.
+}
+
+// Tri-state boolean for the case 'false' is not a default.
+enum TriState {
+  TRI_STATE_UNKNOWN = 0;
+  TRI_STATE_TRUE = 1;
+  TRI_STATE_FALSE = 2;
+}
+
+// Target platforms (aka the type of the switch/chassis).
+enum Platform {
+  PLT_UNKNOWN = 0;  // default
+  PLT_GENERIC_TRIDENT_PLUS = 1;
+  PLT_GENERIC_TRIDENT2 = 2;
+  PLT_GENERIC_TOMAHAWK = 3;
+  PLT_GENERIC_TOMAHAWK_PLUS = 4;
+  PLT_GENERIC_TOMAHAWK2 = 5;
+  PLT_GENERIC_TOMAHAWK3 = 6;
+  PLT_MLNX_SN2700 = 9;
+  PLT_P4_SOFT_SWITCH = 10;
+  PLT_NP4_INTEL_N3000 = 13;
+  PLT_GENERIC_BAREFOOT_TOFINO = 14;
+  PLT_GENERIC_BAREFOOT_TOFINO2 = 15;
+  PLT_P4_IPU_ES2000 = 16;
+  // TODO(unknown): Add all the BCM and MLNX based platforms.
+}
+
+// List of traffic classes (aka class of services).
+// Note: The names of the enum cases are important and are used to identify
+// QoS queues in gNMI YANG model.
+enum TrafficClass {
+  UNDEFINED = 0;
+  BE1 = 20;   // Best effort
+  AF1 = 21;   // Assured forwarding priority 1
+  AF2 = 22;   // Assured forwarding priority 2
+  AF3 = 23;   // Assured forwarding priority 3
+  AF4 = 24;   // Assured forwarding priority 4
+  NC1 = 25;   // Network control
+  NC0 = 26;   // Network control
+  BE0 = 27;   // Best effort at high packet loss
+  LLQ1 = 29;  // Low-latency congestion-control queue (go/llq)
+  LLQ2 = 30;  // Low-latency congestion-control queue (go/llq)
+};
+
+// Mode of hotplug request
+enum QemuHotplugMode {
+  HOTPLUG_MODE_NONE = 0;
+  HOTPLUG_MODE_ADD = 1;
+  HOTPLUG_MODE_DEL = 2;
+}
+
+// Packet Direction type
+enum PacketDirection {
+  DIRECTION_HOST = 0;
+  DIRECTION_NETWORK = 1;
+  DIRECTION_NONE = 2;
+};
+
+//------------------------------------------------------------------------------
+// Definition of chassis, nodes, singleton ports, trunk ports, etc in the
+// internal chassis config (defined later in this file) pushed to the managers.
+//------------------------------------------------------------------------------
+
+// Config-related parameters for the entire chassis.
+message ChassisConfigParams {
+  message LacpConfig {
+    // Router MAC portion of LACP system ID. A mac address stored in 6
+    // least-significant bytes.
+    uint64 lacp_router_mac = 1;
+    // System priority portion of LACP system ID.
+    uint32 lacp_system_priority = 2;
+  }
+  message NtpConfig {
+    // TODO(unknown): See if there is anything in YANG models which can be
+    // used here.
+  }
+  message PowerConfig {
+    // TODO(unknown): See if there is anything in YANG models which can be
+    // used here.
+  }
+  message FanConfig {
+    // The unique ID of the fan within the chassis. Association of an ID to a
+    // fan is done internally and can be queried by an external tool.
+    uint32 id = 1;
+    // Speed in percentage (0 means off and 100 means max speed). Used only
+    // manual speed change is available. If so and this value is set to zero,
+    // the fan will be off, unless the fan has a closed loop temperature
+    // controller and a non zero target_temp_celsius is given. If manual speed
+    // set is not available, giving a fan config for the fan will result in an
+    // error.
+    uint32 speed_percentage = 2;
+    // Target temperature for the sensor used for fan speed control. Used only
+    // when a closed loop temperature controller is available and the value is
+    // non-zero. Otherwise, it is ignored.
+    uint32 target_temperature_celsius = 3;
+  }
+  message TuntapConfig {
+    enum Mode {
+      UNKNOWN = 0;
+      DISABLED = 1;
+      BOOTSTRAP = 2;
+      LOAD_BALANCE = 3;
+    }
+    // The name of the tuntap device (e.g. tap0).
+    string name = 1;
+    // Dataplane mode (typically set to LOAD_BALANCE).
+    Mode mode = 2;
+    // v4 and v6 IP addresses and prefixlens.
+    string ipv4_address = 3;
+    uint32 ipv4_prefixlen = 4;
+    string ipv6_address = 5;
+    uint32 ipv6_prefixlen = 6;
+    // Is this netdev used for default route in Linux.
+    bool default_netdev = 7;
+  }
+  LacpConfig lacp_config = 1;
+  NtpConfig net_config = 2;
+  PowerConfig power_config = 3;
+  repeated FanConfig fan_configs = 4;
+  repeated TuntapConfig tuntap_configs = 5;
+}
+
+// Flow-related parameters for for switching nodes (aka chips).
+message NodeFlowParams {
+  // TODO(unknown): Complete this.
+}
+
+// Config-related parameters for switching nodes (aka chips).
+message NodeConfigParams {
+  // Per-VLAN configuration.
+  message VlanConfig {
+    // VLAN id.
+    int32 vlan_id = 1;
+    // Block broadcast packets for this VLAN?
+    bool block_broadcast = 2;
+    // Block known multicast packets for this VLAN?
+    bool block_known_multicast = 3;
+    // Block unknown multicast packets for this VLAN?
+    bool block_unknown_multicast = 4;
+    // Block unknown multicast packets for this VLAN?
+    bool block_unknown_unicast = 5;
+    // L2 learning needs to be disabled for this VLAN?
+    bool disable_l2_learning = 6;
+  }
+  // Per node L2-related configs.
+  message L2Config {
+    // L2 aging for L2 entries. Affects VLANs with L2 learning enabled. 0
+    // (default) will disable aging timer.
+    int32 l2_age_duration_sec = 1;
+  }
+  // Per node QoS configuration. This config is expected to be common among
+  // all the chips.
+  message QosConfig {
+    // Scheduling mode.
+    enum SchedulingMode {
+      QOS_SCHED_UNKNOWN = 0;  // unknown (default)
+      QOS_SCHED_SP = 1;       // strict priority
+      QOS_SCHED_RR = 2;       // round robin
+      QOS_SCHED_WRR = 3;      // weighted round robin
+      QOS_SCHED_WDRR = 4;     // weighted deficit round robin
+    }
+    // Per internal priority scheduling config.
+    message SchedulerConfig {
+      // Internal priority.
+      uint32 internal_priority = 1;
+      // Weights used for WRR and WDRR. Ignored for other modes.
+      uint32 scheduler_weight = 2;
+      // Max and min bandwidth for each internal priority.
+      uint32 min_bandwidth_percent = 3;  // 1-100
+      uint32 max_bandwidth_percent = 4;  // 1-100
+    }
+    // 802.1p priority to internal priority map entry.
+    message Dot1pMapping {
+      uint32 dot1p_priority = 1;  // 0-7
+      uint32 internal_priority = 2;
+    }
+    // DSCP range to internal priority map entry.
+    message DscpMapping {
+      uint32 dscp_start = 1;
+      uint32 dscp_end = 2;
+      uint32 internal_priority = 3;
+    }
+    // Internal priority to the traffic class map entry.
+    // The map is expected to be 1-to-1.
+    message TrafficClassMapping {
+      uint32 internal_priority = 1;
+      TrafficClass traffic_class = 2;
+    }
+    // Internal priority to the ingress priority group number map entry.
+    // The map is expected to be 1-to-1.
+    message PriorityGroupMapping {
+      uint32 internal_priority = 1;
+      uint32 pg_num = 2;
+    }
+    // Internal priority to the egress CoS queue number map entry.
+    // The map is expected to be 1-to-1.
+    message CosqMapping {
+      uint32 internal_priority = 1;
+      uint32 q_num = 2;
+    }
+    // Ingress priority group number to the ingress service pool map entry.
+    message IngressServicePoolMapping {
+      uint32 pg_num = 1;
+      uint32 sp_num = 2;
+    }
+    // Egress CoS queue number to egress service pool map entry.
+    message EgressServicePoolMapping {
+      uint32 q_num = 1;
+      uint32 sp_num = 2;
+    }
+    SchedulingMode scheduling_mode = 1;
+    repeated SchedulerConfig scheduling_config = 2;
+    repeated Dot1pMapping dot1p_mapping = 3;
+    repeated DscpMapping dscp_mapping = 4;
+    repeated TrafficClassMapping traffic_class_mapping = 5;
+    repeated CosqMapping cosq_mapping = 6;
+    repeated PriorityGroupMapping priority_group_mapping = 7;
+    repeated IngressServicePoolMapping ingress_service_pool_mapping = 8;
+    repeated EgressServicePoolMapping egress_service_pool_mapping = 9;
+  }
+  repeated VlanConfig vlan_configs = 1;
+  L2Config l2_config = 2;
+  QosConfig qos_config = 3;
+}
+
+// Flow-related parameters for the ports (singleton and trunk ports).
+message PortFlowParams {
+  // TODO(unknown): Complete this.
+}
+
+// FEC operational mode for a singleton port.
+enum FecMode {
+  FEC_MODE_UNKNOWN = 0;
+  FEC_MODE_ON = 1;
+  FEC_MODE_OFF = 2;
+  FEC_MODE_AUTO = 3;
+}
+
+// DPDK port types.
+enum DpdkPortType {
+  PORT_TYPE_NONE = 0;
+  PORT_TYPE_VHOST = 1;
+  PORT_TYPE_TAP = 2;
+  PORT_TYPE_LINK = 3;
+  PORT_TYPE_SOURCE = 4;
+  PORT_TYPE_SINK = 5;
+}
+
+// DPDK device types.
+enum DpdkDeviceType {
+  DEVICE_TYPE_NONE = 0;
+  DEVICE_TYPE_VIRTIO_NET = 1;
+  DEVICE_TYPE_VIRTIO_BLK = 2;
+}
+
+// QEMU Hotplug parameters.
+enum DpdkHotplugParam {
+  PARAM_NONE = 0;
+  PARAM_SOCK_IP = 1;
+  PARAM_SOCK_PORT = 2;
+  PARAM_HOTPLUG_MODE = 3;
+  PARAM_VM_MAC = 4;
+  PARAM_NETDEV_ID = 5;
+  PARAM_CHARDEV_ID = 6;
+  PARAM_NATIVE_SOCK_PATH = 7;
+  PARAM_DEVICE_ID = 8;
+}
+
+// Hotplug config parameters for QEMU-based VM.
+message HotplugConfig {
+  // IP address for qemu monitor socket
+  string qemu_socket_ip = 1;
+  // Port number for qemu monitor socket
+  uint32 qemu_socket_port = 2;
+  // Qemu Hotplug mode
+  QemuHotplugMode qemu_hotplug_mode = 3;
+  // The configured mac address for this port.
+  uint64 qemu_vm_mac_address = 4;
+  // VM netdev id for hotplug
+  string qemu_vm_netdev_id = 5;
+  // VM chardev id for hotplug
+  string qemu_vm_chardev_id = 6;
+  // Native socket path (applicable for containers)
+  string native_socket_path = 7;
+  // VM device id for hotplug
+  string qemu_vm_device_id = 8;
+}
+
+// Config-related parameters for the ports (singleton and trunk ports).
+message PortConfigParams {
+  // Per-port hash config. Most of the hash configuration is given per node.
+  // This is the only hash config we need to provide per node, for ports that
+  // are part of a trunk/lag or ECMP group.
+  message HashConfig {
+    // TODO(unknown): We need a better way than hash_select.
+    // This is RTAG7 specific. Maybe based on the port type?
+    int32 rtag7_ecmp_hash_select = 1;
+    int32 rtag7_lag_hash_select = 2;
+  }
+  // Modulation type for ports.
+  enum ModulationType {
+    PORT_MODULATION_UNKNOWN = 0;
+    PORT_MODULATION_NRZ = 1;
+    PORT_MODULATION_PAM4 = 2;
+  }
+  // The configured admin state for this port.
+  AdminState admin_state = 1;
+  // The per port MTU (aka max frame size) for this port.
+  int32 mtu = 2;
+  // Whether autoneg is enabled for this port.
+  TriState autoneg = 3;
+  // The per port hash config for this port.
+  HashConfig hash_config = 4;
+  // The modulation type used for the port. Required for some platforms.
+  ModulationType modulation_type = 5;
+  // FEC operational mode
+  FecMode fec_mode = 6;
+  // The configured mac address for this port.
+  MacAddress mac_address = 7;
+  // The configured loopback state for this port.
+  LoopbackState loopback_mode = 8;
+  // Type of this port.
+  DpdkPortType port_type = 9;
+  // Flag to trigger SW backed pipeline.
+  bool build_pipeline = 10;
+  // VM associated in the OpenConfig.
+  string host_name = 11;
+  // Queues to be configured
+  int32 queues  = 12;
+  // Socket path to be used
+  string socket_path = 13;
+  // Backend device type
+  DpdkDeviceType device_type = 14;
+  // Pipeline name to be used
+  string pipeline_name = 15;
+  // Mempool name to be used
+  string mempool_name = 16;
+  // Flag to trigger Auto creation of back-end control TAP ports and rules.
+  string control_port = 17;
+  // PCI BDF value to be used for the LINK port
+  string pci_bdf = 18;
+  // Per Qemu VM hotplug config
+  HotplugConfig hotplug_config = 19;
+  // Packet direction
+  PacketDirection packet_dir = 20;
+}
+
+// Chassis uniquely identifies a switch with a single management interface,
+// one or more slots (aka linecards), and one or more switching nodes (aka
+// chips) on each linecard.
+// NOTE: There is no need to specifiy a unique ID for chassis. Also, there
+// is no flow-related parameters specified for the chassis. Flow-related
+// parameters only apply to nodes and ports, as specified in this section.
+message Chassis {
+  // The chassis platforms. Required for any platform-specific code.
+  Platform platform = 1;  // required
+  // An optional arbitrary name for the chassis. WILL NOT BE PARSED.
+  // Example: ju1u1t1.cbf97.net.google.com.
+  string name = 2;
+  // Parameters configured for the entire chassis when config is pushed to the
+  // the switch.
+  ChassisConfigParams config_params = 3;
+}
+
+// Node uniquely identifies a single switching node (aka chip) on a chassis
+// linecard and all its flow-related and config-related parameters.
+message Node {
+  // The unique ID of the switching node on the chassis as used by the
+  // controller.
+  uint64 id = 1;  // required
+  // An optional arbitrary name for the switching node. WILL NOT BE PARSED.
+  // Example: jka1switch.prod.google.com.
+  string name = 2;
+  // The 1-base index of the slot (aka linecard) which this node belongs.
+  int32 slot = 3;  // required
+  // The optional 1-base index of the node within the chassis. The value
+  // must be in {1..N}, where N is the number of chips on the chassis. This
+  // index is not necessarily in the model. The stack can use this internally
+  // to index the nodes.
+  int32 index = 4;
+  // Flow-related parameters for the switching nodes.
+  NodeFlowParams flow_params = 5;
+  // Parameters configured for switching node when config is pushed to the
+  // the switch.
+  NodeConfigParams config_params = 6;
+}
+
+// SingletonPort uniquely identifies a single physical port on a single chassis
+// and all its flow-related and config-related parameters.
+// NOTE: Each implementation of SwitchInterface class is assumed to be able to
+// translate a SingletonPort to any internal presentation of port used by the
+// class. For example:
+// SaiSwitch: An implementation of SwitchInterface based on SAI. This class
+//            translates SingletonPort to SAI port of type sai_object_id_t
+//            and vice versa.
+// BcmSwitch: An implementation of SwitchInterface that uses BCM SDK directly.
+//            This class translates SingletonPort to a tuple of
+//            (int unit, bcm_port_t port) and vice versa.
+message SingletonPort {
+  // The unique ID of the singleton port. Used for operations which need a
+  // single unique integer ID for each port (e.g. flow programming). Note that
+  // all the singleton and trunk ports use a common range of integer IDs, so
+  // using the same integer ID for a singleton port and a trunk port is not
+  // allowed.
+  uint32 id = 1;  // required
+  // An optional arbitrary name for the singleton port. WILL NOT BE
+  // PARSED. Example: "ju1u1.xyz99.net.google.com:ce-1/32". Used only for
+  // logging purposes.
+  string name = 2;
+  // The 1-based index of the slot (aka linecard) of the port.
+  int32 slot = 3;  // required
+  // The 1-based index of the singleton port on the slot.
+  int32 port = 4;  // required
+  // The 1-based channel index (only if the port is channelized). Absence or
+  // zero means non-channelized.
+  int32 channel = 5;
+  // The speed of the ports.
+  uint64 speed_bps = 6;  // required
+  // The id of the node that the port belongs to.
+  uint64 node = 9;  // required
+  // Flow-related parameters used when SingletonPort message is used in flow
+  // programming related operations.
+  PortFlowParams flow_params = 7;
+  // Parameters configured for each singleton port when config is pushed to the
+  // the switch.
+  PortConfigParams config_params = 8;
+}
+
+// OpticalNetworkInterface uniquely identifies a single physical optical
+// network interface on a single chassis.
+message OpticalNetworkInterface {
+  // The unique optical network interface ID.
+  uint32 id = 1;
+  // An optional arbitrary name for the optical port. WILL NOT BE PARSED.
+  string name = 2;
+  // The 1-based module index of this port.
+  int32 module = 3;
+  // The 1-based network interface index of this port.
+  int32 network_interface = 4;
+  // Optical channel frequency in Hz.
+  uint64 frequency = 5;
+  // Target output optical power level of the optical channel, expressed in
+  // increments of 0.01 decibel-milliwats.
+  double target_output_power = 6;
+  // Optical channel operational mode.
+  uint64 operational_mode = 7;
+  // Optical channel line port value.
+  string line_port = 8;
+}
+
+// TrunkPort uniquely identifies a single trunk port on a single chassis and
+// all its flow-related and config-related parameters. This message is the
+// only message we will use to specify trunk ports in the HAL and avoid
+// defining any other message to specify trunks of any sort.
+message TrunkPort {
+  enum TrunkType {
+    UNKNOWN_TRUNK = 0;
+    STATIC_TRUNK = 1;
+    LACP_TRUNK = 2;
+  }
+  // The unique ID of the trunk port. Used for operations which need a
+  // single unique integer ID for each port (e.g. flow programming). Note that
+  // all the singleton and trunk ports use a common range of integer IDs. So,
+  // using the same integer ID for a singleton port and a trunk port is not
+  // allowed.
+  uint32 id = 1;  // required
+  // An optional arbitrary name for the trunk port. WILL NOT BE PARSED.
+  // Example: trk-df101s1i1.cbf96-2.
+  string name = 2;
+  // The id of the corresponding node that the trunk belongs to.
+  uint64 node = 3;  // required
+  // The type of the trunk.
+  TrunkType type = 4;  // required
+  // The id of the SingletonPorts or TrunkPorts members. This list can be empty
+  // for a LACP trunk but cannot be empty for STATIC trunks.
+  repeated uint32 members = 5;
+  // Flow-related parameters used when TrunkPort message is used in flow
+  // programming related operations.
+  PortFlowParams flow_params = 6;
+  // Parameters configured for each trunk port when config is pushed to the
+  // the switch.
+  PortConfigParams config_params = 7;
+}
+
+// PortGroup uniquely identifies an ECMP/WCMP port group.
+message PortGroup {
+  message PortGroupMember {
+    // The id of the singleton port member.
+    uint32 id = 1;
+    // The weight (in WCMP mode).
+    int32 weight = 2;
+  }
+  // The unique ID of the port group used for flow programming.
+  uint32 id = 1;
+  // An optional arbitrary name for the port group. WILL NOT BE PARSED.
+  string name = 2;
+  // The port group members.
+  repeated PortGroupMember members = 3;
+}
+
+//------------------------------------------------------------------------------
+// Vendor-specific messages in the internal chassis config pushed to the
+// managers (defined later in this file). Note that these messages are still
+// defined here in this file as opposed to a vendor specific folder, as they are
+// used by the common code to parse/deparse vendor specific code. Examples
+// include BCM-specific messages that are populated based on the config pushed
+// to the switch.
+//------------------------------------------------------------------------------
+
+// Config specific to Google-build chassis.
+message GoogleConfig {
+  // BcmKnetIntfPurpose defines which application will supposed to use a KNET
+  // interface defined on a unit and CPU queue.
+  enum BcmKnetIntfPurpose {
+    BCM_KNET_INTF_PURPOSE_UNKNOWN = 0;     // Default.
+    BCM_KNET_INTF_PURPOSE_CONTROLLER = 1;  // Packets sent to the controller
+    BCM_KNET_INTF_PURPOSE_SFLOW = 2;       // Packets sent to the sflow agent
+  }
+
+  // This message encapsulates all the info required to setup KNET interfaces
+  // on a specific node.
+  message BcmKnetConfig {
+    // KNET config for a single KNET interface on a node.
+    message BcmKnetIntfConfig {
+      int32 mtu = 1;
+      int32 cpu_queue = 2;
+      int32 vlan = 3;
+      BcmKnetIntfPurpose purpose = 4;
+      // TODO(unknown): Anything else?
+    }
+    repeated BcmKnetIntfConfig knet_intf_configs = 1;
+  }
+
+  // BcmRxConfig encapsulates all the data required to fully configure RX on a
+  // unit. This is just a proto wrapper around BcmSdkInterface::RxConfig.
+  message BcmRxConfig {
+    // BcmDmaChannelConfig encapsulates all the data required to configure an
+    // RX DMA channel.
+    message BcmDmaChannelConfig {
+      // The number of chains (DVs).
+      int32 chains = 1;
+      // Strip CRC from packets?
+      bool strip_crc = 2;
+      // Strip VLAN tag from packets?
+      bool strip_vlan = 3;
+      // Accept packets larger than bufsize?
+      bool oversized_packets_ok = 4;
+      // Do not parse received packets?
+      bool no_pkt_parsing = 5;
+      // The set of COS (classes of service) supported.
+      repeated int32 cos_set = 6;
+    }
+    // The RX pool size in packets. If non-positive, default will be used.
+    int32 rx_pool_pkt_count = 1;
+    // Bytes per packet in RX pool. If non-positive, default will be used.
+    int32 rx_pool_bytes_per_pkt = 2;
+    // Max packet size in bytes. If non-positive, default will be used.
+    int32 max_pkt_size_bytes = 3;
+    // Packets per chain. If non-positive, default will be used.
+    int32 pkts_per_chain = 4;
+    // Global rate limit in pps. If not given , we set no limit. Note that this
+    // limit can be overwritten by the value given in BcmRateLimitConfig.
+    int32 max_rate_pps = 5;
+    // Max # of pakcet received in single burst. If not given, we set no limit.
+    // Note that this limit can be overwritten by the value given in
+    // BcmRateLimitConfig.
+    int32 max_burst_pkts = 6;
+    // Are we using interrupts to generate RX callback?
+    bool use_interrupt = 7;
+    // Map from DMA channel (0-based) to DMA channel config given by
+    // BcmDmaChannelConfig.
+    map<int32, BcmDmaChannelConfig> dma_channel_configs = 8;
+  }
+
+  message BcmTxConfig {}
+
+  // BcmRateLimitConfig specifies rate limit settings for a unit. This is just
+  // a proto wrapper around BcmSdkInterface::RateLimitConfig;
+  message BcmRateLimitConfig {
+    // Specifies rate limit settings for a COS.
+    message BcmPerCosRateLimitConfig {
+      // Rate limit for this cos in ppc. If not given, we set no limit.
+      int32 max_rate_pps = 1;
+      // Max # of pakcet received in single burst for this cos. If not given,
+      // we set no limit.
+      int32 max_burst_pkts = 2;
+    }
+    // Global rate limit in pps. If not given , we set no limit.
+    int32 max_rate_pps = 1;
+    // Max # of pakcet received in single burst. If not given, we set no limit.
+    int32 max_burst_pkts = 2;
+    // Map from cos (0-based) to its rate limit config given by
+    // BcmPerCosRateLimitConfig.
+    map<int32, BcmPerCosRateLimitConfig> per_cos_rate_limit_configs = 3;
+  }
+
+  // BcmBufferConfig defines the buffer carving config for a BCM unit.
+  // TODO(unknown): This still needs modification. Not ready yet.
+  // TODO(unknown): Add documentation.
+  message BcmBufferConfig {
+    message ServicePoolConfig {
+      uint32 sp_num = 1;
+      uint32 max_ingress_buf_bytes = 2;
+      uint32 max_egress_buf_bytes = 3;
+    }
+    message PriorityGroupConig {
+      uint32 pg_num = 1;
+      uint32 pg_min = 2;
+      uint32 pg_hdrm_global_enable = 3;
+      uint32 pg_shared_limit_cell = 4;
+      uint32 pg_shared_dynamic = 5;
+    }
+    message CosqConfig {
+      uint32 q_num = 1;
+      uint32 q_min = 2;
+      uint32 q_limit_enable = 3;
+      uint32 q_limit_dynamic = 4;
+      uint32 q_shared_limit_cell = 5;
+      uint32 q_shared_alpha_cell = 6;
+      uint32 q_color_limit_dynamic_cell = 7;
+    }
+    uint32 global_hdrm_limit = 1;
+    uint32 port_min = 2;
+  }
+
+  // BcmRtag7HashConfig defines RTAG7 hash config for a unit.
+  // TODO(unknown): Add documentation.
+  message BcmRtag7HashConfig {
+    enum HashField {
+      UNKNOWN_FIELD = 0;
+      SRC_IP = 1;
+      DST_IP = 2;
+      SRC_PORT = 3;
+      DST_PORT = 4;
+      VLAN_ID = 5;
+      IP_PROTO = 6;
+      MPLS_LABEL = 7;
+      IPV6_LO_FLOW_LABEL_16_BITS = 8;
+      IPV6_HI_FLOW_LABEL_4_BITS = 9;
+    }
+    enum HashBlock {
+      UNKNOWN_BLOCK = 0;
+      RTAG7A = 1;
+      RTAG7B = 2;
+    }
+    enum HashSubBlock {
+      UNKNOWN_SUB_BLOCK = 0;
+      RTAG7A0 = 1;
+      RTAG7B0 = 2;
+      RTAG7A1 = 3;
+      RTAG7B1 = 4;
+    }
+    enum Polynomial {
+      UNKNOWN_POLYNOMIAL = 0;
+      BISYNC = 1;
+      BISYNC_XOR1 = 2;
+      BISYNC_XOR2 = 3;
+      BISYNC_XOR4 = 4;
+      BISYNC_XOR8 = 5;
+      CCITT = 6;
+      XOR16 = 7;
+      CRC32_LO = 8;           // 16 LSBs of computed CRC32
+      CRC32_HI = 9;           // 16 MSBs of computed CRC32
+      CRC32_ETH_LO = 10;      // 16 LSBs of Ethernet CRC32
+      CRC32_ETH_HI = 11;      // 16 MSBs of Ethernet CRC32
+      CRC32_KOOPMAN_LO = 12;  // 16 LSBs of Koopman CRC32
+      CRC32_KOOPMAN_HI = 13;  // 16 MSBs of Koopman CRC32
+    }
+    message HashFunctionConfig {
+      HashBlock block = 1;
+      int32 seed = 2;  // Random seed.
+      repeated HashField fields = 3;
+      Polynomial polynomial_0 = 4;  // for 0 (or only) sub block
+      Polynomial polynomial_1 = 5;  // for 1 (if exists) sub block
+    }
+    message MacroFlowHashConfig {
+      message TableConfig {
+        HashSubBlock sub_block = 1;
+        int32 index_start = 2;
+        int32 index_end = 3;
+        uint32 offset = 4;
+      }
+      Polynomial polynomial = 1;
+      repeated TableConfig table_configs = 2;
+      bool use_msb_16bits = 3;
+      bool randomize_table = 4;
+      int32 random_iterations = 5;
+      int32 seed = 6;
+    }
+    message PerTypeHashConfig {
+      message TableConfig {
+        int32 offset = 1;
+        // Use macro flow hash. Only applicable to ECMP. If set, offset will be
+        // ignored.
+        bool use_macro_flow_hash = 2;
+      }
+      HashBlock block = 1;
+      TableConfig table_config_0 = 2;
+      TableConfig table_config_1 = 3;
+      // RTAG7A and RTAG7B has per port per HashType hash bits selection.
+      // Each port can select one of two sets of hash config defined by
+      // table_config_0 and table_config_1.
+      // Here defines the default value, and it could be overridden by the per
+      // port config given in the PortConfigParams.
+      int32 port_hash_select = 4;
+    }
+    string description = 1;  // optional, just for debugging.
+    repeated HashFunctionConfig hash_function_configs = 2;
+    MacroFlowHashConfig macro_flow_hash_config = 3;
+    PerTypeHashConfig ecmp_hash_config = 4;
+    PerTypeHashConfig lag_hash_config = 5;
+  }
+
+  // The BcmChassisMap id. Only needed if the chassis supports more than one
+  // chassis map.
+  string bcm_chassis_map_id = 1;
+  // Maps from the index of the nodes (1-based) to all the configs related to
+  // that specific node.
+  map<uint64, BcmKnetConfig> node_id_to_knet_config = 2;
+  map<uint64, BcmRxConfig> node_id_to_rx_config = 3;
+  map<uint64, BcmTxConfig> node_id_to_tx_config = 4;
+  map<uint64, BcmRateLimitConfig> node_id_to_rate_limit_config = 5;
+  map<uint64, BcmBufferConfig> node_id_to_buffer_config = 6;
+  map<uint64, BcmRtag7HashConfig> node_id_to_rtag7_hash_config = 7;
+}
+
+// Config specific to Tofino chassis.
+message TofinoConfig {
+  message PacketShape {
+    uint64 rate_pps = 1;
+    uint32 burst_packets = 2;
+  }
+  message ByteShape {
+    uint64 rate_bps = 1;
+    uint32 burst_bytes = 2;
+  }
+  message BfPortShapingConfig {
+    message BfPerPortShapingConfig {
+      oneof shaping {
+        PacketShape packet_shaping = 1;
+        ByteShape byte_shaping = 2;
+      }
+    }
+    // Map from port id to its shaping config given by BfPerPortShapingConfig.
+    map<uint32, BfPerPortShapingConfig> per_port_shaping_configs = 1;
+  }
+
+  // DeflectOnPacketDropConfig specifies the port and queue where dropped
+  // packets will be deflected to.
+  message DeflectOnPacketDropConfig {
+    message DropTarget {
+      oneof port_type {  // required
+        uint32 port = 1;
+        uint32 sdk_port = 2;
+      }
+      uint32 queue = 3;
+    }
+    repeated DropTarget drop_targets = 1;
+  }
+
+  // QoS configuration for the traffic manager.
+  message TofinoQosConfig {
+    enum ApplicationPool {
+      UNKNOWN_APP_POOL = 0;
+      INGRESS_APP_POOL_0 = 1;
+      INGRESS_APP_POOL_1 = 2;
+      INGRESS_APP_POOL_2 = 3;
+      INGRESS_APP_POOL_3 = 4;
+      EGRESS_APP_POOL_0 = 5;
+      EGRESS_APP_POOL_1 = 6;
+      EGRESS_APP_POOL_2 = 7;
+      EGRESS_APP_POOL_3 = 8;
+    }
+    enum Baf {
+      UNKNOWN_BAF = 0;
+      BAF_1_POINT_5_PERCENT = 1;
+      BAF_3_PERCENT = 2;
+      BAF_6_PERCENT = 3;
+      BAF_11_PERCENT = 4;
+      BAF_20_PERCENT = 5;
+      BAF_33_PERCENT = 6;
+      BAF_50_PERCENT = 7;
+      BAF_66_PERCENT = 8;
+      BAF_80_PERCENT = 9;
+      DISABLE_BAF = 10;
+    }
+    enum SchedulingPriority {
+      UNKNOWN_PRIO = 0;
+      PRIO_0 = 1;
+      PRIO_1 = 2;
+      PRIO_2 = 3;
+      PRIO_3 = 4;
+      PRIO_4 = 5;
+      PRIO_5 = 6;
+      PRIO_6 = 7;
+      PRIO_7 = 8;
+    }
+    enum QueueColorLimit {
+      UNKNOWN_LIMIT = 0;
+      LIMIT_12_POINT_5_PERCENT = 1;
+      LIMIT_25_PERCENT = 2;
+      LIMIT_37_POINT_5_PERCENT = 3;
+      LIMIT_50_PERCENT = 4;
+      LIMIT_62_POINT_5_PERCENT = 5;
+      LIMIT_75_PERCENT = 6;
+      LIMIT_87_POINT_5_PERCENT = 7;
+      LIMIT_100_PERCENT = 8;
+    }
+    message PoolConfig {
+      ApplicationPool pool = 1;  // required
+      uint32 pool_size = 2;
+      bool enable_color_drop = 3;
+      uint32 color_drop_limit_green = 4;
+      uint32 color_drop_limit_yellow = 5;
+      uint32 color_drop_limit_red = 6;
+    }
+    message PpgConfig {
+      oneof port_type {  // required
+        uint32 port = 1;
+        uint32 sdk_port = 10;
+      }
+      bool is_default_ppg = 9;
+      uint32 minimum_guaranteed_cells = 2;
+      ApplicationPool pool = 3;
+      uint32 base_use_limit = 4;
+      Baf baf = 5;
+      uint32 hysteresis = 6;
+      uint32 ingress_drop_limit = 7;
+      uint32 icos_bitmap = 8;
+    }
+    message QueueConfig {
+      message QueueMapping {
+        int32 queue_id = 1;  // required
+        SchedulingPriority priority = 2;
+        uint32 weight = 3;
+        uint32 minimum_guaranteed_cells = 4;
+        ApplicationPool pool = 5;
+        uint32 base_use_limit = 6;
+        Baf baf = 7;
+        uint32 hysteresis = 8;
+        oneof max_rate {
+          PacketShape max_rate_packets = 9;
+          ByteShape max_rate_bytes = 10;
+        }
+        oneof min_rate {
+          PacketShape min_rate_packets = 11;
+          ByteShape min_rate_bytes = 12;
+        }
+        bool enable_color_drop = 13;
+        QueueColorLimit color_drop_limit_yellow = 14;
+        QueueColorLimit color_drop_limit_red = 15;
+      }
+      oneof port_type {  // required
+        uint32 port = 1;
+        uint32 sdk_port = 2;
+      }
+      repeated QueueMapping queue_mapping = 3;
+    }
+    repeated PoolConfig pool_configs = 1;
+    uint32 pool_color_drop_hysteresis_green = 2;
+    uint32 pool_color_drop_hysteresis_yellow = 3;
+    uint32 pool_color_drop_hysteresis_red = 4;
+    repeated PpgConfig ppg_configs = 5;
+    repeated QueueConfig queue_configs = 6;
+  }
+
+  // Maps from the index of the nodes (1-based) to all the configs related to
+  // that specific node.
+  map<uint64, BfPortShapingConfig> node_id_to_port_shaping_config = 1;
+  map<uint64, DeflectOnPacketDropConfig> node_id_to_deflect_on_drop_configs = 2;
+  map<uint64, TofinoQosConfig> node_id_to_qos_config = 3;
+}
+
+message VendorConfig {
+  GoogleConfig google_config = 1;
+  TofinoConfig tofino_config = 2;
+}
+
+//------------------------------------------------------------------------------
+// Definition of the internal chassis config pushed to the managers.
+//------------------------------------------------------------------------------
+
+// ChassisConfig is the internal data structure that encapsulates the so-called
+// "config" pushed to the entire chassis. The term "chassis" refers to a
+// switching box with one or more switching nodes managed by a mgmt interface.
+// The proto includes all the not-so-frequent settings that are required before
+// the switch can accept flow programming requests from the controller.
+// NOTE: In Stratum the external interface for pushing config is gNMI. The
+// proto realization of the YANG models for the config is internally converted
+// to a ChassisConfig before it is consumed by the internal stack components.
+message ChassisConfig {
+  string description = 1;
+  Chassis chassis = 2;
+  repeated Node nodes = 3;
+  repeated SingletonPort singleton_ports = 4;
+  repeated TrunkPort trunk_ports = 5;
+  repeated PortGroup port_groups = 6;
+  VendorConfig vendor_config = 7;
+  repeated OpticalNetworkInterface optical_network_interfaces = 8;
+}
+
+//------------------------------------------------------------------------------
+// State, status, type related enums.
+//------------------------------------------------------------------------------
+
+// A enum for describing the operational state (aka oper state) of a singleton
+// port.
+enum PortState {
+  // Default/invalid oper state.
+  PORT_STATE_UNKNOWN = 0;
+  // Port is up, which also means the link that the port is part is up as well.
+  PORT_STATE_UP = 1;
+  // Port is down, which also means the link that the port is part is down as
+  // well.
+  PORT_STATE_DOWN = 2;
+  // Port has indicated some low-level failures. This is a special case of a
+  // port down which is associated with a failure.
+  PORT_STATE_FAILED = 3;
+}
+
+// A enum for describing the operational state (aka oper state) of a trunk port.
+enum TrunkState {
+  // Default/invalid trunk state.
+  TRUNK_STATE_UNKNOWN = 0;
+  // Trunk is not empty and at least one member of the trunk is up and
+  // forwarding traffic (i.e. not blocked).
+  TRUNK_STATE_UP = 1;
+  // Trunk is empty or all the members of the trunk are either down or blocked.
+  TRUNK_STATE_DOWN = 2;
+}
+
+// An enum for describing the traffic block state of a singleton port that is
+// part of a trunk.
+enum TrunkMemberBlockState {
+  // Default/invalid blocking state.
+  TRUNK_MEMBER_BLOCK_STATE_UNKNOWN = 0;
+  // The trunk member port may be up and receiving traffic, but egress traffic
+  // is blocked. Only control traffic can be egressed from the port (if it is
+  // up). A port that is part of a trunk is set to blocked as part of LACP
+  // protocol or forcefully by the SDN controller.
+  TRUNK_MEMBER_BLOCK_STATE_BLOCKED = 1;
+  // The trunk member port is up and forwarding traffic normally.
+  TRUNK_MEMBER_BLOCK_STATE_FORWARDING = 2;
+}
+
+// A generic enum for describing the loopback state of a singleton port.
+enum LoopbackState {
+  // Default/invalid state.
+  LOOPBACK_STATE_UNKNOWN = 0;
+  // Normal/non-loopback state.
+  LOOPBACK_STATE_NONE = 1;
+  // Loopback packets at the MAC layer of the port.
+  LOOPBACK_STATE_MAC = 2;
+  // Loopback packets at the PHY layer of the port.
+  LOOPBACK_STATE_PHY = 3;
+}
+
+// A generic enum for describing the administrative state (aka admin state) of
+// a HW component. Admin state is typically the "intended oper state". After
+// the admin state of a HW component changes, we expect the oper state to change
+// eventually, however there is no direct dependency. For example, for a port,
+// the SDN controller may request the admin state to be enabled. The stack will
+// then set the port to be disabled on HW. The port will eventually change its
+// state and the linkscan will report the change, in which case we update the
+// operational state of the port to be down. In this case, one can expect the
+// admin state to be down, while the oper state is still up. It should be noted
+// that admin state can also specifiy some logical state which does not fully
+// translate to a new oper state. For example, setting a HW component to diag
+// mode, may not trasnlate to a new oper state.
+enum AdminState {
+  // Default/invalid admin state.
+  ADMIN_STATE_UNKNOWN = 0;
+  // HW component is set to be enabled. Setting a HW component (e.g., a port) to
+  // enabled translates to some HW operations, as a result of which the oper
+  // state of the HW component may change (e.g., in case of a port oper state of
+  // the port will eventually become up).
+  ADMIN_STATE_ENABLED = 1;
+  // HW component is set to be disabled. Setting a HW component (e.g., a port)
+  // to disabled translates to some HW operations, as a result of which the oper
+  // state of the HW component may change (e.g., in case of a port oper state of
+  // the port will eventually become down).
+  ADMIN_STATE_DISABLED = 2;
+  // HW component is set to be in diag mode. This typically indicates that the
+  // HW component is being used by a diagnostics SW underneath and should not be
+  // used like a normal component. Setting a HW component to diag mode will
+  // eventually change the HW state of the component.
+  // TODO(unknown): This mode is not supported at the moment.
+  ADMIN_STATE_DIAG = 3;
+}
+
+// A generic enum for describing the state of HW components (e.g. QSFP module).
+enum HwState {
+  // Hardware is present, but details (type/state) are unknown.
+  HW_STATE_UNKNOWN = 0;
+  // Hardware is present, configured, and operational.
+  HW_STATE_READY = 1;
+  // Hardware is present, but not yet operational.
+  HW_STATE_PRESENT = 2;
+  // No hardware is present.
+  HW_STATE_NOT_PRESENT = 3;
+  // Hardware is present, but not powered on.
+  HW_STATE_OFF = 4;
+  // Hardware is operational, but configured off.
+  HW_STATE_CONFIGURED_OFF = 5;
+  // A hardware failure has been detected.
+  HW_STATE_FAILED = 6;
+  // Hardware is in a diagnostic mode. This typically indicates that the HW
+  // component is being used by a diagnostics SW underneath
+  HW_STATE_DIAGNOSTIC = 7;
+}
+
+// A generic enum for describing the health state of a HW component, as seen
+// by a remote telemetry agent or set by an SDN controller. Note that the health
+// state of a component "may" be correlated to its HW state and/or operational
+// state, but no inherent correlation is required in general. Also, similar to
+// admin state, health state of a component can be set by a remote agent, such
+// as an SDN controller. In that case, the health state indicates whether the
+// the component is healthy from the controller POV or not.
+enum HealthState {
+  // Default/invalid health state.
+  HEALTH_STATE_UNKNOWN = 0;
+  // The HW component is healthy. The meaning will be case specific. For the
+  // case of ports as seen by the SDN controller, a healthy port means a port
+  // which is ready for sending traffic, which boils down to be being up with
+  // ND/LLDP reporting correct neighbor.
+  HEALTH_STATE_GOOD = 1;
+  // The HW component is unhealthy. The meaning will be case specific. For the
+  // case of ports as seen by the SDN controller, an unhealthy port means a port
+  // which is not ready for sending traffic, e.g., it is up by ND/LLDP reports
+  // wrong neighbor.
+  HEALTH_STATE_BAD = 2;
+}
+
+// Possible state for LED lights. Possible LedState for any supported LedType
+// should be listed here.
+enum LedState {
+  LED_STATE_UNKNOWN = 0;  // Used when the state is undetermined
+                          // e.g. after warm boot
+  LED_STATE_OFF = 1;
+  LED_STATE_SOLID = 2;
+  LED_STATE_BLINKING_SLOW = 3;
+  LED_STATE_BLINKING_FAST = 4;
+}
+
+// Different type of LED has different possible color & state conbination and
+// different number & control value of control path. LedType determin the value
+// for each control path for a given color & state combination.
+enum LedType {
+  // Unknown led type is regard as an config error.
+  LED_TYPE_UNKNOWN = 0;
+  // Green/Red non-blinking LEDs (Front Panel, PSU, Fan).
+  LED_TYPE_BICOLOR_FPGA = 1;
+  // Green/Amber solid/blinking LEDs (10G interfaces)
+  LED_TYPE_BICOLOR_LINK = 2;
+  // Non-blinking Green LED and Red LED. Used by Markab ports.
+  LED_TYPE_BICOLOR_FPGA_G_R = 3;
+  // Non-blinking Green/Red and Green/Yellow LEDs. Used by Markab ports.
+  LED_TYPE_TRICOLOR_FPGA_GR_GY = 4;
+  // Solid/blinking Green/Red and solid Yellow LED. Used by Markab ports.
+  LED_TYPE_TRICOLOR_FPGA_GR_Y = 5;
+  // Non-blinking Green, Red, and Yellow LEDs. Used by Markab ports.
+  LED_TYPE_TRICOLOR_FPGA_G_R_Y = 6;
+  // Non-blinking Green, Red LEDs controlled by multiple GPIO pins.
+  LED_TYPE_BICOLOR_GPIO_G_R = 7;
+}
+
+// Possible color for LED lights. Possible LedColor for any supported LedType
+// should be listed here.
+enum LedColor {
+  LED_COLOR_UNKNOWN = 0;  // Used when the color is undetermined
+                          // e.g. after warm boot
+  LED_COLOR_GREEN = 1;
+  LED_COLOR_RED = 2;
+  LED_COLOR_AMBER = 3;
+}
+
+// Possible physcial types for a frontpanel port.
+enum PhysicalPortType {
+  PHYSICAL_PORT_TYPE_UNKNOWN = 0;
+  PHYSICAL_PORT_TYPE_ETHERNET_1G = 1;
+  PHYSICAL_PORT_TYPE_IPASS = 2;
+  PHYSICAL_PORT_TYPE_SFP_CAGE = 3;
+  PHYSICAL_PORT_TYPE_QSFP_CAGE = 4;
+  PHYSICAL_PORT_TYPE_LP_CAGE = 5;
+  PHYSICAL_PORT_TYPE_CFP_CAGE = 6;
+  PHYSICAL_PORT_TYPE_BACKPLANE = 7;
+  PHYSICAL_PORT_TYPE_DWDM = 8;
+}
+
+// The media type for a frontpanel port.
+enum MediaType {
+  MEDIA_TYPE_UNKNOWN = 0;
+  MEDIA_TYPE_QSFP_SR4 = 1;
+  MEDIA_TYPE_QSFP_LR4 = 2;
+  MEDIA_TYPE_QSFP_COPPER = 3;
+  MEDIA_TYPE_SFP = 5;
+  MEDIA_TYPE_QSFP_PSM4 = 6;
+  MEDIA_TYPE_CFP_LR4 = 7;
+  MEDIA_TYPE_CFP_COPPER = 8;
+  MEDIA_TYPE_BP_COPPER = 9;
+  MEDIA_TYPE_QSFP_CSR4 = 11;
+  MEDIA_TYPE_QSFP_CLR4 = 12;  // IEEE LR4
+  MEDIA_TYPE_QSFP_CCR4 = 14;  // 100G copper
+}
+
+// TODO(unknown): revise these enum as needed per ASIC integration
+//       currently maps to sff_sfp_type_t defined in sff.h
+enum SfpType {
+  SFP_TYPE_UNKNOWN = 0;
+  SFP_TYPE_SFP = 1;
+  SFP_TYPE_QSFP = 2;
+  SFP_TYPE_QSFP_PLUS = 3;
+  SFP_TYPE_QSFP28 = 4;
+  SFP_TYPE_SFP28 = 5;
+}
+
+// TODO(unknown): revise these enum as needed per ASIC integration
+//       currently maps to sff_module_type_t defined in sff.h
+enum SfpModuleType {
+  SFP_MODULE_TYPE_UNKNOWN = 0;
+  SFP_MODULE_TYPE_100G_BASE_CR4 = 1;
+  SFP_MODULE_TYPE_10G_BASE_CR = 2;
+  SFP_MODULE_TYPE_1G_BASE_SX = 3;
+}
+
+// The module speed capability for a frontpanel port.
+// note: currently maps to sff_module_caps_t defined in sff.h
+message SfpModuleCaps {
+  bool f_100 = 1;
+  bool f_1g = 2;
+  bool f_10g = 3;
+  bool f_40g = 4;
+  bool f_100g = 5;
+}
+
+// Possible directions for a fan module.
+// currently maps to onlp_fan_info_t defined in fan.h
+enum FanDir {
+  FAN_DIR_UNKNOWN = 0;
+  FAN_DIR_B2F = 1;
+  FAN_DIR_F2B = 2;
+}
+
+// Possible capabilities for a fan module.
+// currently maps to onlp_fan_info_t defined in fan.h
+message FanCaps {
+  bool set_dir = 1;
+  bool get_dir = 2;
+  bool set_rpm = 3;
+  bool set_percentage = 4;
+  bool get_rpm = 5;
+  bool get_percentage = 6;
+}
+
+// Possible types for a PSU.
+// currently maps to onlp_psu_type_t defined in psu.h
+enum PsuType {
+  PSU_TYPE_UNKNOWN = 0;
+  PSU_TYPE_AC = 1;
+  PSU_TYPE_DC12 = 2;
+  PSU_TYPE_DC48 = 3;
+}
+
+// Possible Capabilities for a PSU.
+// currently maps to onlp_psu_caps_t defined in psu.h
+message PsuCaps {
+  bool get_type = 1;
+  bool get_vin = 2;
+  bool get_vout = 3;
+  bool get_iin = 4;
+  bool get_iout = 5;
+  bool get_pin = 6;
+  bool get_pout = 7;
+}
+
+// Possible capabilities for a thermal sensor module.
+// currently maps to onlp_thermal_info_t defined in thermal.h
+message ThermalCaps {
+  bool get_temperature = 1;
+  bool get_warning_threshold = 2;
+  bool get_error_threshold = 3;
+  bool get_shutdown_threshold = 4;
+}
+
+// Possible capabilities for a LED module.
+// currently maps to onlp_led_info_t defined in led.h
+message LedCaps {
+  bool off = 1;
+  bool auto = 2;
+  bool auto_blinking = 3;
+  bool char = 4;
+  bool red = 5;
+  bool red_blinking = 6;
+  bool orange = 7;
+  bool orange_blinking = 8;
+  bool yellow = 9;
+  bool yellow_blinking = 10;
+  bool green = 11;
+  bool green_blinking = 12;
+  bool blue = 13;
+  bool blue_blinking = 14;
+  bool purple = 15;
+  bool purple_blinking = 16;
+}
+
+// Possible modes for a LED module.
+// currently maps to onlp_led_info_t defined in led.h
+enum LedMode {
+  LED_MODE_UNKNOWN = 0;
+  LED_MODE_OFF = 1;
+  LED_MODE_AUTO = 2;
+  LED_MODE_AUTO_BLINKING = 3;
+  LED_MODE_CHAR = 4;
+  LED_MODE_RED = 5;
+  LED_MODE_RED_BLINKING = 6;
+  LED_MODE_ORANGE = 7;
+  LED_MODE_ORANGE_BLINKING = 8;
+  LED_MODE_YELLOW = 9;
+  LED_MODE_YELLOW_BLINKING = 10;
+  LED_MODE_GREEN = 11;
+  LED_MODE_GREEN_BLINKING = 12;
+  LED_MODE_BLUE = 13;
+  LED_MODE_BLUE_BLINKING = 14;
+  LED_MODE_PURPLE = 15;
+  LED_MODE_PURPLE_BLINKING = 16;
+}
+
+//------------------------------------------------------------------------------
+// Messages related to physical properties of ports on a chassis
+//------------------------------------------------------------------------------
+
+// Frontpanel port info. Refers to properties of the module (e.g. QSFP module)
+// used for a frontpanel port.
+message FrontPanelPortInfo {
+  PhysicalPortType physical_port_type = 1;
+  MediaType media_type = 2;
+  string vendor_name = 3;
+  string part_number = 4;
+  string serial_number = 5;
+  HwState hw_state = 6;
+}
+
+// Optical channel state and configuration.
+message OpticalTransceiverInfo {
+  message Power {
+    // The instantaneous value of the statistic.
+    double instant = 1;
+    // The arithmetic mean value of the statistic over the time interval.
+    double avg = 2;
+    // The time interval over which the statistics are computed.
+    uint64 interval = 3;
+    // The maximum value of the statistic over the time interval.
+    double max = 4;
+    // The absolute time at which the maximum value occurred.
+    uint64 max_time = 5;
+    // The minimum value of the statistic over the time interval.
+    double min = 6;
+    // The absolute time at which the minimum value occurred.
+    uint64 min_time = 7;
+  }
+
+  // Optical channel frequency in Hz.
+  uint64 frequency = 1;
+  // The input/output optical power of this port in units of 0.01
+  // decibel-milliwatt. If the port is an aggregate of multiple physical
+  // channels, this attribute is the total power or sum of all channels.
+  Power input_power = 2;
+  Power output_power = 3;
+  // Target output optical power level of the optical channel, expressed in
+  // increments of 0.01 decibel-milliwats.
+  double target_output_power = 4;
+  // Vendor-specific optical channel operational mode.
+  uint64 operational_mode = 5;
+}
+
+//------------------------------------------------------------------------------
+// Monitoring related messages.
+//------------------------------------------------------------------------------
+
+// Wrapper around oper state of a port.
+message OperStatus {
+  PortState state = 1;           // required
+  uint64 time_last_changed = 2;  // optional
+}
+
+// Wrapper around loopback state of a port.
+message LoopbackStatus {
+  LoopbackState state = 1;  // required
+}
+
+// Wrapper around DPDK port type.
+message DpdkPortTypeValue {
+  DpdkPortType type = 1; // required
+}
+
+// Wrapper around DPDK device type
+message DpdkDeviceTypeValue {
+  DpdkDeviceType device_type = 1; // required
+}
+
+// Specifies host to be used by the device
+message HostNameValue {
+  string host_name = 1; // required
+}
+
+// Specifies number of queues needed for backend
+message QueuesConfigured {
+  int32 queue_count = 1; // required
+}
+
+// Specifies socket path to be used for port creation
+message SocketPathConfigured {
+  string sock_path = 1; // required
+}
+
+// Specifies pipeline name to be used for port association
+message PipelineNameConfigured {
+  string pipeline_name = 1; // required
+}
+
+// Specifies mempool name to be used for port association
+message MempoolNameConfigured {
+  string mempool_name = 1; // required
+}
+
+// Specifies packet direction to be used for port association
+message PacketDirValue {
+  PacketDirection packet_dir = 1; // required
+}
+
+// Specifies if Auto creation of back-end control TAP ports is needed.
+message ControlPortConfigured {
+  string control_port = 1; // required
+}
+
+// Specifies PCI BDF value to be used for the LINK port.
+message PciBdfConfigured {
+  string pci_bdf = 1; // required
+}
+
+// Specifies the MTU value to be used
+message MtuValue {
+  int32 mtu_value = 1; // required
+}
+
+// Wrapper around admin state of a HW component.
+message AdminStatus {
+  AdminState state = 1;  // required
+}
+
+// Wrapper around mac address (for example LACP router MAC).
+message MacAddress {
+  // A mac address stored in 6 least-significant bytes.
+  uint64 mac_address = 1;  // required
+}
+
+// Wrapper around port speed of the port.
+message PortSpeed {
+  uint64 speed_bps = 1;  // required
+}
+
+// Wrapper around LACP system priority.
+message SystemPriority {
+  uint32 priority = 1;  // required
+}
+
+// Wrapper around all the per port counters.
+message PortCounters {
+  uint64 in_octets = 1;
+  uint64 in_unicast_pkts = 2;
+  uint64 in_broadcast_pkts = 3;
+  uint64 in_multicast_pkts = 4;
+  uint64 in_discards = 5;
+  uint64 in_errors = 6;
+  uint64 in_unknown_protos = 7;
+  uint64 out_octets = 8;
+  uint64 out_unicast_pkts = 9;
+  uint64 out_broadcast_pkts = 10;
+  uint64 out_multicast_pkts = 11;
+  uint64 out_discards = 12;
+  uint64 out_errors = 13;
+  uint64 in_fcs_errors = 14;
+}
+
+// Wrapper around per port per queue counters.
+message PortQosCounters {
+  uint32 queue_id = 1;
+  uint64 out_octets = 2;
+  uint64 out_pkts = 3;
+  uint64 out_dropped_pkts = 4;
+}
+
+// Wrapper around all the alarm related data.
+message Alarm {
+  enum Severity {
+    UNKNOWN = 0;
+    MINOR = 1;
+    WARNING = 2;
+    MAJOR = 3;
+    CRITICAL = 4;
+  }
+  uint64 time_created = 1;  // required
+  string description = 2;   // optional
+  Severity severity = 3;    // required
+  bool status = 4;          // required.
+}
+
+// Wrapper around the optional node info.
+message NodeInfo {
+  string vendor_name = 1;
+  string chip_name = 2;
+}
+
+// Wrapper around an optional debug info for a node/chip.
+message NodeDebugInfo {
+  string debug_string = 1;
+}
+
+// Wrapper around the forwarding viability of a trunk member. It is used for
+// trunk pruning.
+message ForwardingViability {
+  TrunkMemberBlockState state = 1;
+}
+
+// Wrapper around the health indicator (usally translated to LED state) of a
+// port.
+message HealthIndicator {
+  HealthState state = 1;
+}
+
+// Wrapper around the autoneg status of a port.
+message AutonegotiationStatus {
+  TriState state = 1;
+}
+
+// Wrapper around the FEC mode.
+message FecStatus {
+  FecMode mode = 1;
+}
+
+// Wrapper around the SDN port ID.
+// The target is expected to accept requests from the controller
+// using the ID assigned by the SDN management system. If the target
+// cannot accept requests using the provided ID, it can provide
+// an alterate ID that should be used by the controller to address
+// the interface.
+message SdnPortId {
+  uint32 port_id = 1;
+}
+
+// Wrapper around Target datapath index required for pipeline configuration
+message TargetDatapathId {
+  uint32 tdi_portin_id = 1; // Port ID for Pipeline in Input Direction
+  uint32 tdi_portout_id = 2; // Port ID for Pipeline in Output Direction
+}
+
+// IPsecSADBConfig message is the external interface for pushing IPsec
+// Security Association (SA) database configuration data. A gNMI message with
+// all contents populated is expected by Stratum. All other nested messages
+// and enums are defined here.
+enum IPsecMode {
+  IPSEC_MODE_TRANSPORT = 0;
+  IPSEC_MODE_TUNNEL = 1;
+}
+
+enum IPsecProtocolParams {
+  IPSEC_PROTOCOL_PARAMS_ESP = 0;
+}
+
+enum IPsecLifetimeAction {
+  IPSEC_LIFETIME_ACTION_UNSET = 0;
+  IPSEC_LIFETIME_ACTION_TERMINATE_CLEAR = 1;
+  IPSEC_LIFETIME_ACTION_TERMINATE_HOLD = 2;
+  IPSEC_LIFETIME_ACTION_REPLACE = 3;
+}
+
+enum IPsecSadbConfigOp {
+  IPSEC_SADB_CONFIG_OP_ADD_ENTRY = 0;
+  IPSEC_SADB_CONFIG_OP_MOD_ENTRY = 1;
+  IPSEC_SADB_CONFIG_OP_DEL_ENTRY = 2;
+}
+
+message IPsecEspSa {
+  IPsecEncryption encryption = 1;
+}
+
+message IPsecEncryption {
+  uint32 encryption_algorithm = 1;
+  string key = 2;
+  uint32 key_len = 3;
+}
+
+message IPsecSaHardLifetime {
+  oneof value { 
+    uint32 time = 1;
+    uint64 bytes = 2;
+    uint32 packets = 3;
+    uint32 idle = 4;
+  }
+}
+
+message IPsecSaSoftLifetime {
+  oneof value {
+    uint32 time = 1;
+    uint64 bytes = 2;
+    uint32 packets = 3;
+    uint32 idle = 4;
+  }
+  IPsecLifetimeAction action = 5;
+}
+
+message IPsecSADBConfig {
+  uint32 offload_id = 1;
+  bool direction = 2; // true = egress, false = ingress
+  uint64 req_id = 3;
+  uint32 spi = 4;
+  bool ext_seq_num = 5;
+  uint32 anti_replay_window_size = 6;
+  IPsecProtocolParams protocol_parameters = 7;
+  IPsecMode mode = 8;
+  IPsecEspSa esp_payload = 9;
+  IPsecSaHardLifetime sa_hard_lifetime = 10;
+  IPsecSaSoftLifetime sa_soft_lifetime = 11;
+}
+
+// IPsecNotification message is sent from Stratum to gNMI-client based on a
+// target-originated event.
+message IPsecNotification {
+  uint32 device_id = 1;
+  uint32 ipsec_sa_spi = 2;
+  bool soft_lifetime_expire = 3;
+  uint32 ipsec_sa_protocol = 4;
+  string ipsec_sa_dest_address = 5;
+  bool address_family = 6;
+}
+
+// IPsecOffloadInfo is used in DataRequest and DataResponse to retrieve the
+// values from target. Currently, only security parameter index (SPI) retrieval
+// is supported, but can be extended to retrieve other values.
+message IPsecOffloadInfo {
+  int32 spi = 1;
+}
+
+// VportStateNotification message is sent from Stratum to gNMI-client based on a
+// target-originated event.
+message VportStateNotification {
+  uint32 device_id = 1;
+  uint32 global_resource_id = 2;
+  uint32 state = 3;
+}
+
+message VirtualPortInfo {
+  oneof value { 
+    uint32 vsi = 1;
+  }
+}
+
+// DataRequest is a message used internally to request data about a component
+// or a set of components through SwitchInterface. It is specifically used in
+// ConfigMonitoringService, as part of gNMI Get/Subscribe RPC implementation.
+message DataRequest {
+  message Request {
+    // Defines the data required to get a data for a port.
+    message Port {
+      uint64 node_id = 1;
+      uint32 port_id = 2;
+    }
+    // Defines the data required to get a data for a node.
+    message Node {
+      uint64 node_id = 1;
+    }
+    // Defined the data required to get a data for a chassis.
+    message Chassis {}
+    // Defined the data required to get a data for a queue of a port.
+    message PortQueue {
+      uint64 node_id = 1;
+      uint32 port_id = 2;
+      uint32 queue_id = 3;
+    }
+    // Data required to set info for a specific optical network interface.
+    message OpticalNetworkInterface {
+      int32 module = 1;
+      int32 network_interface = 2;
+    }
+    message IPsecOffloadInfo {
+      int32 spi = 1;
+    }
+    // Defines data required to get vport.
+    // Req will only contain global_resource_id to index on
+    message VirtualPort {
+      uint32 global_resource_id = 1;
+    }
+    oneof request {
+      Port oper_status = 1;
+      Port admin_status = 2;
+      Port mac_address = 3;
+      Port port_speed = 4;
+      Port negotiated_port_speed = 5;
+      Port lacp_router_mac = 6;
+      Port lacp_system_priority = 7;
+      Port port_counters = 8;
+      Chassis memory_error_alarm = 9;
+      Chassis flow_programming_exception_alarm = 10;
+      PortQueue port_qos_counters = 11;
+      Node node_packetio_debug_info = 12;
+      Port forwarding_viability = 13;
+      Port health_indicator = 14;
+      Port autoneg_status = 15;
+      Port front_panel_port_info = 16;
+      Port fec_status = 18;
+      OpticalNetworkInterface optical_transceiver_info = 19;
+      Port loopback_status = 20;
+      Node node_info = 21;
+      Port sdn_port_id = 22;
+      Port target_dp_id = 23;
+      IPsecOffloadInfo ipsec_offload_info = 24;
+      VirtualPort vport_vsi = 25;
+      VirtualPort vport_oper_status = 26;
+      VirtualPort vport_mac_address = 27;
+    }
+  }
+  repeated Request requests = 1;
+}
+
+// DataResponse is a message used internally to return data about a component
+// or a set of components, requested by DataRequest through SwitchInterface, to
+// It is specifically used in ConfigMonitoringService. It is used in the gNMI
+// Get/Subscribe RPC implementation.
+message DataResponse {
+  oneof response {
+    OperStatus oper_status = 1;
+    AdminStatus admin_status = 2;
+    MacAddress mac_address = 3;
+    PortSpeed port_speed = 4;
+    PortSpeed negotiated_port_speed = 5;
+    MacAddress lacp_router_mac = 6;
+    SystemPriority lacp_system_priority = 7;
+    PortCounters port_counters = 8;
+    Alarm memory_error_alarm = 9;
+    Alarm flow_programming_exception_alarm = 10;
+    PortQosCounters port_qos_counters = 11;
+    NodeDebugInfo node_packetio_debug_info = 12;
+    ForwardingViability forwarding_viability = 13;
+    HealthIndicator health_indicator = 14;
+    AutonegotiationStatus autoneg_status = 15;
+    FrontPanelPortInfo front_panel_port_info = 16;
+    FecStatus fec_status = 18;
+    OpticalTransceiverInfo optical_transceiver_info = 19;
+    LoopbackStatus loopback_status = 20;
+    NodeInfo node_info = 21;
+    SdnPortId sdn_port_id = 22;
+    DpdkPortTypeValue port_type = 23;
+    HostNameValue host_config = 24;
+    QueuesConfigured queue_count = 25;
+    SocketPathConfigured sock_path = 26;
+    DpdkDeviceTypeValue device_type = 27;
+    PipelineNameConfigured pipeline_name = 28;
+    MempoolNameConfigured mempool_name = 29;
+    ControlPortConfigured control_port = 30;
+    PciBdfConfigured pci_bdf = 31;
+    MtuValue mtu_value = 32;
+    HotplugConfig hotplug_config = 33;
+    TargetDatapathId target_dp_id = 34;
+    PacketDirValue packet_dir = 35;
+    IPsecOffloadInfo ipsec_offload_info = 36;
+    VirtualPortInfo vport_vsi = 37;
+  }
+}
+
+// A message requesting changing configuration parameters inside the HAL.
+message SetRequest {
+  message Request {
+    // Data required to set info for a specific port.
+    message Port {
+      uint64 node_id = 1;  // Node ID of the node the port is located on.
+      uint32 port_id = 2;  // Port ID of the port the request points to.
+      oneof value {
+        // The intended admin state of the port.
+        AdminStatus admin_status = 3;
+        // The intended MAC address of the port.
+        MacAddress mac_address = 4;
+        // The intended speed of the port.
+        PortSpeed port_speed = 5;
+        // The new router MAC portion of LACP system ID.
+        MacAddress lacp_router_mac = 6;
+        // The new system priority of LACP system ID.
+        SystemPriority lacp_system_priority = 7;
+        // The new health state of the port.
+        HealthIndicator health_indicator = 8;
+        // The new autoneg status of the port.
+        AutonegotiationStatus autoneg_status = 9;
+        // The new forwarding viability of the port.
+        ForwardingViability forwarding_viability = 10;
+        // The intended loopback state of the port.
+        LoopbackStatus loopback_status = 11;
+        // The new port type to be used.
+        DpdkPortTypeValue port_type = 12;
+        // The new device to be used.
+        DpdkDeviceTypeValue device_type = 13;
+        // The hostname to be used by backend.
+        HostNameValue host_config = 14;
+        // The no of queues to be used by backend.
+        QueuesConfigured queue_count = 15;
+        // The socket path to be used by backend.
+        SocketPathConfigured sock_path = 16;
+        // The Pipeline name to be used for port association.
+        PipelineNameConfigured pipeline_name = 17;
+        // The Mempool name to be used for port association.
+        MempoolNameConfigured mempool_name = 18;
+        // The control port to be used for creation of back-end TAP ports/rules
+        ControlPortConfigured control_port = 19;
+        // PCI BDF value to be used for the LINK port
+        PciBdfConfigured pci_bdf = 20;
+        // MTU value to be used for the Port
+        MtuValue mtu_value = 21;
+        // Per Qemu VM hotplug config
+        HotplugConfig hotplug_config = 22;
+        // The packet direction to be used for port association.
+        PacketDirValue packet_dir = 23;
+      }
+    }
+    // Data required to set info for a specific node.
+    message Node {
+      // Used to enable status change notifications in the Switch.
+      bool enable_vport_status_notif = 1;
+    }
+    // Data required to set info for a specific chassis.
+    message Chassis {
+      // TODO(unknown): Add this.
+    }
+    // Data required to set info for a specific optical network interface.
+    message OpticalNetworkInterface {
+      int32 module = 1;
+      int32 network_interface = 2;
+      oneof value {
+        // The new optical channel configurable values.
+        OpticalTransceiverInfo optical_transceiver_info = 3;
+      }
+    }
+    // IPsec related SetRequest message (internal to Stratum) reuses the prior
+    // defined IPsec enum and message
+    message IPsecOffloadConfig {
+      IPsecSadbConfigOp ipsec_sadb_config_op = 1;
+      IPsecSADBConfig ipsec_sadb_config_info = 2;
+    }
+    oneof request {
+      Port port = 1;
+      Node node = 2;
+      Chassis chassis = 3;
+      OpticalNetworkInterface optical_network_interface = 4;
+      IPsecOffloadConfig ipsec_offload_config = 5;
+    }
+  }
+  repeated Request requests = 1;
+}

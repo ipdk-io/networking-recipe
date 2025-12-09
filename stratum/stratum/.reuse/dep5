@@ -1,0 +1,106 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Stratum
+Upstream-Contact: Stratum dev <stratum-dev@lists.stratumproject.org>
+Source: https://github.com/stratum/stratum
+
+Files: stratum/glue/gtl/map_util.h stratum/glue/gtl/stl_util.h
+Copyright: 2015 The TensorFlow Authors
+License: Apache-2.0
+
+Files: stratum/hal/bin/barefoot/tofino_skip_p4.conf
+Copyright: 2019 Barefoot Networks, Inc.
+License: Apache-2.0
+
+Files: stratum/hal/bin/barefoot/tofino_skip_p4_no_bsp.conf
+Copyright: 2019 Barefoot Networks, Inc.
+License: Apache-2.0
+
+Files: stratum/hal/bin/bcm/sim/bcm_pcid_sim.k8
+Copyright: 2018 Google LLC
+Copyright: 2018-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/testing/cdlang/g3doc/cdlang-pipeline.png
+Copyright: 2018 Google LLC
+Copyright: 2018-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/docs/gnmi/img/* stratum/docs/gnmi/imgsrc/*
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: tools/mininet/**/*
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/hal/config/**/* stratum/hal/config/*
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: .circleci/*.txt
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/docs/plantuml/*
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/docs/images/*
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/hal/bin/barefoot/*.pb.txt
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/hal/lib/common/gnmi_caps.pb.txt
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/pipelines/ptf/requirements.txt
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: .clang-format
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: .github/ISSUE_TEMPLATE/*.md
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: bazel/patches/ygot.patch
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/hal/bin/bmv2/debian/description
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/hal/bin/bmv2/dummy.json
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/hal/bin/dummy/arch.svg
+Copyright: 2019-present Open Networking Foundation
+License: Apache-2.0
+
+Files: stratum/hal/bin/np4intel/docker/*
+Copyright: 2020 Dell EMC
+License: Apache-2.0
+
+Files: stratum/hal/bin/np4intel/dummy.json
+Copyright: 2020 Dell EMC
+License: Apache-2.0
+
+Files: stratum/docs/tai/img/* stratum/docs/tai/imgsrc/*
+Copyright: 2020-present Open Networking Foundation
+License: Apache-2.0
+
+Files: .bazelversion
+Copyright: 2020-present Open Networking Foundation
+License: Apache-2.0
+
+Files: NOTICE legal/NOTICE* legal/LICENSE*
+Copyright: No Copyright
+License: CC0-1.0

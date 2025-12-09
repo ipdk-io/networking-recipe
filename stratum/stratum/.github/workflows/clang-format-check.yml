@@ -1,0 +1,44 @@
+name: "clang-format check"
+
+on:
+  push:
+    branches:
+      - split-arch
+  pull_request:
+    branches:
+      - mev-ts*
+      - split-arch
+      - stratum-updates
+
+concurrency:
+  # If workflow for PR or push is already running, stop it and start a new one.
+  group: clang-format-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  #---------------------------------------------------------------------
+  # clang-format-check
+  #---------------------------------------------------------------------
+  clang-format-check:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out stratum repository
+        uses: actions/checkout@v4
+
+      - name: Get list of changed Files
+        id: changes
+        uses: tj-actions/changed-files@v46
+        with:
+          files_yaml: |
+            src:
+              - '**.c'
+              - '**.cc'
+              - '**.h'
+              - '!stratum/hal/lib/bcm/**'
+
+      - name: Check for formatting errors
+        run: |
+          for file in ${{ steps.changes.outputs.src_all_changed_files }}; do
+            clang-format --dry-run -Werror $file
+          done
