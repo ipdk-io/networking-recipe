@@ -1,0 +1,42 @@
+# metadata build artifacts
+meta/xml
+meta/html
+meta/temp
+
+meta/*.o
+meta/*.lo
+
+meta/doxygen_sqlite3.db
+meta/saidepgraph.gv
+meta/saidepgraph.svg
+meta/saidepgraphgen
+meta/saimetadata.c
+meta/saimetadata.h
+meta/saimetadatatest
+meta/saimetadatatest.c
+meta/saisanitycheck
+meta/saiserializetest
+meta/saiswig.i
+
+# temporary files
+**/*~
+**/*.swp
+
+**/.deps/
+**/.dirstamp
+**/.libs/
+
+**/*.gcda
+**/*.gcno
+**/*.gcov
+
+#python buildout and cache
+test/saithrift/stptest/__pycache__
+test/saithrift/MANIFEST
+test/saithrift/build/
+test/saithrift/dist/
+test/saithrift/saiserver
+test/saithrift/src/gen-cpp/
+test/saithrift/src/gen-py/
+test/saithrift/src/obj/
+**/*.pyc
