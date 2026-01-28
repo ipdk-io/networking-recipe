@@ -11,7 +11,7 @@
 #include <string>
 #include <utility>
 
-#include "absl/base/thread_annotations.h"
+#include "stratum/glue/thread_annotations_compat.h"
 #include "absl/synchronization/mutex.h"
 #include "stratum/glue/status/status.h"
 #include "stratum/glue/status/statusor.h"

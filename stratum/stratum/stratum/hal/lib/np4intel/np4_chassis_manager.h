@@ -12,7 +12,7 @@
 #include <thread>  // NOLINT
 #include <utility>
 
-#include "absl/base/thread_annotations.h"
+#include "stratum/glue/thread_annotations_compat.h"
 #include "absl/memory/memory.h"
 #include "absl/synchronization/mutex.h"
 #include "stratum/glue/integral_types.h"

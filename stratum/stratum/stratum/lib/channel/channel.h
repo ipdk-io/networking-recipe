@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "absl/base/thread_annotations.h"
+#include "stratum/glue/thread_annotations_compat.h"
 #include "absl/memory/memory.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/time/time.h"

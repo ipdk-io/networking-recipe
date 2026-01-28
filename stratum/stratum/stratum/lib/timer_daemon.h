@@ -4,6 +4,7 @@
 
 #ifndef STRATUM_LIB_TIMER_DAEMON_H_
 #define STRATUM_LIB_TIMER_DAEMON_H_
+#include "stratum/glue/thread_annotations_compat.h"
 
 #include <pthread.h>
 

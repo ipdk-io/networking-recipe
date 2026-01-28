@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "absl/base/thread_annotations.h"
+#include "stratum/glue/thread_annotations_compat.h"
 #include "absl/synchronization/mutex.h"
 #include "gnoi/cert/cert.grpc.pb.h"
 #include "grpcpp/grpcpp.h"

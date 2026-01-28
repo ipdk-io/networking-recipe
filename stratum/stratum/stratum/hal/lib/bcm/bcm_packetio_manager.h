@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "absl/base/thread_annotations.h"
+#include "stratum/glue/thread_annotations_compat.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_cat.h"
 #include "absl/synchronization/mutex.h"

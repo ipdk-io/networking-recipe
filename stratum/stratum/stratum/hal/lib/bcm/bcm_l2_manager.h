@@ -10,7 +10,7 @@
 #include <string>
 #include <tuple>
 
-#include "absl/base/thread_annotations.h"
+#include "stratum/glue/thread_annotations_compat.h"
 #include "absl/strings/str_cat.h"
 #include "stratum/glue/integral_types.h"
 #include "stratum/glue/status/status.h"

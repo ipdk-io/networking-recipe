@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-#include "absl/base/thread_annotations.h"
+#include "stratum/glue/thread_annotations_compat.h"
 #include "absl/container/flat_hash_map.h"
 #include "stratum/glue/integral_types.h"
 #include "stratum/glue/status/status.h"
