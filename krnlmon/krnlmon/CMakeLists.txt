@@ -38,6 +38,14 @@ include_directories(.)
 # Set the "krnlmon" label on all tests in this directory.
 set_property(DIRECTORY PROPERTY LABELS krnlmon)
 
+# Define stub for define_unit_test when testing is disabled
+if(NOT BUILD_TESTING)
+  function(define_unit_test test_name)
+    # Stub function - remove the test target
+    set_target_properties(${test_name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+  endfunction()
+endif()
+
 if(BUILD_TESTING)
   include(cmake/testing.cmake)
 endif()
