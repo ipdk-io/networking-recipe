@@ -200,7 +200,7 @@ def parse_p4runtime_error(f):
     return handle
 
 
-mac_pattern = re.compile('^([\da-fA-F]{2}:){5}([\da-fA-F]{2})$')
+mac_pattern = re.compile(r'^([\da-fA-F]{2}:){5}([\da-fA-F]{2})$')
 
 
 def matchesMac(mac_addr_string):
@@ -224,7 +224,7 @@ def decodeToHex(encoded_bytes):
                                                  'c', encoded_bytes))
 
 
-ip_pattern = re.compile('^(\d{1,3}\.){3}(\d{1,3})$')
+ip_pattern = re.compile(r'^(\d{1,3}\.){3}(\d{1,3})$')
 
 
 def matchesIPv4(ip_addr_string):
@@ -341,14 +341,14 @@ class P4InfoHelper(object):
         # Synthesize convenience functions for name to id lookups for top-level
         # entities
         # e.g. get_tables_id(name_string) or get_actions_id(name_string)
-        m = re.search("^get_(\w+)_id$", attr)
+        m = re.search(r"^get_(\w+)_id$", attr)
         if m:
             primitive = m.group(1)
             return lambda name: self.get_id(primitive, name)
 
         # Synthesize convenience functions for id to name lookups
         # e.g. get_tables_name(id) or get_actions_name(id)
-        m = re.search("^get_(\w+)_name$", attr)
+        m = re.search(r"^get_(\w+)_name$", attr)
         if m:
             primitive = m.group(1)
             return lambda id: self.get_name(primitive, id)
